@@ -6,7 +6,7 @@
                 "${default}",
                 "${workspaceFolder}",
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/external"
+                "${workspaceFolder}/headers/masala/headers"
             ],
             "intelliSenseMode": "gcc-x64",
             "cStandard": "c11",
