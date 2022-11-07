@@ -31,6 +31,7 @@ SOFTWARE.
 
 // Core API headers:
 #include <core_api/auto_generated_api/pose/Pose_API.hh>
+#include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
