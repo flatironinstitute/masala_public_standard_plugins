@@ -22,58 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.hh
+/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.cc
 /// @brief Headers for an atom selector that selects atoms by element type.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
-#define Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
-
-// Parent class:
-#include <core_api/base_classes/selectors/atom_selectors/AtomSelector.hh>
-
-// Forward declarations:
-#include <selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh>
+// Unit headers:
+#include <selectors/atom_selectors/ElementTypeAtomSelector.hh>
 
 // Core API headers:
+#include <core_api/auto_generated_api/pose/Pose_API.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
 namespace atom_selectors {
 
 
-/// @brief Headers for an atom selector that selects atoms by element type.
-/// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class ElementTypeAtomSelector : public masala::core_api::base_classes::selectors::atom_selectors::AtomSelector {
-
-public:
-
-	/// @brief Default constructor.
-	ElementTypeAtomSelector() = default;
-
-	/// @brief Copy constructor.
-	ElementTypeAtomSelector( ElementTypeAtomSelector const & ) = default;
-
-	/// @brief Destructor.
-	~ElementTypeAtomSelector() override = default;
-
-public:
-
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Given the current pose, generate the atom selection.
-	/// @details Pure virtual function.
-	masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionCSP
-	generate_atom_selection(
-		masala::core_api::auto_generated_api::pose::Pose_API const & pose
-	) const override;
+/// @brief Given the current pose, generate the atom selection.
+/// @details Pure virtual function.
+masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionCSP
+ElementTypeAtomSelector::generate_atom_selection(
+	masala::core_api::auto_generated_api::pose::Pose_API const & pose
+) const {
+	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelection;
 
-}; // class ElementTypeAtomSelector
+	AtomSelectionSP selection( std::make_shared< AtomSelection >() );
+	selection->reserve( pose.total_atoms() );
+
+	for( auto const & atom( pose.atoms_begin() ); atom != pose.atoms_end(); ++atom ) {
+		if( atom->element() == element_ ) {
+			selection->add_atom( atom );
+		}
+	}
+
+	selection->shrink_to_fit();
+	return selection;
+}
 
 } // namespace atom_selectors
 } // namespace selectors
 } // namespace standard_masala_plugins
-
-#endif // Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
