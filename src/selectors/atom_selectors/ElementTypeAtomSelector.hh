@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh
+/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.hh
 /// @brief Headers for an atom selector that selects atoms by element type.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
