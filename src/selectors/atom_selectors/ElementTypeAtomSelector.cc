@@ -49,6 +49,7 @@ ElementTypeAtomSelector::generate_atom_selection(
 	masala::core_api::auto_generated_api::pose::Pose_API const & pose
 ) const {
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelection;
+	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionSP;
 
 	AtomSelectionSP selection( std::make_shared< AtomSelection >() );
 	selection->reserve( pose.total_atoms() );
