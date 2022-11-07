@@ -22,50 +22,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// @file src/core_api/base_classes/selectors/atom_selectors/AtomSelector.hh
-/// @brief Header for a pure virtual base class for AtomSelectors.
-/// @details AtomSelectors select atoms in a pose based on some rule.
-/// @note Since this class does not implement class_name() or class_namespace()
-/// functions required by the MasalaObject base class, it remains pure virtual.
+/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh
+/// @brief Headers for an atom selector that selects atoms by element type.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_hh
-#define Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_hh
+#ifndef Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
+#define Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
 
 // Parent class:
-#include <core_api/base_classes/selectors/Selector.hh>
+#include <core_api/base_classes/selectors/atom_selectors/AtomSelector.hh>
 
 // Forward declarations:
-#include <core_api/base_classes/selectors/atom_selectors/AtomSelector.fwd.hh>
+#include <selectors/atom_selectors/ElementTypeAtomSelector.hh>
 
 // Core API headers:
-#include <core_api/base_classes/selectors/Selection.fwd.hh>
-#include <core_api/base_classes/selectors/atom_selectors/AtomSelection.fwd.hh>
-#include <core_api/auto_generated_api/pose/Pose_API.fwd.hh>
 
-namespace masala {
-namespace core_api {
-namespace base_classes {
+namespace standard_masala_plugins {
 namespace selectors {
 namespace atom_selectors {
 
-/// @brief A pure virtual base class for AtomSelectors.
-/// @details AtomSelectors select atoms in a pose based on some rule.
-/// @note Since this class does not implement class_name() or class_namespace()
-/// functions required by the MasalaObject base class, it remains pure virtual.
+
+/// @brief Headers for an atom selector that selects atoms by element type.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class AtomSelector : public core_api::base_classes::selectors::Selector {
+class ElementTypeAtomSelector : public core_api::base_classes::selectors::Selector {
 
 public:
 
 	/// @brief Default constructor.
-	AtomSelector() = default;
+	ElementTypeAtomSelector() = default;
 
 	/// @brief Copy constructor.
-	AtomSelector( AtomSelector const & ) = default;
+	ElementTypeAtomSelector( ElementTypeAtomSelector const & ) = default;
 
 	/// @brief Destructor.
-	~AtomSelector() override = default;
+	~ElementTypeAtomSelector() override = default;
 
 public:
 
@@ -73,28 +63,17 @@ public:
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Given the current pose, generate the selection.
-	/// @details Calls generate_atom_selection(), which must be implemented
-	/// by derived classes.
-	core_api::base_classes::selectors::SelectionCSP
-	generate_selection(
+	/// @brief Given the current pose, generate the atom selection.
+	/// @details Pure virtual function.
+	masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionCSP
+	generate_atom_selection(
 		core_api::auto_generated_api::pose::Pose_API const & pose
 	) const override;
 
-	/// @brief Given the current pose, generate the atom selection.
-	/// @details Pure virtual function.
-	virtual
-	AtomSelectionCSP
-	generate_atom_selection(
-		core_api::auto_generated_api::pose::Pose_API const & pose
-	) const = 0;
-
-}; // class AtomSelector
+}; // class ElementTypeAtomSelector
 
 } // namespace atom_selectors
 } // namespace selectors
-} // namespace base_classes
-} // namespace core_api
-} // namespace masala
+} // namespace standard_masala_plugins
 
-#endif // Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_hh
+#endif // Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_hh
