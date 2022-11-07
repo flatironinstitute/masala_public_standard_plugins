@@ -22,46 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// @file src/core_api/base_classes/selectors/atom_selectors/AtomSelector.fwd.hh
-/// @brief Forward declarations for a pure virtual base class for AtomSelectors.
-/// @details AtomSelectors select atoms in a pose based on some rule.
-/// @note Since this class does not implement class_name() or class_namespace()
-/// functions required by the MasalaObject base class, it remains pure virtual.
+/// @file src/selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh
+/// @brief Forward declarations for an atom selector that selects atoms by element type.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_fwd_hh
-#define Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_fwd_hh
+#ifndef Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_fwd_hh
+#define Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_fwd_hh
 
 #include <memory> // For std::shared_ptr
 
-namespace masala {
-namespace core_api {
-namespace base_classes {
+namespace standard_masala_plugins {
 namespace selectors {
 namespace atom_selectors {
 
-	class AtomSelector;
+	class ElementTypeAtomSelector;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a std::shared_ptr for objects of that class.
-	using AtomSelectorSP = std::shared_ptr< AtomSelector >;
+	using ElementTypeAtomSelectorSP = std::shared_ptr< ElementTypeAtomSelector >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a std::shared_ptr for const objects of that class.
-	using AtomSelectorCSP = std::shared_ptr< AtomSelector const >;
+	using ElementTypeAtomSelectorCSP = std::shared_ptr< ElementTypeAtomSelector const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a std::weak_ptr for objects of that class.
-	using AtomSelectorWP = std::weak_ptr< AtomSelector >;
+	using ElementTypeAtomSelectorWP = std::weak_ptr< ElementTypeAtomSelector >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a std::weak_ptr for const objects of that class.
-	using AtomSelectorCWP = std::weak_ptr< AtomSelector const >;
+	using ElementTypeAtomSelectorCWP = std::weak_ptr< ElementTypeAtomSelector const >;
 
 } // namespace atom_selectors
 } // namespace selectors
-} // namespace base_classes
-} // namespace core_api
-} // namespace masala
+} // namespace standard_masala_plugins
 
-#endif // Masala_src_core_api_base_classes_selectors_atom_selectors_AtomSelector_fwd_hh
+#endif // Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_fwd_hh
