@@ -31,6 +31,8 @@ SOFTWARE.
 
 // Core API headers:
 #include <core_api/auto_generated_api/pose/Pose_API.hh>
+#include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
+#include <core_api/auto_generated_api/chemistry/atoms/AtomInstance_API.hh>
 #include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
 
 namespace standard_masala_plugins {
@@ -52,9 +54,13 @@ ElementTypeAtomSelector::generate_atom_selection(
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionSP;
 
 	AtomSelectionSP selection( std::make_shared< AtomSelection >() );
-	selection->reserve( pose.total_atoms() );
+	selection->reserve( pose.molecules_shared_ptr()->total_atoms() );
 
-	for( auto const & atom( pose.atoms_begin() ); atom != pose.atoms_end(); ++atom ) {
+	for(
+		auto const & atom( pose.molecules_shared_ptr()->atoms_begin() );
+		atom != pose.molecules_shared_ptr()->atoms_end();
+		++atom
+	) {
 		if( atom->element() == element_ ) {
 			selection->add_atom( atom );
 		}
