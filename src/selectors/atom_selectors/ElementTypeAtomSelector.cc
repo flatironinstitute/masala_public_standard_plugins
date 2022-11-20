@@ -33,6 +33,7 @@ SOFTWARE.
 #include <core_api/auto_generated_api/pose/Pose_API.hh>
 #include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstance_API.hh>
+#include <core_api/auto_generated_api/chemistry/atoms/AtomInstanceConstIterator_API.hh>
 #include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
 
 namespace standard_masala_plugins {
@@ -61,7 +62,7 @@ ElementTypeAtomSelector::generate_atom_selection(
 		atom != pose.molecules_shared_ptr()->atoms_end();
 		++atom
 	) {
-		if( atom->element() == element_ ) {
+		if( atom.get_inner_object().element() == element_ ) {
 			selection->add_atom( atom );
 		}
 	}
