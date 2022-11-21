@@ -58,12 +58,12 @@ ElementTypeAtomSelector::generate_atom_selection(
 	selection->reserve( pose.molecules_shared_ptr()->total_atoms() );
 
 	for(
-		auto const & atom( pose.molecules_shared_ptr()->atoms_begin() );
+		auto atom( pose.molecules_shared_ptr()->atoms_begin() );
 		atom != pose.molecules_shared_ptr()->atoms_end();
 		++atom
 	) {
-		if( atom.get_inner_object().element() == element_ ) {
-			selection->add_atom( atom );
+		if( atom.ptr()->element_type_enum() == element_ ) {
+			selection->add_atom( atom.ptr() );
 		}
 	}
 

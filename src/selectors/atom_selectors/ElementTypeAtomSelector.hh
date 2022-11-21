@@ -36,6 +36,7 @@ SOFTWARE.
 #include <selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh>
 
 // Core API headers:
+#include <core/chemistry/atoms/ElementType.fwd.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
@@ -69,6 +70,15 @@ public:
 	generate_atom_selection(
 		masala::core_api::auto_generated_api::pose::Pose_API const & pose
 	) const override;
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE DATA
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The type of atom that we will be selecting.
+	masala::core::chemistry::atoms::ElementTypeEnum element_ = masala::core::chemistry::atoms::ElementTypeEnum::C;
 
 }; // class ElementTypeAtomSelector
 
