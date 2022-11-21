@@ -38,6 +38,9 @@ SOFTWARE.
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
@@ -99,17 +102,43 @@ ElementTypeAtomSelector::class_namespace() const {
 masala::base::api::MasalaObjectAPIDefinitionCWP
 ElementTypeAtomSelector::get_api_definition() {
 	using namespace masala::base::api;
+	using namespace masala::base::api::constructor;
+	using namespace masala::base::api::work_function;
+	using namespace masala::core_api::base_classes::selectors::atom_selectors;
+	using namespace masala::core_api::auto_generated_api::pose;
 
 	if( api_description_ == nullptr ) {
 		MasalaObjectAPIDefinitionSP api_description(
-			utility::pointer::make_shared< MasalaObjectAPIDefinition >(
+			std::make_shared< MasalaObjectAPIDefinition >(
 				class_name(), class_namespace(),
 				"An atom selector that selects atoms by element type.",
 				false
 			)
 		);
+		api_description->add_constructor(
+			std::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ElementTypeAtomSelector > >(
+				"ElementTypeAtomSelector", "Default constructor."
+			)
+		);
+		api_description->add_constructor(
+			std::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ElementTypeAtomSelector, ElementTypeAtomSelector const & > >(
+				"ElementTypeAtomSelector", "Copy constructor.",
+				"src", "The other instance of an ElementTypeAtomSelector that we are copying."
+			)
+		);
+		api_description->add_work_function(
+			std::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
+				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
+				true, false,
+				"pose", "An input pose, for which a selection will be generated.",
+				"atom_selection", "A selection of atoms generated from the input pose, by element type.",
+				std::bind( &ElementTypeAtomSelector::generate_atom_selection, this, std::placeholders::_1 )
+			)
+		);
+
+		api_description_ = api_description;
 	}
-	//TODO TODO TODO CONTINUE HERE
+
 	return api_description_;
 }
 
