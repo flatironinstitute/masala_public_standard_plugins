@@ -71,6 +71,21 @@ ElementTypeAtomSelector::generate_atom_selection(
 	return selection;
 }
 
+
+/// @brief Every class can name itself.
+/// @returns "ElementTypeAtomSelector".
+std::string
+ElementTypeAtomSelector::class_name() const {
+	return "ElementTypeAtomSelector";
+}
+
+/// @brief Every class can provide its own namespace.
+/// @returns "standard_masala_plugins::selectors::atom_selectors".
+std::string
+ElementTypeAtomSelector::class_namespace() const {
+	return "standard_masala_plugins::selectors::atom_selectors";
+}
+
 } // namespace atom_selectors
 } // namespace selectors
 } // namespace standard_masala_plugins

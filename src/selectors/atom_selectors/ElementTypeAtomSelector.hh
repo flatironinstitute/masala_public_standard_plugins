@@ -71,6 +71,14 @@ public:
 		masala::core_api::auto_generated_api::pose::Pose_API const & pose
 	) const override;
 
+	/// @brief Every class can name itself.
+	/// @returns "ElementTypeAtomSelector".
+	std::string class_name() const override;
+
+	/// @brief Every class can provide its own namespace.
+	/// @returns "standard_masala_plugins::selectors::atom_selectors".
+	std::string class_namespace() const override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
