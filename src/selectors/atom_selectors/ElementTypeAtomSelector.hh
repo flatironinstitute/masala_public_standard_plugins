@@ -71,6 +71,18 @@ public:
 		masala::core_api::auto_generated_api::pose::Pose_API const & pose
 	) const override;
 
+	/// @brief Set the element type, by string.
+	void
+	set_element_type(
+		std::string const & element_name
+	);
+
+	/// @brief Set the element type, by enum.
+	void
+	set_element_type(
+		masala::core::chemistry::atoms::ElementTypeEnum const element_type
+	);
+
 	/// @brief Every class can name itself.
 	/// @returns "ElementTypeAtomSelector".
 	std::string class_name() const override;
