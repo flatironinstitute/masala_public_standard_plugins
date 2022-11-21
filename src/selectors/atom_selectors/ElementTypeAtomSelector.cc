@@ -36,6 +36,9 @@ SOFTWARE.
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstanceConstIterator_API.hh>
 #include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
 
+// Base headers:
+#include <base/api/MasalaObjectAPIDefinition.hh>
+
 namespace standard_masala_plugins {
 namespace selectors {
 namespace atom_selectors {
@@ -84,6 +87,30 @@ ElementTypeAtomSelector::class_name() const {
 std::string
 ElementTypeAtomSelector::class_namespace() const {
 	return "standard_masala_plugins::selectors::atom_selectors";
+}
+
+/// @brief Get an object describing the API for this object.
+/// @note This is a weak pointer rather than a shared pointer since the
+/// original object is expected to hold on to its API definition (which includes
+/// funciton pointers to the functions of the instance).  Querying whether the
+/// weak pointer can be converted to a shared pointer serves on a check as to
+/// whether it is safe to use the function pointers.  Not ideal, but better than
+/// nothing.
+masala::base::api::MasalaObjectAPIDefinitionCWP
+ElementTypeAtomSelector::get_api_definition() {
+	using namespace masala::base::api;
+
+	if( api_description_ == nullptr ) {
+		MasalaObjectAPIDefinitionSP api_description(
+			utility::pointer::make_shared< MasalaObjectAPIDefinition >(
+				class_name(), class_namespace(),
+				"An atom selector that selects atoms by element type.",
+				false
+			)
+		);
+	}
+	//TODO TODO TODO CONTINUE HERE
+	return api_description_;
 }
 
 } // namespace atom_selectors
