@@ -41,6 +41,7 @@ SOFTWARE.
 #include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
@@ -128,6 +129,7 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 ElementTypeAtomSelector::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::constructor;
+	using namespace masala::base::api::setter;
 	using namespace masala::base::api::work_function;
 	using namespace masala::core_api::base_classes::selectors::atom_selectors;
 	using namespace masala::core_api::auto_generated_api::pose;
@@ -158,6 +160,13 @@ ElementTypeAtomSelector::get_api_definition() {
 				"pose", "An input pose, for which a selection will be generated.",
 				"atom_selection", "A selection of atoms generated from the input pose, by element type.",
 				std::bind( &ElementTypeAtomSelector::generate_atom_selection, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string > >(
+				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
+				"element_name", "The abbreviated name of the element, with proper capitalization.",
+				std::bind( static_cast< void(ElementTypeAtomSelector::*)(std::string const &) >( &ElementTypeAtomSelector::set_element_type ), this, std::placeholders::_1 )
 			)
 		);
 
