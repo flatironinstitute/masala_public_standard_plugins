@@ -1,2 +1,6 @@
+build/
+bin/
+headers/
+src/*/auto_generated_api/*
 external
 headers/masala/headers 
