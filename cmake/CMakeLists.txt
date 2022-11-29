@@ -60,4 +60,4 @@ INCLUDE( ../build/cmake_generated/selectors.cmake )
 INCLUDE( ../build/cmake_generated/selectors_api.cmake )
 
 # Build tests for the selectors library.
-#INCLUDE( ../build/cmake_generated/selectors_tests.cmake )
+INCLUDE( ../build/cmake_generated/selectors_tests.cmake )
