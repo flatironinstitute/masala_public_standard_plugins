@@ -50,7 +50,7 @@ INCLUDE( compiler.cmake )
 
 # Generate the build lists for selectors library and its API library:
 execute_process(
-    COMMAND python3 ../cmake/generate_cmake_build.py selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
 )
 
 # Build the selectors library:
