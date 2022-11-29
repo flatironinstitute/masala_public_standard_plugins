@@ -188,7 +188,7 @@ ElementTypeAtomSelector::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string > >(
+			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
 				"element_name", "The abbreviated name of the element, with proper capitalization.",
 				std::bind( static_cast< void(ElementTypeAtomSelector::*)(std::string const &) >( &ElementTypeAtomSelector::set_element_type ), this, std::placeholders::_1 )
