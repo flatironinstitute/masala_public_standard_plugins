@@ -47,6 +47,31 @@ namespace standard_masala_plugins {
 namespace selectors {
 namespace atom_selectors {
 
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION, DESTRUCTION, COPYING, AND CLONING
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Clone operation: copy this object and return a shared pointer to the copy.
+masala::core_api::base_classes::selectors::atom_selectors::AtomSelectorSP
+ElementTypeAtomSelector::clone() const {
+	ElementTypeAtomSelectorSP new_copy( std::make_shared< ElementTypeAtomSelector >( *this ) );
+	new_copy->api_description_ = nullptr;
+	return new_copy;
+}
+
+/// @brief Deep clone operation: copy this object and return a shared pointer to the
+/// copy, making sure that all contained objects are also copied.
+masala::core_api::base_classes::selectors::atom_selectors::AtomSelectorSP
+ElementTypeAtomSelector::deep_clone() const {
+	return clone(); // There are no shared data, so deep cloning is like cloning.
+}
+
+/// @brief Make this object independent by calling deep_clone on all contained objects.
+/// @details All that this version does is to make the api description null.
+void
+ElementTypeAtomSelector::make_independent() {
+	api_description_ = nullptr;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
