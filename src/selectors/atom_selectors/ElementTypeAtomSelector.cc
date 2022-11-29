@@ -52,7 +52,7 @@ namespace atom_selectors {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Clone operation: copy this object and return a shared pointer to the copy.
-masala::core_api::base_classes::selectors::atom_selectors::AtomSelectorSP
+ElementTypeAtomSelectorSP
 ElementTypeAtomSelector::clone() const {
 	ElementTypeAtomSelectorSP new_copy( std::make_shared< ElementTypeAtomSelector >( *this ) );
 	new_copy->api_description_ = nullptr;
@@ -61,7 +61,7 @@ ElementTypeAtomSelector::clone() const {
 
 /// @brief Deep clone operation: copy this object and return a shared pointer to the
 /// copy, making sure that all contained objects are also copied.
-masala::core_api::base_classes::selectors::atom_selectors::AtomSelectorSP
+ElementTypeAtomSelectorSP
 ElementTypeAtomSelector::deep_clone() const {
 	return clone(); // There are no shared data, so deep cloning is like cloning.
 }
