@@ -31,9 +31,11 @@ SOFTWARE.
 
 // Unit headers:
 #include <selectors_api/auto_generated_api/atom_selectors/ElementTypeAtomSelector_API.hh>
+#include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
 
 // Core headers:
 #include <core_api/auto_generated_api/pose/Pose_API.hh>
+#include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -48,6 +50,20 @@ TEST_CASE( "Instantiate an ElementTypeAtomSelector", "[standard_masala_plugins::
         );
         elemsel->write_to_tracer( "Instantiated an ElementTypeAtomSelector." );
     }() );
+}
+
+TEST_CASE( "Select oxygen atoms in an empty pose", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][selection][apply]" ) {
+    using namespace selectors_api::auto_generated_api::atom_selectors;
+    using namespace masala::core_api::auto_generated_api::pose;
+    using namespace masala::core_api::base_classes::selectors::atom_selectors;
+
+    AtomSelectionCSP selection;
+    REQUIRE_NOTHROW([&](){
+        ElementTypeAtomSelector_APISP elemsel( std::make_shared< ElementTypeAtomSelector_API >() );
+        Pose_APISP pose( std::make_shared< Pose_API >() );
+        selection = elemsel->generate_atom_selection( *pose );
+    }() );
+    REQUIRE( selection->num_selected_atoms() == 0 );
 }
 
 } // namespace atom_selectors
