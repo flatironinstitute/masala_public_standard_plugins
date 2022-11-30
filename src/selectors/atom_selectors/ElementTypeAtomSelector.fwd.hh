@@ -23,7 +23,7 @@
 #ifndef Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_fwd_hh
 #define Standard_Masala_Plugins_src_selectors_atom_selectors_ElementTypeAtomSelector_fwd_hh
 
-#include <memory> // For std::shared_ptr
+#include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
 namespace standard_masala_plugins {
 namespace selectors {
@@ -32,20 +32,20 @@ namespace atom_selectors {
 	class ElementTypeAtomSelector;
 
 	/// @brief We will use the convention that an class name followed by SP
-	/// represents a std::shared_ptr for objects of that class.
-	using ElementTypeAtomSelectorSP = std::shared_ptr< ElementTypeAtomSelector >;
+	/// represents a MASALA_SHARED_POINTER for objects of that class.
+	using ElementTypeAtomSelectorSP = MASALA_SHARED_POINTER< ElementTypeAtomSelector >;
 
 	/// @brief We will use the convention that an class name followed by CSP
-	/// represents a std::shared_ptr for const objects of that class.
-	using ElementTypeAtomSelectorCSP = std::shared_ptr< ElementTypeAtomSelector const >;
+	/// represents a MASALA_SHARED_POINTER for const objects of that class.
+	using ElementTypeAtomSelectorCSP = MASALA_SHARED_POINTER< ElementTypeAtomSelector const >;
 
 	/// @brief We will use the convention that an class name followed by WP
-	/// represents a std::weak_ptr for objects of that class.
-	using ElementTypeAtomSelectorWP = std::weak_ptr< ElementTypeAtomSelector >;
+	/// represents a MASALA_WEAK_POINTER for objects of that class.
+	using ElementTypeAtomSelectorWP = MASALA_WEAK_POINTER< ElementTypeAtomSelector >;
 
 	/// @brief We will use the convention that an class name followed by CWP
-	/// represents a std::weak_ptr for const objects of that class.
-	using ElementTypeAtomSelectorCWP = std::weak_ptr< ElementTypeAtomSelector const >;
+	/// represents a MASALA_WEAK_POINTER for const objects of that class.
+	using ElementTypeAtomSelectorCWP = MASALA_WEAK_POINTER< ElementTypeAtomSelector const >;
 
 } // namespace atom_selectors
 } // namespace selectors
