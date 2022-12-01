@@ -48,7 +48,7 @@ namespace atom_selectors {
 /// @brief Clone operation: copy this object and return a shared pointer to the copy.
 ElementTypeAtomSelectorSP
 ElementTypeAtomSelector::clone() const {
-	ElementTypeAtomSelectorSP new_copy( std::make_shared< ElementTypeAtomSelector >( *this ) );
+	ElementTypeAtomSelectorSP new_copy( masala::make_shared< ElementTypeAtomSelector >( *this ) );
 	new_copy->api_description_ = nullptr;
 	return new_copy;
 }
@@ -80,7 +80,7 @@ ElementTypeAtomSelector::generate_atom_selection(
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelection;
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionSP;
 
-	AtomSelectionSP selection( std::make_shared< AtomSelection >() );
+	AtomSelectionSP selection( masala::make_shared< AtomSelection >() );
 	selection->reserve( pose.molecules_shared_ptr()->total_atoms() );
 
 	for(
@@ -155,25 +155,25 @@ ElementTypeAtomSelector::get_api_definition() {
 
 	if( api_description_ == nullptr ) {
 		MasalaObjectAPIDefinitionSP api_description(
-			std::make_shared< MasalaObjectAPIDefinition >(
+			masala::make_shared< MasalaObjectAPIDefinition >(
 				class_name(), class_namespace(),
 				"An atom selector that selects atoms by element type.",
 				false
 			)
 		);
 		api_description->add_constructor(
-			std::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ElementTypeAtomSelector > >(
+			masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ElementTypeAtomSelector > >(
 				"ElementTypeAtomSelector", "Default constructor."
 			)
 		);
 		api_description->add_constructor(
-			std::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ElementTypeAtomSelector, ElementTypeAtomSelector const & > >(
+			masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ElementTypeAtomSelector, ElementTypeAtomSelector const & > >(
 				"ElementTypeAtomSelector", "Copy constructor.",
 				"src", "The other instance of an ElementTypeAtomSelector that we are copying."
 			)
 		);
 		api_description->add_work_function(
-			std::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
 				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
 				true, false,
 				"pose", "An input pose, for which a selection will be generated.",
@@ -182,7 +182,7 @@ ElementTypeAtomSelector::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
 				"element_name", "The abbreviated name of the element, with proper capitalization.",
 				std::bind( static_cast< void(ElementTypeAtomSelector::*)(std::string const &) >( &ElementTypeAtomSelector::set_element_type ), this, std::placeholders::_1 )

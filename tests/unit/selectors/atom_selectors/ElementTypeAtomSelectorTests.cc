@@ -40,7 +40,7 @@ namespace atom_selectors {
 TEST_CASE( "Instantiate an ElementTypeAtomSelector", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][instantiation]" ) {
     REQUIRE_NOTHROW([&](){
         selectors_api::auto_generated_api::atom_selectors::ElementTypeAtomSelector_APISP elemsel(
-            std::make_shared< selectors_api::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API >()
+            masala::make_shared< selectors_api::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API >()
         );
         elemsel->write_to_tracer( "Instantiated an ElementTypeAtomSelector." );
     }() );
@@ -53,8 +53,8 @@ TEST_CASE( "Select oxygen atoms in an empty pose", "[standard_masala_plugins::au
 
     AtomSelectionCSP selection;
     REQUIRE_NOTHROW([&](){
-        ElementTypeAtomSelector_APISP elemsel( std::make_shared< ElementTypeAtomSelector_API >() );
-        Pose_APISP pose( std::make_shared< Pose_API >() );
+        ElementTypeAtomSelector_APISP elemsel( masala::make_shared< ElementTypeAtomSelector_API >() );
+        Pose_APISP pose( masala::make_shared< Pose_API >() );
         selection = elemsel->generate_atom_selection( *pose );
     }() );
     REQUIRE( selection->num_selected_atoms() == 0 );

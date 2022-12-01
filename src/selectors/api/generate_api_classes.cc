@@ -39,7 +39,7 @@ namespace api {
         std::vector< masala::base::MasalaObjectSP > outvec;
 
         // Add to this vector whenever a class is added with a defined API:
-        outvec.emplace_back( std::make_shared< standard_masala_plugins::selectors::atom_selectors::ElementTypeAtomSelector >() );
+        outvec.emplace_back( masala::make_shared< standard_masala_plugins::selectors::atom_selectors::ElementTypeAtomSelector >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
