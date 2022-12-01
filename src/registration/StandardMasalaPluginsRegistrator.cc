@@ -35,8 +35,8 @@ namespace registration {
 /// @brief Instantiate the static singleton and get a handle to it.
 StandardMasalaPluginsRegistratorHandle
 StandardMasalaPluginsRegistrator::get_instance() {
-    static StandardMasalaPluginsRegistrator config_manager;
-    return &config_manager;
+    static StandardMasalaPluginsRegistrator reg;
+    return &reg;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

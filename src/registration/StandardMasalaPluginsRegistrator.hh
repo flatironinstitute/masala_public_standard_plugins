@@ -86,6 +86,9 @@ private:
 
 }; // class StandardMasalaPluginsRegistrator
 
+/// @brief Ensure that this object is instantiated.
+static StandardMasalaPluginsRegistratorHandle const registration_handle( StandardMasalaPluginsRegistrator::get_instance() );
+
 } // namespace registration
 } // namespace standard_masala_plugins
 
