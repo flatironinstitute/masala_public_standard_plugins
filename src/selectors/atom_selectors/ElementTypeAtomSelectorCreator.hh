@@ -58,9 +58,6 @@ public:
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Comparison operator.
-	bool operator==( ElementTypeAtomSelectorCreator const & other ) const;
-
 	/// @brief Create an object of the desired type (in this case, an ElementTypeAtomSelector).
 	/// @returns A new instance of an ElementTypeAtomSelector.
 	/// @details Must be implemented by derived classes.
