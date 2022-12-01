@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/selectors/atom_selectors/ElementTypeAtomSelectorCreator.cc
+/// @file src/selectors/atom_selectors/ElementTypeAtomSelectorCreator.hh
 /// @brief Headers for a creator for an atom selector that selects atoms by element type.
 /// @details Creators are needed to allow the Masala plugin system to use objects
 /// defined in plugin libraries.
