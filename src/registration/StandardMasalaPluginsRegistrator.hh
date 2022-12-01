@@ -64,6 +64,16 @@ public:
     /// @brief Default destructor.
     ~StandardMasalaPluginsRegistrator() = default;
 
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC MEMBER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+    /// @brief Register all plugins in the standard Masala plugins module with the
+    /// Masala plugin manager.
+    void register_plugins() const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,10 +84,7 @@ private:
     /// Masala plugin manager.
     void register_selectors() const;
 
-};
-
-/// @brief This forces instantiation of the static singleton when this library is loaded.
-static StandardMasalaPluginsRegistratorHandle const registrator_handle( StandardMasalaPluginsRegistrator::get_instance() );
+}; // class StandardMasalaPluginsRegistrator
 
 } // namespace registration
 } // namespace standard_masala_plugins

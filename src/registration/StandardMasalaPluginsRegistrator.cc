@@ -47,6 +47,17 @@ StandardMasalaPluginsRegistrator::get_instance() {
 /// @details Construction triggers registration of all instantiable classes in this module
 /// that will be managed by the plugin manager.
 StandardMasalaPluginsRegistrator::StandardMasalaPluginsRegistrator() {
+    register_plugins();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC MEMBER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Register all plugins in the standard Masala plugins module with the
+/// Masala plugin manager.
+void
+StandardMasalaPluginsRegistrator::register_plugins() const {
     register_selectors();
 }
 
