@@ -1,25 +1,19 @@
 /*
-MIT License
+    Standard Masala Plugins
+    Copyright (C) 2022 Vikram K. Mulligan
 
-Copyright (c) 2022 Vikram K. Mulligan
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /// @file src/selectors/atom_selectors/ElementTypeAtomSelector.cc
@@ -54,7 +48,7 @@ namespace atom_selectors {
 /// @brief Clone operation: copy this object and return a shared pointer to the copy.
 ElementTypeAtomSelectorSP
 ElementTypeAtomSelector::clone() const {
-	ElementTypeAtomSelectorSP new_copy( std::make_shared< ElementTypeAtomSelector >( *this ) );
+	ElementTypeAtomSelectorSP new_copy( masala::make_shared< ElementTypeAtomSelector >( *this ) );
 	new_copy->api_description_ = nullptr;
 	return new_copy;
 }
@@ -86,7 +80,7 @@ ElementTypeAtomSelector::generate_atom_selection(
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelection;
 	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionSP;
 
-	AtomSelectionSP selection( std::make_shared< AtomSelection >() );
+	AtomSelectionSP selection( masala::make_shared< AtomSelection >() );
 	selection->reserve( pose.molecules_shared_ptr()->total_atoms() );
 
 	for(
@@ -161,25 +155,25 @@ ElementTypeAtomSelector::get_api_definition() {
 
 	if( api_description_ == nullptr ) {
 		MasalaObjectAPIDefinitionSP api_description(
-			std::make_shared< MasalaObjectAPIDefinition >(
+			masala::make_shared< MasalaObjectAPIDefinition >(
 				class_name(), class_namespace(),
 				"An atom selector that selects atoms by element type.",
 				false
 			)
 		);
 		api_description->add_constructor(
-			std::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ElementTypeAtomSelector > >(
+			masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ElementTypeAtomSelector > >(
 				"ElementTypeAtomSelector", "Default constructor."
 			)
 		);
 		api_description->add_constructor(
-			std::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ElementTypeAtomSelector, ElementTypeAtomSelector const & > >(
+			masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ElementTypeAtomSelector, ElementTypeAtomSelector const & > >(
 				"ElementTypeAtomSelector", "Copy constructor.",
 				"src", "The other instance of an ElementTypeAtomSelector that we are copying."
 			)
 		);
 		api_description->add_work_function(
-			std::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
 				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
 				true, false,
 				"pose", "An input pose, for which a selection will be generated.",
@@ -188,7 +182,7 @@ ElementTypeAtomSelector::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
 				"element_name", "The abbreviated name of the element, with proper capitalization.",
 				std::bind( static_cast< void(ElementTypeAtomSelector::*)(std::string const &) >( &ElementTypeAtomSelector::set_element_type ), this, std::placeholders::_1 )

@@ -2,7 +2,7 @@
 
 ## Description
 
-Standard plugins for distribution with the Masala software suite.  These are released under an MIT licence, permitting use for any purpose (not-for-profit or commercial).
+Standard plugins for distribution with the Masala software suite.  These are released under an AGPLv3 licence, permitting use for any purpose (not-for-profit or commercial), but requiring that any redistribution of this or any derived product retain an AGPL licence (version 3 or later) and include source code.
 
 ## Author
 

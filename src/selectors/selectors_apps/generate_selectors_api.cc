@@ -1,25 +1,19 @@
 /*
-MIT License
+    Standard Masala Plugins
+    Copyright (C) 2022 Vikram K. Mulligan
 
-Copyright (c) 2022 Vikram K. Mulligan
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /// @file src/selectors/api/generate_api_classes.hh
@@ -28,13 +22,17 @@ SOFTWARE.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Core headers
-#include <selectors/api/generate_api_classes.hh>
 #include <core_api/types.hh>
+
+// Registration header
+#include <src/registration/StandardMasalaPluginsRegistrator.hh>
 
 // Base headers
 #include <base/MasalaObject.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/managers/disk/MasalaDiskManager.hh>
+#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
+#include <base/managers/plugin_module/MasalaPlugin.hh>
 
 // External headers
 #include <external/nlohmann_json/single_include/nlohmann/json.hpp>
@@ -49,14 +47,19 @@ main(
     // char * argv[]
     int, char**
 ) {
+    using namespace masala::base::managers::plugin_module;
     nlohmann::json api_definition;
     api_definition["FileType"] = "API_definition";
     api_definition["Module"] = "Selectors";
     nlohmann::json api_entries;
-    std::vector< masala::base::MasalaObjectSP > const api_objects( standard_masala_plugins::selectors::api::generate_api_classes() );
-    for( masala::core_api::Size i(0), imax(api_objects.size()); i<imax; ++i ) {
-        masala::base::api::MasalaObjectAPIDefinitionCSP api_def( api_objects[i]->get_api_definition() );
-        api_entries[ api_objects[i]->class_namespace() + "::" + api_objects[i]->class_name() ] = *api_def->get_json_description();
+    MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
+    std::vector< std::string > const api_object_names(
+        pm->get_list_of_plugins_by_keywords( std::vector< std::string >{ "selector", "standard_masala_plugins" } )
+    );
+    for( masala::core_api::Size i(0), imax(api_object_names.size()); i<imax; ++i ) {
+        MasalaPluginSP api_object( pm->create_plugin_object_instance( std::vector< std::string >{ "Selector" }, api_object_names[i] ) );
+        masala::base::api::MasalaObjectAPIDefinitionCSP api_def( api_object->get_api_definition() );
+        api_entries[ api_object->class_namespace() + "::" + api_object->class_name() ] = *api_def->get_json_description();
     }
     api_definition["Elements"] = api_entries;
 
