@@ -52,6 +52,7 @@ main(
     api_definition["FileType"] = "API_definition";
     api_definition["Module"] = "Selectors";
     nlohmann::json api_entries;
+    standard_masala_plugins::registration::StandardMasalaPluginsRegistrator::get_instance();
     MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
     std::vector< std::string > const api_object_names(
         pm->get_list_of_plugins_by_keywords( std::vector< std::string >{ "selector", "standard_masala_plugins" } )
