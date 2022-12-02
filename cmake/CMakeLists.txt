@@ -41,10 +41,18 @@ INCLUDE_DIRECTORIES( SYSTEM ../ ../src/ ../headers/masala/headers/ )
 # Compiler settings and compilation flags:
 INCLUDE( compiler.cmake )
 
+# Generate the build lists for registration library:
+execute_process(
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins registration ../src/registration cmake_generated/registration.cmake NONE NONE
+)
+
 # Generate the build lists for selectors library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
 )
+
+# Build the registration library:
+INCLUDE( ../build/cmake_generated/registration.cmake )
 
 # Build the selectors library:
 INCLUDE( ../build/cmake_generated/selectors.cmake )
