@@ -11,7 +11,7 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
 ## Setup
 
 1.  Compile Masala using the buildme.sh script in the masala/ directory.
-2.  Set up a simlink to the headers/masala/headers directory.  For instance: `ln -s ~/my_projects/masala/headers ~/my_projects/standard_masala_plugins/headers/masala/`
+2.  Set up a simlink to the headers/masala/headers directory.  For instance: `ln -s ~/my_projects/masala/headers/ ~/my_projects/standard_masala_plugins/headers/masala/`
 3.  Set up simlinks to the dylib files or so files in your masala build directory.  For instance `cd ~/myprojects/standard_masala_plugins/lib && for f in \`ls -1 ~/my_projects/masala/build/*.dylib\`; do ln -s $f .; done && cd ..`
 4.  Set up a simlink to the external/ directory.  For instance: `ln -s ~/my_projects/masala/external ~/my_projects/standard_masala_plugins/`
 5.  Set up a simlink to the code_templates/ directory.  For instance: `ln -s ~/my_projects/masala/code_templates ~/my_projects/standard_masala_plugins/`
