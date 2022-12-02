@@ -47,7 +47,7 @@ private:
     /// @brief Private constructor: object can only be instantiated with getInstance().
     /// @details Construction triggers registration of all instantiable classes in this module
     /// that will be managed by the plugin manager.
-    StandardMasalaPluginsRegistrator() = default;
+    StandardMasalaPluginsRegistrator();
 
 public:
 

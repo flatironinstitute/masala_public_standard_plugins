@@ -76,7 +76,7 @@ public:
 	/// @returns This override returns { "standard_masala_plugins", "selector",
 	/// "atom_selector", "element", "elements" }.
 	std::vector< std::string >
-	get_plugin_object_keywords() const = 0;
+	get_plugin_object_keywords() const override;
 
 	/// @brief Get The name of the class of object that this creator creates.
 	/// @returns This override returns "ElementTypeAtomSelector".
@@ -87,6 +87,14 @@ public:
 	/// @returns This override returns "standard_masala_plugins::selectors::atom_selectors".
 	std::string
 	get_plugin_object_namespace() const override;
+
+	/// @brief Get the class name.
+	/// @returns Returns "ElementTypeAtomSelectorCreator".
+	std::string class_name() const override;
+
+	/// @brief Get the class namespace.
+	/// @returns Returns "standard_masala_plugins::selectors::atom_selectors".
+	std::string class_namespace() const override;
 
 }; // class ElementTypeAtomSelectorCreator
 

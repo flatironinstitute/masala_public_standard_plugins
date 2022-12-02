@@ -88,6 +88,20 @@ ElementTypeAtomSelectorCreator::get_plugin_object_namespace() const {
 	return "standard_masala_plugins::selectors::atom_selectors";
 }
 
+/// @brief Get the class name.
+/// @returns Returns "ElementTypeAtomSelectorCreator".
+std::string
+ElementTypeAtomSelectorCreator::class_name() const {
+	return "ElementTypeAtomSelectorCreator";
+}
+
+/// @brief Get the class namespace.
+/// @returns Returns "standard_masala_plugins::selectors::atom_selectors".
+std::string
+ElementTypeAtomSelectorCreator::class_namespace() const {
+	return "standard_masala_plugins::selectors::atom_selectors";
+}
+
 
 } // namespace atom_selectors
 } // namespace selectors
