@@ -158,7 +158,7 @@ ElementTypeAtomSelector::get_api_definition() {
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				class_name(), class_namespace(),
 				"An atom selector that selects atoms by element type.",
-				false
+				false, true
 			)
 		);
 		api_description->add_constructor(
