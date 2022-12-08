@@ -25,14 +25,12 @@
 #include <core_api/types.hh>
 
 // Registration header
-#include <src/registration/StandardMasalaPluginsRegistrator.hh>
+#include <selectors/api/generate_api_classes.hh>
 
 // Base headers
 #include <base/MasalaObject.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/managers/disk/MasalaDiskManager.hh>
-#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
-#include <base/managers/plugin_module/MasalaPlugin.hh>
 
 // External headers
 #include <external/nlohmann_json/single_include/nlohmann/json.hpp>
@@ -52,13 +50,10 @@ main(
     api_definition["FileType"] = "API_definition";
     api_definition["Module"] = "Selectors";
     nlohmann::json api_entries;
-    standard_masala_plugins::registration::StandardMasalaPluginsRegistrator::get_instance();
-    MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
-    std::vector< std::string > const api_object_names(
-        pm->get_list_of_plugins_by_keywords( std::vector< std::string >{ "selector", "standard_masala_plugins" } )
-    );
-    for( masala::core_api::Size i(0), imax(api_object_names.size()); i<imax; ++i ) {
-        MasalaPluginSP api_object( pm->create_plugin_object_instance( std::vector< std::string >{ "Selector" }, api_object_names[i] ) );
+    
+    std::vector< masala::base::MasalaObjectSP > const api_objects( standard_masala_plugins::selectors::api::generate_api_classes() );
+
+    for( auto const & api_object : api_objects ) {
         masala::base::api::MasalaObjectAPIDefinitionCSP api_def( api_object->get_api_definition() );
         api_entries[ api_object->class_namespace() + "::" + api_object->class_name() ] = *api_def->get_json_description();
     }
