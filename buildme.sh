@@ -7,5 +7,4 @@ make -j `nproc` && echo "Build completed." || echo "Build errors!  Check output 
 cd ..
 mkdir headers/standard_masala_plugins && echo "Created headers/standard_masala_plugins/ directory." || echo "Directory headers/standard_masala_plugins/ already exists."
 rm -r headers/standard_masala_plugins/*
-python3 ./code_templates/copy_headers.py registration src headers/standard_masala_plugins
 python3 ./code_templates/copy_headers.py selectors src headers/standard_masala_plugins
