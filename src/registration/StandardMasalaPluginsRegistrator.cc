@@ -27,7 +27,7 @@
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 
 // Standard Masala plugin headers -- selectors:
-#include <selectors/atom_selectors/ElementTypeAtomSelectorCreator.hh>
+#include <selectors_api/auto_generated_api/atom_selectors/ElementTypeAtomSelectorCreator.hh>
 
 namespace standard_masala_plugins {
 namespace registration {
@@ -70,7 +70,7 @@ StandardMasalaPluginsRegistrator::register_plugins() const {
 void
 StandardMasalaPluginsRegistrator::register_selectors() const {
     using namespace masala::base::managers::plugin_module;
-    using namespace selectors::atom_selectors;
+    using namespace standard_masala_plugins::selectors_api::auto_generated_api::atom_selectors;
 
     MasalaPluginModuleManager::get_instance()->add_plugins(
         std::vector< MasalaPluginCreatorCSP >{
