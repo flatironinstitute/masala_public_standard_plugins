@@ -110,6 +110,28 @@ public:
 	masala::base::api::MasalaObjectAPIDefinitionCWP
 	get_api_definition() override;
 
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PLUGIN PUBLIC MEMBER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+    /// @brief Get the category or categories for this plugin class.
+    /// @returns { { "Selector", "AtomSelector" } }
+    /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
+    /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
+    /// in more than one hierarchical category (in which case there would be more than one
+    /// entry in the outher vector), but must be in at least one.  The first one is used as
+    /// the primary key.
+    std::vector< std::vector< std::string > >
+    get_categories() const override;
+
+    /// @brief Get the keywords for this plugin class.
+    /// @returns { "standard_masala_plugins", "selector", "atom_selector",
+    ///            "element", "elements" }
+    std::vector< std::string >
+    get_keywords() const override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
