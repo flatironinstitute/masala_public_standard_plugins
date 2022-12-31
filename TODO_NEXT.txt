@@ -3,5 +3,5 @@
 - [ ] Add a new registration library dependent on the selectors_api library.  Call registration function in selectors_api library.
 - [ ] Add function in selectors_api library that registers all creators.
 - [ ] Figure out why ElementTypeAtomSelector.hh is ending up copied into headers.  It shouldn't be.
-- [ ] Figure out why the ElementTypeAtomSelector_API.hh file isn't in headers.  It should be.
-
+- [X] Figure out why the ElementTypeAtomSelector_API.hh file isn't in headers.  It should be.
+- [ ] Figure out how to prevent headers from other libraries from being copied into headers.
