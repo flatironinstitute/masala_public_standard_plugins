@@ -16,15 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/registration_api/registration_functions/register_library.cc
+/// @file src/registration_api/register_library.cc
 /// @brief Function to register a library with the Masala base plugin manager.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 namespace standard_masala_plugins {
 namespace registration_api {
-namespace registration_functions {
 
-#include <registration_api/registration_functions/register_library.hh>
 #include <registration/register_sub_libraries.hh>
 
 /// @brief Register this library with the Masala base plugin manager.
@@ -39,6 +37,5 @@ unregister_library() {
     standard_masala_plugins::registration::unregister_sub_libraries();
 }
 
-} // namespace registration_functions
 } // namespace registration_api
 } // namespace standard_masala_plugins
