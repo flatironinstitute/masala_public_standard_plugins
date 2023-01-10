@@ -21,7 +21,11 @@
 /// Masala base plugin manager.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
+// Unit headers:
 #include <registration/register_sub_libraries.hh>
+
+// Selectors headers:
+#include <selectors_api/auto_generated_api/registration/register_selectors.hh>
 
 namespace standard_masala_plugins {
 namespace registration {
