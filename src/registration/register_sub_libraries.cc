@@ -21,10 +21,10 @@
 /// Masala base plugin manager.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
+#include <registration/register_sub_libraries.hh>
+
 namespace standard_masala_plugins {
 namespace registration {
-
-#include <registration/register_sub_libraries.hh>
 
 /// @brief Register sub-libraries with the Masala base plugin manager.
 void

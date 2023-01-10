@@ -20,10 +20,11 @@
 /// @brief Function to register a library with the Masala base plugin manager.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
+#include <registration_api/register_library.hh>
+#include <registration/register_sub_libraries.hh>
+
 namespace standard_masala_plugins {
 namespace registration_api {
-
-#include <registration/register_sub_libraries.hh>
 
 /// @brief Register this library with the Masala base plugin manager.
 void

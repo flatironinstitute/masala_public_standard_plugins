@@ -16,8 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/selectors/selectors_apps/generate_selectors_api.hh
-/// @brief An application used for auto-generating the selectors API JSON.
+/// @file src/registration/registration_api/generate_registration_api.hh
+/// @brief An application used for auto-generating the registration API JSON.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Core headers
@@ -47,20 +47,20 @@ main(
     using namespace masala::base::managers::plugin_module;
     nlohmann::json api_definition;
     api_definition["FileType"] = "API_definition";
-    api_definition["Module"] = "Selectors";
+    api_definition["Module"] = "Registration";
     nlohmann::json api_entries;
     
-    std::vector< masala::base::MasalaObjectSP > const api_objects( standard_masala_plugins::selectors::api::generate_api_classes() );
+    // std::vector< masala::base::MasalaObjectSP > const api_objects( standard_masala_plugins::selectors::api::generate_api_classes() );
 
-    for( auto const & api_object : api_objects ) {
-        masala::base::api::MasalaObjectAPIDefinitionCSP api_def( api_object->get_api_definition() );
-        api_entries[ api_object->class_namespace() + "::" + api_object->class_name() ] = *api_def->get_json_description();
-    }
+    // for( auto const & api_object : api_objects ) {
+    //     masala::base::api::MasalaObjectAPIDefinitionCSP api_def( api_object->get_api_definition() );
+    //     api_entries[ api_object->class_namespace() + "::" + api_object->class_name() ] = *api_def->get_json_description();
+    // }
     api_definition["Elements"] = api_entries;
 
     std::ostringstream ss;
     ss << api_definition.dump( 1, '\t' ) << "\n";
-    masala::base::managers::disk::MasalaDiskManager::get_instance()->write_ascii_file( "selectors_api.json", ss.str() );
+    masala::base::managers::disk::MasalaDiskManager::get_instance()->write_ascii_file( "registration_api.json", ss.str() );
 
     return 0;
 }
