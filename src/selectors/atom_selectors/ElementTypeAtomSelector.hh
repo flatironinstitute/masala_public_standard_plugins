@@ -30,7 +30,7 @@
 #include <selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh>
 
 // Core API headers:
-#include <core/chemistry/atoms/ElementType.fwd.hh>
+#include <base/managers/database/elements/ElementType.fwd.hh>
 
 namespace standard_masala_plugins {
 namespace selectors {
@@ -89,7 +89,7 @@ public:
 	/// @brief Set the element type, by enum.
 	void
 	set_element_type(
-		masala::core::chemistry::atoms::ElementTypeEnum const element_type
+		masala::base::managers::database::elements::ElementTypeEnum const element_type
 	);
 
 	/// @brief Every class can name itself.
@@ -139,7 +139,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief The type of atom that we will be selecting.
-	masala::core::chemistry::atoms::ElementTypeEnum element_ = masala::core::chemistry::atoms::ElementTypeEnum::C;
+	masala::base::managers::database::elements::ElementTypeEnum element_ = masala::base::managers::database::elements::ElementTypeEnum::C;
 
 	/// @brief The API descriptor.
 	/// @details Lazily generated.

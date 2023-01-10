@@ -102,7 +102,7 @@ void
 ElementTypeAtomSelector::set_element_type(
 	std::string const & element_name
 ) {
-	using namespace masala::core::chemistry::atoms;
+	using namespace masala::base::managers::database::elements;
 	ElementTypeEnum const element_type( element_enum_from_name( element_name ) );
 	CHECK_OR_THROW_FOR_CLASS( element_type != ElementTypeEnum::INVALID_ELEMENT_TYPE, "set_element_type", "Could not interpret \"" + element_name + "\" as a valid element type." );
 	set_element_type( element_type );
@@ -111,9 +111,9 @@ ElementTypeAtomSelector::set_element_type(
 /// @brief Set the element type, by enum.
 void
 ElementTypeAtomSelector::set_element_type(
-	masala::core::chemistry::atoms::ElementTypeEnum const element_type
+	masala::base::managers::database::elements::ElementTypeEnum const element_type
 ) {
-	using namespace masala::core::chemistry::atoms;
+	using namespace masala::base::managers::database::elements;
 	CHECK_OR_THROW_FOR_CLASS(
 		static_cast< signed long >( element_type ) > 0 &&
 		element_type <= ElementTypeEnum::NUM_KNOWN_ELEMENTS,
