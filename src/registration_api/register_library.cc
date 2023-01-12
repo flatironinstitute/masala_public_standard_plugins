@@ -27,12 +27,14 @@ namespace standard_masala_plugins {
 namespace registration_api {
 
 /// @brief Register this library with the Masala base plugin manager.
+extern "C"
 void
 register_library() {
     standard_masala_plugins::registration::register_sub_libraries();
 }
 
 /// @brief Unregister this library with the Masala base plugin manager.
+extern "C"
 void
 unregister_library() {
     standard_masala_plugins::registration::unregister_sub_libraries();

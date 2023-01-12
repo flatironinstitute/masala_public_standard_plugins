@@ -27,10 +27,10 @@ namespace standard_masala_plugins {
 namespace registration_api {
 
     /// @brief Register this library with the Masala base plugin manager.
-    void register_library();
+    extern "C" void register_library();
 
     /// @brief Unregister this library with the Masala base plugin manager.
-    void unregister_library();
+    extern "C" void unregister_library();
 
 } // namespace registration_api
 } // namespace standard_masala_plugins
