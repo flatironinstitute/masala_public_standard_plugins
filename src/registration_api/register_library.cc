@@ -23,6 +23,8 @@
 #include <registration_api/register_library.hh>
 #include <registration/register_sub_libraries.hh>
 
+#include <base/managers/tracer/MasalaTracerManager.hh>
+
 namespace standard_masala_plugins {
 namespace registration_api {
 
@@ -30,6 +32,9 @@ namespace registration_api {
 extern "C"
 void
 register_library() {
+    masala::base::managers::tracer::MasalaTracerManager::get_instance()->write_to_tracer(
+        "standard_masala_plugins::registration_api::register_library", "Registering standard Masala plugins."
+    );
     standard_masala_plugins::registration::register_sub_libraries();
 }
 
@@ -37,6 +42,9 @@ register_library() {
 extern "C"
 void
 unregister_library() {
+    masala::base::managers::tracer::MasalaTracerManager::get_instance()->write_to_tracer(
+        "standard_masala_plugins::registration_api::register_library", "Unregistering standard Masala plugins."
+    );
     standard_masala_plugins::registration::unregister_sub_libraries();
 }
 
