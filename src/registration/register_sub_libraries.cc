@@ -33,11 +33,13 @@ namespace registration {
 /// @brief Register sub-libraries with the Masala base plugin manager.
 void
 register_sub_libraries() {
+    standard_masala_plugins::selectors_api::auto_generated_api::registration::register_selectors();
 }
 
 /// @brief Unregister sub-libraries with the Masala base plugin manager.
 void
 unregister_sub_libraries() {
+    standard_masala_plugins::selectors_api::auto_generated_api::registration::unregister_selectors();
 }
 
 } // namespace registration

@@ -8,3 +8,4 @@ cd ..
 mkdir headers/standard_masala_plugins && echo "Created headers/standard_masala_plugins/ directory." || echo "Directory headers/standard_masala_plugins/ already exists."
 rm -r headers/standard_masala_plugins/*
 python3 ./code_templates/copy_headers.py selectors_api src headers/standard_masala_plugins
+python3 ./code_templates/copy_headers.py registration_api src headers/standard_masala_plugins
