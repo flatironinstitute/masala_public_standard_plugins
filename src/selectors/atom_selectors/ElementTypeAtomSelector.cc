@@ -123,6 +123,18 @@ ElementTypeAtomSelector::set_element_type(
 	element_ = element_type;
 }
 
+/// @brief Get the element type, by string.
+std::string
+ElementTypeAtomSelector::get_element_type_name() const {
+	return masala::base::managers::database::elements::element_name_from_enum( element_ );
+}
+
+/// @brief Get the element type, by enum.
+masala::base::managers::database::elements::ElementTypeEnum
+ElementTypeAtomSelector::get_element_type_enum() const {
+	return element_;
+}
+
 /// @brief Every class can name itself.
 /// @returns "ElementTypeAtomSelector".
 std::string

@@ -92,6 +92,14 @@ public:
 		masala::base::managers::database::elements::ElementTypeEnum const element_type
 	);
 
+	/// @brief Get the element type, by string.
+	std::string
+	get_element_type_name() const;
+
+	/// @brief Get the element type, by enum.
+	masala::base::managers::database::elements::ElementTypeEnum
+	get_element_type_enum() const;
+
 	/// @brief Every class can name itself.
 	/// @returns "ElementTypeAtomSelector".
 	std::string class_name() const override;
