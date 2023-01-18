@@ -30,6 +30,9 @@
 #include <selectors/atom_selectors/ElementTypeAtomSelector.fwd.hh>
 
 // Core API headers:
+#include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.fwd.hh>
+
+// Base headers:
 #include <base/managers/database/elements/ElementType.fwd.hh>
 
 namespace standard_masala_plugins {
@@ -75,7 +78,7 @@ public:
 
 	/// @brief Given the current pose, generate the atom selection.
 	/// @details Pure virtual function.
-	masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionCSP
+	masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 	generate_atom_selection(
 		masala::core_api::auto_generated_api::pose::Pose_API const & pose
 	) const override;

@@ -28,7 +28,7 @@
 #include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstance_API.hh>
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstanceConstIterator_API.hh>
-#include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
+#include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.hh>
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
@@ -73,15 +73,14 @@ ElementTypeAtomSelector::make_independent() {
 
 /// @brief Given the current pose, generate the atom selection.
 /// @details Pure virtual function.
-masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionCSP
+masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 ElementTypeAtomSelector::generate_atom_selection(
 	masala::core_api::auto_generated_api::pose::Pose_API const & pose
 ) const {
-	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelection;
-	using masala::core_api::base_classes::selectors::atom_selectors::AtomSelectionSP;
+	using masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_API;
+	using masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APISP;
 
-	AtomSelectionSP selection( masala::make_shared< AtomSelection >() );
-	selection->reserve( pose.molecules_shared_ptr()->total_atoms() );
+	AtomSelection_APISP selection( masala::make_shared< AtomSelection_API >() );
 
 	for(
 		auto atom( pose.molecules_shared_ptr()->atoms_begin() );
@@ -93,7 +92,6 @@ ElementTypeAtomSelector::generate_atom_selection(
 		}
 	}
 
-	selection->shrink_to_fit();
 	return selection;
 }
 
@@ -164,6 +162,7 @@ ElementTypeAtomSelector::get_api_definition() {
 	using namespace masala::base::api::work_function;
 	using namespace masala::core_api::base_classes::selectors::atom_selectors;
 	using namespace masala::core_api::auto_generated_api::pose;
+	using namespace masala::core_api::auto_generated_api::selection::atom_selection;
 
 	if( api_description_ == nullptr ) {
 		MasalaObjectAPIDefinitionSP api_description(
@@ -185,7 +184,7 @@ ElementTypeAtomSelector::get_api_definition() {
 			)
 		);
 		api_description->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelectionCSP, Pose_API const & > >(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelection_APICSP, Pose_API const & > >(
 				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
 				true, false,
 				"pose", "An input pose, for which a selection will be generated.",

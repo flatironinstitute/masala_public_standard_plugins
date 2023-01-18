@@ -25,7 +25,7 @@
 
 // Unit headers:
 #include <selectors_api/auto_generated_api/atom_selectors/ElementTypeAtomSelector_API.hh>
-#include <core_api/base_classes/selectors/atom_selectors/AtomSelection.hh>
+#include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.hh>
 
 // Core headers:
 #include <core_api/auto_generated_api/pose/Pose_API.hh>
@@ -49,9 +49,9 @@ TEST_CASE( "Instantiate an ElementTypeAtomSelector", "[standard_masala_plugins::
 TEST_CASE( "Select oxygen atoms in an empty pose", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][selection][apply]" ) {
     using namespace selectors_api::auto_generated_api::atom_selectors;
     using namespace masala::core_api::auto_generated_api::pose;
-    using namespace masala::core_api::base_classes::selectors::atom_selectors;
+    using namespace masala::core_api::auto_generated_api::selection::atom_selection;
 
-    AtomSelectionCSP selection;
+    AtomSelection_APICSP selection;
     REQUIRE_NOTHROW([&](){
         ElementTypeAtomSelector_APISP elemsel( masala::make_shared< ElementTypeAtomSelector_API >() );
         Pose_APISP pose( masala::make_shared< Pose_API >() );
