@@ -2,6 +2,8 @@
 - [X] Ensure that Creator classes get built (i.e. added to cmake files).
 - [X] Add a new registration library dependent on the selectors_api library.  Call registration function in selectors_api library.
 - [X] Add function in selectors_api library that registers all creators.
+- [ ] Figure out how to make AtomSelection threadsafe.
+- [ ] Figure out observers / making AtomSelection update itself as a pose is pruned.
 - [ ] Test registration function.
 - [X] Figure out why ElementTypeAtomSelector.hh is ending up copied into headers.  It shouldn't be.
 - [X] Figure out why the ElementTypeAtomSelector_API.hh file isn't in headers.  It should be.
