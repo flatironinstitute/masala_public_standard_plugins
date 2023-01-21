@@ -220,7 +220,7 @@ ElementTypeAtomSelector::get_api_definition() {
 std::vector< std::vector< std::string > >
 ElementTypeAtomSelector::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Selector", "Atom_Selector" }
+		{ "Selector", "AtomSelector" }
 	};
 }
 
