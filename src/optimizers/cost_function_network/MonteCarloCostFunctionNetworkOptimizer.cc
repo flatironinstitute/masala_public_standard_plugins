@@ -28,8 +28,8 @@
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem.hh>
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -75,11 +75,12 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
 
 /// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 /// @details Must be implemented by derived classes.
-masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutionCSP
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP
 MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem const & problem
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
 ) const {
-    TODO TODO TODO
+    //TODO TODO TODO
+    return nullptr; // TODO TODO TODO
 }
 
 } // namespace cost_function_network
