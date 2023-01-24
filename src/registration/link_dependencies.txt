@@ -1,5 +1,6 @@
 base
-#numeric
+numeric
+numeric_api
 core
 core_api
 selectors
