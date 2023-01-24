@@ -46,7 +46,12 @@ execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
 )
 
-# Generate the build lists for selectors library and its API library:
+# Generate the build lists for optimizers library and its API library:
+execute_process(
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins optimizers ../src/optimizers cmake_generated/optimizers.cmake cmake_generated/optimizers_api.cmake cmake_generated/optimizers_tests.cmake
+)
+
+# Generate the build lists for registration library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins registration ../src/registration cmake_generated/registration.cmake cmake_generated/registration_api.cmake cmake_generated/registration_tests.cmake
 )
@@ -57,6 +62,13 @@ INCLUDE( ../build/cmake_generated/selectors.cmake )
 # Build the selectors API library:
 INCLUDE( ../build/cmake_generated/selectors_api.cmake )
 
+# Build the optimizers library:
+INCLUDE( ../build/cmake_generated/optimizers.cmake )
+
+# Build the optimizers API library:
+INCLUDE( ../build/cmake_generated/optimizers_api.cmake )
+
+
 # Build the registration library:
 INCLUDE( ../build/cmake_generated/registration.cmake )
 
@@ -66,5 +78,8 @@ INCLUDE( ../build/cmake_generated/registration_api.cmake )
 # Build tests for the selectors library.
 INCLUDE( ../build/cmake_generated/selectors_tests.cmake )
 
-# Build tests for the selectors library.
+# Build tests for the optimizers library.
+INCLUDE( ../build/cmake_generated/optimizers_tests.cmake )
+
+# Build tests for the registration library.
 INCLUDE( ../build/cmake_generated/registration_tests.cmake )
