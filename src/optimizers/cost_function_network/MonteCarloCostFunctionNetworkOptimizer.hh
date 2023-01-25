@@ -33,6 +33,9 @@
 // Parent header:
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 
+// STL headers:
+#include <mutex>
+
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
@@ -46,11 +49,29 @@ class MonteCarloCostFunctionNetworkOptimizer : public masala::numeric_api::base_
 
 public:
 
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION AND DESTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+
 	/// @brief Default constructor.
 	MonteCarloCostFunctionNetworkOptimizer() = default;
 
 	/// @brief Copy constructor.
-	MonteCarloCostFunctionNetworkOptimizer( MonteCarloCostFunctionNetworkOptimizer const & ) = default;
+	/// @details Needed since we define a mutex.
+	MonteCarloCostFunctionNetworkOptimizer( MonteCarloCostFunctionNetworkOptimizer const & );
+
+	/// @brief Assignment operator.
+	/// @details Needed since we define a mutex.
+	MonteCarloCostFunctionNetworkOptimizer &
+	operator=( MonteCarloCostFunctionNetworkOptimizer const & );
+
+	/// @brief Make a copy of this object that's wholly independent.
+	MonteCarloCostFunctionNetworkOptimizerSP
+	deep_clone() const;
+
+	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+	void
+	make_independent();
 
 	/// @brief Destructor.
 	~MonteCarloCostFunctionNetworkOptimizer() override = default;
@@ -78,12 +99,48 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the class name.
+	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
+	std::string class_name() const override;
+
+	/// @brief Get the class namespace.
+	/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+	std::string class_namespace() const override;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC API FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the API definition for this object.
+	masala::base::api::MasalaObjectAPIDefinitionCWP
+	get_api_definition();
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC WORK FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
 	/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 	/// @details Must be implemented by derived classes.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP
 	run_cost_function_network_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
 	) const override;
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE DATA
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief A mutex for threadsafe operation.
+	mutable std::mutex optimizer_mutex_;
+
+	/// @brief The API description.
+	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

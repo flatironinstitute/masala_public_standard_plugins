@@ -28,11 +28,12 @@
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
+#include <base/api/MasalaObjectAPIDefinition.hh>
 
 // STL headers:
 #include <vector>
@@ -41,6 +42,40 @@
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
+
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION AND DESTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Copy constructor.
+/// @details Needed since we define a mutex.
+MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
+    MonteCarloCostFunctionNetworkOptimizer const & src
+) :
+    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+{}
+
+/// @brief Assignment operator.
+/// @details Needed since we define a mutex.
+MonteCarloCostFunctionNetworkOptimizer &
+MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
+    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
+    return *this;
+}
+
+/// @brief Make a copy of this object that's wholly independent.
+MonteCarloCostFunctionNetworkOptimizerSP
+MonteCarloCostFunctionNetworkOptimizer::deep_clone() const {
+    MonteCarloCostFunctionNetworkOptimizerSP new_optimizer( masala::make_shared< MonteCarloCostFunctionNetworkOptimizer >(*this) );
+    new_optimizer->make_independent();
+    return new_optimizer;
+}
+
+/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+void
+MonteCarloCostFunctionNetworkOptimizer::make_independent() {
+    //GNDN
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +107,50 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
     keywords.push_back( "stochastic" );
     return keywords;
 }
+
+/// @brief Get the class name.
+/// @returns "MonteCarloCostFunctionNetworkOptimizer".
+std::string
+MonteCarloCostFunctionNetworkOptimizer::class_name() const {
+    return "MonteCarloCostFunctionNetworkOptimizer";
+}
+
+/// @brief Get the class namespace.
+/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+std::string
+MonteCarloCostFunctionNetworkOptimizer::class_namespace() const {
+    return "standard_masala_plugins::optimizers::cost_function_network";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC API FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the API definition for this object.
+masala::base::api::MasalaObjectAPIDefinitionCWP
+MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    if( api_description_ == nullptr ) {
+        masala::base::api::MasalaObjectAPIDefinitionSP api_description(
+            masala::make_shared< masala::base::api::MasalaObjectAPIDefinition >(
+                *this,
+                "An optimizer for cost function network problems that uses a Monte Carlo search to optimize.  This "
+                "performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to "
+                "pick a node at random and change its setting at random, compute the change in overall energy or score, "
+                "and accept or reject the move based on the difference in energy and the Metropolis criterion.",
+                false
+            )
+        );
+
+        // Convert nonconst to const:
+        api_description_ = api_description;
+    }
+    return api_description_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC WORK FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 /// @details Must be implemented by derived classes.
