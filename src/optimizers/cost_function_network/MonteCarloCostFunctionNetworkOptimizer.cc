@@ -34,6 +34,8 @@
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -129,16 +131,33 @@ MonteCarloCostFunctionNetworkOptimizer::class_namespace() const {
 /// @brief Get the API definition for this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
 MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
+    using namespace masala::base::api;
+    using namespace masala::base::api::constructor;
+
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     if( api_description_ == nullptr ) {
-        masala::base::api::MasalaObjectAPIDefinitionSP api_description(
-            masala::make_shared< masala::base::api::MasalaObjectAPIDefinition >(
+        MasalaObjectAPIDefinitionSP api_description(
+            masala::make_shared< MasalaObjectAPIDefinition >(
                 *this,
                 "An optimizer for cost function network problems that uses a Monte Carlo search to optimize.  This "
                 "performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to "
                 "pick a node at random and change its setting at random, compute the change in overall energy or score, "
                 "and accept or reject the move based on the difference in energy and the Metropolis criterion.",
                 false
+            )
+        );
+
+        // Constructors:
+
+        api_description->add_constructor(
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< MonteCarloCostFunctionNetworkOptimizer > >(
+                class_name(), "Create an instance of this optimizer, and initialize it with default options."
+            )
+        );
+        api_description->add_constructor(
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< MonteCarloCostFunctionNetworkOptimizer, MonteCarloCostFunctionNetworkOptimizer const & > >(
+                class_name(), "Copy constructor.",
+                "src", "The optimizer to copy.  Not changed by this operation."
             )
         );
 
