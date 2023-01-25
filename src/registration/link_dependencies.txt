@@ -5,3 +5,5 @@ core
 core_api
 selectors
 selectors_api
+optimizers
+optimizers_api
