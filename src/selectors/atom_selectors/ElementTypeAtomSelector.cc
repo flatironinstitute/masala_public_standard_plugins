@@ -72,7 +72,6 @@ ElementTypeAtomSelector::make_independent() {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Given the current pose, generate the atom selection.
-/// @details Pure virtual function.
 masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 ElementTypeAtomSelector::generate_atom_selection(
 	masala::core_api::auto_generated_api::pose::Pose_API const & pose
@@ -186,7 +185,7 @@ ElementTypeAtomSelector::get_api_definition() {
 		api_description->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelection_APICSP, Pose_API const & > >(
 				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
-				true, false,
+				true, false, true, false,
 				"pose", "An input pose, for which a selection will be generated.",
 				"atom_selection", "A selection of atoms generated from the input pose, by element type.",
 				std::bind( &ElementTypeAtomSelector::generate_atom_selection, this, std::placeholders::_1 )
@@ -195,7 +194,7 @@ ElementTypeAtomSelector::get_api_definition() {
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
-				"element_name", "The abbreviated name of the element, with proper capitalization.",
+				"element_name", "The abbreviated name of the element, with proper capitalization.", false, false,
 				std::bind( static_cast< void(ElementTypeAtomSelector::*)(std::string const &) >( &ElementTypeAtomSelector::set_element_type ), this, std::placeholders::_1 )
 			)
 		);

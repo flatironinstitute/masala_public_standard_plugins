@@ -77,7 +77,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Given the current pose, generate the atom selection.
-	/// @details Pure virtual function.
 	masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 	generate_atom_selection(
 		masala::core_api::auto_generated_api::pose::Pose_API const & pose
