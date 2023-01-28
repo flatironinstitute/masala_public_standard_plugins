@@ -181,7 +181,7 @@ ConstantAnnealingSchedule::get_api_definition() {
                 "temperature", "Get the temperature at the current timepoint, and increment the timepoint counter.  In this "
                 "case, the same value is returned every time.", true, false, true, false, "temperature",
                 "The temperature at the current timepoint (the constant temperature value).",
-                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)()>( &ConstantAnnealingSchedule::temperature ), this )
+                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)() const>( &ConstantAnnealingSchedule::temperature ), this )
             )
         );
         api_definition->add_work_function(
@@ -193,7 +193,7 @@ ConstantAnnealingSchedule::get_api_definition() {
                 "time_index", "The timepoint at which we are getting temperature."
                 "temperature",
                 "The temperature at the current timepoint (the constant temperature value).",
-                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)( masala::numeric_api::Size )>( &ConstantAnnealingSchedule::temperature ), this, std::placeholders::_1 )
+                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)( masala::numeric_api::Size const ) const>( &ConstantAnnealingSchedule::temperature ), this, std::placeholders::_1 )
             )
         );
 
