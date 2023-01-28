@@ -68,6 +68,9 @@ public:
 	/// @details Should be overridden for derived classes.
 	void make_independent() override;
 
+	/// @brief Make an independent copy of this object.
+	ConstantAnnealingScheduleSP deep_clone() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -80,6 +80,14 @@ ConstantAnnealingSchedule::make_independent() {
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::make_independent();
 }
 
+/// @brief Make an independent copy of this object.
+ConstantAnnealingScheduleSP
+ConstantAnnealingSchedule::deep_clone() const {
+    ConstantAnnealingScheduleSP object_copy( std::static_pointer_cast<ConstantAnnealingSchedule>(clone()) );
+    object_copy->make_independent();
+    return object_copy;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
