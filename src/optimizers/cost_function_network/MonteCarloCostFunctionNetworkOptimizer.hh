@@ -178,8 +178,6 @@ private:
 	masala::numeric_api::Size cpu_threads_to_request_ = 0;
 
 	/// @brief The number of times to attempt each problem.
-	/// @details This is also the maximum number of solutions per problem.  If an optimizer can fail,
-	/// the actual number of solutions will be fewer.
 	masala::numeric_api::Size attempts_per_problem_ = 1;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
