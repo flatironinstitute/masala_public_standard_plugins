@@ -24,7 +24,8 @@
 // Project header
 #include <optimizers/api/generate_api_classes.hh>
 
-// Core headers
+// Optimizers headers
+#include <optimizers/annealing/ConstantAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
 namespace standard_masala_plugins {
@@ -38,8 +39,11 @@ namespace api {
     generate_api_classes() {
         std::vector< masala::base::MasalaObjectSP > outvec;
 
+        using namespace standard_masala_plugins::optimizers;
+
         // Add to this vector whenever a class is added with a defined API:
-        outvec.emplace_back( masala::make_shared< standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
+        outvec.emplace_back( masala::make_shared< annealing::ConstantAnnealingSchedule >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
