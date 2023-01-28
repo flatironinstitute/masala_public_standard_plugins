@@ -36,6 +36,8 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -54,7 +56,9 @@ namespace cost_function_network {
 MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     MonteCarloCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ),
+    cpu_threads_to_request_(src.cpu_threads_to_request_),
+    attempts_per_problem_(src.attempts_per_problem_)
 {}
 
 /// @brief Assignment operator.
@@ -62,6 +66,8 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
+    cpu_threads_to_request_ = src.cpu_threads_to_request_;
+    attempts_per_problem_ = src.attempts_per_problem_;
     return *this;
 }
 
@@ -133,6 +139,9 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
+    using namespace masala::base::api::setter;
+    using namespace masala::base::api::getter;
+    using masala::numeric_api::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     if( api_description_ == nullptr ) {
@@ -161,10 +170,91 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
             )
         );
 
+        // Setters:
+
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
+				"threads_in", "The number of CPU threads to request.  This is a maximum; fewer are requested if there are fewer "
+				"problem replicates to try.  A setting of 0 means \"request all available\".", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_cpu_threads_to_request, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"set_attempts_per_problem", "Sets the number of times to try each problem.",
+				"attempts_in", "The number of times to try each problem.  Minimum 1.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem, this, std::placeholders::_1 )
+			)
+		);
+
+		// Getters:
+
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
+				"cpu_threads_to_request", "Gets the number of threads to request when running problems in parallel.",
+				"cpu_threads_to_request", "The number of CPU threads to request.  This is a maximum; fewer are requested if there are fewer "
+				"problem replicates to try.  A setting of 0 means \"request all available\".", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request, this )
+			)
+		);
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
+				"attempts_per_problem", "Gets the number of times to try each problem.",
+				"attempts_per_problem", "The number of times to try each problem.  Minimum 1.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem, this )
+			)
+		);
+
         // Convert nonconst to const:
         api_description_ = api_description;
     }
     return api_description_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the number of threads to request.
+/// @details The default setting of 0 means "request all available".
+void
+MonteCarloCostFunctionNetworkOptimizer::set_cpu_threads_to_request(
+    masala::numeric_api::Size const threads_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    cpu_threads_to_request_ = threads_in;
+}
+
+/// @brief Set the number of times to try each problem.
+/// @details Minimum is 1.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
+    masala::numeric_api::Size const attempts_in
+) {
+    CHECK_OR_THROW_FOR_CLASS( attempts_in > 0, "set_attempts_per_problem", "The number of attempts per problem must be greater than zero." );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    attempts_per_problem_ = attempts_in;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC GETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the number of threads to request.
+/// @details The default setting of 0 means "request all available".
+masala::numeric_api::Size
+MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return cpu_threads_to_request_;
+}
+
+/// @brief Get the number of times to try each problem.
+/// @details Minimum is 1.
+masala::numeric_api::Size
+MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return attempts_per_problem_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

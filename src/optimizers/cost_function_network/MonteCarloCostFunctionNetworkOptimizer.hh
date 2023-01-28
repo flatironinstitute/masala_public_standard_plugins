@@ -33,6 +33,9 @@
 // Parent header:
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 
+// Numeric API headers:
+#include <numeric_api/types.hh>
+
 // STL headers:
 #include <mutex>
 
@@ -120,6 +123,34 @@ public:
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
+// PUBLIC SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the number of threads to request.
+	/// @details The default setting of 0 means "request all available".
+	void set_cpu_threads_to_request( masala::numeric_api::Size const threads_in );
+
+	/// @brief Set the number of times to try each problem.
+	/// @details Minimum is 1.
+	void set_attempts_per_problem( masala::numeric_api::Size const attempts_in );
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC GETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the number of threads to request.
+	/// @details The default setting of 0 means "request all available".
+	masala::numeric_api::Size cpu_threads_to_request() const;
+
+	/// @brief Get the number of times to try each problem.
+	/// @details Minimum is 1.
+	masala::numeric_api::Size attempts_per_problem() const;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -141,6 +172,15 @@ private:
 
 	/// @brief The API description.
 	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
+
+	/// @brief The maximum number of CPU threads to request for parallel execution.
+	/// @details The default of 0 means "all available".
+	masala::numeric_api::Size cpu_threads_to_request_ = 0;
+
+	/// @brief The number of times to attempt each problem.
+	/// @details This is also the maximum number of solutions per problem.  If an optimizer can fail,
+	/// the actual number of solutions will be fewer.
+	masala::numeric_api::Size attempts_per_problem_ = 1;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 
