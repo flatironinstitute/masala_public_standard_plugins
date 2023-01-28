@@ -173,9 +173,9 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 
 /// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 /// @details Must be implemented by derived classes.
-masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
 MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
     //TODO TODO TODO
     return nullptr; // TODO TODO TODO
