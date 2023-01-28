@@ -127,18 +127,18 @@ ConstantAnnealingSchedule::get_api_definition() {
     if( api_definition_ == nullptr ) {
         MasalaObjectAPIDefinitionSP api_definition(
             masala::make_shared< MasalaObjectAPIDefinition >(
-                "ConstantAnnealingSchedule",  "An annealing schedule that does not vary with time.", false
+                *this, "An annealing schedule that does not vary with time.", false
             )
         );
 
         // Constructors
         api_definition->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< MasalaObjectAPIDefinition > >( 
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ConstantAnnealingSchedule > >( 
                 "ConstantAnnealingSchedule", "Construct a ConstantAnnealingSchedule object, with temperature initialized to 0.62 kcal/mol."
             )
         );
         api_definition->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< MasalaObjectAPIDefinition, MasalaObjectAPIDefinition const & > >( 
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ConstantAnnealingSchedule, ConstantAnnealingSchedule const & > >( 
                 "ConstantAnnealingSchedule", "Copy another ConstantAnnealingSchedule object.",
                 "src", "The object to copy, unaltered by this operation."
             )
@@ -190,7 +190,7 @@ ConstantAnnealingSchedule::get_api_definition() {
                 "case, the same value is returned every time.  This does not increment the "
                 "timepoint counter.",
                 true, false, true, false,
-                "time_index", "The timepoint at which we are getting temperature."
+                "time_index", "The timepoint at which we are getting temperature.",
                 "temperature",
                 "The temperature at the current timepoint (the constant temperature value).",
                 std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)( masala::numeric_api::Size const ) const>( &ConstantAnnealingSchedule::temperature ), this, std::placeholders::_1 )
