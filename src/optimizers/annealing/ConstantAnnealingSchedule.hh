@@ -126,6 +126,13 @@ public:
 	/// @details In kcal/mol.  Must be positive.
 	void set_temperature( masala::numeric_api::Real const temperature_in );
 
+	/// @brief Set the index of the expected final timepoint.
+	/// @details For the constant annealing schedule, this does nothing.
+	void
+	set_final_time_index(
+		masala::numeric_api::Size const final_time_index_in
+	) override;
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////

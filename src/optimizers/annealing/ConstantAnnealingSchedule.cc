@@ -160,6 +160,12 @@ ConstantAnnealingSchedule::get_api_definition() {
             )
         );
         api_definition->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
+                "reset_call_count", "Reset this object's call count.",
+                false, false, std::bind( &ConstantAnnealingSchedule::reset_call_count, this )
+            )
+        );
+        api_definition->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::numeric_api::Real > >(
                 "set_temperature", "Set the temperature, in kcal/mol.  Default is 0.62.",
                 "temperature_in", "The temperature to set, in kcal/mol.",
@@ -250,6 +256,15 @@ ConstantAnnealingSchedule::set_temperature(
     CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature", "The temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
     std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_ );
     temperature_ = temperature_in;
+}
+
+/// @brief Set the index of the expected final timepoint.
+/// @details For the constant annealing schedule, this does nothing.
+void
+ConstantAnnealingSchedule::set_final_time_index(
+    masala::numeric_api::Size const
+) {
+    //GNDN
 }
 
 ////////////////////////////////////////////////////////////////////////////////
