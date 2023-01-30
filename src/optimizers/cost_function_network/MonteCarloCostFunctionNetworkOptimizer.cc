@@ -388,10 +388,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
-            copy_solution( current_solution, last_accepted_solution );
+            last_accepted_solution = current_solution;
             determine_whether_to_store_solution( current_solution, last_accepted_solution, deltaE, solutions, replicate_index, problem_index, problem );
         } else {
-            copy_solution( last_accepted_solution, current_solution );
+            current_solution = last_accepted_solution;
         }
     }
 
@@ -408,12 +408,13 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 /// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
 /// (node index, number of choices).
 /// @param randgen The handle of the Masala random generator.
+/*static*/
 void
 MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
     std::vector< masala::numeric_api::Size > & current_solution,
     std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
     masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
-) const {
+) {
     using masala::numeric_api::Real;
     using masala::numeric_api::Size;
     Size const index_to_change( randgen->uniform_size_distribution( 0, current_solution.size() - 1 ) );

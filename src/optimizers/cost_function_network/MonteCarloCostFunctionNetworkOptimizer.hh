@@ -203,12 +203,13 @@ private:
 	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
 	/// (node index, number of choices).
 	/// @param randgen The handle of the Masala random generator.
+	static
 	void
 	make_mc_move(
 		std::vector< masala::numeric_api::Size > & current_solution,
 		std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
 		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
-	) const;
+	);
 
 private:
 
