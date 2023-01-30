@@ -105,7 +105,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "stochastic" }
+	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -141,6 +141,9 @@ public:
 	/// @details Minimum is 1.
 	void set_attempts_per_problem( masala::numeric_api::Size const attempts_in );
 
+	/// @brief Set the number of solutions to return for each problem.
+	void set_n_solutions_to_store_per_problem( masala::numeric_api::Size const n_solutions_in );
+
 	/// @brief Set the annealing schedule to use for annealing.
 	/// @details Cloned on input.
 	void set_annealing_schedule( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in );
@@ -161,6 +164,12 @@ public:
 	/// @brief Get the number of times to try each problem.
 	/// @details Minimum is 1.
 	masala::numeric_api::Size attempts_per_problem() const;
+
+	/// @brief Get the number of solutions to return for each problem.
+	masala::numeric_api::Size n_solutions_to_store_per_problem() const;
+
+	/// @brief Get the numer of Monte Carlo moves to make in each attempt.
+	masala::numeric_api::Size annealing_steps_per_attempt() const;
 
 public:
 
@@ -185,6 +194,7 @@ private:
 	/// @param replicate_index The index of this replicate for this problem.
 	/// @param problem_index The index of this problem.
 	/// @param annealing_steps The number of steps in the trajectory.
+	/// @param n_solutions_to_store The number of solutions to store.
 	/// @param annealing_schedule The temperature generator (already configured with the number of steps).
 	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
 	/// @param solutions Storage for a collection of solutions.  Should be unique to job.
@@ -193,6 +203,7 @@ private:
 		masala::numeric_api::Size const replicate_index,
 		masala::numeric_api::Size const problem_index,
 		masala::numeric_api::Size const annealing_steps,
+		masala::numeric_api::Size const n_solutions_to_store,
 		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
@@ -255,6 +266,9 @@ private:
 
 	/// @brief The number of times to attempt each problem.
 	masala::numeric_api::Size attempts_per_problem_ = 1;
+
+	/// @brief The number of solutions to store for each problem.
+	masala::numeric_api::Size n_solutions_to_store_per_problem_ = 1;
 
 	/// @brief The number of Monte Carlo steps to make per attempt.
 	masala::numeric_api::Size annealing_steps_per_attempt_ = 100000;

@@ -65,12 +65,15 @@ namespace cost_function_network {
 MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     MonteCarloCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ),
-    cpu_threads_to_request_(src.cpu_threads_to_request_),
-    attempts_per_problem_(src.attempts_per_problem_),
-    annealing_steps_per_attempt_( src.annealing_steps_per_attempt_ ),
-    annealing_schedule_( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() )
+    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
 {
+    std::lock_guard< std::mutex > lock( src.optimizer_mutex_ );
+    cpu_threads_to_request_ = src.cpu_threads_to_request_;
+    attempts_per_problem_ = src.attempts_per_problem_;
+    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
+    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
+    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
+
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_->reset_call_count();
     }
@@ -80,10 +83,14 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 /// @details Needed since we define a mutex.
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
+    std::lock( optimizer_mutex_, src.optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock1( optimizer_mutex_, std::adopt_lock );
+    std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
     attempts_per_problem_ = src.attempts_per_problem_;
     annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
+    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
     annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_->reset_call_count();
@@ -128,12 +135,13 @@ MonteCarloCostFunctionNetworkOptimizer::get_categories() const {
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "stochastic" }
+/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
 std::vector< std::string >
 MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
 	std::vector< std::string > keywords( CostFunctionNetworkOptimizer::get_keywords() );
     keywords.push_back( "monte_carlo" );
+    keywords.push_back( "simulated_annealing" );
     keywords.push_back( "stochastic" );
     return keywords;
 }
@@ -163,6 +171,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
     using namespace masala::base::api::getter;
+    using namespace masala::numeric_api::base_classes::optimization::annealing;
     using masala::numeric_api::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
@@ -179,7 +188,6 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
         );
 
         // Constructors:
-
         api_description->add_constructor(
             masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< MonteCarloCostFunctionNetworkOptimizer > >(
                 class_name(), "Create an instance of this optimizer, and initialize it with default options."
@@ -193,7 +201,6 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
         );
 
         // Setters:
-
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
@@ -209,9 +216,29 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem, this, std::placeholders::_1 )
 			)
 		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"set_n_solutions_to_store_per_problem", "Sets the maximum number of solutions to return for each problem.",
+				"n_solutions_in", "The maximum number solutions to return for each problem.  Minimum 1.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingSchedule const & > > (
+				"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
+				"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"set_annealing_steps_per_attempt", "Sets the length of the Monte Carlo trajectory performed for each attempt of each problem.",
+				"steps_in", "The number of steps in the Monte Carlo trajectory.  Minimum 1.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
-
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
 				"cpu_threads_to_request", "Gets the number of threads to request when running problems in parallel.",
@@ -225,6 +252,20 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				"attempts_per_problem", "Gets the number of times to try each problem.",
 				"attempts_per_problem", "The number of times to try each problem.  Minimum 1.", false, false,
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem, this )
+			)
+		);
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
+				"n_solutions_to_store_per_problem", "Gets the maximum number of solutions that will be returned for each problem.",
+				"n_solutions_to_store_per_problem", "The maximum number of solutions that will be returned for each problem.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::n_solutions_to_store_per_problem, this )
+			)
+		);
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
+				"annealing_steps_per_attempt", "Gets the length of the Monte Carlo trajectory performed for each attempt of each problem.",
+				"steps", "The number of steps in the Monte Carlo trajectory.", false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt, this )
 			)
 		);
 
@@ -257,6 +298,16 @@ MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
     CHECK_OR_THROW_FOR_CLASS( attempts_in > 0, "set_attempts_per_problem", "The number of attempts per problem must be greater than zero." );
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     attempts_per_problem_ = attempts_in;
+}
+
+/// @brief Set the number of solutions to return for each problem.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem(
+    masala::numeric_api::Size const n_solutions_in
+) {
+    CHECK_OR_THROW_FOR_CLASS( n_solutions_in > 0, "set_n_solutions_to_store_per_problem", "The number of solutions to return per problem must be greater than zero." );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    n_solutions_to_store_per_problem_ = n_solutions_in;
 }
 
 /// @brief Set the annealing schedule to use for annealing.
@@ -304,6 +355,20 @@ MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem() const {
     return attempts_per_problem_;
 }
 
+/// @brief Get the number of solutions to return for each problem.
+masala::numeric_api::Size
+MonteCarloCostFunctionNetworkOptimizer::n_solutions_to_store_per_problem() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return n_solutions_to_store_per_problem_;
+}
+
+/// @brief Get the numer of Monte Carlo moves to make in each attempt.
+masala::numeric_api::Size
+MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return annealing_steps_per_attempt_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -345,6 +410,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 /// @param replicate_index The index of this replicate for this problem.
 /// @param problem_index The index of this problem.
 /// @param annealing_steps The number of steps in the trajectory.
+/// @param n_solutions_to_store The number of solutions to store.
 /// @param annealing_schedule The temperature generator (already configured with the number of steps).
 /// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
 /// @param solutions Storage for a collection of solutions.  Should be unique to job.
@@ -353,6 +419,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::Size const replicate_index,
     masala::numeric_api::Size const problem_index,
     masala::numeric_api::Size const annealing_steps,
+    masala::numeric_api::Size const n_solutions_to_store,
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
