@@ -32,6 +32,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
 
@@ -45,10 +46,12 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
+#include <base/managers/random/MasalaRandomNumberGenerator.hh>
 
 // STL headers:
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -353,6 +356,28 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     std::mutex & solutions_mutex,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 ) const {
+    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    using namespace masala::base::managers::random;
+    using masala::numeric_api::Real;
+    using masala::numeric_api::Size;
+
+    // Determine whether the problem has precomputed pairwise structure.  Will be nullptr if this isn't a precomputed problem.
+    PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const * precomputed_problem( dynamic_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const * >( &problem ) );
+
+    /// Selection for the solution:
+    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem.n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
+    Size const n_variable_nodes( n_choices_per_variable_node.size() );
+    std::vector< Size > current_solution( n_variable_nodes ), last_accepted_solution( n_variable_nodes );
+
+    // Get handle to random generator.
+    MasalaRandomNumberGeneratorHandle const randgen( MasalaRandomNumberGenerator::get_instance() );
+
+    // Initialize choices:
+    for( Size i(0); i<n_variable_nodes; ++i ) {
+        current_solution[i] = randgen->uniform_size_distribution( 0, n_choices_per_variable_node[i].second - 1 );
+        last_accepted_solution[i] = current_solution[i];
+    }
+
     // TODO TODO TODO
 }
 
