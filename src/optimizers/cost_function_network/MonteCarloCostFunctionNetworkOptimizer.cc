@@ -406,6 +406,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 #else
     solutions.recompute_all_scores( false );
 #endif
+    solutions.sort_by_score();
 
     // Minimal output.
     write_to_tracer(
