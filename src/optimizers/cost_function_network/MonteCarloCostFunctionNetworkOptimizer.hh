@@ -139,6 +139,9 @@ public:
 	/// @details Cloned on input.
 	void set_annealing_schedule( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in );
 
+	/// @brief Set the numer of Monte Carlo moves to make in each attempt.
+	void set_annealing_steps_per_attempt( masala::numeric_api::Size const steps_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +187,9 @@ private:
 
 	/// @brief The number of times to attempt each problem.
 	masala::numeric_api::Size attempts_per_problem_ = 1;
+
+	/// @brief The number of Monte Carlo steps to make per attempt.
+	masala::numeric_api::Size annealing_steps_per_attempt_ = 100000;
 
 	/// @brief The annealing schedule to use for annealing.
 	masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP annealing_schedule_;

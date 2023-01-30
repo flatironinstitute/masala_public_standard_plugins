@@ -244,8 +244,23 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in
 ) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     annealing_schedule_ = schedule_in.deep_clone();
-    annealing_schedule_->set_total_calls( annealing_steps_per_attempt_ );
+    annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+    annealing_schedule_->reset_call_count();
+}
+
+/// @brief Set the numer of Monte Carlo moves to make in each attempt.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
+    masala::numeric_api::Size const steps_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    annealing_steps_per_attempt_ = steps_in;
+    if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_->set_final_time_index( steps_in );
+        annealing_schedule_->reset_call_count();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
