@@ -36,6 +36,7 @@
 // Numeric API headers:
 #include <numeric_api/types.hh>
 #include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 
 // STL headers:
 #include <mutex>
