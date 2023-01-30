@@ -211,6 +211,32 @@ private:
 		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 	);
 
+	/// @brief Determine whether to add the current solution to the set of solutions stored for this replicate attempt.
+	/// @details We maintain a list of N solutions for each replicate attempt.  If this solution has been encountered before
+	/// and is already in the list, we increment the count for the number of times it has been seen.  If not, and if fewer
+	/// than N solutions have been stored, we append the solution in a CostFunctionNetworkOptimizationSolution container.  If
+	/// the solution has not been seen, N solutions are stored, and this solution is lower-energy than the highest-energy
+	/// solution, we replace the highest-energy solution with this one.
+	/// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
+	/// entry in the vector corresponds to a variable node (in order).
+	/// @param current_absolute_score The absolute score of this solution.
+	/// @param solutions The container of solutions.
+	/// @param n_solutions_to_store The number of solutions to store.
+	/// @param replicate_index The index of this replicate for this problem.
+	/// @param problem_index The index of this problem.
+	/// @param problem The problem description.  A const shared pointer to the problem will be embedded in the solution.
+	static
+	void
+	determine_whether_to_store_solution(
+		std::vector< masala::numeric_api::Size > const & current_solution,
+		masala::numeric_api::Real current_absolute_score,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		masala::numeric_api::Size const n_solutions_to_store,
+		masala::numeric_api::Size const replicate_index,
+		masala::numeric_api::Size const problem_index,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+	);
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
