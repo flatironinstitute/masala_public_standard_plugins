@@ -30,6 +30,8 @@
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
 
 // Base headers:
@@ -39,6 +41,9 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/managers/threads/MasalaThreadedWorkRequest.hh>
+#include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 
 // STL headers:
 #include <vector>
@@ -59,8 +64,14 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 ) :
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ),
     cpu_threads_to_request_(src.cpu_threads_to_request_),
-    attempts_per_problem_(src.attempts_per_problem_)
-{}
+    attempts_per_problem_(src.attempts_per_problem_),
+    annealing_steps_per_attempt_( src.annealing_steps_per_attempt_ ),
+    annealing_schedule_( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() )
+{
+    if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_->reset_call_count();
+    }
+}
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
@@ -69,6 +80,11 @@ MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetwork
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
     attempts_per_problem_ = src.attempts_per_problem_;
+    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
+    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
+    if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_->reset_call_count();
+    }
     return *this;
 }
 
@@ -83,7 +99,9 @@ MonteCarloCostFunctionNetworkOptimizer::deep_clone() const {
 /// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
 void
 MonteCarloCostFunctionNetworkOptimizer::make_independent() {
-    //GNDN
+    if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_ = annealing_schedule_->deep_clone();
+    }
 }
 
 
@@ -293,6 +311,25 @@ masala::numeric_api::auto_generated_api::optimization::cost_function_network::Co
 MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
+    using namespace masala::base::managers::threads;
+    using masala::numeric_api::Size;
+
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+
+    CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "run_cost_function_network_optimizer", "An annealing schedule must be set before calling this function." );
+    annealing_schedule_->reset_call_count();
+
+    // Create work vector.
+    MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
+    work_request.reserve( problems.n_problems() * attempts_per_problem_ );
+    // for( Size i(0), imax(problems.n_problems); i<imax; ++i ) {
+    //     for( Size j(0); j<attempts_per_problem_; ++j ) {
+    //         work_request.add_job(
+    //             std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory, this, TODO TODO TODO )
+    //         );
+    //     }
+    // }
+
     //TODO TODO TODO
     return nullptr; // TODO TODO TODO
 }
