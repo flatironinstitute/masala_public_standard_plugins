@@ -22,6 +22,7 @@
 /// @details This performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to
 /// pick a node at random and change its setting at random, compute the change in overall energy or score, and
 /// accept or reject the move based on the difference in energy and the Metropolis criterion.
+/// @note If the annealing schedule used ramps temperature, this does simulated annealing.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
