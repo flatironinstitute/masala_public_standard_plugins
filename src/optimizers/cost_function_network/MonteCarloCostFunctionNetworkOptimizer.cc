@@ -383,7 +383,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
-        make_mc_move( problem, current_solution, randgen, step_index );
+        make_mc_move( current_solution, n_choices_per_variable_node, randgen );
         Real const deltaE( problem.compute_score_change( current_solution, last_accepted_solution ) );
 
         // Apply the Metropolis criterion to accept or reject the move:
@@ -402,6 +402,28 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         std::to_string( problem_index ) + "."
     );
 }
+
+/// @brief Make a Monte Carlo move.
+/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
+/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
+/// (node index, number of choices).
+/// @param randgen The handle of the Masala random generator.
+void
+MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
+    std::vector< masala::numeric_api::Size > & current_solution,
+    std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
+    masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
+) const {
+    using masala::numeric_api::Real;
+    using masala::numeric_api::Size;
+    Size const index_to_change( randgen->uniform_size_distribution( 0, current_solution.size() - 1 ) );
+    Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[index_to_change].second - 2 ) );
+    if( new_choice >= current_solution[index_to_change] ) {
+        ++new_choice;
+    }
+    current_solution[index_to_change] = new_choice;
+}
+
 
 } // namespace cost_function_network
 } // namespace optimizers

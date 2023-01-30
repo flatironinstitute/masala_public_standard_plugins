@@ -39,6 +39,9 @@
 #include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 
+// Base headers:
+#include <base/managers/random/MasalaRandomNumberGenerator.fwd.hh>
+
 // STL headers:
 #include <mutex>
 
@@ -193,6 +196,18 @@ private:
 		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+	) const;
+
+	/// @brief Make a Monte Carlo move.
+	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
+	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
+	/// (node index, number of choices).
+	/// @param randgen The handle of the Masala random generator.
+	void
+	make_mc_move(
+		std::vector< masala::numeric_api::Size > & current_solution,
+		std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
+		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 	) const;
 
 private:
