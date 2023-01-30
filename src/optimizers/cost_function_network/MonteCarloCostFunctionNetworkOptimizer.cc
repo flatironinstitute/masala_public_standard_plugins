@@ -380,6 +380,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         current_solution[i] = randgen->uniform_size_distribution( 0, n_choices_per_variable_node[i].second - 1 );
         last_accepted_solution[i] = current_solution[i];
     }
+    // Note: these will accumulate numerical errors.
+    Real current_absolute_score( problem.compute_absolute_score( current_solution ) );
+    Real last_accepted_absolute_score( problem.compute_absolute_score( last_accepted_solution ) );
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
@@ -389,11 +392,20 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
             last_accepted_solution = current_solution;
-            determine_whether_to_store_solution( current_solution, last_accepted_solution, deltaE, solutions, replicate_index, problem_index, problem );
+            current_absolute_score += deltaE,
+            last_accepted_absolute_score = current_absolute_score;
+            determine_whether_to_store_solution( current_solution, last_accepted_solution, current_absolute_score, solutions, replicate_index, problem_index, problem );
         } else {
             current_solution = last_accepted_solution;
         }
     }
+
+    // Recompute energies of all solutions to correct numerical error.
+#ifndef NDEBUG
+    solutions.recompute_all_scores( true, 1.0e-3 ); // As a sanity check, make sure numerical errors are small.
+#else
+    solutions.recompute_all_scores( false );
+#endif
 
     // Minimal output.
     write_to_tracer(
