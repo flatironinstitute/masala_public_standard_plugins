@@ -30,6 +30,7 @@
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -235,6 +236,16 @@ MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
     CHECK_OR_THROW_FOR_CLASS( attempts_in > 0, "set_attempts_per_problem", "The number of attempts per problem must be greater than zero." );
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     attempts_per_problem_ = attempts_in;
+}
+
+/// @brief Set the annealing schedule to use for annealing.
+/// @details Cloned on input.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
+    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in
+) {
+    annealing_schedule_ = schedule_in.deep_clone();
+    annealing_schedule_->set_total_calls( annealing_steps_per_attempt_ );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -35,6 +35,7 @@
 
 // Numeric API headers:
 #include <numeric_api/types.hh>
+#include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.fwd.hh>
 
 // STL headers:
 #include <mutex>
@@ -134,6 +135,10 @@ public:
 	/// @details Minimum is 1.
 	void set_attempts_per_problem( masala::numeric_api::Size const attempts_in );
 
+	/// @brief Set the annealing schedule to use for annealing.
+	/// @details Cloned on input.
+	void set_annealing_schedule( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,6 +184,9 @@ private:
 
 	/// @brief The number of times to attempt each problem.
 	masala::numeric_api::Size attempts_per_problem_ = 1;
+
+	/// @brief The annealing schedule to use for annealing.
+	masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP annealing_schedule_;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 
