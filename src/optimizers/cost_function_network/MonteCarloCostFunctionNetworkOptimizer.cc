@@ -32,7 +32,6 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
 
@@ -343,26 +342,30 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run a single Monte Carlo trajectory.
+/// @param replicate_index The index of this replicate for this problem.
+/// @param problem_index The index of this problem.
 /// @param annealing_steps The number of steps in the trajectory.
 /// @param annealing_schedule The temperature generator (already configured with the number of steps).
 /// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-/// @param solutions_mutex A mutex for accessing the solutions collection.
-/// @param solutions Shared storage for a collection of solutions.  The mutex must be locked for access.
+/// @param solutions Storage for a collection of solutions.  Should be unique to job.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
+    masala::numeric_api::Size const replicate_index,
+    masala::numeric_api::Size const problem_index,
     masala::numeric_api::Size const annealing_steps,
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
-    std::mutex & solutions_mutex,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    using namespace masala::numeric_api::base_classes::optimization::annealing;
     using namespace masala::base::managers::random;
     using masala::numeric_api::Real;
     using masala::numeric_api::Size;
 
-    // Determine whether the problem has precomputed pairwise structure.  Will be nullptr if this isn't a precomputed problem.
-    PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const * precomputed_problem( dynamic_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const * >( &problem ) );
+    // Make a copy of the annealing schedule.
+    AnnealingScheduleSP annealing_schedule_copy( annealing_schedule.deep_clone() );
+    annealing_schedule_copy->reset_call_count();
 
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem.n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
@@ -372,13 +375,32 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     // Get handle to random generator.
     MasalaRandomNumberGeneratorHandle const randgen( MasalaRandomNumberGenerator::get_instance() );
 
-    // Initialize choices:
+    // Initialize choices randomly:
     for( Size i(0); i<n_variable_nodes; ++i ) {
         current_solution[i] = randgen->uniform_size_distribution( 0, n_choices_per_variable_node[i].second - 1 );
         last_accepted_solution[i] = current_solution[i];
     }
 
-    // TODO TODO TODO
+    // Main loop over all steps of the annealing trajectory.
+    for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
+        make_mc_move( problem, current_solution, randgen, step_index );
+        Real const deltaE( problem.compute_score_change( current_solution, last_accepted_solution ) );
+
+        // Apply the Metropolis criterion to accept or reject the move:
+        if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
+            copy_solution( current_solution, last_accepted_solution );
+            determine_whether_to_store_solution( current_solution, last_accepted_solution, deltaE, solutions, replicate_index, problem_index, problem );
+        } else {
+            copy_solution( last_accepted_solution, current_solution );
+        }
+    }
+
+    // Minimal output.
+    write_to_tracer(
+        "Completed replicate " + std::to_string( replicate_index ) +
+        " of cost function network optimization problem " +
+        std::to_string( problem_index ) + "."
+    );
 }
 
 } // namespace cost_function_network

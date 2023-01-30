@@ -179,17 +179,19 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Run a single Monte Carlo trajectory.
+	/// @param replicate_index The index of this replicate for this problem.
+	/// @param problem_index The index of this problem.
 	/// @param annealing_steps The number of steps in the trajectory.
 	/// @param annealing_schedule The temperature generator (already configured with the number of steps).
 	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-	/// @param solutions_mutex A mutex for accessing the solutions collection.
-	/// @param solutions Shared storage for a collection of solutions.  The mutex must be locked for access.
+	/// @param solutions Storage for a collection of solutions.  Should be unique to job.
 	void
 	run_mc_trajectory(
+		masala::numeric_api::Size const replicate_index,
+		masala::numeric_api::Size const problem_index,
 		masala::numeric_api::Size const annealing_steps,
 		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
-		std::mutex & solutions_mutex,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 	) const;
 
