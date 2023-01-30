@@ -334,6 +334,27 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     return nullptr; // TODO TODO TODO
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Run a single Monte Carlo trajectory.
+/// @param annealing_steps The number of steps in the trajectory.
+/// @param annealing_schedule The temperature generator (already configured with the number of steps).
+/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
+/// @param solutions_mutex A mutex for accessing the solutions collection.
+/// @param solutions Shared storage for a collection of solutions.  The mutex must be locked for access.
+void
+MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
+    masala::numeric_api::Size const annealing_steps,
+    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
+    std::mutex & solutions_mutex,
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+) const {
+    // TODO TODO TODO
+}
+
 } // namespace cost_function_network
 } // namespace optimizers
 } // namesapce standard_masala_plugins
