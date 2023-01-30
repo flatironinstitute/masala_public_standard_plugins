@@ -194,7 +194,7 @@ private:
 		masala::numeric_api::Size const problem_index,
 		masala::numeric_api::Size const annealing_steps,
 		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 	) const;
 
@@ -234,7 +234,7 @@ private:
 		masala::numeric_api::Size const n_solutions_to_store,
 		masala::numeric_api::Size const replicate_index,
 		masala::numeric_api::Size const problem_index,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
 	);
 
 private:

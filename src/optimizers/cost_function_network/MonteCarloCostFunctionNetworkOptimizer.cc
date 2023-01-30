@@ -354,7 +354,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::Size const problem_index,
     masala::numeric_api::Size const annealing_steps,
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -368,7 +368,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     annealing_schedule_copy->reset_call_count();
 
     /// Selection for the solution:
-    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem.n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
+    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
     std::vector< Size > current_solution( n_variable_nodes ), last_accepted_solution( n_variable_nodes );
 
@@ -381,13 +381,13 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
-    Real current_absolute_score( problem.compute_absolute_score( current_solution ) );
-    Real last_accepted_absolute_score( problem.compute_absolute_score( last_accepted_solution ) );
+    Real current_absolute_score( problem->compute_absolute_score( current_solution ) );
+    Real last_accepted_absolute_score( problem->compute_absolute_score( last_accepted_solution ) );
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         make_mc_move( current_solution, n_choices_per_variable_node, randgen );
-        Real const deltaE( problem.compute_score_change( current_solution, last_accepted_solution ) );
+        Real const deltaE( problem->compute_score_change( current_solution, last_accepted_solution ) );
 
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
@@ -461,7 +461,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     masala::numeric_api::Size const n_solutions_to_store,
     masala::numeric_api::Size const replicate_index,
     masala::numeric_api::Size const problem_index,
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
 ) {
     //TODO TODO TODO
 }
