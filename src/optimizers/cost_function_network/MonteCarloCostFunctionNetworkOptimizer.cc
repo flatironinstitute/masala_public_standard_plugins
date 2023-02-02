@@ -420,7 +420,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Size;
 
     // Make a copy of the annealing schedule.
-    AnnealingScheduleBaseSP annealing_schedule_copy( annealing_schedule.deep_clone() );
+    AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
 
     /// Selection for the solution:
