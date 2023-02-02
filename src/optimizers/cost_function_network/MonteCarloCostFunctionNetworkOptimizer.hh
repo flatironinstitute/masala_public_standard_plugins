@@ -35,8 +35,8 @@
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
-#include <numeric_api/types.hh>
-#include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.fwd.hh>
+#include <base/types.hh>
+#include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 
 // Base headers:
@@ -135,21 +135,21 @@ public:
 
 	/// @brief Set the number of threads to request.
 	/// @details The default setting of 0 means "request all available".
-	void set_cpu_threads_to_request( masala::numeric_api::Size const threads_in );
+	void set_cpu_threads_to_request( masala::base::Size const threads_in );
 
 	/// @brief Set the number of times to try each problem.
 	/// @details Minimum is 1.
-	void set_attempts_per_problem( masala::numeric_api::Size const attempts_in );
+	void set_attempts_per_problem( masala::base::Size const attempts_in );
 
 	/// @brief Set the number of solutions to return for each problem.
-	void set_n_solutions_to_store_per_problem( masala::numeric_api::Size const n_solutions_in );
+	void set_n_solutions_to_store_per_problem( masala::base::Size const n_solutions_in );
 
 	/// @brief Set the annealing schedule to use for annealing.
 	/// @details Cloned on input.
 	void set_annealing_schedule( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in );
 
 	/// @brief Set the numer of Monte Carlo moves to make in each attempt.
-	void set_annealing_steps_per_attempt( masala::numeric_api::Size const steps_in );
+	void set_annealing_steps_per_attempt( masala::base::Size const steps_in );
 
 public:
 
@@ -159,17 +159,17 @@ public:
 
 	/// @brief Get the number of threads to request.
 	/// @details The default setting of 0 means "request all available".
-	masala::numeric_api::Size cpu_threads_to_request() const;
+	masala::base::Size cpu_threads_to_request() const;
 
 	/// @brief Get the number of times to try each problem.
 	/// @details Minimum is 1.
-	masala::numeric_api::Size attempts_per_problem() const;
+	masala::base::Size attempts_per_problem() const;
 
 	/// @brief Get the number of solutions to return for each problem.
-	masala::numeric_api::Size n_solutions_to_store_per_problem() const;
+	masala::base::Size n_solutions_to_store_per_problem() const;
 
 	/// @brief Get the numer of Monte Carlo moves to make in each attempt.
-	masala::numeric_api::Size annealing_steps_per_attempt() const;
+	masala::base::Size annealing_steps_per_attempt() const;
 
 public:
 
@@ -200,10 +200,10 @@ private:
 	/// @param solutions Storage for a collection of solutions.  Should be unique to job.
 	void
 	run_mc_trajectory(
-		masala::numeric_api::Size const replicate_index,
-		masala::numeric_api::Size const problem_index,
-		masala::numeric_api::Size const annealing_steps,
-		masala::numeric_api::Size const n_solutions_to_store,
+		masala::base::Size const replicate_index,
+		masala::base::Size const problem_index,
+		masala::base::Size const annealing_steps,
+		masala::base::Size const n_solutions_to_store,
 		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
@@ -217,8 +217,8 @@ private:
 	static
 	void
 	make_mc_move(
-		std::vector< masala::numeric_api::Size > & current_solution,
-		std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
+		std::vector< masala::base::Size > & current_solution,
+		std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
 		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 	);
 
@@ -239,12 +239,12 @@ private:
 	static
 	void
 	determine_whether_to_store_solution(
-		std::vector< masala::numeric_api::Size > const & current_solution,
-		masala::numeric_api::Real current_absolute_score,
+		std::vector< masala::base::Size > const & current_solution,
+		masala::base::Real current_absolute_score,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-		masala::numeric_api::Size const n_solutions_to_store,
-		masala::numeric_api::Size const replicate_index,
-		masala::numeric_api::Size const problem_index,
+		masala::base::Size const n_solutions_to_store,
+		masala::base::Size const replicate_index,
+		masala::base::Size const problem_index,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
 	);
 
@@ -262,16 +262,16 @@ private:
 
 	/// @brief The maximum number of CPU threads to request for parallel execution.
 	/// @details The default of 0 means "all available".
-	masala::numeric_api::Size cpu_threads_to_request_ = 0;
+	masala::base::Size cpu_threads_to_request_ = 0;
 
 	/// @brief The number of times to attempt each problem.
-	masala::numeric_api::Size attempts_per_problem_ = 1;
+	masala::base::Size attempts_per_problem_ = 1;
 
 	/// @brief The number of solutions to store for each problem.
-	masala::numeric_api::Size n_solutions_to_store_per_problem_ = 1;
+	masala::base::Size n_solutions_to_store_per_problem_ = 1;
 
 	/// @brief The number of Monte Carlo steps to make per attempt.
-	masala::numeric_api::Size annealing_steps_per_attempt_ = 100000;
+	masala::base::Size annealing_steps_per_attempt_ = 100000;
 
 	/// @brief The annealing schedule to use for annealing.
 	masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP annealing_schedule_;

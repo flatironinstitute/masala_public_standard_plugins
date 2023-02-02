@@ -166,7 +166,7 @@ ConstantAnnealingSchedule::get_api_definition() {
             )
         );
         api_definition->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::numeric_api::Real > >(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature", "Set the temperature, in kcal/mol.  Default is 0.62.",
                 "temperature_in", "The temperature to set, in kcal/mol.",
                 false, false, std::bind( &ConstantAnnealingSchedule::set_temperature, this, std::placeholders::_1 )
@@ -175,14 +175,14 @@ ConstantAnnealingSchedule::get_api_definition() {
 
         // Getters
         api_definition->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::numeric_api::Size > >(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
                 "get_call_count", "Get the current call count.",
                 "call_count", "The number of times the temperature() function has been called.",
                 false, false, std::bind( &ConstantAnnealingSchedule::get_call_count, this )
             )
         );
         api_definition->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::numeric_api::Real > >(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Real > >(
                 "get_temperature", "Get the temperature, in kcal/mol.  Default is 0.62.",
                 "temperature", "The temperature, in kcal/mol.",
                 false, false, std::bind( &ConstantAnnealingSchedule::get_temperature, this )
@@ -191,15 +191,15 @@ ConstantAnnealingSchedule::get_api_definition() {
 
         // Work functions
         api_definition->add_work_function(
-            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric_api::Real > >(
+            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::base::Real > >(
                 "temperature", "Get the temperature at the current timepoint, and increment the timepoint counter.  In this "
                 "case, the same value is returned every time.", true, false, true, false, "temperature",
                 "The temperature at the current timepoint (the constant temperature value).",
-                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)() const>( &ConstantAnnealingSchedule::temperature ), this )
+                std::bind( static_cast<masala::base::Real(ConstantAnnealingSchedule::*)() const>( &ConstantAnnealingSchedule::temperature ), this )
             )
         );
         api_definition->add_work_function(
-            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< masala::numeric_api::Real, masala::numeric_api::Size > >(
+            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< masala::base::Real, masala::base::Size > >(
                 "temperature", "Get the temperature at the given timepoint.  In this "
                 "case, the same value is returned every time.  This does not increment the "
                 "timepoint counter.",
@@ -207,7 +207,7 @@ ConstantAnnealingSchedule::get_api_definition() {
                 "time_index", "The timepoint at which we are getting temperature.",
                 "temperature",
                 "The temperature at the current timepoint (the constant temperature value).",
-                std::bind( static_cast<masala::numeric_api::Real(ConstantAnnealingSchedule::*)( masala::numeric_api::Size const ) const>( &ConstantAnnealingSchedule::temperature ), this, std::placeholders::_1 )
+                std::bind( static_cast<masala::base::Real(ConstantAnnealingSchedule::*)( masala::base::Size const ) const>( &ConstantAnnealingSchedule::temperature ), this, std::placeholders::_1 )
             )
         );
 
@@ -221,16 +221,16 @@ ConstantAnnealingSchedule::get_api_definition() {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Return temperature.
-masala::numeric_api::Real
+masala::base::Real
 ConstantAnnealingSchedule::temperature() const {
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
     return temperature_;
 }
 
 /// @brief Return temperature for the Nth timepoint.
-masala::numeric_api::Real
+masala::base::Real
 ConstantAnnealingSchedule::temperature(
-    masala::numeric_api::Size const
+    masala::base::Size const
 ) const {
     return temperature_;
 }
@@ -251,7 +251,7 @@ ConstantAnnealingSchedule::reset() {
 /// @details In kcal/mol.  Must be positive.
 void
 ConstantAnnealingSchedule::set_temperature(
-    masala::numeric_api::Real const temperature_in
+    masala::base::Real const temperature_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature", "The temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
@@ -262,7 +262,7 @@ ConstantAnnealingSchedule::set_temperature(
 /// @details For the constant annealing schedule, this does nothing.
 void
 ConstantAnnealingSchedule::set_final_time_index(
-    masala::numeric_api::Size const
+    masala::base::Size const
 ) {
     //GNDN
 }
@@ -272,14 +272,14 @@ ConstantAnnealingSchedule::set_final_time_index(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Get the call count.
-masala::numeric_api::Size
+masala::base::Size
 ConstantAnnealingSchedule::get_call_count() const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return call_count();
 }
 
 /// @brief Get the temperature.
-masala::numeric_api::Real
+masala::base::Real
 ConstantAnnealingSchedule::get_temperature() const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return temperature_;

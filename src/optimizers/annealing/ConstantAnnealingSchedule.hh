@@ -104,13 +104,13 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Return temperature.
-	masala::numeric_api::Real
+	masala::base::Real
 	temperature() const override;
 
 	/// @brief Return temperature for the Nth timepoint.
-	masala::numeric_api::Real
+	masala::base::Real
 	temperature(
-		masala::numeric_api::Size const time_index
+		masala::base::Size const time_index
 	) const override;
 
 public:
@@ -124,13 +124,13 @@ public:
 
 	/// @brief Set the temperature.
 	/// @details In kcal/mol.  Must be positive.
-	void set_temperature( masala::numeric_api::Real const temperature_in );
+	void set_temperature( masala::base::Real const temperature_in );
 
 	/// @brief Set the index of the expected final timepoint.
 	/// @details For the constant annealing schedule, this does nothing.
 	void
 	set_final_time_index(
-		masala::numeric_api::Size const final_time_index_in
+		masala::base::Size const final_time_index_in
 	) override;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,10 +138,10 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Get the call count.
-	masala::numeric_api::Size get_call_count() const;
+	masala::base::Size get_call_count() const;
 
 	/// @brief Get the temperature.
-	masala::numeric_api::Real get_temperature() const;
+	masala::base::Real get_temperature() const;
 
 private:
 
@@ -151,7 +151,7 @@ private:
 
 	/// @brief The temperature.
 	/// @details In units of kcal/mol.  Defaults to 0.62.
-	masala::numeric_api::Real temperature_ = 0.62;
+	masala::base::Real temperature_ = 0.62;
 
 }; // class ConstantAnnealingSchedule
 

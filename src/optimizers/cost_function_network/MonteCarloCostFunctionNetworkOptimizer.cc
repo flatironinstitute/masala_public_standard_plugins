@@ -33,7 +33,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
-#include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
+#include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -172,7 +172,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::base::api::setter;
     using namespace masala::base::api::getter;
     using namespace masala::numeric_api::base_classes::optimization::annealing;
-    using masala::numeric_api::Size;
+    using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     if( api_description_ == nullptr ) {
@@ -283,7 +283,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 /// @details The default setting of 0 means "request all available".
 void
 MonteCarloCostFunctionNetworkOptimizer::set_cpu_threads_to_request(
-    masala::numeric_api::Size const threads_in
+    masala::base::Size const threads_in
 ) {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     cpu_threads_to_request_ = threads_in;
@@ -293,7 +293,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_cpu_threads_to_request(
 /// @details Minimum is 1.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
-    masala::numeric_api::Size const attempts_in
+    masala::base::Size const attempts_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( attempts_in > 0, "set_attempts_per_problem", "The number of attempts per problem must be greater than zero." );
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
@@ -303,7 +303,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
 /// @brief Set the number of solutions to return for each problem.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem(
-    masala::numeric_api::Size const n_solutions_in
+    masala::base::Size const n_solutions_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( n_solutions_in > 0, "set_n_solutions_to_store_per_problem", "The number of solutions to return per problem must be greater than zero." );
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
@@ -325,7 +325,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
 /// @brief Set the numer of Monte Carlo moves to make in each attempt.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
-    masala::numeric_api::Size const steps_in
+    masala::base::Size const steps_in
 ) {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     annealing_steps_per_attempt_ = steps_in;
@@ -341,7 +341,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
 
 /// @brief Get the number of threads to request.
 /// @details The default setting of 0 means "request all available".
-masala::numeric_api::Size
+masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return cpu_threads_to_request_;
@@ -349,21 +349,21 @@ MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
 
 /// @brief Get the number of times to try each problem.
 /// @details Minimum is 1.
-masala::numeric_api::Size
+masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return attempts_per_problem_;
 }
 
 /// @brief Get the number of solutions to return for each problem.
-masala::numeric_api::Size
+masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::n_solutions_to_store_per_problem() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return n_solutions_to_store_per_problem_;
 }
 
 /// @brief Get the numer of Monte Carlo moves to make in each attempt.
-masala::numeric_api::Size
+masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return annealing_steps_per_attempt_;
@@ -380,7 +380,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
     using namespace masala::base::managers::threads;
-    using masala::numeric_api::Size;
+    using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 
@@ -416,10 +416,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 /// @param solutions Storage for a collection of solutions.  Should be unique to job.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
-    masala::numeric_api::Size const replicate_index,
-    masala::numeric_api::Size const problem_index,
-    masala::numeric_api::Size const annealing_steps,
-    masala::numeric_api::Size const n_solutions_to_store,
+    masala::base::Size const replicate_index,
+    masala::base::Size const problem_index,
+    masala::base::Size const annealing_steps,
+    masala::base::Size const n_solutions_to_store,
     masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
@@ -427,8 +427,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::numeric_api::base_classes::optimization::annealing;
     using namespace masala::base::managers::random;
-    using masala::numeric_api::Real;
-    using masala::numeric_api::Size;
+    using masala::base::Real;
+    using masala::base::Size;
 
     // Make a copy of the annealing schedule.
     AnnealingScheduleSP annealing_schedule_copy( annealing_schedule.deep_clone() );
@@ -491,12 +491,12 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 /*static*/
 void
 MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
-    std::vector< masala::numeric_api::Size > & current_solution,
-    std::vector< std::pair< masala::numeric_api::Size, masala::numeric_api::Size > > const & n_choices_per_variable_node,
+    std::vector< masala::base::Size > & current_solution,
+    std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
     masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 ) {
-    using masala::numeric_api::Real;
-    using masala::numeric_api::Size;
+    using masala::base::Real;
+    using masala::base::Size;
     Size const index_to_change( randgen->uniform_size_distribution( 0, current_solution.size() - 1 ) );
     Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[index_to_change].second - 2 ) );
     if( new_choice >= current_solution[index_to_change] ) {
@@ -522,12 +522,12 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 /*static*/
 void
 MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
-    std::vector< masala::numeric_api::Size > const & current_solution,
-    masala::numeric_api::Real current_absolute_score,
+    std::vector< masala::base::Size > const & current_solution,
+    masala::base::Real current_absolute_score,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-    masala::numeric_api::Size const n_solutions_to_store,
-    masala::numeric_api::Size const replicate_index,
-    masala::numeric_api::Size const problem_index,
+    masala::base::Size const n_solutions_to_store,
+    masala::base::Size const replicate_index,
+    masala::base::Size const problem_index,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
 ) {
     //TODO TODO TODO
