@@ -38,8 +38,7 @@
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
-#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
-#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
@@ -188,17 +187,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
         );
 
         // Constructors:
-        api_description->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< MonteCarloCostFunctionNetworkOptimizer > >(
-                class_name(), "Create an instance of this optimizer, and initialize it with default options."
-            )
-        );
-        api_description->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< MonteCarloCostFunctionNetworkOptimizer, MonteCarloCostFunctionNetworkOptimizer const & > >(
-                class_name(), "Copy constructor.",
-                "src", "The optimizer to copy.  Not changed by this operation."
-            )
-        );
+        ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( MonteCarloCostFunctionNetworkOptimizer, api_description );
 
         // Setters:
 		api_description->add_setter(
