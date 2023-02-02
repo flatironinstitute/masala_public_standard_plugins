@@ -69,7 +69,7 @@ public:
 	void make_independent() override;
 
 	/// @brief Make an independent copy of this object.
-	masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingScheduleSP deep_clone() const override;
+	masala::numeric::optimization::annealing::AnnealingScheduleBaseSP deep_clone() const override;
 
 public:
 

@@ -146,7 +146,7 @@ public:
 
 	/// @brief Set the annealing schedule to use for annealing.
 	/// @details Cloned on input.
-	void set_annealing_schedule( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in );
+	void set_annealing_schedule( masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in );
 
 	/// @brief Set the numer of Monte Carlo moves to make in each attempt.
 	void set_annealing_steps_per_attempt( masala::base::Size const steps_in );
@@ -204,7 +204,7 @@ private:
 		masala::base::Size const problem_index,
 		masala::base::Size const annealing_steps,
 		masala::base::Size const n_solutions_to_store,
-		masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
+		masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 	) const;
@@ -274,7 +274,7 @@ private:
 	masala::base::Size annealing_steps_per_attempt_ = 100000;
 
 	/// @brief The annealing schedule to use for annealing.
-	masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP annealing_schedule_;
+	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

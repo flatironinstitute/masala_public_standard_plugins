@@ -171,7 +171,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
     using namespace masala::base::api::getter;
-    using namespace masala::numeric_api::base_classes::optimization::annealing;
+    using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
@@ -224,7 +224,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingSchedule const & > > (
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
 				"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
 				"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
@@ -314,7 +314,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem(
 /// @details Cloned on input.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & schedule_in
+    masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in
 ) {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     annealing_schedule_ = schedule_in.deep_clone();
@@ -420,18 +420,18 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::base::Size const problem_index,
     masala::base::Size const annealing_steps,
     masala::base::Size const n_solutions_to_store,
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule const & annealing_schedule,
+    masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-    using namespace masala::numeric_api::base_classes::optimization::annealing;
+    using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using namespace masala::base::managers::random;
     using masala::base::Real;
     using masala::base::Size;
 
     // Make a copy of the annealing schedule.
-    AnnealingScheduleSP annealing_schedule_copy( annealing_schedule.deep_clone() );
+    AnnealingScheduleBaseSP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
 
     /// Selection for the solution:

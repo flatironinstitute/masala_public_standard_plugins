@@ -81,7 +81,7 @@ ConstantAnnealingSchedule::make_independent() {
 }
 
 /// @brief Make an independent copy of this object.
-ConstantAnnealingScheduleSP
+masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
 ConstantAnnealingSchedule::deep_clone() const {
     ConstantAnnealingScheduleSP object_copy( std::static_pointer_cast<ConstantAnnealingSchedule>(clone()) );
     object_copy->make_independent();
