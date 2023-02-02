@@ -140,9 +140,6 @@ public:
 	/// @brief Get the call count.
 	masala::base::Size get_call_count() const;
 
-	/// @brief Get the temperature.
-	masala::base::Real get_temperature() const;
-
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

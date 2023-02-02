@@ -21,7 +21,7 @@
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Core headers
-#include <core_api/types.hh>
+#include <base/types.hh>
 
 // Registration header
 #include <optimizers/api/generate_api_classes.hh>
