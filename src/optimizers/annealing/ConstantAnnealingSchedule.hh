@@ -28,7 +28,7 @@
 #include <optimizers/annealing/ConstantAnnealingSchedule.fwd.hh>
 
 // Parent class:
-#include <numeric_api/base_classes/optimization/annealing/AnnealingSchedule.hh>
+#include <numeric_api/base_classes/optimization/annealing/PluginAnnealingSchedule.hh>
 
 // STL headers
 #include <mutex>
@@ -40,7 +40,7 @@ namespace annealing {
 /// @brief An annealing schedule that does not vary with time.
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class ConstantAnnealingSchedule : public masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule {
+class ConstantAnnealingSchedule : public masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule {
 
 public:
 
@@ -61,7 +61,7 @@ public:
 	virtual ~ConstantAnnealingSchedule() = default;
 
 	/// @brief Make a copy of this object.
-	masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP
+	masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
 	clone() const override;
 
 	/// @brief Make this object wholly independent.
@@ -69,7 +69,7 @@ public:
 	void make_independent() override;
 
 	/// @brief Make an independent copy of this object.
-	ConstantAnnealingScheduleSP deep_clone() const;
+	masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingScheduleSP deep_clone() const override;
 
 public:
 
@@ -149,15 +149,9 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Mutex for locking the derived class data.
-	mutable std::mutex constant_annealing_schedule_mutex_;
-
 	/// @brief The temperature.
 	/// @details In units of kcal/mol.  Defaults to 0.62.
 	masala::numeric_api::Real temperature_ = 0.62;
-
-	/// @brief The API definition (not copied).
-	masala::base::api::MasalaObjectAPIDefinitionCSP api_definition_;
 
 }; // class ConstantAnnealingSchedule
 

@@ -48,9 +48,9 @@ namespace annealing {
 ConstantAnnealingSchedule::ConstantAnnealingSchedule(
     ConstantAnnealingSchedule const & src
 ) :
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule( src )
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
 {
-    std::lock_guard< std::mutex > lock( src.constant_annealing_schedule_mutex_ );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     temperature_ = src.temperature_;
 }
 
@@ -59,16 +59,16 @@ ConstantAnnealingSchedule &
 ConstantAnnealingSchedule::operator=(
     ConstantAnnealingSchedule const & src
 ) {
-    std::lock( constant_annealing_schedule_mutex_, src.constant_annealing_schedule_mutex_ );
-    std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_, std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.constant_annealing_schedule_mutex_, std::adopt_lock );
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::operator=( src );
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=( src );
+    std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
     temperature_ = src.temperature_;
     return *this;
 }
 
 /// @brief Make a copy of this object.
-masala::numeric_api::base_classes::optimization::annealing::AnnealingScheduleSP
+masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
 ConstantAnnealingSchedule::clone() const {
     return masala::make_shared< ConstantAnnealingSchedule >(*this);
 }
@@ -77,7 +77,7 @@ ConstantAnnealingSchedule::clone() const {
 /// @details Should be overridden for derived classes.
 void
 ConstantAnnealingSchedule::make_independent() {
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::make_independent();
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::make_independent();
 }
 
 /// @brief Make an independent copy of this object.
@@ -96,14 +96,14 @@ ConstantAnnealingSchedule::deep_clone() const {
 /// @details The base class implementation returns { { "AnnealingSchedule" } }
 std::vector< std::vector< std::string > >
 ConstantAnnealingSchedule::get_categories() const {
-    return masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::get_categories();
+    return masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::get_categories();
 }
 
 /// @brief Get the ahierarchical keywords for this plugin class.
 /// @details The base class implementation returns { "annealing_schedule", "constant", "time_independent" }
 std::vector< std::string >
 ConstantAnnealingSchedule::get_keywords() const {
-    std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::get_keywords() );
+    std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::get_keywords() );
     outvec.push_back( "constant" );
     outvec.push_back( "time_independent" );
     return outvec;
@@ -130,12 +130,12 @@ ConstantAnnealingSchedule::get_api_definition() {
     using namespace masala::base::api::getter;
     using namespace masala::base::api::work_function;
 
-    std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_ );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
 
-    if( api_definition_ == nullptr ) {
+    if( api_definition() == nullptr ) {
         MasalaObjectAPIDefinitionSP api_definition(
             masala::make_shared< MasalaObjectAPIDefinition >(
-                *this, "An annealing schedule that does not vary with time.", false
+                *this, "An annealing schedule that does not vary with time.", false, false
             )
         );
 
@@ -211,9 +211,9 @@ ConstantAnnealingSchedule::get_api_definition() {
             )
         );
 
-        api_definition_ = api_definition;
+        api_definition() = api_definition;
     }
-    return api_definition_;
+    return api_definition();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ ConstantAnnealingSchedule::get_api_definition() {
 /// @brief Return temperature.
 masala::numeric_api::Real
 ConstantAnnealingSchedule::temperature() const {
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::increment_call_count();
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
     return temperature_;
 }
 
@@ -242,9 +242,9 @@ ConstantAnnealingSchedule::temperature(
 /// @brief Reset this object.
 void
 ConstantAnnealingSchedule::reset() {
-    std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_ );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     temperature_ = 0.62;
-    masala::numeric_api::base_classes::optimization::annealing::AnnealingSchedule::reset_call_count();
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
 }
 
 /// @brief Set the temperature.
@@ -254,7 +254,7 @@ ConstantAnnealingSchedule::set_temperature(
     masala::numeric_api::Real const temperature_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature", "The temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
-    std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_ );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     temperature_ = temperature_in;
 }
 
@@ -274,13 +274,14 @@ ConstantAnnealingSchedule::set_final_time_index(
 /// @brief Get the call count.
 masala::numeric_api::Size
 ConstantAnnealingSchedule::get_call_count() const {
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return call_count();
 }
 
 /// @brief Get the temperature.
 masala::numeric_api::Real
 ConstantAnnealingSchedule::get_temperature() const {
-    std::lock_guard< std::mutex > lock( constant_annealing_schedule_mutex_ );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return temperature_;
 }
 
