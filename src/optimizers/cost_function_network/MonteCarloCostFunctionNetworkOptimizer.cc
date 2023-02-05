@@ -528,10 +528,9 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     bool first(true);
     Real highestE(0.0);
     Size highestE_index(0);
-    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {
-        CostFunctionNetworkOptimizationSolution_API & solution( solutions.solution(i) );    
-        if( solution == current_solution ) {
-            solution.increment_times_produced();
+    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {  
+        if( solutions.solution(i) == current_solution ) {
+            solutions.increment_times_solution_was_produced(i);
             return;
         }
         if( first || solution.solution_score() > highestE ) {
