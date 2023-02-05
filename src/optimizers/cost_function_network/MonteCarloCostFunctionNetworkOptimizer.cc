@@ -519,7 +519,42 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     masala::base::Size const problem_index,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
 ) {
-    TODO TODO TODO
+    using masala::base::Size;
+    using masala::base::Real;
+    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+    // If the solution has already been seen, increment the number of times we have seen it.
+    // Simultaneously, find the highest score solution that we have stored.
+    bool first(true);
+    Real highestE(0.0);
+    Size highestE_index(0);
+    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {
+        CostFunctionNetworkOptimizationSolution_API & solution( solutions.solution(i) );    
+        if( solution == current_solution ) {
+            solution.increment_times_produced();
+            return;
+        }
+        if( first || solution.solution_score() > highestE ) {
+            first = false;
+            highestE = solution.solution_score();
+            highestE_index = i;
+        }
+    }
+
+    // If we reach here, we've not yet seen this solution.  If we're supposed to store more solutions
+    // than we are currently storing, store this one.
+    if( solutions.n_solutions() < n_solutions_to_store ) {
+        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) );
+        return;
+    }
+
+    // If we reach here, we have a full solution vector.  We only store this solution (and kick out the highest-energy solution)
+    // if this solution is lower energy than the highest energy.
+    if( current_absolute_score < highestE ) {
+        solutions.remove_solution( highestE_index );
+        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) );
+    }
+
 }
 
 
