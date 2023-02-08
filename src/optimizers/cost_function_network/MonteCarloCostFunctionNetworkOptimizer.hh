@@ -178,8 +178,9 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
-	/// @details Must be implemented by derived classes.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
+	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
+	/// the problem with the same index.
+	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
 	run_cost_function_network_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 	) const override;
@@ -199,7 +200,6 @@ private:
 	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
 	/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
 	/// @param solutions_mutex A mutex for the collection of solutions.
-	static
 	void
 	run_mc_trajectory(
 		masala::base::Size const replicate_index,
@@ -210,7 +210,7 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
 		std::mutex & solutions_mutex
-	);
+	) const;
 
 	/// @brief Make a Monte Carlo move.
 	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.

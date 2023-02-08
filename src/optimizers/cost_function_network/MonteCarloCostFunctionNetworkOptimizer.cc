@@ -363,8 +363,9 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
-/// @details Must be implemented by derived classes.
-masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
+/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
+/// the problem with the same index.
+std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
 MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
@@ -402,7 +403,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 #endif
         for( Size j(0); j<attempts_per_problem_; ++j ) {
             work_request.add_job(
-                std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory, this,
                     j, // replicate index
                     i, // problem index
                     annealing_steps_per_attempt_, // Steps in the MC search.
@@ -420,8 +421,13 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_request ) );
     threading_summary.write_summary_to_tracer();
 
-    //TODO TODO TODO
-    return nullptr; // TODO TODO TODO
+    // Nonconst to const requires a silly extra step:
+    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( nproblems );
+    for( Size i(0); i<nproblems; ++i ) {
+        const_solutions_by_problem[i] = solutions_by_problem[i];
+    }
+
+    return const_solutions_by_problem;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -447,7 +453,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
     std::mutex & solutions_mutex
-) {
+) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using namespace masala::base::managers::random;
@@ -505,11 +511,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     } // End mutex lock scope.
 
     // Minimal output.
-    // write_to_tracer(
-    //     "Completed replicate " + std::to_string( replicate_index ) +
-    //     " of cost function network optimization problem " +
-    //     std::to_string( problem_index ) + "."
-    // );
+    write_to_tracer(
+        "Completed replicate " + std::to_string( replicate_index ) +
+        " of cost function network optimization problem " +
+        std::to_string( problem_index ) + "."
+    );
 }
 
 /// @brief Make a Monte Carlo move.
