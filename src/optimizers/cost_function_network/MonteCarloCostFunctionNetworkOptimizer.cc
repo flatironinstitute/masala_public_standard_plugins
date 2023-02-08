@@ -551,7 +551,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     // If we reach here, we have a full solution vector.  We only store this solution (and kick out the highest-energy solution)
     // if this solution is lower energy than the highest energy.
     if( current_absolute_score < highestE ) {
-        solutions.remove_solution( highestE_index );
+        solutions.remove_optimization_solution( highestE_index );
         solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) );
     }
 
