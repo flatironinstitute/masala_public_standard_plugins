@@ -35,7 +35,7 @@ namespace optimizers {
 namespace cost_function_network {
 
 TEST_CASE( "Instantiate an MonteCarloCostFunctionNetworkOptimizer", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][instantiation]" ) {    REQUIRE_NOTHROW([&](){
-        selectors_api::auto_generated_api:: mcopt(
+        optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
             masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API >()
         );
         mcopt->write_to_tracer( "Instantiated a MonteCarloCostFunctionNetworkOptimizer." );
