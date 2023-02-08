@@ -199,6 +199,7 @@ private:
 	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
 	/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
 	/// @param solutions_mutex A mutex for the collection of solutions.
+	static
 	void
 	run_mc_trajectory(
 		masala::base::Size const replicate_index,
@@ -209,7 +210,7 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
 		std::mutex & solutions_mutex
-	) const;
+	);
 
 	/// @brief Make a Monte Carlo move.
 	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.

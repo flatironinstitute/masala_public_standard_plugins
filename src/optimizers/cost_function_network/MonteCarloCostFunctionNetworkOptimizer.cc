@@ -389,24 +389,28 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     solutions_by_problem.shrink_to_fit();
 
     // Create work vector.
-    // MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
-    // work_request.reserve( nproblems * attempts_per_problem_ );
-    // for( Size i(0); i<nproblems; ++i ) {
-    //     for( Size j(0); j<attempts_per_problem_; ++j ) {
-    //         work_request.add_job(
-    //             std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory, this,
-    //                 j, // replicate index
-    //                 i, // problem index
-    //                 annealing_steps_per_attempt_, // Steps in the MC search.
-    //                 n_solutions_to_store_per_problem_, // Solutions per problem.
-    //                 std::cref( annealing_schedule_ ), // A copy of the annealing schedule.
-    //                 problems.problem(i), // The problem description.
-    //                 std::ref( *solutions_by_problem[i] ), // The storage for the collection of solutions.
-    //                 std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
-    //             )
-    //         );
-    //     }
-    // }
+    MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
+    work_request.reserve( nproblems * attempts_per_problem_ );
+    for( Size i(0); i<nproblems; ++i ) {
+        for( Size j(0); j<attempts_per_problem_; ++j ) {
+            work_request.add_job(
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory,
+                    j, // replicate index
+                    i, // problem index
+                    annealing_steps_per_attempt_, // Steps in the MC search.
+                    n_solutions_to_store_per_problem_, // Solutions per problem.
+                    std::cref( *annealing_schedule_ ), // A copy of the annealing schedule.
+                    problems.problem(i), // The problem description.
+                    std::ref( *(solutions_by_problem[i]) ), // The storage for the collection of solutions.
+                    std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
+                )
+            );
+        }
+    }
+
+    // Do the work.
+    MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_request ) );
+    threading_summary.write_summary_to_tracer();
 
     //TODO TODO TODO
     return nullptr; // TODO TODO TODO
@@ -435,7 +439,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
     std::mutex & solutions_mutex
-) const {
+) {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using namespace masala::base::managers::random;
@@ -493,11 +497,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     } // End mutex lock scope.
 
     // Minimal output.
-    write_to_tracer(
-        "Completed replicate " + std::to_string( replicate_index ) +
-        " of cost function network optimization problem " +
-        std::to_string( problem_index ) + "."
-    );
+    // write_to_tracer(
+    //     "Completed replicate " + std::to_string( replicate_index ) +
+    //     " of cost function network optimization problem " +
+    //     std::to_string( problem_index ) + "."
+    // );
 }
 
 /// @brief Make a Monte Carlo move.
