@@ -197,7 +197,8 @@ private:
 	/// @param n_solutions_to_store The number of solutions to store.
 	/// @param annealing_schedule The temperature generator (already configured with the number of steps).
 	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-	/// @param solutions Storage for a collection of solutions.  Should be unique to job.
+	/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+	/// @param solutions_mutex A mutex for the collection of solutions.
 	void
 	run_mc_trajectory(
 		masala::base::Size const replicate_index,
@@ -206,7 +207,8 @@ private:
 		masala::base::Size const n_solutions_to_store,
 		masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		std::mutex & solutions_mutex
 	) const;
 
 	/// @brief Make a Monte Carlo move.
@@ -242,6 +244,7 @@ private:
 		std::vector< masala::base::Size > const & current_solution,
 		masala::base::Real current_absolute_score,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		std::mutex & solutions_mutex,
 		masala::base::Size const n_solutions_to_store,
 		masala::base::Size const replicate_index,
 		masala::base::Size const problem_index,

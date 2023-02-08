@@ -369,20 +369,41 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
     using namespace masala::base::managers::threads;
+    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 
     CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "run_cost_function_network_optimizer", "An annealing schedule must be set before calling this function." );
     annealing_schedule_->reset_call_count();
+    annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+
+    // Create storange for solutions.
+    Size const nproblems( problems.n_problems() );
+    std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_by_problem;
+    std::vector< std::mutex > solution_mutexes( nproblems );
+    solutions_by_problem.reserve( nproblems );
+    for( Size i(0); i<nproblems; ++i ) {
+        solutions_by_problem.push_back( masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >() );
+    }
+    solutions_by_problem.shrink_to_fit();
 
     // Create work vector.
-    MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
-    work_request.reserve( problems.n_problems() * attempts_per_problem_ );
-    // for( Size i(0), imax(problems.n_problems); i<imax; ++i ) {
+    // MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
+    // work_request.reserve( nproblems * attempts_per_problem_ );
+    // for( Size i(0); i<nproblems; ++i ) {
     //     for( Size j(0); j<attempts_per_problem_; ++j ) {
     //         work_request.add_job(
-    //             std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory, this, TODO TODO TODO )
+    //             std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory, this,
+    //                 j, // replicate index
+    //                 i, // problem index
+    //                 annealing_steps_per_attempt_, // Steps in the MC search.
+    //                 n_solutions_to_store_per_problem_, // Solutions per problem.
+    //                 std::cref( annealing_schedule_ ), // A copy of the annealing schedule.
+    //                 problems.problem(i), // The problem description.
+    //                 std::ref( *solutions_by_problem[i] ), // The storage for the collection of solutions.
+    //                 std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
+    //             )
     //         );
     //     }
     // }
@@ -402,7 +423,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 /// @param n_solutions_to_store The number of solutions to store.
 /// @param annealing_schedule The temperature generator (already configured with the number of steps).
 /// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-/// @param solutions Storage for a collection of solutions.  Should be unique to job.
+/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+/// @param solutions_mutex A mutex for the collection of solutions.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::base::Size const replicate_index,
@@ -411,7 +433,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::base::Size const n_solutions_to_store,
     masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+    std::mutex & solutions_mutex
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
@@ -450,19 +473,24 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             last_accepted_solution = current_solution;
             current_absolute_score += deltaE,
             last_accepted_absolute_score = current_absolute_score;
-            determine_whether_to_store_solution( current_solution, current_absolute_score, solutions, n_solutions_to_store, replicate_index, problem_index, problem );
+            determine_whether_to_store_solution( current_solution, current_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
         } else {
             current_solution = last_accepted_solution;
         }
     }
 
+    { // Mutex lock scope
+        std::lock_guard< std::mutex > lock( solutions_mutex );
+
     // Recompute energies of all solutions to correct numerical error.
 #ifndef NDEBUG
-    solutions.recompute_all_scores( 1.0e-6); // As a sanity check, make sure numerical errors are small.
+        solutions.recompute_all_scores( 1.0e-6); // As a sanity check, make sure numerical errors are small.
 #else
-    solutions.recompute_all_scores();
+        solutions.recompute_all_scores();
 #endif
-    solutions.sort_by_score();
+        solutions.sort_by_score();
+
+    } // End mutex lock scope.
 
     // Minimal output.
     write_to_tracer(
@@ -504,6 +532,7 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 /// entry in the vector corresponds to a variable node (in order).
 /// @param current_absolute_score The absolute score of this solution.
 /// @param solutions The container of solutions.
+/// @param solutions_mutex A mutex for locking and keeping locked the solutions collection.
 /// @param n_solutions_to_store The number of solutions to store.
 /// @param replicate_index The index of this replicate for this problem.
 /// @param problem_index The index of this problem.
@@ -514,6 +543,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     std::vector< masala::base::Size > const & current_solution,
     masala::base::Real current_absolute_score,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+    std::mutex & solutions_mutex,
     masala::base::Size const n_solutions_to_store,
     masala::base::Size const replicate_index,
     masala::base::Size const problem_index,
@@ -522,6 +552,9 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     using masala::base::Size;
     using masala::base::Real;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+    // Lock this solutions container.
+    std::lock_guard< std::mutex > lock( solutions_mutex );
 
     // If the solution has already been seen, increment the number of times we have seen it.
     // Simultaneously, find the highest score solution that we have stored.
