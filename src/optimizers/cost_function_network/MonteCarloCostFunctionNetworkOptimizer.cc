@@ -392,6 +392,14 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
     work_request.reserve( nproblems * attempts_per_problem_ );
     for( Size i(0); i<nproblems; ++i ) {
+#ifndef NDEBUG
+        // Redundant check that this is a cost function network optimization problem in debug mode.
+        CostFunctionNetworkOptimizationProblem_APICSP problem_cast( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(problems.problem(i)) );
+        DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "run_cost_function_network_optimizer", "Program error: problem " + std::to_string(i) + " is not a cost function network optimization problem!" );
+#else
+        // Just assume that this is the right problem type in release mode.
+        CostFunctionNetworkOptimizationProblem_APICSP problem_cast( std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(problems.problem(i)) );
+#endif
         for( Size j(0); j<attempts_per_problem_; ++j ) {
             work_request.add_job(
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory,
@@ -400,7 +408,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
                     annealing_steps_per_attempt_, // Steps in the MC search.
                     n_solutions_to_store_per_problem_, // Solutions per problem.
                     std::cref( *annealing_schedule_ ), // A copy of the annealing schedule.
-                    problems.problem(i), // The problem description.
+                    problem_cast, // The problem description.
                     std::ref( *(solutions_by_problem[i]) ), // The storage for the collection of solutions.
                     std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
                 )
