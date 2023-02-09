@@ -25,6 +25,7 @@
 
 // Unit headers:
 #include <optimizers_api/auto_generated_api/cost_function_network/MonteCarloCostFunctionNetworkOptimizer_API.hh>
+#include <optimizers_api/auto_generated_api/annealing/ConstantAnnealingSchedule_API.hh>
 
 // Masala numeric headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
@@ -51,6 +52,7 @@ TEST_CASE( "Instantiate an MonteCarloCostFunctionNetworkOptimizer", "[standard_m
 
 TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimizer", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
@@ -135,6 +137,10 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         mcopt->set_attempts_per_problem(5);
         mcopt->set_n_solutions_to_store_per_problem(5);
         mcopt->set_cpu_threads_to_request(5);
+
+        ConstantAnnealingSchedule_APISP annealing_schedule( masala::make_shared< ConstantAnnealingSchedule_API >() );
+        annealing_schedule->set_temperature(0.9 /*kcal/mol*/); // Hottish.
+        mcopt->set_annealing_schedule( *annealing_schedule );
         
         solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
     }() );
