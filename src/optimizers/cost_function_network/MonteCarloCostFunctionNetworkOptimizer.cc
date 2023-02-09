@@ -500,20 +500,21 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
-    Real current_absolute_score( problem->compute_absolute_score( current_solution ) );
-    Real last_accepted_absolute_score( problem->compute_absolute_score( last_accepted_solution ) );
+    Real current_accepted_absolute_score( problem->compute_absolute_score( current_solution ) );
+    write_to_tracer( "Initial score = " + std::to_string( current_accepted_absolute_score ) ); // DELETE ME
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         make_mc_move( current_solution, n_choices_per_variable_node, randgen );
         Real const deltaE( problem->compute_score_change( current_solution, last_accepted_solution ) );
+        write_to_tracer( "Move " + std::to_string( step_index ) + " deltaE = " + std::to_string(deltaE) ); // DELETE ME
 
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
             last_accepted_solution = current_solution;
-            current_absolute_score += deltaE,
-            last_accepted_absolute_score = current_absolute_score;
-            determine_whether_to_store_solution( current_solution, current_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+            current_accepted_absolute_score += deltaE,
+            write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( current_accepted_absolute_score ) + "." ); // DELETE ME
+            determine_whether_to_store_solution( current_solution, current_accepted_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
         } else {
             current_solution = last_accepted_solution;
         }
