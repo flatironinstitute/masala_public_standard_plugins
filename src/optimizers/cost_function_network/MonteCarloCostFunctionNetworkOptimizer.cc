@@ -41,6 +41,7 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
@@ -170,6 +171,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
     using namespace masala::base::api::getter;
+    using namespace masala::base::api::work_function;
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using masala::base::Size;
 
@@ -257,6 +259,23 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt, this )
 			)
 		);
+
+        // Work functions:
+        api_description->add_work_function(
+            masala::make_shared<
+                MasalaObjectAPIWorkFunctionDefinition_OneInput<
+                    std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >,
+                    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const &
+                >
+            >(
+                "run_cost_function_network_optimizer", "Run the optimizer on a cost function network optimization problem, and produce a solution.",
+                true, false, false, true,
+                "problems", "A set of problems to run.",
+                "solutions", "A vector of solution sets.  Each CostFunctionNetworkOptimizationSolutions object contains the set of solutions for the problem "
+                "in the input vector with the corresponding index.  There may be multiple solutions, depending on settings.",
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer, this, std::placeholders::_1 )
+            )
+        );
 
         // Convert nonconst to const:
         api_description_ = api_description;
