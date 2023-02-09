@@ -26,12 +26,14 @@
 // Unit headers:
 #include <optimizers_api/auto_generated_api/cost_function_network/MonteCarloCostFunctionNetworkOptimizer_API.hh>
 #include <optimizers_api/auto_generated_api/annealing/ConstantAnnealingSchedule_API.hh>
+#include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 // Masala numeric headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 
 // Masala base headers:
 #include <base/managers/threads/MasalaThreadManager.hh>
@@ -55,6 +57,9 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    
+    optimizers_api::auto_generated_api::registration::register_optimizers();
+    masala::numeric_api::auto_generated_api::registration::register_numeric();
 
     masala::base::managers::threads::MasalaThreadManager::get_instance()->set_total_threads(5);
 
@@ -132,6 +137,9 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 1 ), 0 );
         problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 2 ), 3 );
 
+        // Finalize the problem.
+        problem->finalize();
+
         CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
         problem_container->add_optimization_problem( problem );
         
@@ -159,6 +167,8 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22.0 ) < 1.0e-8 );
     CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23.0 ) < 1.0e-8 );
 
+    optimizers_api::auto_generated_api::registration::unregister_optimizers();
+    masala::numeric_api::auto_generated_api::registration::unregister_numeric();
 }
 
 } // namespace cost_function_network
