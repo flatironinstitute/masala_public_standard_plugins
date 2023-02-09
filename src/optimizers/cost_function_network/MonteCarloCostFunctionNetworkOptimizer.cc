@@ -416,7 +416,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
         // Redundant check that this is a cost function network optimization problem in debug mode.
         CostFunctionNetworkOptimizationProblem_APICSP problem_cast( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(problems.problem(i)) );
         DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "run_cost_function_network_optimizer", "Program error: problem "
-            + std::to_string(i) + " is not a CostFunctionNetworkOptimizationProblem!  It is a " + problems.problem(i)->inner_class_name() + "."
+            + std::to_string(i) + " is not enclosed in a CostFunctionNetworkOptimizationProblem_API!  It is a " + problems.problem(i)->inner_class_name() + " encapsulated in a "
+            + problems.problem(i)->class_name() + "."
         );
 #else
         // Just assume that this is the right problem type in release mode.
