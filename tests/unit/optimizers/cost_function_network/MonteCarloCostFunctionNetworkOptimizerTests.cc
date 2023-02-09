@@ -33,7 +33,8 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 
-// Core headers:
+// Masala base headers:
+#include <base/managers/threads/MasalaThreadManager.hh>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -55,9 +56,12 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
+    masala::base::managers::threads::MasalaThreadManager::get_instance()->set_total_threads(5);
+
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
 
     REQUIRE_NOTHROW([&](){
+
         PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >() );
 
         // We'll create a simple problem with 27 possible solutions:
@@ -143,6 +147,8 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         mcopt->set_annealing_schedule( *annealing_schedule );
         
         solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
+
+
     }() );
 
     CHECK( solutions.size() == 1 );
@@ -152,6 +158,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 18.0 ) < 1.0e-8 );
     CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22.0 ) < 1.0e-8 );
     CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23.0 ) < 1.0e-8 );
+
 }
 
 } // namespace cost_function_network
