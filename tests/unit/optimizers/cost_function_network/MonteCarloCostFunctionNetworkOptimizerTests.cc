@@ -53,7 +53,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
-    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const solutions;
+    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
 
     REQUIRE_NOTHROW([&](){
         PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >() );
@@ -136,7 +136,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         mcopt->set_n_solutions_to_store_per_problem(5);
         mcopt->set_cpu_threads_to_request(5);
         
-        solutions = mcopt->run_cost_function_network_optimizer( problem_container );
+        solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
     }() );
 
     CHECK( solutions.size() == 1 );
