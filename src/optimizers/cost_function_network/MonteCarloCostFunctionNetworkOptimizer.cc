@@ -46,6 +46,7 @@
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
+#include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -506,8 +507,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         make_mc_move( current_solution, n_choices_per_variable_node, randgen );
-        Real const deltaE( problem->compute_score_change( current_solution, last_accepted_solution ) );
-        write_to_tracer( "Move " + std::to_string( step_index ) + " deltaE = " + std::to_string(deltaE) ); // DELETE ME
+        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) );
+        write_to_tracer( "Move " + std::to_string( step_index ) +
+            + " old = [" + masala::base::utility::container::container_to_string( last_accepted_solution, "," )
+            + "] new = [" + masala::base::utility::container::container_to_string( current_solution, "," )
+            + "] deltaE = " + std::to_string(deltaE) ); // DELETE ME
 
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
