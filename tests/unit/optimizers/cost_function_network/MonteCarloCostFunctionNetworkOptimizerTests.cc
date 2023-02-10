@@ -178,7 +178,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         ss << std::setw(8) << i << "\t"
             << std::setw(10) << solution->n_times_solution_was_produced() << "\t"
             << std::setw(5) << solution->solution_score() << "\t"
-            << std::setw(16) << "[" << masala::base::utility::container::container_to_string( solution->selection_at_variable_positions(), ",") << "]";
+            << std::setw(16) << "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
     }
 
     CHECK( solutions.size() == 1 );
