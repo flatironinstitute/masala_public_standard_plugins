@@ -117,6 +117,35 @@ public:
 	/// @returns "standard_masala_plugins::optimizers::cost_function_network".
 	std::string class_namespace() const override;
 
+	/// @brief Get the class name (static version).
+	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
+	static std::string class_name_static();
+
+	/// @brief Get the class namespace (static version).
+	/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+	static std::string class_namespace_static();
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC STATIC ENUM FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the storage modes, as a list separated by a delimiter.
+	/// @param delimiter The delimiter to use.  (For instance, ", " for a comma-separated list).
+	/// @param include_and If true, the string "and " is inserted before the last entry.
+	static std::string solution_storage_mode_strings( std::string const & delimiter, bool const include_and );
+
+	/// @brief Given a solution storage mode as an enum, get the corresponding string.
+	/// @param mode_enum The solution storage mode.
+	/// @note Throws if the mode is INVALID.
+	static std::string solution_storage_mode_string_from_enum( MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const mode_enum );
+
+	/// @brief Given a solution storage mode as a string, get the corresponding enum.
+	/// @param mode_string The solution storage mode, expressed as a string.
+	/// @returns The corresponding enum, or INVALID if the string could not be parsed.
+	static MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_enum_from_string( std::string const & mode_string );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

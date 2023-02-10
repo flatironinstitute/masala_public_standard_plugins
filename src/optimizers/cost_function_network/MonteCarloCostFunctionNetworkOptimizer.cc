@@ -52,6 +52,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <sstream>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -154,14 +155,93 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
 /// @returns "MonteCarloCostFunctionNetworkOptimizer".
 std::string
 MonteCarloCostFunctionNetworkOptimizer::class_name() const {
-    return "MonteCarloCostFunctionNetworkOptimizer";
+    return class_name_static();
 }
 
 /// @brief Get the class namespace.
 /// @returns "standard_masala_plugins::optimizers::cost_function_network".
 std::string
 MonteCarloCostFunctionNetworkOptimizer::class_namespace() const {
+    return class_namespace_static();
+}
+
+/// @brief Get the class name (static version).
+/// @returns "MonteCarloCostFunctionNetworkOptimizer".
+//static
+std::string
+MonteCarloCostFunctionNetworkOptimizer::class_name_static() {
+    return "MonteCarloCostFunctionNetworkOptimizer";
+}
+
+/// @brief Get the class namespace (static version).
+/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+//static
+std::string
+MonteCarloCostFunctionNetworkOptimizer::class_namespace_static() {
     return "standard_masala_plugins::optimizers::cost_function_network";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC STATIC ENUM FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the storage modes, as a list separated by a delimiter.
+/// @param delimiter The delimiter to use.  (For instance, ", " for a comma-separated list).
+/// @param include_and If true, the string "and " is inserted before the last entry.
+/*static*/
+std::string
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_strings(
+    std::string const & delimiter,
+    bool const include_and
+) {
+    using masala::base::Size;
+    std::ostringstream ss;
+    for( Size i(1); i<=static_cast<Size>(MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::NUM_SOLUTION_STORAGE_MODES); ++i ) {
+        if( i > 1 ) {
+            ss << delimiter;
+        }
+        if( include_and && static_cast<Size>(MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::NUM_SOLUTION_STORAGE_MODES) > 2 ) {
+            ss << "and ";
+        }
+        ss << solution_storage_mode_string_from_enum( static_cast<MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode>(i) );
+    }
+    return ss.str();
+}
+
+/// @brief Given a solution storage mode as an enum, get the corresponding string.
+/// @param mode_enum The solution storage mode.
+/// @note Throws if the mode is INVALID.
+/*static*/
+std::string
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string_from_enum(
+    MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const mode_enum
+) {
+    switch(mode_enum) {
+        case MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP :
+            return "check_at_every_step";
+        case MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE :
+            return "check_on_acceptance";
+        default:
+            MASALA_THROW( class_namespace_static() + "::" + class_name_static(), "solution_storage_mode_string_from_enum", "Invalid solution storage mode!" );
+    }
+    return "invalid"; // Should never reach here.
+}
+
+/// @brief Given a solution storage mode as a string, get the corresponding enum.
+/// @param mode_string The solution storage mode, expressed as a string.
+/// @returns The corresponding enum, or INVALID if the string could not be parsed.
+/*static*/
+MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum_from_string(
+    std::string const & mode_string
+) {
+    using masala::base::Size;
+    for( Size i(1); i<=static_cast<Size>(MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::NUM_SOLUTION_STORAGE_MODES); ++i ) {
+        if( solution_storage_mode_string_from_enum(static_cast<MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode>(i)) == mode_string ) {
+            return static_cast<MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode>(i);
+        }
+    }
+    return MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -562,13 +642,18 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         //     + "] deltaE = " + std::to_string(deltaE) ); // DELETE ME
 
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
-        determine_whether_to_store_solution( current_solution, candidate_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+        if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
+            determine_whether_to_store_solution( current_solution, candidate_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+        }
 
         // Apply the Metropolis criterion to accept or reject the move:
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
             last_accepted_solution = current_solution;
             last_accepted_absolute_score = candidate_absolute_score;
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
+            if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
+                determine_whether_to_store_solution( current_solution, candidate_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+            }
         } else {
             current_solution = last_accepted_solution;
             candidate_absolute_score = last_accepted_absolute_score;
