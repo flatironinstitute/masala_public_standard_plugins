@@ -151,6 +151,12 @@ public:
 	/// @brief Set the numer of Monte Carlo moves to make in each attempt.
 	void set_annealing_steps_per_attempt( masala::base::Size const steps_in );
 
+	/// @brief Set the solution storage mode, by enum.
+	void set_solution_storage_mode( MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode_in );
+
+	/// @brief Set the solution storage mode, by string.
+	void set_solution_storage_mode( std::string const & solution_storage_mode_string_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,6 +285,12 @@ private:
 
 	/// @brief The annealing schedule to use for annealing.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
+
+	/// @brief The mode for checking whether to store a solution.
+	/// @details CHECK_AT_EVERY_STEP promotes diversity at the expense of slower computation,
+	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
+	/// only checks whether to store a solution when it is accepted.
+	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

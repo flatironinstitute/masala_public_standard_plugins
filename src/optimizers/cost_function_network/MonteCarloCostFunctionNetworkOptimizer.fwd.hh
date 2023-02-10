@@ -52,6 +52,19 @@ namespace cost_function_network {
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
 	using MonteCarloCostFunctionNetworkOptimizerCWP = MASALA_WEAK_POINTER< MonteCarloCostFunctionNetworkOptimizer const >;
 
+	/// @brief An enum class for the modes for storing solutions.
+	/// @details CHECK_AT_EVERY_STEP promotes diversity at the expense of slower computation,
+	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
+	/// only checks whether to store a solution when it is accepted.
+	/// @note If you add to this, update the function
+	/// MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string_from_enum().
+	enum class MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode {
+		INVALID_MODE=0, // Keep this first.
+		CHECK_AT_EVERY_STEP,
+		CHECK_ON_ACCEPTANCE, // Keep this second-to-last.
+		NUM_SOLUTION_STORAGE_MODES = CHECK_ON_ACCEPTANCE // Keep this last.
+	};
+
 } // namespace cost_function_network
 } // namespace optimizers
 } // namesapce standard_masala_plugins

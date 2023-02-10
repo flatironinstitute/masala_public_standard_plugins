@@ -78,6 +78,8 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_->reset_call_count();
     }
+
+    solution_storage_mode_ = src.solution_storage_mode_;
 }
 
 /// @brief Assignment operator.
@@ -96,6 +98,7 @@ MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetwork
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_->reset_call_count();
     }
+    solution_storage_mode_ = src.solution_storage_mode_;
     return *this;
 }
 
@@ -229,6 +232,20 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt, this, std::placeholders::_1 )
 			)
 		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > > (
+				"set_solution_storage_mode", "Sets the solution storage mode.  The 'check_at_every_step' option promotes diversity "
+                "at the expense of slower computation, checking every solution considered to see whether it should be stored. The "
+                "'check_on_acceptance' option only checks whether to store a solution when it is accepted (default).",
+				"storage_mode_in", "A string representing the solution storage mode.  Options are " + solution_storage_mode_strings( ", ", true ),
+                false, false,
+				std::bind(
+                    static_cast< void(MonteCarloCostFunctionNetworkOptimizer::*)(std::string const &) >(
+                        &MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode
+                    ), this, std::placeholders::_1
+                )
+			)
+		);
 
 		// Getters:
 		api_description->add_getter(
@@ -342,6 +359,35 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
         annealing_schedule_->set_final_time_index( steps_in );
         annealing_schedule_->reset_call_count();
     }
+}
+
+/// @brief Set the solution storage mode, by enum.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
+    MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode_in
+) {
+    CHECK_OR_THROW_FOR_CLASS(
+        solution_storage_mode_in != MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE,
+        "set_solution_storage_mode", "An invalid mode was passed to this function!"
+    );
+    solution_storage_mode_ = solution_storage_mode_in;
+}
+
+/// @brief Set the solution storage mode, by string.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
+    std::string const & solution_storage_mode_string_in
+) {
+    MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const mode_enum(
+        solution_storage_mode_enum_from_string( solution_storage_mode_string_in )
+    );
+    CHECK_OR_THROW_FOR_CLASS(
+        mode_enum != MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE,
+        "set_solution_storage_mode", "Could not parse \"" + solution_storage_mode_string_in +
+        "as a valid solution storage mode!"
+    );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    solution_storage_mode_ = mode_enum;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
