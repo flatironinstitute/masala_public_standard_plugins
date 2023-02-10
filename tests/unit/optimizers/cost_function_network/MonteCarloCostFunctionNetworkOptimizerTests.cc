@@ -37,6 +37,12 @@
 
 // Masala base headers:
 #include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/managers/tracer/MasalaTracerManager.hh>
+#include <base/utility/container/container_util.tmpl.hh>
+
+// STL headers:
+#include <sstream>
+#include <iomanip>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -57,6 +63,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    using namespace masala::base::managers::tracer;
     
     optimizers_api::auto_generated_api::registration::register_optimizers();
     masala::numeric_api::auto_generated_api::registration::register_numeric();
@@ -158,6 +165,21 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
 
     }() );
+
+    MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+
+    for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
+        CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
+        CHECK( solution != nullptr );
+        std::ostringstream ss;
+        ss << std::setw(8) << i << "\t"
+            << std::setw(10) << solution->n_times_solution_was_produced() << "\t"
+            << std::setw(5) << solution->solution_score() << "\t"
+            << std::setw(16) << "[" << masala::base::utility::container::container_to_string( solution->selection_at_variable_positions(), ",") << "]";
+    }
 
     CHECK( solutions.size() == 1 );
     CHECK( solutions[0]->n_solutions() == 5 );
