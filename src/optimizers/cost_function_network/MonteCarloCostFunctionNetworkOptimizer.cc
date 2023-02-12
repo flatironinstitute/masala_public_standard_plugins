@@ -742,8 +742,18 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     bool first(true);
     Real highestE(0.0);
     Size highestE_index(0);
-    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {  
-        CostFunctionNetworkOptimizationSolution_API const & solution( static_cast< CostFunctionNetworkOptimizationSolution_API const & >( *(solutions.solution(i)) ) );
+    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {
+#ifndef NDEBUG
+        CostFunctionNetworkOptimizationSolution_APICSP solution_ptr( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution(i) ) );
+        CHECK_OR_THROW( solution_ptr != nullptr, class_namespace_static() + "::" + class_name_static(),
+            "determine_whether_to_store_solution", "The solution was not encapsulated in a "
+            "CostFunctionNetworkOptimizationSolution_API container!  It was in a "
+            + solutions.solution(i)->class_name() + "container."
+        );
+#else
+        CostFunctionNetworkOptimizationSolution_APICSP solution_ptr( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution(i) ) );
+#endif
+        CostFunctionNetworkOptimizationSolution_API const & solution( *solution_ptr );
         if( solution == current_solution ) {
             solutions.increment_n_times_solution_was_produced(i);
             return;
