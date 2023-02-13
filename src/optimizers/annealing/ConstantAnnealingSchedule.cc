@@ -249,7 +249,7 @@ ConstantAnnealingSchedule::reset() {
 }
 
 /// @brief Set the temperature.
-/// @details In kcal/mol.  Must be positive.
+/// @details In kcal/mol.  Must be non-negative.
 void
 ConstantAnnealingSchedule::set_temperature(
     masala::base::Real const temperature_in
