@@ -26,6 +26,7 @@
 
 // Optimizers headers
 #include <optimizers/annealing/ConstantAnnealingSchedule.hh>
+#include <optimizers/annealing/LinearAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
 namespace standard_masala_plugins {
@@ -43,6 +44,7 @@ namespace api {
 
         // Add to this vector whenever a class is added with a defined API:
         outvec.emplace_back( masala::make_shared< annealing::ConstantAnnealingSchedule >() );
+        outvec.emplace_back( masala::make_shared< annealing::LinearAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
         // ADD MORE ENTRIES HERE
 
