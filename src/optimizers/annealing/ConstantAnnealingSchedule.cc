@@ -254,7 +254,7 @@ void
 ConstantAnnealingSchedule::set_temperature(
     masala::base::Real const temperature_in
 ) {
-    CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature", "The temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
+    CHECK_OR_THROW_FOR_CLASS( temperature_in >= 0.0, "set_temperature", "The temperature must be greater than or equal to zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     temperature_ = temperature_in;
 }
