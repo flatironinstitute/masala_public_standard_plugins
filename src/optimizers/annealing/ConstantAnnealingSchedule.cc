@@ -224,6 +224,7 @@ ConstantAnnealingSchedule::get_api_definition() {
 /// @brief Return temperature.
 masala::base::Real
 ConstantAnnealingSchedule::temperature() const {
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
     return temperature_;
 }
@@ -233,6 +234,7 @@ masala::base::Real
 ConstantAnnealingSchedule::temperature(
     masala::base::Size const
 ) const {
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return temperature_;
 }
 

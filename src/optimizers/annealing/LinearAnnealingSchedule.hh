@@ -163,6 +163,10 @@ private:
 	/// @details In units of kcal/mol.  Defaults to 0.4.
 	masala::base::Real temperature_final_ = 0.4;
 
+	/// @brief The number of calls expected.
+	/// @details Defaults to 100,000, arbitrarily.
+	masala::base::Size call_count_final_ = 100000;
+
 }; // class LinearAnnealingSchedule
 
 } // namespace annealing

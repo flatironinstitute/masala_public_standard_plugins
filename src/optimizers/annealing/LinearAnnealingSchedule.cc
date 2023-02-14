@@ -52,7 +52,9 @@ LinearAnnealingSchedule::LinearAnnealingSchedule(
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
 {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_ = src.temperature_;
+    temperature_initial_ = src.temperature_initial_;
+    temperature_final_ = src.temperature_final_;
+    call_count_final_ = src.call_count_final_;
 }
 
 /// @brief Assignment operator.
@@ -64,7 +66,9 @@ LinearAnnealingSchedule::operator=(
     std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
-    temperature_ = src.temperature_;
+    temperature_initial_ = src.temperature_initial_;
+    temperature_final_ = src.temperature_final_;
+    call_count_final_ = src.call_count_final_;
     return *this;
 }
 
@@ -229,16 +233,23 @@ LinearAnnealingSchedule::get_api_definition() {
 /// @brief Return temperature.
 masala::base::Real
 LinearAnnealingSchedule::temperature() const {
+    using masala::base::Size;
+    using masala::base::Real;
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
-    return temperature_;
+    Size const callcount( call_count() );
+    Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( call_count_final_ - 1 ) );
+    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
 }
 
 /// @brief Return temperature for the Nth timepoint.
 masala::base::Real
 LinearAnnealingSchedule::temperature(
-    masala::base::Size const
+    masala::base::Size const time_index
 ) const {
-    return temperature_;
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    masala::base::Real const f( static_cast< masala::base::Real >( time_index - 1 ) / static_cast< masala::base::Real >( call_count_final_ - 1 ) );
+    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +262,7 @@ LinearAnnealingSchedule::reset() {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     temperature_initial_ = 3.0;
     temperature_final_ = 0.4;
+    call_count_final_ = 100000;
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
 }
 
@@ -279,9 +291,11 @@ LinearAnnealingSchedule::set_temperature_final(
 /// @brief Set the index of the expected final timepoint.
 void
 LinearAnnealingSchedule::set_final_time_index(
-    masala::base::Size const
+    masala::base::Size const final_time_index_in
 ) {
-    TODO TODO TODO
+    CHECK_OR_THROW_FOR_CLASS( final_time_index_in > 0, "set_final_time_index", "The final time index must be greater than 0." );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    call_count_final_ = final_time_index_in;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
