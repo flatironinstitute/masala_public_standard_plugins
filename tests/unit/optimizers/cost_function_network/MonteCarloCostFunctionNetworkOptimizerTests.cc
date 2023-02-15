@@ -26,6 +26,7 @@
 // Unit headers:
 #include <optimizers_api/auto_generated_api/cost_function_network/MonteCarloCostFunctionNetworkOptimizer_API.hh>
 #include <optimizers_api/auto_generated_api/annealing/ConstantAnnealingSchedule_API.hh>
+#include <optimizers_api/auto_generated_api/annealing/LinearAnnealingSchedule_API.hh>
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 // Masala numeric headers:
@@ -50,7 +51,7 @@ namespace unit {
 namespace optimizers {
 namespace cost_function_network {
 
-TEST_CASE( "Instantiate an MonteCarloCostFunctionNetworkOptimizer", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][instantiation]" ) {
+TEST_CASE( "Instantiate an MonteCarloCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][instantiation]" ) {
     REQUIRE_NOTHROW([&](){
         optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
             masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API >()
@@ -59,7 +60,7 @@ TEST_CASE( "Instantiate an MonteCarloCostFunctionNetworkOptimizer", "[standard_m
     }() );
 }
 
-TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimizer", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimizer with a constant annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -161,6 +162,142 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
         ConstantAnnealingSchedule_APISP annealing_schedule( masala::make_shared< ConstantAnnealingSchedule_API >() );
         annealing_schedule->set_temperature(0.9 /*kcal/mol*/); // Hottish.
+        mcopt->set_annealing_schedule( *annealing_schedule );
+        
+        solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
+
+
+    }() );
+
+    MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
+    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+
+    for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
+        CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
+        CHECK( solution != nullptr );
+        std::ostringstream ss;
+        ss << std::setw(8) << i << "\t"
+            << std::setw(10) << solution->n_times_solution_was_produced() << "\t"
+            << std::setw(5) << solution->solution_score() << "\t"
+            << "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
+        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ss.str() );
+    }
+
+    CHECK( solutions.size() == 1 );
+    CHECK( solutions[0]->n_solutions() == 5 );
+    CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 6.0 ) < 1.0e-8 );
+    CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 7.0 ) < 1.0e-8 );
+    CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 18.0 ) < 1.0e-8 );
+    CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22.0 ) < 1.0e-8 );
+    CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23.0 ) < 1.0e-8 );
+
+    optimizers_api::auto_generated_api::registration::unregister_optimizers();
+    masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+}
+
+TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimizer with a linear annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
+    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    using namespace masala::base::managers::tracer;
+    
+    optimizers_api::auto_generated_api::registration::register_optimizers();
+    masala::numeric_api::auto_generated_api::registration::register_numeric();
+
+    masala::base::managers::threads::MasalaThreadManager::get_instance()->set_total_threads(5);
+
+    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
+
+    REQUIRE_NOTHROW([&](){
+
+        PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >() );
+
+        // We'll create a simple problem with 27 possible solutions:
+        // 0 0 0 -> 71
+        // 0 0 1 -> 54
+        // 0 0 2 -> 58
+        // 0 1 0 -> 96
+        // 0 1 1 -> 83
+        // 0 1 2 -> 88
+        // 0 2 0 -> 55
+        // 0 2 1 -> 42
+        // 0 2 2 -> 46
+        // 1 0 0 -> 76
+        // 1 0 1 -> 58
+        // 1 0 2 -> 57
+        // 1 1 0 -> 100
+        // 1 1 1 -> 86
+        // 1 1 2 -> 86
+        // 1 2 0 -> 54
+        // 1 2 1 -> 40
+        // 1 2 2 -> 399
+        // 2 0 0 -> 38
+        // 2 0 1 -> 22
+        // 2 0 2 -> 23
+        // 2 1 0 -> 67
+        // 2 1 1 -> 55
+        // 2 1 2 -> 57
+        // 2 2 0 -> 18
+        // 2 2 1 -> 6  <-- lowest
+        // 2 2 2 -> 7
+        problem->set_onebody_penalty( 0, 0, 25 );
+        problem->set_onebody_penalty( 0, 1, 32 );
+        problem->set_onebody_penalty( 0, 2, 0 );
+        problem->set_onebody_penalty( 1, 0, 15 );
+        problem->set_onebody_penalty( 1, 1, 43 );
+        problem->set_onebody_penalty( 1, 2, 0 );
+        problem->set_onebody_penalty( 2, 0, 14 );
+        problem->set_onebody_penalty( 2, 1, 5 );
+        problem->set_onebody_penalty( 2, 2, 0 );
+
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 0 ), 5 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 1 ), 3 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 2 ), 9 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 0 ), 4 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 1 ), 1 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 2 ), 2 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 0 ), 1 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 1 ), 3 );
+        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 2 ), 1 );
+
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 0 ), 5 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 1 ), 3 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 2 ), 9 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 0 ), 4 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 1 ), 1 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 2 ), 2 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 0 ), 1 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 1 ), 0 );
+        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 2 ), 3 );
+
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 0 ), 7 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 1 ), 1 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 2 ), 4 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 0 ), 6 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 1 ), 4 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 2 ), 8 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 0 ), 2 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 1 ), 0 );
+        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 2 ), 3 );
+
+        // Finalize the problem.
+        problem->finalize();
+
+        CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
+        problem_container->add_optimization_problem( problem );
+
+        MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
+            masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
+        );
+        mcopt->set_solution_storage_mode( "check_at_every_step" );
+        mcopt->set_annealing_steps_per_attempt(10000); //Shorter trajectories.
+        mcopt->set_attempts_per_problem(5);
+        mcopt->set_n_solutions_to_store_per_problem(5);
+        mcopt->set_cpu_threads_to_request(5);
+
+        LinearAnnealingSchedule_APISP annealing_schedule( masala::make_shared< LinearAnnealingSchedule_API >() );
         mcopt->set_annealing_schedule( *annealing_schedule );
         
         solutions = mcopt->run_cost_function_network_optimizer( *problem_container );

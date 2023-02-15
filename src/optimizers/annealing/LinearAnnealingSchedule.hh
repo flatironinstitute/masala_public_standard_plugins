@@ -16,16 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/annealing/ConstantAnnealingSchedule.hh
-/// @brief Headers for an annealing schedule that does not vary with time.
+/// @file src/optimizers/annealing/LinearAnnealingSchedule.hh
+/// @brief Headers for an annealing schedule that changes linearly with time.
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef StandardMasalaPlugins_src_optimizers_annealing_ConstantAnnealingSchedule_hh
-#define StandardMasalaPlugins_src_optimizers_annealing_ConstantAnnealingSchedule_hh
+#ifndef StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
+#define StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
 
 // Forward declarations:
-#include <optimizers/annealing/ConstantAnnealingSchedule.fwd.hh>
+#include <optimizers/annealing/LinearAnnealingSchedule.fwd.hh>
 
 // Parent class:
 #include <numeric_api/base_classes/optimization/annealing/PluginAnnealingSchedule.hh>
@@ -37,10 +37,10 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace annealing {
 
-/// @brief An annealing schedule that does not vary with time.
+/// @brief An annealing schedule that changes linearly with time.
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class ConstantAnnealingSchedule : public masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule {
+class LinearAnnealingSchedule : public masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule {
 
 public:
 
@@ -49,16 +49,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	ConstantAnnealingSchedule() = default;
+	LinearAnnealingSchedule() = default;
 
 	/// @brief Copy constructor.
-	ConstantAnnealingSchedule( ConstantAnnealingSchedule const & );
+	LinearAnnealingSchedule( LinearAnnealingSchedule const & );
 
 	/// @brief Assignment operator.
-	ConstantAnnealingSchedule & operator=( ConstantAnnealingSchedule const & );
+	LinearAnnealingSchedule & operator=( LinearAnnealingSchedule const & );
 
 	/// @brief Virtual destructor.
-	virtual ~ConstantAnnealingSchedule() = default;
+	virtual ~LinearAnnealingSchedule() = default;
 
 	/// @brief Make a copy of this object.
 	masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
@@ -83,11 +83,11 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the ahierarchical keywords for this plugin class.
-	/// @details The base class implementation returns { "annealing_schedule", "constant", "time_independent" }
+	/// @details The base class implementation returns { "annealing_schedule", "linear", "time_dependent" }
 	std::vector< std::string >
 	get_keywords() const override;
 
-	/// @brief Get the class name ("ConstantAnnealingSchedule").
+	/// @brief Get the class name ("LinearAnnealingSchedule").
 	std::string class_name() const override;
 
 	/// @brief Get the class namespace ("standard_masala_plugins::optimizers::annealing").
@@ -122,12 +122,21 @@ public:
 	/// @brief Reset this object.
 	void reset();
 
-	/// @brief Set the temperature.
+	/// @brief Set the initial temperature.
 	/// @details In kcal/mol.  Must be non-negative.
-	void set_temperature( masala::base::Real const temperature_in );
+	void
+	set_temperature_initial(
+		masala::base::Real const temperature_in
+	);
+
+	/// @brief Set the final temperature.
+	/// @details In kcal/mol.  Must be non-negative.
+	void
+	set_temperature_final(
+		masala::base::Real const temperature_in
+	);
 
 	/// @brief Set the index of the expected final timepoint.
-	/// @details For the constant annealing schedule, this does nothing.
 	void
 	set_final_time_index(
 		masala::base::Size const final_time_index_in
@@ -146,14 +155,22 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief The temperature.
-	/// @details In units of kcal/mol.  Defaults to 0.62.
-	masala::base::Real temperature_ = 0.62;
+	/// @brief The initial temperature.
+	/// @details In units of kcal/mol.  Defaults to 3.0.
+	masala::base::Real temperature_initial_ = 3.0;
 
-}; // class ConstantAnnealingSchedule
+	/// @brief The final temperature.
+	/// @details In units of kcal/mol.  Defaults to 0.4.
+	masala::base::Real temperature_final_ = 0.4;
+
+	/// @brief The number of calls expected.
+	/// @details Defaults to 100,000, arbitrarily.
+	masala::base::Size call_count_final_ = 100000;
+
+}; // class LinearAnnealingSchedule
 
 } // namespace annealing
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //StandardMasalaPlugins_src_optimizers_annealing_ConstantAnnealingSchedule_hh
+#endif //StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
