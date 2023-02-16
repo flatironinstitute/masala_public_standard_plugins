@@ -646,7 +646,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         make_mc_move( current_solution, n_choices_per_variable_node, randgen );
-        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) );
+        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
         //     + " old = [" + masala::base::utility::container::container_to_string( last_accepted_solution, "," )
