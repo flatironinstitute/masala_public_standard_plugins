@@ -735,7 +735,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
     // Lock this solutions container.
-    std::lock_guard< std::mutex > lock( solutions_mutex );
+    std::lock_guard< std::mutex > lock( solutions_mutex ); // SOURCE OF A LOT OF UNNECESSARY THREAD CONTENTION.
 
     // If the solution has already been seen, increment the number of times we have seen it.
     // Simultaneously, find the highest score solution that we have stored.
