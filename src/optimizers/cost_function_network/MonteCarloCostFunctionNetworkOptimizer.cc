@@ -680,7 +680,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
-        solutions.merge_in_lowest( solutions_copy, n_solutions_to_store );
+        solutions.merge_in_lowest_scoring_solutions( *solutions_copy, n_solutions_to_store );
 
         // Recompute energies of all solutions to correct numerical error.
 #ifndef NDEBUG
