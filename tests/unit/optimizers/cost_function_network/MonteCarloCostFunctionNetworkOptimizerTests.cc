@@ -155,7 +155,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
             masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
         );
         mcopt->set_solution_storage_mode( "check_at_every_step" );
-        mcopt->set_annealing_steps_per_attempt(10000); //Shorter trajectories.
+        mcopt->set_annealing_steps_per_attempt(100000);
         mcopt->set_attempts_per_problem(5);
         mcopt->set_n_solutions_to_store_per_problem(5);
         mcopt->set_cpu_threads_to_request(5);
@@ -292,7 +292,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
             masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
         );
         mcopt->set_solution_storage_mode( "check_at_every_step" );
-        mcopt->set_annealing_steps_per_attempt(10000); //Shorter trajectories.
+        mcopt->set_annealing_steps_per_attempt(100000);
         mcopt->set_attempts_per_problem(5);
         mcopt->set_n_solutions_to_store_per_problem(5);
         mcopt->set_cpu_threads_to_request(5);
