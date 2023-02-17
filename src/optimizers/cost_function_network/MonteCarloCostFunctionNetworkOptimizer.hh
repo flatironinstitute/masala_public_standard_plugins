@@ -315,10 +315,10 @@ private:
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
 
 	/// @brief The mode for checking whether to store a solution.
-	/// @details CHECK_AT_EVERY_STEP promotes diversity at the expense of slower computation,
+	/// @details CHECK_AT_EVERY_STEP (default) promotes diversity at the expense of slower computation,
 	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
 	/// only checks whether to store a solution when it is accepted.
-	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE;
+	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

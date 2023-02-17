@@ -314,9 +314,9 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > > (
-				"set_solution_storage_mode", "Sets the solution storage mode.  The 'check_at_every_step' option promotes diversity "
+				"set_solution_storage_mode", "Sets the solution storage mode.  The 'check_at_every_step' option (default) promotes diversity "
                 "at the expense of slower computation, checking every solution considered to see whether it should be stored. The "
-                "'check_on_acceptance' option only checks whether to store a solution when it is accepted (default).",
+                "'check_on_acceptance' option only checks whether to store a solution when it is accepted.",
 				"storage_mode_in", "A string representing the solution storage mode.  Options are " + solution_storage_mode_strings( ", ", true ),
                 false, false,
 				std::bind(
