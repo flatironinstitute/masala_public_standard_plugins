@@ -43,15 +43,27 @@ main(
     int, char**
 ) {
     using masala::base::Size;
-     masala::base::managers::threads::MasalaThreadManagerHandle tm( masala::base::managers::threads::MasalaThreadManager::get_instance() );
+    masala::base::managers::threads::MasalaThreadManagerHandle tm( masala::base::managers::threads::MasalaThreadManager::get_instance() );
     masala::base::managers::tracer::MasalaTracerManagerHandle tr( masala::base::managers::tracer::MasalaTracerManager::get_instance() );
+
+    std::string const appname( "standard_masala_plugins::benchmark::benchmark_apps::benchmark_monte_carlo_cfn_optimizer" );
 
     try{
         Size const nthread_total( tm->hardware_threads() );
         if( nthread_total == 0 ) {
-            MASALA_THROW( "benchmark_monte_carlo_cfn_optimizer application", "main", "Could not auto-detect hardware threads!" );
+            MASALA_THROW( appname, "main", "Could not auto-detect hardware threads!" );
         }
-        tr->write_to_tracer( "benchmark_monte_carlo_cfn_optimizer application", "Detected " + std::to_string(nthread_total) + " hardware threads." );
+        tr->write_to_tracer( appname, "Detected " + std::to_string(nthread_total) + " hardware threads." );
+
+        // Launch as many threads as we have hardware threads:
+        tm->set_total_threads( nthread_total );
+
+        // Run a problem on a series of thread counts:
+        for( Size threadcount(1); threadcount<=nthread_total; ++threadcount ) {
+            tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads." );
+            
+        }
+
     } catch( masala::base::error::MasalaException const e ) {
         tr->write_to_tracer( "benchmark_monte_carlo_cfn_optimizer application", "Caught Masala exception: " + e. message() );
         return 1;
