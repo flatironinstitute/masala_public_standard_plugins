@@ -34,6 +34,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 
 // Base headers
 #include <base/managers/tracer/MasalaTracerManager.hh>
@@ -59,6 +60,7 @@ main(
     std::string const appname( "standard_masala_plugins::benchmark::benchmark_apps::benchmark_monte_carlo_cfn_optimizer" );
 
     try{
+        masala::numeric_api::auto_generated_api::registration::register_numeric();
         standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
 
         Size const nthread_total( tm->hardware_threads() );
@@ -76,17 +78,20 @@ main(
         );
         problems->add_optimization_problem( construct_test_problem() );
 
+        // Prepare the annealing schedule:
+        LinearAnnealingSchedule_APISP anneal_sched(
+            masala::make_shared< LinearAnnealingSchedule_API >()
+        );
+
         // Run a problem on a series of thread counts:
         for( Size threadcount(1); threadcount<=nthread_total; ++threadcount ) {
             tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads." );
-            LinearAnnealingSchedule_APISP anneal_sched(
-                masala::make_shared< LinearAnnealingSchedule_API >()
-            );
+
             MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt(
                 masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
             );
-            mc_opt->set_annealing_schedule( anneal_sched );
-            mc_opt->set_annealing_steps_per_attempt(1000000);
+            mc_opt->set_annealing_schedule( *anneal_sched );
+            mc_opt->set_annealing_steps_per_attempt(100000);
             mc_opt->set_attempts_per_problem(threadcount);
             mc_opt->set_cpu_threads_to_request(threadcount);
             mc_opt->set_solution_storage_mode("check_at_every_step");
