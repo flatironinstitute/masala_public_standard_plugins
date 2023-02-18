@@ -27,7 +27,9 @@
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 // Base headers
+#include <base/managers/tracer/MasalaTracerManager.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/error/ErrorHandling.hh>
 
 // External headers
 
@@ -41,9 +43,19 @@ main(
     int, char**
 ) {
     using masala::base::Size;
+     masala::base::managers::threads::MasalaThreadManagerHandle tm( masala::base::managers::threads::MasalaThreadManager::get_instance() );
+    masala::base::managers::tracer::MasalaTracerManagerHandle tr( masala::base::managers::tracer::MasalaTracerManager::get_instance() );
 
-    masala::base::managers::threads::MasalaThreadManagerHandle tm( masala::base::managers::threads::MasalaThreadManager::get_instance() );
+    try{
+        Size const nthread_total( tm->hardware_threads() );
+        if( nthread_total == 0 ) {
+            MASALA_THROW( "benchmark_monte_carlo_cfn_optimizer application", "main", "Could not auto-detect hardware threads!" );
+        }
+        tr->write_to_tracer( "benchmark_monte_carlo_cfn_optimizer application", "Detected " + std::to_string(nthread_total) + " hardware threads." );
+    } catch( masala::base::error::MasalaException const e ) {
+        tr->write_to_tracer( "benchmark_monte_carlo_cfn_optimizer application", "Caught Masala exception: " + e. message() );
+        return 1;
+    }
 
-    Size const nthread_total( tm->hardware_threads() );
     return 0;
 }
