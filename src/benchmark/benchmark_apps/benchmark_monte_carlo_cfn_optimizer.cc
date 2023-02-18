@@ -40,6 +40,13 @@
 #include <base/managers/tracer/MasalaTracerManager.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/error/ErrorHandling.hh>
+#include <base/managers/random/MasalaRandomNumberGenerator.hh>
+
+// STL headers
+#include <chrono>
+#include <tuple>
+#include <sstream>
+#include <iomanip>
 
 // Program entry point:
 int
@@ -49,6 +56,7 @@ main(
     int, char**
 ) {
     using masala::base::Size;
+    using masala::base::Real;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::numeric_api::utility::optimization::cost_function_network;
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
@@ -56,12 +64,16 @@ main(
 
     masala::base::managers::threads::MasalaThreadManagerHandle tm( masala::base::managers::threads::MasalaThreadManager::get_instance() );
     masala::base::managers::tracer::MasalaTracerManagerHandle tr( masala::base::managers::tracer::MasalaTracerManager::get_instance() );
+    masala::base::managers::random::MasalaRandomNumberGeneratorHandle rg( masala::base::managers::random::MasalaRandomNumberGenerator::get_instance() );
 
     std::string const appname( "standard_masala_plugins::benchmark::benchmark_apps::benchmark_monte_carlo_cfn_optimizer" );
 
     try{
         masala::numeric_api::auto_generated_api::registration::register_numeric();
         standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
+
+        Size const total_replicates( 10 ); // Do 10 replicates for each threadcount.
+        Size const total_steps( 100000 ); // Do 100000 Monte Carlo steps for each threadcount.
 
         Size const nthread_total( tm->hardware_threads() );
         if( nthread_total == 0 ) {
@@ -83,26 +95,72 @@ main(
             masala::make_shared< LinearAnnealingSchedule_API >()
         );
 
+        // Prepare the vector of stuff to be done.  Each entry is threadcount, replicate number, output time in microseconds.
+        std::vector< std::tuple< Size, Size, Size > > jobs;
+        std::vector< Size > jobindices;
+        Size counter(0);
+        jobs.reserve( total_replicates * nthread_total );
+        jobindices.reserve( total_replicates * nthread_total );
+        for( Size threadcount(1); threadcount <= nthread_total; ++threadcount ) {
+            for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
+                jobs.push_back( std::make_tuple( threadcount, ireplicate, 0 ) );
+                jobindices.push_back( counter );
+                ++counter;
+            }
+        }
+        
+        // Randomize the order in which jobs will run.
+        rg->shuffle_vector( jobindices );
+
         // Run a problem on a series of thread counts:
-        for( Size threadcount(1); threadcount<=nthread_total; ++threadcount ) {
-            tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads." );
+        for( Size const jobindex : jobindices ) {
+            std::tuple< Size, Size, Size > & job( jobs[jobindex] );
+            Size const threadcount( std::get<0>(job) );
+            Size const replicate( std::get<1>(job) );
+            tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads (replicate " + std::to_string(replicate) + " of " + std::to_string(total_replicates) + ")." );
 
             MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt(
                 masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
             );
             mc_opt->set_annealing_schedule( *anneal_sched );
-            mc_opt->set_annealing_steps_per_attempt(100000);
+            mc_opt->set_annealing_steps_per_attempt( total_steps );
             mc_opt->set_attempts_per_problem(threadcount);
             mc_opt->set_cpu_threads_to_request(threadcount);
             mc_opt->set_solution_storage_mode("check_at_every_step");
             mc_opt->set_n_solutions_to_store_per_problem(5);
 
             // Run the problem:
+            std::chrono::time_point< std::chrono::steady_clock > const starttime(
+                std::chrono::steady_clock::now()
+            );
             std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const solutions(
                 mc_opt->run_cost_function_network_optimizer( *problems )
             );
+            std::chrono::time_point< std::chrono::steady_clock > const endtime(
+                std::chrono::steady_clock::now()
+            );
+            std::get<2>(job) = std::chrono::duration_cast< std::chrono::microseconds >( endtime-starttime ).count();
+        }
 
-            // TODO ANALYZE SOLUTIONS.
+        // Print the results:
+        tr->write_to_tracer( appname, "THREADS\tTIME(us)\tTIME_STDERR\tMONTE_CARLO_STEPS\tSTEPS/MICROSECOND\tSTEPS/US_STDERR" );
+        tr->write_to_tracer( appname, "-------\t--------\t-----------\t-----------------\t-----------------\t---------------" );
+        counter = 0;
+        for( Size threadcount(1); threadcount <= nthread_total; ++threadcount ) {
+            Real avgtime(0);
+            //Real stderr(0);
+            for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
+                avgtime += static_cast< Real >( std::get<2>(jobs[counter]) );
+            }
+            avgtime /= static_cast<Real>(total_replicates);
+            std::ostringstream ss;
+            ss << std::setw(7) << threadcount << "\t";
+            ss << std::setw(8) << avgtime << "\t";
+            ss << std::setw(11) << 0.0 << "\t"; // TODO
+            ss << std::setw(17) << total_steps * threadcount << "\t";
+            ss << std::setw(17) << static_cast<Real>(total_steps * threadcount)/static_cast<Real>(avgtime) << "\t";
+            ss << std::setw(15) << 0.0; // TODO -- propagate error
+            tr->write_to_tracer( appname, ss.str() );
         }
 
     } catch( masala::base::error::MasalaException const e ) {
