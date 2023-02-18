@@ -73,7 +73,11 @@ main(
         standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
 
         Size const total_replicates( 10 ); // Do 10 replicates for each threadcount.
-        Size const total_steps( 100000 ); // Do 100000 Monte Carlo steps for each threadcount.
+#ifndef NDEBUG
+        Size const total_steps( 100000 ); // Do a hundred thousand Monte Carlo steps for each threadcount in debug mode.
+#else
+        Size const total_steps( 1000000 ); // Do a million Monte Carlo steps for each threadcount in release mode.
+#endif
 
         Size const nthread_total( tm->hardware_threads() );
         if( nthread_total == 0 ) {
@@ -151,6 +155,7 @@ main(
             //Real stderr(0);
             for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
                 avgtime += static_cast< Real >( std::get<2>(jobs[counter]) );
+                ++counter;
             }
             avgtime /= static_cast<Real>(total_replicates);
             std::ostringstream ss;
