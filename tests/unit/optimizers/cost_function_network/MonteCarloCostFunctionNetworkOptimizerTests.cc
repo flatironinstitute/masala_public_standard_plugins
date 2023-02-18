@@ -35,6 +35,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/registration/register_numeric.hh>
+#include <numeric_api/utility/optimization/cost_function_network/util.hh>
 
 // Masala base headers:
 #include <base/managers/threads/MasalaThreadManager.hh>
@@ -75,81 +76,10 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
     REQUIRE_NOTHROW([&](){
 
-        PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >() );
-
-        // We'll create a simple problem with 27 possible solutions:
-        // 0 0 0 -> 71
-        // 0 0 1 -> 54
-        // 0 0 2 -> 58
-        // 0 1 0 -> 96
-        // 0 1 1 -> 83
-        // 0 1 2 -> 88
-        // 0 2 0 -> 55
-        // 0 2 1 -> 42
-        // 0 2 2 -> 46
-        // 1 0 0 -> 76
-        // 1 0 1 -> 58
-        // 1 0 2 -> 57
-        // 1 1 0 -> 100
-        // 1 1 1 -> 86
-        // 1 1 2 -> 86
-        // 1 2 0 -> 54
-        // 1 2 1 -> 40
-        // 1 2 2 -> 399
-        // 2 0 0 -> 38
-        // 2 0 1 -> 22
-        // 2 0 2 -> 23
-        // 2 1 0 -> 67
-        // 2 1 1 -> 55
-        // 2 1 2 -> 57
-        // 2 2 0 -> 18
-        // 2 2 1 -> 6  <-- lowest
-        // 2 2 2 -> 7
-        problem->set_onebody_penalty( 0, 0, 25 );
-        problem->set_onebody_penalty( 0, 1, 32 );
-        problem->set_onebody_penalty( 0, 2, 0 );
-        problem->set_onebody_penalty( 1, 0, 15 );
-        problem->set_onebody_penalty( 1, 1, 43 );
-        problem->set_onebody_penalty( 1, 2, 0 );
-        problem->set_onebody_penalty( 2, 0, 14 );
-        problem->set_onebody_penalty( 2, 1, 5 );
-        problem->set_onebody_penalty( 2, 2, 0 );
-
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 0 ), 5 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 2 ), 9 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 0 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 2 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 0 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 2 ), 1 );
-
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 0 ), 5 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 2 ), 9 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 0 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 2 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 0 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 1 ), 0 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 2 ), 3 );
-
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 0 ), 7 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 2 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 0 ), 6 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 1 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 2 ), 8 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 0 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 1 ), 0 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 2 ), 3 );
-
-        // Finalize the problem.
-        problem->finalize();
-
         CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
-        problem_container->add_optimization_problem( problem );
+        problem_container->add_optimization_problem(
+            masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem()
+        );
         
         MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
             masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
@@ -212,81 +142,10 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
     REQUIRE_NOTHROW([&](){
 
-        PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >() );
-
-        // We'll create a simple problem with 27 possible solutions:
-        // 0 0 0 -> 71
-        // 0 0 1 -> 54
-        // 0 0 2 -> 58
-        // 0 1 0 -> 96
-        // 0 1 1 -> 83
-        // 0 1 2 -> 88
-        // 0 2 0 -> 55
-        // 0 2 1 -> 42
-        // 0 2 2 -> 46
-        // 1 0 0 -> 76
-        // 1 0 1 -> 58
-        // 1 0 2 -> 57
-        // 1 1 0 -> 100
-        // 1 1 1 -> 86
-        // 1 1 2 -> 86
-        // 1 2 0 -> 54
-        // 1 2 1 -> 40
-        // 1 2 2 -> 399
-        // 2 0 0 -> 38
-        // 2 0 1 -> 22
-        // 2 0 2 -> 23
-        // 2 1 0 -> 67
-        // 2 1 1 -> 55
-        // 2 1 2 -> 57
-        // 2 2 0 -> 18
-        // 2 2 1 -> 6  <-- lowest
-        // 2 2 2 -> 7
-        problem->set_onebody_penalty( 0, 0, 25 );
-        problem->set_onebody_penalty( 0, 1, 32 );
-        problem->set_onebody_penalty( 0, 2, 0 );
-        problem->set_onebody_penalty( 1, 0, 15 );
-        problem->set_onebody_penalty( 1, 1, 43 );
-        problem->set_onebody_penalty( 1, 2, 0 );
-        problem->set_onebody_penalty( 2, 0, 14 );
-        problem->set_onebody_penalty( 2, 1, 5 );
-        problem->set_onebody_penalty( 2, 2, 0 );
-
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 0 ), 5 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 2 ), 9 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 0 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 2 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 0 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 2 ), 1 );
-
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 0 ), 5 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 1 ), 3 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 2 ), 9 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 0 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 2 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 0 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 1 ), 0 );
-        problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 2 ), 3 );
-
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 0 ), 7 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 1 ), 1 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 2 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 0 ), 6 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 1 ), 4 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 2 ), 8 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 0 ), 2 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 1 ), 0 );
-        problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 2 ), 3 );
-
-        // Finalize the problem.
-        problem->finalize();
-
         CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
-        problem_container->add_optimization_problem( problem );
+        problem_container->add_optimization_problem(
+            masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem()
+        );
 
         MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
             masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
@@ -301,7 +160,6 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         mcopt->set_annealing_schedule( *annealing_schedule );
         
         solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
-
 
     }() );
 
