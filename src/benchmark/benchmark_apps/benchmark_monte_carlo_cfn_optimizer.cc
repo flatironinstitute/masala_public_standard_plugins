@@ -149,9 +149,10 @@ main(
         }
 
         // Print the results:
-        tr->write_to_tracer( appname, "THREADS\tTIME(us)\tTIME_STDERR\tMONTE_CARLO_STEPS\tSTEPS/MICROSECOND\tSTEPS/US_STDERR" );
-        tr->write_to_tracer( appname, "-------\t--------\t-----------\t-----------------\t-----------------\t---------------" );
+        tr->write_to_tracer( appname, "THREADS\tTIME(us)\tTIME_STDERR\tMONTE_CARLO_STEPS\tSTEPS/MICROSECOND\tSTEPS/US_STDERR\tEXPECTED_STEPS\tEFFICIENCY" );
+        tr->write_to_tracer( appname, "-------\t--------\t-----------\t-----------------\t-----------------\t---------------\t--------------\t----------" );
         counter = 0;
+        Real avgtime_1(0.0);
         for( Size threadcount(1); threadcount <= nthread_total; ++threadcount ) {
             Real avgtime(0);
             //Real stderr(0);
@@ -160,13 +161,20 @@ main(
                 ++counter;
             }
             avgtime /= static_cast<Real>(total_replicates);
+            if(threadcount == 1) {
+                avgtime_1 = avgtime;
+            }
             std::ostringstream ss;
             ss << std::setw(7) << threadcount << "\t";
             ss << std::setw(8) << avgtime << "\t";
             ss << std::setw(11) << 0.0 << "\t"; // TODO
             ss << std::setw(17) << total_steps * threadcount << "\t";
-            ss << std::setw(17) << static_cast<Real>(total_steps * threadcount)/static_cast<Real>(avgtime) << "\t";
-            ss << std::setw(15) << 0.0; // TODO -- propagate error
+            Real const actual( static_cast<Real>(total_steps * threadcount)/avgtime );
+            ss << std::setw(17) << actual << "\t";
+            ss << std::setw(15) << 0.0 << "\t"; // TODO -- propagate error
+            Real const expected( static_cast<Real>(total_steps * threadcount)/avgtime_1 );
+            ss << std::setw(14) << expected << "\t" ;
+            ss << std::setw(10) << actual/expected ;
             tr->write_to_tracer( appname, ss.str() );
         }
 
