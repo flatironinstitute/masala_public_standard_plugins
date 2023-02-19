@@ -47,6 +47,7 @@
 #include <tuple>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 // Program entry point:
 int
@@ -155,23 +156,29 @@ main(
         Real avgtime_1(0.0);
         for( Size threadcount(1); threadcount <= nthread_total; ++threadcount ) {
             Real avgtime(0);
-            //Real stderr(0);
+            Real std_err(0);
             for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
                 avgtime += static_cast< Real >( std::get<2>(jobs[counter]) );
                 ++counter;
             }
             avgtime /= static_cast<Real>(total_replicates);
+            for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
+                Real const diff(static_cast< Real >( std::get<2>(jobs[counter]) ) - avgtime);
+                std_err += diff*diff;
+            }
+            std_err = std::sqrt(std_err)/static_cast<Real>(total_replicates);
             if(threadcount == 1) {
                 avgtime_1 = avgtime;
             }
             std::ostringstream ss;
             ss << std::setw(7) << threadcount << "\t";
             ss << std::setw(8) << avgtime << "\t";
-            ss << std::setw(11) << 0.0 << "\t"; // TODO
+            ss << std::setw(11) << std_err << "\t";
             ss << std::setw(17) << total_steps * threadcount << "\t";
             Real const actual( static_cast<Real>(total_steps * threadcount)/avgtime );
             ss << std::setw(17) << actual << "\t";
-            ss << std::setw(15) << 0.0 << "\t"; // TODO -- propagate error
+            Real const std_err_actual( actual * std_err / avgtime ); // Propagation of error: if x = C/y, delta_x = x delta_y / y.
+            ss << std::setw(15) << std_err_actual << "\t";
             Real const expected( static_cast<Real>(total_steps * threadcount)/avgtime_1 );
             ss << std::setw(14) << expected << "\t" ;
             ss << std::setw(10) << actual/expected ;
