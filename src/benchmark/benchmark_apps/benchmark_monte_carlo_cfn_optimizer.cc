@@ -117,11 +117,12 @@ main(
         rg->shuffle_vector( jobindices );
 
         // Run a problem on a series of thread counts:
+        counter = 0;
         for( Size const jobindex : jobindices ) {
             std::tuple< Size, Size, Size > & job( jobs[jobindex] );
             Size const threadcount( std::get<0>(job) );
             Size const replicate( std::get<1>(job) );
-            tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads (replicate " + std::to_string(replicate) + " of " + std::to_string(total_replicates) + ")." );
+            tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads (test " + std::to_string(counter+1) + " of " + std::to_string(total_replicates * nthread_total) + ")." );
 
             MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt(
                 masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
@@ -144,6 +145,7 @@ main(
                 std::chrono::steady_clock::now()
             );
             std::get<2>(job) = std::chrono::duration_cast< std::chrono::microseconds >( endtime-starttime ).count();
+            ++counter;
         }
 
         // Print the results:
