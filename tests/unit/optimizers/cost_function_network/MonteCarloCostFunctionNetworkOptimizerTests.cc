@@ -154,7 +154,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
         mcopt->set_annealing_steps_per_attempt(100000);
         mcopt->set_attempts_per_problem(5);
         mcopt->set_n_solutions_to_store_per_problem(5);
-        mcopt->set_cpu_threads_to_request(5);
+        mcopt->set_cpu_threads_to_request(3);
 
         LinearAnnealingSchedule_APISP annealing_schedule( masala::make_shared< LinearAnnealingSchedule_API >() );
         mcopt->set_annealing_schedule( *annealing_schedule );
