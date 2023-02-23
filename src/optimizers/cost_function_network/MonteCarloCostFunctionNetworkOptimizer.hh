@@ -269,7 +269,7 @@ private:
 	/// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
 	/// entry in the vector corresponds to a variable node (in order).
 	/// @param current_absolute_score The absolute score of this solution.
-	/// @param solutions The container of solutions.
+	/// @param solutions The container of solutions.  This should be a thread-local copy.
 	/// @param n_solutions_to_store The number of solutions to store.
 	/// @param replicate_index The index of this replicate for this problem.
 	/// @param problem_index The index of this problem.
@@ -280,7 +280,6 @@ private:
 		std::vector< masala::base::Size > const & current_solution,
 		masala::base::Real current_absolute_score,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-		std::mutex & solutions_mutex,
 		masala::base::Size const n_solutions_to_store,
 		masala::base::Size const replicate_index,
 		masala::base::Size const problem_index,
@@ -316,10 +315,10 @@ private:
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
 
 	/// @brief The mode for checking whether to store a solution.
-	/// @details CHECK_AT_EVERY_STEP promotes diversity at the expense of slower computation,
+	/// @details CHECK_AT_EVERY_STEP (default) promotes diversity at the expense of slower computation,
 	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
 	/// only checks whether to store a solution when it is accepted.
-	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE;
+	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

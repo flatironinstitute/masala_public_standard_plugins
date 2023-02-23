@@ -42,19 +42,24 @@ INCLUDE_DIRECTORIES( SYSTEM ../ ../src/ ../headers/masala/headers/ )
 # Compiler settings and compilation flags:
 INCLUDE( compiler.cmake )
 
-# Generate the build lists for selectors library and its API library:
+# Generate the build lists for the selectors library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
 )
 
-# Generate the build lists for optimizers library and its API library:
+# Generate the build lists for the optimizers library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins optimizers ../src/optimizers cmake_generated/optimizers.cmake cmake_generated/optimizers_api.cmake cmake_generated/optimizers_tests.cmake
 )
 
-# Generate the build lists for registration library and its API library:
+# Generate the build lists for the registration library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins registration ../src/registration cmake_generated/registration.cmake cmake_generated/registration_api.cmake cmake_generated/registration_tests.cmake
+)
+
+# Generate the build lists for the benchmark library and its API library:
+execute_process(
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins benchmark ../src/benchmark cmake_generated/benchmark.cmake NONE NONE
 )
 
 # Build the selectors library:
@@ -69,12 +74,14 @@ INCLUDE( ../build/cmake_generated/optimizers.cmake )
 # Build the optimizers API library:
 INCLUDE( ../build/cmake_generated/optimizers_api.cmake )
 
-
 # Build the registration library:
 INCLUDE( ../build/cmake_generated/registration.cmake )
 
 # Build the registration_api library:
 INCLUDE( ../build/cmake_generated/registration_api.cmake )
+
+# Build the benchmark library:
+INCLUDE( ../build/cmake_generated/benchmark.cmake )
 
 # Build tests for the selectors library.
 INCLUDE( ../build/cmake_generated/selectors_tests.cmake )

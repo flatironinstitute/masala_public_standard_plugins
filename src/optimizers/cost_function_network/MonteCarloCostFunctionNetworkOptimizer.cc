@@ -314,9 +314,9 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > > (
-				"set_solution_storage_mode", "Sets the solution storage mode.  The 'check_at_every_step' option promotes diversity "
+				"set_solution_storage_mode", "Sets the solution storage mode.  The 'check_at_every_step' option (default) promotes diversity "
                 "at the expense of slower computation, checking every solution considered to see whether it should be stored. The "
-                "'check_on_acceptance' option only checks whether to store a solution when it is accepted (default).",
+                "'check_on_acceptance' option only checks whether to store a solution when it is accepted.",
 				"storage_mode_in", "A string representing the solution storage mode.  Options are " + solution_storage_mode_strings( ", ", true ),
                 false, false,
 				std::bind(
@@ -613,6 +613,18 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
 
+    // Make a copy of the solutions container
+    CostFunctionNetworkOptimizationSolutions_APISP solutions_copy;
+    { // Mutex lock scope
+        std::lock_guard< std::mutex > lock( solutions_mutex );
+#ifndef NDEBUG
+		solutions_copy = std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions.deep_clone() );
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solutions_copy != nullptr, "run_mc_trajectory", "Program error: solutions object clone failed!" );
+#else
+        solutions_copy = std::static_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions.deep_clone() );
+#endif
+    }
+
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
@@ -634,7 +646,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         make_mc_move( current_solution, n_choices_per_variable_node, randgen );
-        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) );
+        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
         //     + " old = [" + masala::base::utility::container::container_to_string( last_accepted_solution, "," )
@@ -643,7 +655,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
         if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
-            determine_whether_to_store_solution( current_solution, candidate_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+            determine_whether_to_store_solution(
+                current_solution, candidate_absolute_score, *solutions_copy,
+                n_solutions_to_store, replicate_index, problem_index, problem
+            );
         }
 
         // Apply the Metropolis criterion to accept or reject the move:
@@ -652,7 +667,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             last_accepted_absolute_score = candidate_absolute_score;
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
             if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
-                determine_whether_to_store_solution( current_solution, candidate_absolute_score, solutions, solutions_mutex, n_solutions_to_store, replicate_index, problem_index, problem );
+                determine_whether_to_store_solution(
+                    current_solution, candidate_absolute_score, *solutions_copy,
+                    n_solutions_to_store, replicate_index, problem_index, problem
+                );
             }
         } else {
             current_solution = last_accepted_solution;
@@ -662,8 +680,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
+        solutions.merge_in_lowest_scoring_solutions( *solutions_copy, n_solutions_to_store );
 
-    // Recompute energies of all solutions to correct numerical error.
+        // Recompute energies of all solutions to correct numerical error.
 #ifndef NDEBUG
         solutions.recompute_all_scores( 1.0e-6); // As a sanity check, make sure numerical errors are small.
 #else
@@ -712,8 +731,7 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 /// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
 /// entry in the vector corresponds to a variable node (in order).
 /// @param current_absolute_score The absolute score of this solution.
-/// @param solutions The container of solutions.
-/// @param solutions_mutex A mutex for locking and keeping locked the solutions collection.
+/// @param solutions The container of solutions.  This should be a thread-local copy.
 /// @param n_solutions_to_store The number of solutions to store.
 /// @param replicate_index The index of this replicate for this problem.
 /// @param problem_index The index of this problem.
@@ -724,7 +742,6 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     std::vector< masala::base::Size > const & current_solution,
     masala::base::Real current_absolute_score,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-    std::mutex & solutions_mutex,
     masala::base::Size const n_solutions_to_store,
     masala::base::Size const replicate_index,
     masala::base::Size const problem_index,
@@ -733,9 +750,6 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     using masala::base::Size;
     using masala::base::Real;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-
-    // Lock this solutions container.
-    std::lock_guard< std::mutex > lock( solutions_mutex );
 
     // If the solution has already been seen, increment the number of times we have seen it.
     // Simultaneously, find the highest score solution that we have stored.
