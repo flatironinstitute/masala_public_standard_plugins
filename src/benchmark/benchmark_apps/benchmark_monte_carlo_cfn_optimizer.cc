@@ -77,7 +77,7 @@ main(
 #ifndef NDEBUG
         Size const total_steps( 100000 ); // Do a hundred thousand Monte Carlo steps for each threadcount in debug mode.
 #else
-        Size const total_steps( 200000 ); // Do two hundred thousand Monte Carlo steps for each threadcount in release mode.
+        Size const total_steps( 1000000 ); // Do a million Monte Carlo steps for each threadcount in release mode.
 #endif
 
         Size const nthread_total( tm->hardware_threads() );
