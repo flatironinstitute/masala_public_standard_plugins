@@ -613,8 +613,15 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
 
-    // Make a local copy of the solutions container
-    CostFunctionNetworkOptimizationSolutions_APISP solutions_copy( masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >() );
+    // Store local solutions as a vector of tuples of (solution vector, score, count of times seen)
+    std::vector<
+        std::tuple<
+            std::vector< Size >, // Solution vector.
+            Real, // Solution score.
+            Size // Number of times seen.
+        >
+    > local_solutions;
+    local_solutions.reserve( n_solutions_to_store );
 
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
@@ -647,8 +654,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
         if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
             determine_whether_to_store_solution(
-                current_solution, candidate_absolute_score, *solutions_copy,
-                n_solutions_to_store, replicate_index, problem_index, problem
+                current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
             );
         }
 
@@ -659,8 +665,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
             if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
-                    current_solution, candidate_absolute_score, *solutions_copy,
-                    n_solutions_to_store, replicate_index, problem_index, problem
+                    current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
                 );
             }
         } else {
@@ -671,7 +676,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
-        solutions.merge_in_lowest_scoring_solutions( *solutions_copy, n_solutions_to_store );
+        solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
 
         // Recompute energies of all solutions to correct numerical error.
 #ifndef NDEBUG
@@ -722,21 +727,16 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 /// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
 /// entry in the vector corresponds to a variable node (in order).
 /// @param current_absolute_score The absolute score of this solution.
-/// @param solutions The container of solutions.  This should be a thread-local copy.
+/// @param solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
+/// each tuple is ( solution vector for variable nodes, solution score, number of times solution was seen ).
 /// @param n_solutions_to_store The number of solutions to store.
-/// @param replicate_index The index of this replicate for this problem.
-/// @param problem_index The index of this problem.
-/// @param problem The problem description.  A const shared pointer to the problem will be embedded in the solution.
 /*static*/
 void
 MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     std::vector< masala::base::Size > const & current_solution,
     masala::base::Real current_absolute_score,
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-    masala::base::Size const n_solutions_to_store,
-    masala::base::Size const replicate_index,
-    masala::base::Size const problem_index,
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
+    std::vector< std::tuple < std::vector< masala::base::Size >, masala::base::Real, masala::base::Size > > & solutions,
+    masala::base::Size const n_solutions_to_store
 ) {
     using masala::base::Size;
     using masala::base::Real;
@@ -747,32 +747,32 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     bool first(true);
     Real highestE(0.0);
     Size highestE_index(0);
-    for( Size i(0), imax(solutions.n_solutions()); i<imax; ++i ) {
-        if( solutions.solution_matches( i, current_solution ) ) {
-            solutions.increment_n_times_solution_was_produced(i);
+    for( Size i(0), imax(solutions.size()); i<imax; ++i ) {
+        if( std::get<0>(solutions[i]) == current_solution ) {
+            std::get<2>(solutions[i]) += 1;
             return;
         }
-        if( first || solutions.solution_score(i) > highestE ) {
+        if( first || std::get<1>(solutions[i]) > highestE ) {
             first = false;
-            highestE = solutions.solution_score(i);
+            highestE = std::get<1>(solutions[i]);
             highestE_index = i;
         }
     }
 
     // If we reach here, we've not yet seen this solution.  If we're supposed to store more solutions
     // than we are currently storing, store this one.
-    if( solutions.n_solutions() < n_solutions_to_store ) {
-        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) ); // HEAP-LOCKING HERE HURTS MULTI-THREADED PERFORMANCE.
+    if( solutions.size() < n_solutions_to_store ) {
+        solutions.push_back( std::make_tuple( current_solution, current_absolute_score, 1 ) );
         return;
     }
 
     // If we reach here, we have a full solution vector.  We only store this solution (and kick out the highest-energy solution)
     // if this solution is lower energy than the highest energy.
     if( current_absolute_score < highestE ) {
-        solutions.remove_optimization_solution( highestE_index );
-        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) ); // HEAP-LOCKING HERE HURTS MULTI-THREADED PERFORMANCE.
+        std::get<0>(solutions[highestE_index]) = current_solution;
+        std::get<1>(solutions[highestE_index]) = current_absolute_score;
+        std::get<2>(solutions[highestE_index]) = 1;
     }
-
 }
 
 
