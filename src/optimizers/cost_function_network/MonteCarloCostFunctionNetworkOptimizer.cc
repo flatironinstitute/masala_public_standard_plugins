@@ -613,19 +613,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
 
-    // Make a copy of the solutions container
-    CostFunctionNetworkOptimizationSolutions_APISP solutions_copy;
-    { // Mutex lock scope
-        std::lock_guard< std::mutex > lock( solutions_mutex );
-#ifndef NDEBUG
-		solutions_copy = std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions.deep_clone() );
-		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solutions_copy != nullptr, "run_mc_trajectory", "Program error: solutions object clone failed!" );
-#else
-        solutions_copy = std::static_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions.deep_clone() );
-#endif
-        // We cloned to ensure correct type.  However, we still need to clear this object, or the counts will be wrong.
-        solutions_copy->reset();
-    }
+    // Make a local copy of the solutions container
+    CostFunctionNetworkOptimizationSolutions_APISP solutions_copy( masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >() );
 
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
