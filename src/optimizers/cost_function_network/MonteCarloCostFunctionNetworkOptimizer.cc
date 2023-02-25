@@ -623,6 +623,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 #else
         solutions_copy = std::static_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions.deep_clone() );
 #endif
+        // We cloned to ensure correct type.  However, we still need to clear this object, or the counts will be wrong.
+        solutions_copy->reset();
     }
 
     /// Selection for the solution:
@@ -771,7 +773,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     // If we reach here, we've not yet seen this solution.  If we're supposed to store more solutions
     // than we are currently storing, store this one.
     if( solutions.n_solutions() < n_solutions_to_store ) {
-        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) );
+        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) ); // HEAP-LOCKING HERE HURTS MULTI-THREADED PERFORMANCE.
         return;
     }
 
@@ -779,7 +781,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     // if this solution is lower energy than the highest energy.
     if( current_absolute_score < highestE ) {
         solutions.remove_optimization_solution( highestE_index );
-        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) );
+        solutions.add_optimization_solution( masala::make_shared< CostFunctionNetworkOptimizationSolution_API >( problem, current_solution, current_absolute_score ) ); // HEAP-LOCKING HERE HURTS MULTI-THREADED PERFORMANCE.
     }
 
 }
