@@ -269,21 +269,16 @@ private:
 	/// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
 	/// entry in the vector corresponds to a variable node (in order).
 	/// @param current_absolute_score The absolute score of this solution.
-	/// @param solutions The container of solutions.  This should be a thread-local copy.
+	/// @param solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
+	/// each tuple is ( solution vector for variable nodes, solution score, number of times solution was seen ).
 	/// @param n_solutions_to_store The number of solutions to store.
-	/// @param replicate_index The index of this replicate for this problem.
-	/// @param problem_index The index of this problem.
-	/// @param problem The problem description.  A const shared pointer to the problem will be embedded in the solution.
 	static
 	void
 	determine_whether_to_store_solution(
 		std::vector< masala::base::Size > const & current_solution,
 		masala::base::Real current_absolute_score,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
-		masala::base::Size const n_solutions_to_store,
-		masala::base::Size const replicate_index,
-		masala::base::Size const problem_index,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
+		std::vector< std::tuple < std::vector< masala::base::Size >, masala::base::Real, masala::base::Size > > & solutions,
+		masala::base::Size const n_solutions_to_store
 	);
 
 private:
