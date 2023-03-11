@@ -122,7 +122,6 @@ main(
         for( Size const jobindex : jobindices ) {
             std::tuple< Size, Size, Size > & job( jobs[jobindex] );
             Size const threadcount( std::get<0>(job) );
-            Size const replicate( std::get<1>(job) );
             tr->write_to_tracer( appname, "Running test problem on " + std::to_string(threadcount) + " threads (test " + std::to_string(counter+1) + " of " + std::to_string(total_replicates * nthread_total) + ")." );
 
             MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt(
