@@ -24,8 +24,8 @@
 #include <selectors/atom_selectors/ElementTypeAtomSelector.hh>
 
 // Core API headers:
-#include <core_api/auto_generated_api/pose/Pose_API.hh>
-#include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
+#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
+#include <core_api/auto_generated_api/chemistry/MolecularGeometry_API.hh>
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstance_API.hh>
 #include <core_api/auto_generated_api/chemistry/atoms/AtomInstanceConstIterator_API.hh>
 #include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.hh>
@@ -71,10 +71,10 @@ ElementTypeAtomSelector::make_independent() {
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Given the current pose, generate the atom selection.
+/// @brief Given the current molecular system, generate the atom selection.
 masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 ElementTypeAtomSelector::generate_atom_selection(
-	masala::core_api::auto_generated_api::pose::Pose_API const & pose
+	masala::core_api::auto_generated_api::molecular_system::MolecularSystem_API const & molecular_system
 ) const {
 	using masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_API;
 	using masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APISP;
@@ -82,8 +82,8 @@ ElementTypeAtomSelector::generate_atom_selection(
 	AtomSelection_APISP selection( masala::make_shared< AtomSelection_API >() );
 
 	for(
-		auto atom( pose.molecules_shared_ptr()->atoms_begin() );
-		atom != pose.molecules_shared_ptr()->atoms_end();
+		auto atom( molecular_system.molecular_geometry_shared_ptr()->atoms_begin() );
+		atom != molecular_system.molecular_geometry_shared_ptr()->atoms_end();
 		++atom
 	) {
 		if( atom.ptr()->element_type_enum() == element_ ) {
@@ -160,7 +160,7 @@ ElementTypeAtomSelector::get_api_definition() {
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::work_function;
 	using namespace masala::core_api::base_classes::selectors::atom_selectors;
-	using namespace masala::core_api::auto_generated_api::pose;
+	using namespace masala::core_api::auto_generated_api::molecular_system;
 	using namespace masala::core_api::auto_generated_api::selection::atom_selection;
 
 	if( api_description_ == nullptr ) {
@@ -183,11 +183,11 @@ ElementTypeAtomSelector::get_api_definition() {
 			)
 		);
 		api_description->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelection_APICSP, Pose_API const & > >(
-				"generate_atom_selection", "Given a pose, generate a selection of atoms, by element type.",
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelection_APICSP, MolecularSystem_API const & > >(
+				"generate_atom_selection", "Given a molecular system, generate a selection of atoms, by element type.",
 				true, false, true, false,
-				"pose", "An input pose, for which a selection will be generated.",
-				"atom_selection", "A selection of atoms generated from the input pose, by element type.",
+				"molecular_system", "An input molecular system, for which a selection will be generated.",
+				"atom_selection", "A selection of atoms generated from the input molecular system, by element type.",
 				std::bind( &ElementTypeAtomSelector::generate_atom_selection, this, std::placeholders::_1 )
 			)
 		);
