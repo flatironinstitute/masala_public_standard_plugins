@@ -28,8 +28,7 @@
 #include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.hh>
 
 // Core headers:
-#include <core_api/auto_generated_api/pose/Pose_API.hh>
-#include <core_api/auto_generated_api/chemistry/Molecules_API.hh>
+#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -46,16 +45,16 @@ TEST_CASE( "Instantiate an ElementTypeAtomSelector", "[standard_masala_plugins::
     }() );
 }
 
-TEST_CASE( "Select oxygen atoms in an empty pose", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][selection][apply]" ) {
+TEST_CASE( "Select oxygen atoms in an empty molecular system", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][selection][apply]" ) {
     using namespace selectors_api::auto_generated_api::atom_selectors;
-    using namespace masala::core_api::auto_generated_api::pose;
+    using namespace masala::core_api::auto_generated_api::molecular_system;
     using namespace masala::core_api::auto_generated_api::selection::atom_selection;
 
     AtomSelection_APICSP selection;
     REQUIRE_NOTHROW([&](){
         ElementTypeAtomSelector_APISP elemsel( masala::make_shared< ElementTypeAtomSelector_API >() );
-        Pose_APISP pose( masala::make_shared< Pose_API >() );
-        selection = elemsel->generate_atom_selection( *pose );
+        MolecularSystem_APISP molecular_system( masala::make_shared< MolecularSystem_API >() );
+        selection = elemsel->generate_atom_selection( *molecular_system );
     }() );
     REQUIRE( selection->num_selected_atoms() == 0 );
 }

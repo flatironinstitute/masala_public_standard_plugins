@@ -76,10 +76,10 @@ public:
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Given the current pose, generate the atom selection.
+	/// @brief Given the current molecular system, generate the atom selection.
 	masala::core_api::auto_generated_api::selection::atom_selection::AtomSelection_APICSP
 	generate_atom_selection(
-		masala::core_api::auto_generated_api::pose::Pose_API const & pose
+		masala::core_api::auto_generated_api::molecular_system::MolecularSystem_API const & molecular_system
 	) const override;
 
 	/// @brief Set the element type, by string.
