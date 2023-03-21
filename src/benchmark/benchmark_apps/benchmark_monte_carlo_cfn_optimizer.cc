@@ -184,7 +184,7 @@ main(
             tr->write_to_tracer( appname, ss.str() );
         }
 
-    } catch( masala::base::error::MasalaException const e ) {
+    } catch( masala::base::error::MasalaException const & e ) {
         tr->write_to_tracer( appname, "Caught Masala exception: " + e. message() );
         return 1;
     }
