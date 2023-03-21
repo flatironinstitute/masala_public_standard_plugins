@@ -1,8 +1,8 @@
-base
-numeric
-numeric_api
-core_api
-selectors
-selectors_api
-registration
-registration_api
+masala_base
+masala_numeric
+masala_numeric_api
+masala_core_api
+standard_masala_plugins_selectors
+standard_masala_plugins_selectors_api
+standard_masala_plugins_registration
+standard_masala_plugins_registration_api
