@@ -469,7 +469,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name(
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
     MasalaPluginAPISP plugin(
-        plugman->create_plugin_object_instance_by_short_name( schedule, std::vector< std::string >{ "AnnealingSchedule" }, true )
+        plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{ "AnnealingSchedule" }, schedule, true )
     );
     AnnealingScheduleBase_APISP annsched( std::dynamic_pointer_cast< AnnealingScheduleBase_API >( plugin ) );
     CHECK_OR_THROW_FOR_CLASS( annsched != nullptr, "set_annealing_schedule_by_name", "Program error getting annealing schedule of type \""
