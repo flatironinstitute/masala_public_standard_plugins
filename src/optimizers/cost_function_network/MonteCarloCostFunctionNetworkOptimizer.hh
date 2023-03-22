@@ -177,6 +177,11 @@ public:
 	/// @details Cloned on input.
 	void set_annealing_schedule( masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in );
 
+	/// @brief Set the annealing schedule by name.
+	/// @details Namespace is not required unless the name is not unique.  Throws if
+	/// the name is not found at all in the plugin manager.
+	void set_annealing_schedule_by_name( std::string const & schedule );
+
 	/// @brief Set the numer of Monte Carlo moves to make in each attempt.
 	void set_annealing_steps_per_attempt( masala::base::Size const steps_in );
 
@@ -205,6 +210,13 @@ public:
 
 	/// @brief Get the numer of Monte Carlo moves to make in each attempt.
 	masala::base::Size annealing_steps_per_attempt() const;
+
+	/// @brief Access the annealing schedule (to allow it to be configured).
+	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API & annealing_schedule();
+
+	/// @brief Const access to the annealing schedule (to allow its configuration to be examined).
+	/// @details The annealing schedule must be set before this is called.  Throws otherwise.
+	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule() const;
 
 public:
 

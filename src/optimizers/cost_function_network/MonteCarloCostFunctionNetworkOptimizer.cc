@@ -46,6 +46,7 @@
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
+#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -428,6 +429,31 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
     annealing_schedule_->reset_call_count();
 }
 
+/// @brief Set the annealing schedule by name.
+/// @details Namespace is not required unless the name is not unique.  Throws if
+/// the name is not found at all in the plugin manager.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name(
+    std::string const & schedule
+) {
+    using namespace masala::base::managers::plugin_module;
+    using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
+    MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+    MasalaPluginAPISP plugin(
+        plugman->create_plugin_object_instance_by_short_name( schedule, std::vector< std::string >{ "AnnealingSchedule" }, true )
+    );
+    AnnealingScheduleBase_APISP annsched( std::dynamic_pointer_cast< AnnealingScheduleBase_API >( plugin ) );
+    CHECK_OR_THROW_FOR_CLASS( annsched != nullptr, "set_annealing_schedule_by_name", "Program error getting annealing schedule of type \""
+        + schedule + "\".  The returned object was not an annealing schedule."
+    );
+    {
+        std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+        annealing_schedule_ = annsched;
+        annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+        annealing_schedule_->reset_call_count();
+    }
+}
+
 /// @brief Set the numer of Monte Carlo moves to make in each attempt.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
@@ -502,6 +528,22 @@ masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return annealing_steps_per_attempt_;
+}
+
+/// @brief Access the annealing schedule (to allow it to be configured).
+/// @details The annealing schedule must be set before this is called.  Throws otherwise.
+masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
+MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() {
+    CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
+    return *annealing_schedule_;
+}
+
+/// @brief Const access to the annealing schedule (to allow its configuration to be examined).
+/// @details The annealing schedule must be set before this is called.  Throws otherwise.
+masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const &
+MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
+    CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
+    return *annealing_schedule_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
