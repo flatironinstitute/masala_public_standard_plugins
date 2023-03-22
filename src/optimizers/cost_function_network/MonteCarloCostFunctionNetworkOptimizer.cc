@@ -41,6 +41,7 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
@@ -306,6 +307,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
 			)
 		);
+        std::string const available_annealing_schedules(
+            masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
+                std::vector< std::string >{ "AnnealingSchedule" }, true
+            )
+        );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+                "set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  The name need not include namespace unless "
+                "there is a name conflict.  Available annealing schedules include: "
+                + available_annealing_schedules + ".", "annealing_schedule_name", "The name of the annealing schedule.",
+                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
+            )
+        );
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_annealing_steps_per_attempt", "Sets the length of the Monte Carlo trajectory performed for each attempt of each problem.",
@@ -358,8 +372,23 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt, this )
 			)
 		);
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & > > (
+                "annealing_schedule", "Allows const access to the annealing schedule, to allow its parameters to be examined.  Not threadsafe!",
+                "annealing_schedule", "A const reference to the annealing schedule.", false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_schedule, this )
+            )
+        );
 
         // Work functions:
+        api_description->add_work_function(
+            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API & > > (
+                "annealing_schedule_nonconst", "Allows nonconst access to the annealing schedule, to allow its parameters to be configured.  Not threadsafe!",
+                false, false, false, false,
+                "annealing_schedule", "A nonconst reference to the annealing schedule.",
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_schedule_nonconst, this )
+            )
+        );
         api_description->add_work_function(
             masala::make_shared<
                 MasalaObjectAPIWorkFunctionDefinition_OneInput<
@@ -530,14 +559,6 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
     return annealing_steps_per_attempt_;
 }
 
-/// @brief Access the annealing schedule (to allow it to be configured).
-/// @details The annealing schedule must be set before this is called.  Throws otherwise.
-masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
-MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() {
-    CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
-    return *annealing_schedule_;
-}
-
 /// @brief Const access to the annealing schedule (to allow its configuration to be examined).
 /// @details The annealing schedule must be set before this is called.  Throws otherwise.
 masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const &
@@ -549,6 +570,14 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Access the annealing schedule by nonconst reference (to allow it to be configured).
+/// @details The annealing schedule must be set before this is called.  Throws otherwise.
+masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
+MonteCarloCostFunctionNetworkOptimizer::annealing_schedule_nonconst() {
+    CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
+    return *annealing_schedule_;
+}
 
 /// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 /// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to

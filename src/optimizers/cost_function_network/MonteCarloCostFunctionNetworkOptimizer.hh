@@ -211,9 +211,6 @@ public:
 	/// @brief Get the numer of Monte Carlo moves to make in each attempt.
 	masala::base::Size annealing_steps_per_attempt() const;
 
-	/// @brief Access the annealing schedule (to allow it to be configured).
-	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API & annealing_schedule();
-
 	/// @brief Const access to the annealing schedule (to allow its configuration to be examined).
 	/// @details The annealing schedule must be set before this is called.  Throws otherwise.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule() const;
@@ -223,6 +220,10 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Access the annealing schedule by nonconst reference (to allow it to be configured).
+	/// @details The annealing schedule must be set before this is called.  Throws otherwise.
+	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API & annealing_schedule_nonconst();
 
 	/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
