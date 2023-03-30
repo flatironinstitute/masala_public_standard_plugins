@@ -217,7 +217,7 @@ TEST_CASE( "Solve a problem with a squared nonlinear count function using the Mo
 
             CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
             problem_container->add_optimization_problem(
-                masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_choice_count_penalties()
+                masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_choice_count_penalties( gapped )
             );
 
             MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
