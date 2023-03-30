@@ -138,54 +138,61 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
     masala::base::managers::threads::MasalaThreadManager::get_instance()->set_total_threads(5);
 
-    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
+    for( auto const gapped : std::vector< bool >{ false, true } ) {
 
-    REQUIRE_NOTHROW([&](){
+        std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
 
-        CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
-        problem_container->add_optimization_problem(
-            masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem()
-        );
+        REQUIRE_NOTHROW([&](){
 
-        MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
-            masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
-        );
-        mcopt->set_solution_storage_mode( "check_at_every_step" );
-        mcopt->set_annealing_steps_per_attempt(100000);
-        mcopt->set_attempts_per_problem(5);
-        mcopt->set_n_solutions_to_store_per_problem(5);
-        mcopt->set_cpu_threads_to_request(3);
+            CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
+            problem_container->add_optimization_problem(
+                masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem( gapped )
+            );
 
-        LinearAnnealingSchedule_APISP annealing_schedule( masala::make_shared< LinearAnnealingSchedule_API >() );
-        mcopt->set_annealing_schedule( *annealing_schedule );
+            MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
+                masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >()
+            );
+            mcopt->set_solution_storage_mode( "check_at_every_step" );
+            mcopt->set_annealing_steps_per_attempt(100000);
+            mcopt->set_attempts_per_problem(5);
+            mcopt->set_n_solutions_to_store_per_problem(5);
+            mcopt->set_cpu_threads_to_request(3);
+
+            LinearAnnealingSchedule_APISP annealing_schedule( masala::make_shared< LinearAnnealingSchedule_API >() );
+            mcopt->set_annealing_schedule( *annealing_schedule );
+            
+            solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
+
+        }() );
+
+        MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ( gapped ? "Gapped results" : "Ungapped results" ) );
+        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
+        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
+        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+
+        for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
+            CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
+            CHECK( solution != nullptr );
+            std::ostringstream ss;
+            ss << std::setw(8) << i << "\t"
+                << std::setw(10) << solution->n_times_solution_was_produced() << "\t"
+                << std::setw(5) << solution->solution_score() << "\t"
+                << "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
+            tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ss.str() );
+        }
+
+        CHECK( solutions.size() == 1 );
+        CHECK( solutions[0]->n_solutions() == 5 );
         
-        solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
+        masala::base::Real const gap_offset( gapped ? 17.0 : 0.0 );
+        CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 6.0 - gap_offset ) < 1.0e-8 );
+        CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 7.0 - gap_offset ) < 1.0e-8 );
+        CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 18.0 - gap_offset ) < 1.0e-8 );
+        CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22.0 - gap_offset ) < 1.0e-8 );
+        CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23.0 - gap_offset ) < 1.0e-8 );
 
-    }() );
-
-    MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
-    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
-    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
-    tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
-
-    for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
-        CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
-        CHECK( solution != nullptr );
-        std::ostringstream ss;
-        ss << std::setw(8) << i << "\t"
-            << std::setw(10) << solution->n_times_solution_was_produced() << "\t"
-            << std::setw(5) << solution->solution_score() << "\t"
-            << "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
-        tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ss.str() );
     }
-
-    CHECK( solutions.size() == 1 );
-    CHECK( solutions[0]->n_solutions() == 5 );
-    CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 6.0 ) < 1.0e-8 );
-    CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 7.0 ) < 1.0e-8 );
-    CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 18.0 ) < 1.0e-8 );
-    CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22.0 ) < 1.0e-8 );
-    CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23.0 ) < 1.0e-8 );
 
     optimizers_api::auto_generated_api::registration::unregister_optimizers();
     masala::numeric_api::auto_generated_api::registration::unregister_numeric();
