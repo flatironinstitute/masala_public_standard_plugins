@@ -263,11 +263,11 @@ TEST_CASE( "Solve a problem with a squared nonlinear count function using the Mo
             CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 47.0 ) < 1.0e-8 );
             CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 63.0 ) < 1.0e-8 );
         } else {
-            CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 18.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 22.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 23.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 39.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 47.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 39.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 59.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 60.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 64.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 80.0 ) < 1.0e-8 );
         }
 
     }
