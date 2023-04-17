@@ -24,6 +24,8 @@
 #include <registration/register_sub_libraries.hh>
 
 #include <base/managers/tracer/MasalaTracerManager.hh>
+#include <base/managers/version/MasalaModuleVersionInfo.hh>
+#include <base/managers/version/MasalaVersionManager.hh>
 
 namespace standard_masala_plugins {
 namespace registration_api {
@@ -32,9 +34,28 @@ namespace registration_api {
 extern "C"
 void
 register_library() {
+    using namespace masala::base::managers::version;
+    using masala::base::Size;
     masala::base::managers::tracer::MasalaTracerManager::get_instance()->write_to_tracer(
         "standard_masala_plugins::registration_api::register_library", "Registering standard Masala plugins."
     );
+
+    MasalaModuleVersionInfoSP module_version_info(
+        masala::make_shared< MasalaModuleVersionInfo >(
+            "Standard Masala Plugins",
+            std::pair< Size, Size >( 0, 1 )
+        )
+    );
+    module_version_info->add_requirement_with_minimum_and_maximum_version(
+        "Masala",
+        true,
+        std::pair< Size, Size >( 0, 1 ), // Min version
+        std::pair< Size, Size >( 0, 1 ), // Max version
+        "", "", "After version 0.1, Masala's SquareOfChoicePenaltySumCostFunction and "
+        "FunctionOfIntegerPenaltySumCostFunction will be moved to the Standard Masala "
+        "Plugins library."
+    );
+    MasalaVersionManager::get_instance()->add_library_information( module_version_info );
     standard_masala_plugins::registration::register_sub_libraries();
 }
 
@@ -42,9 +63,11 @@ register_library() {
 extern "C"
 void
 unregister_library() {
+    using namespace masala::base::managers::version;
     masala::base::managers::tracer::MasalaTracerManager::get_instance()->write_to_tracer(
         "standard_masala_plugins::registration_api::register_library", "Unregistering standard Masala plugins."
     );
+    MasalaVersionManager::get_instance()->remove_library_information( "Standard Masala Plugins" );
     standard_masala_plugins::registration::unregister_sub_libraries();
 }
 
