@@ -25,6 +25,7 @@
 #include <external/catch2/single_include/catch2/catch.hpp>
 
 // Unit headers:
+#include <base/managers/environment/MasalaEnvironmentManager.hh>
 #include <base/managers/version/MasalaVersionManager.hh>
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 #include <base/managers/plugin_module/MasalaPluginLibraryManager.hh>
@@ -44,6 +45,37 @@ TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins
         MasalaVersionManagerHandle vm( MasalaVersionManager::get_instance() );
         n_before = vm->n_modules_registered();
         standard_masala_plugins::registration_api::register_library();
+        n_registered = vm->n_modules_registered();
+        standard_masala_plugins::registration_api::unregister_library();
+        n_after = vm->n_modules_registered();
+    }() );
+
+    CHECK( n_before == 1 );
+    CHECK( n_registered == 2 );
+    CHECK( n_after == 1 );
+}
+
+TEST_CASE( "Register and check version compatibility using MasalaLibraryManager", "[standard_masala_plugins::registration_api::register_library][registration][MasalaEnvironmentManager][MasalaPluginLibraryManager][MasalaVersionManager]" ) {
+    using namespace masala::base::managers::environment;
+    using namespace masala::base::managers::version;
+    using namespace masala::base::managers::plugin_module;
+
+    masala::base::Size n_before, n_registered, n_after;
+    REQUIRE_NOTHROW([&](){
+        MasalaEnvironmentManagerHandle envman( MasalaEnvironmentManager::get_instance() );
+        std::string libpath;
+        CHECK_OR_THROW(
+            envman->get_environment_variable( "MASALA_STANDARD_PLUGINS", libpath ),
+            "tests::unit::registration::version_manager::RegistrationVersionCheckTests",
+            "Register_and_check_version_compatibility_using_MasalaLibraryManager",
+            "The MASALA_STANDARD_PLUGINS environment variable must point to the directory "
+            "of the standard Masala plugins repository for this test."
+        );
+        MasalaPluginLibraryManagerHandle libman( MasalaPluginLibraryManager::get_instance() );
+    
+        MasalaVersionManagerHandle vm( MasalaVersionManager::get_instance() );
+        n_before = vm->n_modules_registered();
+        libman->load_and_register_plugin_libraries_in_subdirectories( libpath, true );
         n_registered = vm->n_modules_registered();
         standard_masala_plugins::registration_api::unregister_library();
         n_after = vm->n_modules_registered();
