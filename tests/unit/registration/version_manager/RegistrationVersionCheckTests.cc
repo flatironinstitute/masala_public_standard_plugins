@@ -26,7 +26,10 @@
 
 // Unit headers:
 #include <base/managers/version/MasalaVersionManager.hh>
+#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
+#include <base/managers/plugin_module/MasalaPluginLibraryManager.hh>
 #include <src/registration_api/register_library.hh>
+#include <src/optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -34,7 +37,7 @@ namespace unit {
 namespace registration {
 namespace version_manager {
 
-TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginLibraryManager][MasalaVersionManager][MasalaPluginModuleManager]" ) {
+TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginLibraryManager][MasalaVersionManager]" ) {
     using namespace masala::base::managers::version;
     masala::base::Size n_before, n_registered, n_after;
     REQUIRE_NOTHROW([&](){
@@ -49,6 +52,23 @@ TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins
     CHECK( n_before == 1 );
     CHECK( n_registered == 2 );
     CHECK( n_after == 1 );
+}
+
+TEST_CASE( "Register and check that plugins were registered", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginLibraryManager][MasalaPluginModuleManager]" ) {
+    using namespace masala::base::managers::plugin_module;
+    masala::base::Size n_plugins_before, n_plugins_registered, n_plugins_after;
+    REQUIRE_NOTHROW([&](){
+        MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
+        n_plugins_before = pm->get_all_plugin_list().size();
+        standard_masala_plugins::registration_api::register_library();
+        n_plugins_registered = pm->get_all_plugin_list().size();
+        standard_masala_plugins::registration_api::unregister_library();
+        n_plugins_after = pm->get_all_plugin_list().size();
+    }() );
+
+    CHECK( n_plugins_registered > n_plugins_before );
+    CHECK( n_plugins_registered - n_plugins_before >= 4 ); // This library defines at least 4 plugins.
+    CHECK( n_plugins_after == n_plugins_before );
 }
 
 
