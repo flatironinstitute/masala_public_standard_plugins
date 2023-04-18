@@ -38,7 +38,7 @@ namespace unit {
 namespace registration {
 namespace version_manager {
 
-TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginLibraryManager][MasalaVersionManager]" ) {
+TEST_CASE( "Register and check version compatibility", "[standard_masala_plugins::registration_api::register_library][registration][MasalaVersionManager]" ) {
     using namespace masala::base::managers::version;
     masala::base::Size n_before, n_registered, n_after;
     REQUIRE_NOTHROW([&](){
@@ -86,13 +86,43 @@ TEST_CASE( "Register and check version compatibility using MasalaLibraryManager"
     CHECK( n_after == 1 );
 }
 
-TEST_CASE( "Register and check that plugins were registered", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginLibraryManager][MasalaPluginModuleManager]" ) {
+TEST_CASE( "Register and check that plugins were registered", "[standard_masala_plugins::registration_api::register_library][registration][MasalaPluginModuleManager]" ) {
     using namespace masala::base::managers::plugin_module;
     masala::base::Size n_plugins_before, n_plugins_registered, n_plugins_after;
     REQUIRE_NOTHROW([&](){
         MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
         n_plugins_before = pm->get_all_plugin_list().size();
         standard_masala_plugins::registration_api::register_library();
+        n_plugins_registered = pm->get_all_plugin_list().size();
+        standard_masala_plugins::registration_api::unregister_library();
+        n_plugins_after = pm->get_all_plugin_list().size();
+    }() );
+
+    CHECK( n_plugins_registered > n_plugins_before );
+    CHECK( n_plugins_registered - n_plugins_before >= 4 ); // This library defines at least 4 plugins.
+    CHECK( n_plugins_after == n_plugins_before );
+}
+
+TEST_CASE( "Register and check that plugins were registered using MasalaLibraryManager", "[standard_masala_plugins::registration_api::register_library][registration][MasalaEnvironmentManager][MasalaPluginLibraryManager][MasalaPluginModuleManager]" ) {
+    using namespace masala::base::managers::environment;
+    using namespace masala::base::managers::plugin_module;
+
+    masala::base::Size n_plugins_before, n_plugins_registered, n_plugins_after;
+    REQUIRE_NOTHROW([&](){
+        MasalaEnvironmentManagerHandle envman( MasalaEnvironmentManager::get_instance() );
+        std::string libpath;
+        CHECK_OR_THROW(
+            envman->get_environment_variable( "MASALA_STANDARD_PLUGINS", libpath ),
+            "tests::unit::registration::version_manager::RegistrationVersionCheckTests",
+            "Register_and_check_version_compatibility_using_MasalaLibraryManager",
+            "The MASALA_STANDARD_PLUGINS environment variable must point to the directory "
+            "of the standard Masala plugins repository for this test."
+        );
+        MasalaPluginLibraryManagerHandle libman( MasalaPluginLibraryManager::get_instance() );
+
+        MasalaPluginModuleManagerHandle pm( MasalaPluginModuleManager::get_instance() );
+        n_plugins_before = pm->get_all_plugin_list().size();
+        libman->load_and_register_plugin_libraries_in_subdirectories( libpath, true );
         n_plugins_registered = pm->get_all_plugin_list().size();
         standard_masala_plugins::registration_api::unregister_library();
         n_plugins_after = pm->get_all_plugin_list().size();
