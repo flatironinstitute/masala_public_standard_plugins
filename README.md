@@ -15,3 +15,8 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
 3.  Set up simlinks to the dylib files or so files in your masala build directory.  For instance `cd ~/myprojects/standard_masala_plugins/lib && for f in \`ls -1 ~/my_projects/masala/build/*.dylib\`; do ln -s $f .; done && cd ..`
 4.  Set up a simlink to the external/ directory.  For instance: `ln -s ~/my_projects/masala/external ~/my_projects/standard_masala_plugins/`
 5.  Set up a simlink to the code_templates/ directory.  For instance: `ln -s ~/my_projects/masala/code_templates ~/my_projects/standard_masala_plugins/`
+
+## Compilation
+
+- Note that default compilation is in debug mode.
+- To compile in release mode, edit cmake/CMakeLists.txt, comment out the two "debug" lines, and uncomment the two "release" lines.
