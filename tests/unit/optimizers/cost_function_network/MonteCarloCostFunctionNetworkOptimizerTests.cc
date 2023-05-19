@@ -412,18 +412,18 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
         CHECK( solutions.size() == 1 );
         CHECK( solutions[0]->n_solutions() == 5 );
 
-        if( gapped ) {
+        if( !gapped ) {
             CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 18.0 ) < 1.0e-8 );
             CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 21.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 40.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 53.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 55.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 22.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 40.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 53.0 ) < 1.0e-8 );
         } else {
-            CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 18.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 21.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 40.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 53.0 ) < 1.0e-8 );
-            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 55.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 18.0 - 17.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 21.0 - 17.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 22.0 - 17.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 40.0 - 17.0 ) < 1.0e-8 );
+            CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 53.0 - 17.0 ) < 1.0e-8 );
         }
 
     }
