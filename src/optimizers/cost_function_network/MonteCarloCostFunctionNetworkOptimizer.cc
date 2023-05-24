@@ -619,6 +619,33 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
     return *annealing_schedule_;
 }
 
+/// @brief Get the solution storage mode, by enum.
+MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum() const {
+    return solution_storage_mode_;
+}
+
+/// @brief Get the solution storage mode, by string.
+std::string
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
+    return solution_storage_mode_string_from_enum( solution_storage_mode_ );
+}
+
+/// @brief Get whether we're using multimutations.
+/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+/// mutate one node at a time.  True by default.
+/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+bool
+MonteCarloCostFunctionNetworkOptimizer::use_multimutation() const {
+    return use_multimutation_;
+}
+
+/// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+masala::base::Real
+MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
+    return multimutation_probability_of_one_mutation_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

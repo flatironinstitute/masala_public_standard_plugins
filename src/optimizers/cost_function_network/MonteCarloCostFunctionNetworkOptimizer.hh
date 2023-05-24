@@ -233,6 +233,21 @@ public:
 	/// @details The annealing schedule must be set before this is called.  Throws otherwise.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule() const;
 
+	/// @brief Get the solution storage mode, by enum.
+	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_enum() const;
+
+	/// @brief Get the solution storage mode, by string.
+	std::string solution_storage_mode_string() const;
+
+	/// @brief Get whether we're using multimutations.
+	/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	bool use_multimutation() const;
+
+	/// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	masala::base::Real multimutation_probability_of_one_mutation() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
