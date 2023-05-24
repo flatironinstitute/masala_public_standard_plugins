@@ -552,6 +552,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
         solution_storage_mode_in != MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE,
         "set_solution_storage_mode", "An invalid mode was passed to this function!"
     );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     solution_storage_mode_ = solution_storage_mode_in;
 }
 
@@ -580,6 +581,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation(
     bool const setting
 ) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     use_multimutation_ = setting;
 }
 
@@ -599,6 +601,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mut
         "The probability of 1 mutation must be in the range (0, 1].  Got a probability of "
         + std::to_string( probability_in ) + ", though!"
     );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     multimutation_probability_of_one_mutation_ = probability_in;
 }
 
@@ -647,12 +650,14 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
 /// @brief Get the solution storage mode, by enum.
 MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode
 MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return solution_storage_mode_;
 }
 
 /// @brief Get the solution storage mode, by string.
 std::string
 MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return solution_storage_mode_string_from_enum( solution_storage_mode_ );
 }
 
@@ -662,12 +667,14 @@ MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
 /// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
 bool
 MonteCarloCostFunctionNetworkOptimizer::use_multimutation() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return use_multimutation_;
 }
 
 /// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
 masala::base::Real
 MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return multimutation_probability_of_one_mutation_;
 }
 
@@ -680,6 +687,7 @@ MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutatio
 masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
 MonteCarloCostFunctionNetworkOptimizer::annealing_schedule_nonconst() {
     CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return *annealing_schedule_;
 }
 
@@ -735,6 +743,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
                     std::cref( *annealing_schedule_ ), // A copy of the annealing schedule.
                     problem_cast, // The problem description.
                     std::ref( *(solutions_by_problem[i]) ), // The storage for the collection of solutions.
+                    ( n_solutions_to_store_per_problem_ > 1 ? solution_storage_mode_ : MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ), // The solution storage mode
+                    use_multimutation_, // Do we do more than one mutation at a time?
+                    multimutation_probability_of_one_mutation_, // Probability of doing just one mutation, in multimutation mode.
                     std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
                 )
             );
@@ -759,13 +770,20 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run a single Monte Carlo trajectory.
-/// @param replicate_index The index of this replicate for this problem.
-/// @param problem_index The index of this problem.
-/// @param annealing_steps The number of steps in the trajectory.
-/// @param n_solutions_to_store The number of solutions to store.
-/// @param annealing_schedule The temperature generator (already configured with the number of steps).
-/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+/// @details This function runs in threads.
+/// @param[in] replicate_index The index of this replicate for this problem.
+/// @param[in] problem_index The index of this problem.
+/// @param[in] annealing_steps The number of steps in the trajectory.
+/// @param[in] n_solutions_to_store The number of solutions to store.
+/// @param[in] annealing_schedule The temperature generator (already configured with the number of steps).
+/// @param[in] problem The description of the problem.  This may or may not be a specialized problem like a
+/// PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
+/// @param[in] solutions Storage for a collection of solutions.  Should be unique to problem.
+/// @param[in] solution_storage_mode The mode for storing solutions.
+/// @param[in] use_multimutation If true, we do N mutations, where N is chosen from a Poisson distribution.
+/// If false, we do one mutation at a time.
+/// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
+/// multimutation mode.
 /// @param solutions_mutex A mutex for the collection of solutions.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
@@ -776,6 +794,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+    MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
+    bool const use_multimutation,
+    masala::base::Real const multimutation_probability_of_one_mutation,
     std::mutex & solutions_mutex
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -827,7 +848,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         //     + "] deltaE = " + std::to_string(deltaE) ); // DELETE ME
 
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
-        if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
+        if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
             determine_whether_to_store_solution(
                 current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
             );
@@ -838,7 +859,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             last_accepted_solution = current_solution;
             last_accepted_absolute_score = candidate_absolute_score;
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
-            if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
+            if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
                     current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
                 );

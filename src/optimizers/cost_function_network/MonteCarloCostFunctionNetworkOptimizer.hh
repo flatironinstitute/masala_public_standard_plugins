@@ -273,13 +273,20 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Run a single Monte Carlo trajectory.
-	/// @param replicate_index The index of this replicate for this problem.
-	/// @param problem_index The index of this problem.
-	/// @param annealing_steps The number of steps in the trajectory.
-	/// @param n_solutions_to_store The number of solutions to store.
-	/// @param annealing_schedule The temperature generator (already configured with the number of steps).
-	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-	/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+	/// @details This function runs in threads.
+	/// @param[in] replicate_index The index of this replicate for this problem.
+	/// @param[in] problem_index The index of this problem.
+	/// @param[in] annealing_steps The number of steps in the trajectory.
+	/// @param[in] n_solutions_to_store The number of solutions to store.
+	/// @param[in] annealing_schedule The temperature generator (already configured with the number of steps).
+	/// @param[in] problem The description of the problem.  This may or may not be a specialized problem like a
+	/// PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
+	/// @param[in] solutions Storage for a collection of solutions.  Should be unique to problem.
+	/// @param[in] solution_storage_mode The mode for storing solutions.
+	/// @param[in] use_multimutation If true, we do N mutations, where N is chosen from a Poisson distribution.
+	/// If false, we do one mutation at a time.
+	/// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
+	/// multimutation mode.
 	/// @param solutions_mutex A mutex for the collection of solutions.
 	void
 	run_mc_trajectory(
@@ -290,6 +297,9 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
+		bool const use_multimutation,
+		masala::base::Real const multimutation_probability_of_one_mutation,
 		std::mutex & solutions_mutex
 	) const;
 
