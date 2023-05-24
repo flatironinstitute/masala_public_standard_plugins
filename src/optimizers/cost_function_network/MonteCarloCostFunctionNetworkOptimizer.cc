@@ -419,7 +419,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
             )
         );
         api_description->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::string > >(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Real > >(
                 "multimutation_probability_of_one_mutation", "Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.",
                 "multimutation_probability_of_one_mutation", "The probability of having exactly one mutation if multimutations are being used.",
                 false, false,
