@@ -525,6 +525,36 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
     solution_storage_mode_ = mode_enum;
 }
 
+/// @brief Set whether we're using multimutations.
+/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+/// mutate one node at a time.  True by default.
+/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation(
+    bool const setting
+) {
+    use_multimutation_ = setting;
+}
+
+/// @brief Set the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+/// P(k) = lambda^k exp(-lambda) / k!
+/// P(0) = exp(-lambda)
+/// -ln( P(0) ) = lambda
+/// @note Throws if outside of the range (0, 1].
+void
+MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation(
+    masala::base::Real const probability_in
+) {
+    CHECK_OR_THROW_FOR_CLASS( probability_in > 0.0 && probability_in <= 1.0,
+        "set_multimutation_probability_of_one_mutation",
+        "The probability of 1 mutation must be in the range (0, 1].  Got a probability of "
+        + std::to_string( probability_in ) + ", though!"
+    );
+    multimutation_probability_of_one_mutation_ = probability_in;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////

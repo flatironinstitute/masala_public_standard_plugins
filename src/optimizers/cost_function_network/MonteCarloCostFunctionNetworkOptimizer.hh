@@ -191,6 +191,24 @@ public:
 	/// @brief Set the solution storage mode, by string.
 	void set_solution_storage_mode( std::string const & solution_storage_mode_string_in );
 
+	/// @brief Set whether we're using multimutations.
+	/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	void set_use_multimutation( bool const setting );
+
+	/// @brief Set the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+	/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+	/// P(k) = lambda^k exp(-lambda) / k!
+	/// P(0) = exp(-lambda)
+	/// -ln( P(0) ) = lambda
+	/// @note Throws if outside of the range (0, 1].
+	void
+	set_multimutation_probability_of_one_mutation(
+		masala::base::Real const probability_in
+	);
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
