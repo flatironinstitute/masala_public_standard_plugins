@@ -341,6 +341,28 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 )
 			)
 		);
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput < bool > >(
+                "set_use_multimutation", "Set whether we're using multimutations.  If true, we select the number of mutation positions from a "
+                "Poisson distribution.  If false, we only mutate one node at a time.  True by default.  Note that we actually take a Poisson "
+                "distribution and add 1, since we don't want 0 mutations.",
+                "use_multimutation", "True if we should use multimutations, false if we should do one mutation at a time.",
+                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation, this, std::placeholders::_1 )
+            )
+        );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput < masala::base::Real > >(
+                "set_multimutation_probability_of_one_mutation", "Set the probability of having 1 mutation.  Must be a value between 0 and 1.  "
+                "Default 0.75.  Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value that comes out of "
+                "the Poisson distribution, the value of P(0) is set to this value: "
+                "lambda^k exp(-lambda) / k!, "
+                "P(0) = exp(-lambda), "
+                "-ln( P(0) ) = lambda.  "
+                "Note that this function throws if outside of the range (0, 1].",
+                "probability_in", "The probability of having one mutation in multimutation mode.  Must be in the range (0, 1].",
+                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation, this, std::placeholders::_1 )
+            )
+        );
 
 		// Getters:
 		api_description->add_getter(
