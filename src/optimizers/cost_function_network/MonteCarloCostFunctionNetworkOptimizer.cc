@@ -401,6 +401,31 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_schedule, this )
             )
         );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::string > >(
+                "solution_storage_mode_string", "Get the solution storage mode, as a string.",
+                "solution_storage_mode", "A string representing the solution storage mode.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "use_multimutation", "Get whether we're using multimutations.  If true, we select the number of mutation positions from a Poisson "
+                "distribution.  If false, we only mutate one node at a time.  True by default.",
+                "use_multimutation", "True if we're using multimutations, false if we're doing one mutation at a time.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::use_multimutation, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::string > >(
+                "multimutation_probability_of_one_mutation", "Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.",
+                "multimutation_probability_of_one_mutation", "The probability of having exactly one mutation if multimutations are being used.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation, this )
+            )
+        );
 
         // Work functions:
         api_description->add_work_function(
