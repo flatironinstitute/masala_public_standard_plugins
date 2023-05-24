@@ -957,10 +957,10 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
     Size const n_mutations( std::min( n_variable_nodes, randgen->poisson_size_distribution( poisson_lambda ) + 1 ) );
 
     // TEMPORARY -- DELETE THE FOLLOWING:
-    std::stringstream ss;
-    ss << "Performing " << n_mutations << " mutations with lambda = " << poisson_lambda << ":\n";
-    for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
-    ss << "\n";
+    // std::stringstream ss;
+    // ss << "Performing " << n_mutations << " mutations with lambda = " << poisson_lambda << ":\n";
+    // for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    // ss << "\n";
     
     std::vector< std::pair< Size, Size > > variable_node_subset( randgen->random_sample( n_mutations, n_choices_per_variable_node ) );
     for( std::pair< Size, Size > const & entry : variable_node_subset ) {
@@ -972,8 +972,8 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
     }
 
     // TEMPORARY -- DELETE THE FOLLOWING:
-    for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
-    std::cout << ss.str() << std::endl;
+    // for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    // std::cout << ss.str() << std::endl;
 }
 
 /// @brief Determine whether to add the current solution to the set of solutions stored for this replicate attempt.
