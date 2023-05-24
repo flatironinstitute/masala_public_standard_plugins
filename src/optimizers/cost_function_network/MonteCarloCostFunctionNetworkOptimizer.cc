@@ -927,6 +927,24 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
     current_solution[index_to_change] = new_choice;
 }
 
+/// @brief Make a Monte Carlo move that introduces many mutations, where the number of mutations is sampled from a
+/// Poisson distribution.
+/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
+/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
+/// (node index, number of choices).
+/// @param poisson_lambda The parameter lambda in the Poisson distribution of the number of mutations to introduce.
+/// @param randgen The handle of the Masala random generator.
+/*static*/
+void
+MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
+    std::vector< masala::base::Size > & current_solution,
+    std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
+    masala::base::Real const poisson_lambda,
+    masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
+) {
+    TODO TODO TODO
+}
+
 /// @brief Determine whether to add the current solution to the set of solutions stored for this replicate attempt.
 /// @details We maintain a list of N solutions for each replicate attempt.  If this solution has been encountered before
 /// and is already in the list, we increment the count for the number of times it has been seen.  If not, and if fewer
