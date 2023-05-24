@@ -805,6 +805,15 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Real;
     using masala::base::Size;
 
+    // Compute lambda for the Poisson distribtion for multiple moves.
+    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+        multimutation_probability_of_one_mutation > 0.0 && multimutation_probability_of_one_mutation <= 1.0,
+        "run_mc_trajectory",
+        "The multimutation probability of one mutations is supposed to be in the interval (0, 1], but "
+        "got " + std::to_string( multimutation_probability_of_one_mutation ) + " as the value!"
+    );
+    masala::base::Real const poisson_lambda( -std::log( multimutation_probability_of_one_mutation ) );
+
     // Make a copy of the annealing schedule.
     AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
     annealing_schedule_copy->reset_call_count();
@@ -839,7 +848,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
-        make_mc_move( current_solution, n_choices_per_variable_node, randgen );
+        if( use_multimutation ) {
+            make_mc_move( current_solution, n_choices_per_variable_node, randgen );
+        } else {
+            make_mc_multimove( current_solution, n_choices_per_variable_node, poisson_lambda, randgen );
+        }
         Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
