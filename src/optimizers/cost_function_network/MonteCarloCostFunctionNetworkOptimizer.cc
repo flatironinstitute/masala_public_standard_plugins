@@ -55,6 +55,7 @@
 #include <string>
 #include <utility>
 #include <sstream>
+#include <iostream>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -341,6 +342,28 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 )
 			)
 		);
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput < bool > >(
+                "set_use_multimutation", "Set whether we're using multimutations.  If true, we select the number of mutation positions from a "
+                "Poisson distribution.  If false, we only mutate one node at a time.  True by default.  Note that we actually take a Poisson "
+                "distribution and add 1, since we don't want 0 mutations.",
+                "use_multimutation", "True if we should use multimutations, false if we should do one mutation at a time.",
+                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation, this, std::placeholders::_1 )
+            )
+        );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput < masala::base::Real > >(
+                "set_multimutation_probability_of_one_mutation", "Set the probability of having 1 mutation.  Must be a value between 0 and 1.  "
+                "Default 0.75.  Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value that comes out of "
+                "the Poisson distribution, the value of P(0) is set to this value: "
+                "lambda^k exp(-lambda) / k!, "
+                "P(0) = exp(-lambda), "
+                "-ln( P(0) ) = lambda.  "
+                "Note that this function throws if outside of the range (0, 1].",
+                "probability_in", "The probability of having one mutation in multimutation mode.  Must be in the range (0, 1].",
+                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation, this, std::placeholders::_1 )
+            )
+        );
 
 		// Getters:
 		api_description->add_getter(
@@ -377,6 +400,31 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 "annealing_schedule", "Allows const access to the annealing schedule, to allow its parameters to be examined.  Not threadsafe!",
                 "annealing_schedule", "A const reference to the annealing schedule.", false, false,
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::annealing_schedule, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::string > >(
+                "solution_storage_mode_string", "Get the solution storage mode, as a string.",
+                "solution_storage_mode", "A string representing the solution storage mode.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "use_multimutation", "Get whether we're using multimutations.  If true, we select the number of mutation positions from a Poisson "
+                "distribution.  If false, we only mutate one node at a time.  True by default.",
+                "use_multimutation", "True if we're using multimutations, false if we're doing one mutation at a time.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::use_multimutation, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Real > >(
+                "multimutation_probability_of_one_mutation", "Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.",
+                "multimutation_probability_of_one_mutation", "The probability of having exactly one mutation if multimutations are being used.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation, this )
             )
         );
 
@@ -505,6 +553,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
         solution_storage_mode_in != MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE,
         "set_solution_storage_mode", "An invalid mode was passed to this function!"
     );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     solution_storage_mode_ = solution_storage_mode_in;
 }
 
@@ -523,6 +572,38 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
     );
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     solution_storage_mode_ = mode_enum;
+}
+
+/// @brief Set whether we're using multimutations.
+/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+/// mutate one node at a time.  True by default.
+/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation(
+    bool const setting
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    use_multimutation_ = setting;
+}
+
+/// @brief Set the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+/// P(k) = lambda^k exp(-lambda) / k!
+/// P(0) = exp(-lambda)
+/// -ln( P(0) ) = lambda
+/// @note Throws if outside of the range (0, 1].
+void
+MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation(
+    masala::base::Real const probability_in
+) {
+    CHECK_OR_THROW_FOR_CLASS( probability_in > 0.0 && probability_in <= 1.0,
+        "set_multimutation_probability_of_one_mutation",
+        "The probability of 1 mutation must be in the range (0, 1].  Got a probability of "
+        + std::to_string( probability_in ) + ", though!"
+    );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    multimutation_probability_of_one_mutation_ = probability_in;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -567,6 +648,37 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
     return *annealing_schedule_;
 }
 
+/// @brief Get the solution storage mode, by enum.
+MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return solution_storage_mode_;
+}
+
+/// @brief Get the solution storage mode, by string.
+std::string
+MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return solution_storage_mode_string_from_enum( solution_storage_mode_ );
+}
+
+/// @brief Get whether we're using multimutations.
+/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+/// mutate one node at a time.  True by default.
+/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+bool
+MonteCarloCostFunctionNetworkOptimizer::use_multimutation() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return use_multimutation_;
+}
+
+/// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+masala::base::Real
+MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    return multimutation_probability_of_one_mutation_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -576,6 +688,7 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
 masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
 MonteCarloCostFunctionNetworkOptimizer::annealing_schedule_nonconst() {
     CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return *annealing_schedule_;
 }
 
@@ -631,6 +744,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
                     std::cref( *annealing_schedule_ ), // A copy of the annealing schedule.
                     problem_cast, // The problem description.
                     std::ref( *(solutions_by_problem[i]) ), // The storage for the collection of solutions.
+                    ( n_solutions_to_store_per_problem_ > 1 ? solution_storage_mode_ : MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ), // The solution storage mode
+                    use_multimutation_, // Do we do more than one mutation at a time?
+                    multimutation_probability_of_one_mutation_, // Probability of doing just one mutation, in multimutation mode.
                     std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
                 )
             );
@@ -655,13 +771,20 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run a single Monte Carlo trajectory.
-/// @param replicate_index The index of this replicate for this problem.
-/// @param problem_index The index of this problem.
-/// @param annealing_steps The number of steps in the trajectory.
-/// @param n_solutions_to_store The number of solutions to store.
-/// @param annealing_schedule The temperature generator (already configured with the number of steps).
-/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+/// @details This function runs in threads.
+/// @param[in] replicate_index The index of this replicate for this problem.
+/// @param[in] problem_index The index of this problem.
+/// @param[in] annealing_steps The number of steps in the trajectory.
+/// @param[in] n_solutions_to_store The number of solutions to store.
+/// @param[in] annealing_schedule The temperature generator (already configured with the number of steps).
+/// @param[in] problem The description of the problem.  This may or may not be a specialized problem like a
+/// PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
+/// @param[in] solutions Storage for a collection of solutions.  Should be unique to problem.
+/// @param[in] solution_storage_mode The mode for storing solutions.
+/// @param[in] use_multimutation If true, we do N mutations, where N is chosen from a Poisson distribution.
+/// If false, we do one mutation at a time.
+/// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
+/// multimutation mode.
 /// @param solutions_mutex A mutex for the collection of solutions.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
@@ -672,6 +795,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+    MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
+    bool const use_multimutation,
+    masala::base::Real const multimutation_probability_of_one_mutation,
     std::mutex & solutions_mutex
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -679,6 +805,15 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using namespace masala::base::managers::random;
     using masala::base::Real;
     using masala::base::Size;
+
+    // Compute lambda for the Poisson distribtion for multiple moves.
+    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+        multimutation_probability_of_one_mutation > 0.0 && multimutation_probability_of_one_mutation <= 1.0,
+        "run_mc_trajectory",
+        "The multimutation probability of one mutations is supposed to be in the interval (0, 1], but "
+        "got " + std::to_string( multimutation_probability_of_one_mutation ) + " as the value!"
+    );
+    masala::base::Real const poisson_lambda( -std::log( multimutation_probability_of_one_mutation ) );
 
     // Make a copy of the annealing schedule.
     AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
@@ -697,6 +832,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
+    std::vector< std::pair< Size, Size > > n_choices_per_variable_node_using_variable_node_indices( n_variable_nodes );
+    for( Size i(0); i<n_variable_nodes; ++i ) {
+        n_choices_per_variable_node_using_variable_node_indices[i] = std::pair< Size, Size >( i, n_choices_per_variable_node[i].second );
+    }
     std::vector< Size > current_solution( n_variable_nodes ), last_accepted_solution( n_variable_nodes );
 
     // Get handle to random generator.
@@ -714,7 +853,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
-        make_mc_move( current_solution, n_choices_per_variable_node, randgen );
+        if( use_multimutation ) {
+            make_mc_multimove( current_solution, n_choices_per_variable_node_using_variable_node_indices, poisson_lambda, randgen );
+        } else {
+            make_mc_move( current_solution, n_choices_per_variable_node, randgen );
+        }
         Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
@@ -723,7 +866,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         //     + "] deltaE = " + std::to_string(deltaE) ); // DELETE ME
 
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
-        if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
+        if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
             determine_whether_to_store_solution(
                 current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
             );
@@ -734,7 +877,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             last_accepted_solution = current_solution;
             last_accepted_absolute_score = candidate_absolute_score;
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
-            if( solution_storage_mode_ == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
+            if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
                     current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
                 );
@@ -770,7 +913,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 /// @brief Make a Monte Carlo move.
 /// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 /// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-/// (node index, number of choices).
+/// (node index, number of choices).  The node index is ABSOLUTE.
 /// @param randgen The handle of the Masala random generator.
 /*static*/
 void
@@ -781,12 +924,56 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 ) {
     using masala::base::Real;
     using masala::base::Size;
+    if( n_choices_per_variable_node.size() == 0 ) return;
+
     Size const index_to_change( randgen->uniform_size_distribution( 0, current_solution.size() - 1 ) );
     Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[index_to_change].second - 2 ) );
     if( new_choice >= current_solution[index_to_change] ) {
         ++new_choice;
     }
     current_solution[index_to_change] = new_choice;
+}
+
+/// @brief Make a Monte Carlo move that introduces many mutations, where the number of mutations is sampled from a
+/// Poisson distribution.
+/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
+/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
+/// (node index, number of choices).  The node index is based on VARIABLE nodes.
+/// @param poisson_lambda The parameter lambda in the Poisson distribution of the number of mutations to introduce.
+/// @param randgen The handle of the Masala random generator.
+/*static*/
+void
+MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
+    std::vector< masala::base::Size > & current_solution,
+    std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
+    masala::base::Real const poisson_lambda,
+    masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
+) {
+    using masala::base::Real;
+    using masala::base::Size;
+    Size const n_variable_nodes( n_choices_per_variable_node.size() );
+    if( n_variable_nodes == 0 ) return;
+
+    Size const n_mutations( std::min( n_variable_nodes, randgen->poisson_size_distribution( poisson_lambda ) + 1 ) );
+
+    // TEMPORARY -- DELETE THE FOLLOWING:
+    // std::stringstream ss;
+    // ss << "Performing " << n_mutations << " mutations with lambda = " << poisson_lambda << ":\n";
+    // for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    // ss << "\n";
+    
+    std::vector< std::pair< Size, Size > > variable_node_subset( randgen->random_sample( n_mutations, n_choices_per_variable_node ) );
+    for( std::pair< Size, Size > const & entry : variable_node_subset ) {
+        Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[ entry.first ].second - 2 ) );
+        if( new_choice >= current_solution[ entry.first ] ) {
+            ++new_choice;
+        }
+        current_solution[ entry.first ] = new_choice;
+    }
+
+    // TEMPORARY -- DELETE THE FOLLOWING:
+    // for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    // std::cout << ss.str() << std::endl;
 }
 
 /// @brief Determine whether to add the current solution to the set of solutions stored for this replicate attempt.

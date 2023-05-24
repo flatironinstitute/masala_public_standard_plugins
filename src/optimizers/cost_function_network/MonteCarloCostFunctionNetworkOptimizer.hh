@@ -191,6 +191,24 @@ public:
 	/// @brief Set the solution storage mode, by string.
 	void set_solution_storage_mode( std::string const & solution_storage_mode_string_in );
 
+	/// @brief Set whether we're using multimutations.
+	/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	void set_use_multimutation( bool const setting );
+
+	/// @brief Set the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+	/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+	/// P(k) = lambda^k exp(-lambda) / k!
+	/// P(0) = exp(-lambda)
+	/// -ln( P(0) ) = lambda
+	/// @note Throws if outside of the range (0, 1].
+	void
+	set_multimutation_probability_of_one_mutation(
+		masala::base::Real const probability_in
+	);
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,6 +232,21 @@ public:
 	/// @brief Const access to the annealing schedule (to allow its configuration to be examined).
 	/// @details The annealing schedule must be set before this is called.  Throws otherwise.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule() const;
+
+	/// @brief Get the solution storage mode, by enum.
+	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_enum() const;
+
+	/// @brief Get the solution storage mode, by string.
+	std::string solution_storage_mode_string() const;
+
+	/// @brief Get whether we're using multimutations.
+	/// @details If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	bool use_multimutation() const;
+
+	/// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	masala::base::Real multimutation_probability_of_one_mutation() const;
 
 public:
 
@@ -240,13 +273,20 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Run a single Monte Carlo trajectory.
-	/// @param replicate_index The index of this replicate for this problem.
-	/// @param problem_index The index of this problem.
-	/// @param annealing_steps The number of steps in the trajectory.
-	/// @param n_solutions_to_store The number of solutions to store.
-	/// @param annealing_schedule The temperature generator (already configured with the number of steps).
-	/// @param problem The description of the problem.  This may or may not be a specialized problem like a PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
-	/// @param solutions Storage for a collection of solutions.  Should be unique to problem.
+	/// @details This function runs in threads.
+	/// @param[in] replicate_index The index of this replicate for this problem.
+	/// @param[in] problem_index The index of this problem.
+	/// @param[in] annealing_steps The number of steps in the trajectory.
+	/// @param[in] n_solutions_to_store The number of solutions to store.
+	/// @param[in] annealing_schedule The temperature generator (already configured with the number of steps).
+	/// @param[in] problem The description of the problem.  This may or may not be a specialized problem like a
+	/// PrecomputedPairwiseCostFunctionNetworkOptimizationProblem.
+	/// @param[in] solutions Storage for a collection of solutions.  Should be unique to problem.
+	/// @param[in] solution_storage_mode The mode for storing solutions.
+	/// @param[in] use_multimutation If true, we do N mutations, where N is chosen from a Poisson distribution.
+	/// If false, we do one mutation at a time.
+	/// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
+	/// multimutation mode.
 	/// @param solutions_mutex A mutex for the collection of solutions.
 	void
 	run_mc_trajectory(
@@ -257,19 +297,38 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & annealing_schedule,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
+		bool const use_multimutation,
+		masala::base::Real const multimutation_probability_of_one_mutation,
 		std::mutex & solutions_mutex
 	) const;
 
 	/// @brief Make a Monte Carlo move.
 	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-	/// (node index, number of choices).
+	/// (node index, number of choices).  The node index is ABSOLUTE.
 	/// @param randgen The handle of the Masala random generator.
 	static
 	void
 	make_mc_move(
 		std::vector< masala::base::Size > & current_solution,
 		std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
+		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
+	);
+
+	/// @brief Make a Monte Carlo move that introduces many mutations, where the number of mutations is sampled from a
+	/// Poisson distribution.
+	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
+	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
+	/// (node index, number of choices).  The node index is based on VARIABLE nodes.
+	/// @param poisson_lambda The parameter lambda in the Poisson distribution of the number of mutations to introduce.
+	/// @param randgen The handle of the Masala random generator.
+	static
+	void
+	make_mc_multimove(
+		std::vector< masala::base::Size > & current_solution,
+		std::vector< std::pair< masala::base::Size, masala::base::Size > > const & n_choices_per_variable_node,
+		masala::base::Real const poisson_lambda,
 		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 	);
 
@@ -318,6 +377,19 @@ private:
 
 	/// @brief The number of Monte Carlo steps to make per attempt.
 	masala::base::Size annealing_steps_per_attempt_ = 100000;
+
+	/// @brief If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @details We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	bool use_multimutation_ = true;
+
+	/// @brief The probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+	/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+	/// P(k) = lambda^k exp(-lambda) / k!
+	/// P(0) = exp(-lambda)
+	/// -ln( P(0) ) = lambda
+	masala::base::Real multimutation_probability_of_one_mutation_ = 0.75;
 
 	/// @brief The annealing schedule to use for annealing.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
