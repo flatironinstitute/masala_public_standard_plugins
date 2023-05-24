@@ -319,6 +319,19 @@ private:
 	/// @brief The number of Monte Carlo steps to make per attempt.
 	masala::base::Size annealing_steps_per_attempt_ = 100000;
 
+	/// @brief If true, we select the number of mutation positions from a Poisson distribution.  If false, we only
+	/// mutate one node at a time.  True by default.
+	/// @details We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
+	bool use_multimutation_ = true;
+
+	/// @brief The probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
+	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
+	/// that comes out of the Poisson distribution, the value of P(0) is set to this value:
+	/// P(k) = lambda^k exp(-lambda) / k!
+	/// P(0) = exp(-lambda)
+	/// -ln( P(0) ) = lambda
+	masala::base::Real multimutation_probability_of_one_mutation_ = 0.75;
+
 	/// @brief The annealing schedule to use for annealing.
 	masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP annealing_schedule_;
 
