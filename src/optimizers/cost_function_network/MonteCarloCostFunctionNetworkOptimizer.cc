@@ -55,6 +55,7 @@
 #include <string>
 #include <utility>
 #include <sstream>
+#include <iostream>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -831,6 +832,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     /// Selection for the solution:
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
+    std::vector< std::pair< Size, Size > > n_choices_per_variable_node_using_variable_node_indices( n_variable_nodes );
+    for( Size i(0); i<n_variable_nodes; ++i ) {
+        n_choices_per_variable_node_using_variable_node_indices[i] = std::pair< Size, Size >( i, n_choices_per_variable_node[i].second );
+    }
     std::vector< Size > current_solution( n_variable_nodes ), last_accepted_solution( n_variable_nodes );
 
     // Get handle to random generator.
@@ -849,9 +854,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         if( use_multimutation ) {
-            make_mc_move( current_solution, n_choices_per_variable_node, randgen );
+            make_mc_multimove( current_solution, n_choices_per_variable_node_using_variable_node_indices, poisson_lambda, randgen );
         } else {
-            make_mc_multimove( current_solution, n_choices_per_variable_node, poisson_lambda, randgen );
+            make_mc_move( current_solution, n_choices_per_variable_node, randgen );
         }
         Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
@@ -908,7 +913,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 /// @brief Make a Monte Carlo move.
 /// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 /// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-/// (node index, number of choices).
+/// (node index, number of choices).  The node index is ABSOLUTE.
 /// @param randgen The handle of the Masala random generator.
 /*static*/
 void
@@ -919,6 +924,8 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 ) {
     using masala::base::Real;
     using masala::base::Size;
+    if( n_choices_per_variable_node.size() == 0 ) return;
+
     Size const index_to_change( randgen->uniform_size_distribution( 0, current_solution.size() - 1 ) );
     Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[index_to_change].second - 2 ) );
     if( new_choice >= current_solution[index_to_change] ) {
@@ -931,7 +938,7 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_move(
 /// Poisson distribution.
 /// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 /// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-/// (node index, number of choices).
+/// (node index, number of choices).  The node index is based on VARIABLE nodes.
 /// @param poisson_lambda The parameter lambda in the Poisson distribution of the number of mutations to introduce.
 /// @param randgen The handle of the Masala random generator.
 /*static*/
@@ -942,7 +949,31 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
     masala::base::Real const poisson_lambda,
     masala::base::managers::random::MasalaRandomNumberGeneratorHandle const randgen
 ) {
-    TODO TODO TODO
+    using masala::base::Real;
+    using masala::base::Size;
+    Size const n_variable_nodes( n_choices_per_variable_node.size() );
+    if( n_variable_nodes == 0 ) return;
+
+    Size const n_mutations( std::min( n_variable_nodes, randgen->poisson_size_distribution( poisson_lambda ) + 1 ) );
+
+    // TEMPORARY -- DELETE THE FOLLOWING:
+    std::stringstream ss;
+    ss << "Performing " << n_mutations << " mutations with lambda = " << poisson_lambda << ":\n";
+    for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    ss << "\n";
+    
+    std::vector< std::pair< Size, Size > > variable_node_subset( randgen->random_sample( n_mutations, n_choices_per_variable_node ) );
+    for( std::pair< Size, Size > const & entry : variable_node_subset ) {
+        Size new_choice( randgen->uniform_size_distribution( 0, n_choices_per_variable_node[ entry.first ].second - 2 ) );
+        if( new_choice >= current_solution[ entry.first ] ) {
+            ++new_choice;
+        }
+        current_solution[ entry.first ] = new_choice;
+    }
+
+    // TEMPORARY -- DELETE THE FOLLOWING:
+    for( Size i(0); i<current_solution.size(); ++i ) { ss << current_solution[i] << "\t"; }
+    std::cout << ss.str() << std::endl;
 }
 
 /// @brief Determine whether to add the current solution to the set of solutions stored for this replicate attempt.

@@ -306,7 +306,7 @@ private:
 	/// @brief Make a Monte Carlo move.
 	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-	/// (node index, number of choices).
+	/// (node index, number of choices).  The node index is ABSOLUTE.
 	/// @param randgen The handle of the Masala random generator.
 	static
 	void
@@ -320,7 +320,7 @@ private:
 	/// Poisson distribution.
 	/// @param current_solution The current solution, as a vector of choice indices for all variable positions.  Changed by this operation.
 	/// @param n_choices_per_variable_node Number of choices per variable node, in the same order as current_solution.  The pairs are
-	/// (node index, number of choices).
+	/// (node index, number of choices).  The node index is based on VARIABLE nodes.
 	/// @param poisson_lambda The parameter lambda in the Poisson distribution of the number of mutations to introduce.
 	/// @param randgen The handle of the Masala random generator.
 	static
