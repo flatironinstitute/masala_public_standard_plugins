@@ -85,7 +85,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
             CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
             problem_container->add_optimization_problem(
-                masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem()
+                masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" )
             );
             
             MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
@@ -160,7 +160,7 @@ TEST_CASE( "Solve a simple problem with the MonteCarloCostFunctionNetworkOptimiz
 
                 CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
                 problem_container->add_optimization_problem(
-                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem( gapped )
+                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem", gapped )
                 );
 
                 MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
@@ -237,7 +237,7 @@ TEST_CASE( "Solve a problem with a squared nonlinear count function using the Mo
 
                 CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
                 problem_container->add_optimization_problem(
-                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_choice_count_penalties( gapped )
+                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_choice_count_penalties(  "PairwisePrecomputedCostFunctionNetworkOptimizationProblem", gapped )
                 );
 
                 MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
@@ -321,7 +321,7 @@ TEST_CASE( "Solve a problem with a sum of count function using the MonteCarloCos
 
                 CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
                 problem_container->add_optimization_problem(
-                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_function_of_integer_penalty_sum_penalties( gapped )
+                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_function_of_integer_penalty_sum_penalties(  "PairwisePrecomputedCostFunctionNetworkOptimizationProblem", gapped )
                 );
 
                 MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(
@@ -405,7 +405,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 
                 CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
                 problem_container->add_optimization_problem(
-                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_unsatisfied_feature_penalties( gapped )
+                    masala::numeric_api::utility::optimization::cost_function_network::construct_test_problem_with_squared_unsatisfied_feature_penalties( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem", gapped )
                 );
 
                 MonteCarloCostFunctionNetworkOptimizer_APISP mcopt(

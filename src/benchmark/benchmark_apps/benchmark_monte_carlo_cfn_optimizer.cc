@@ -93,7 +93,7 @@ main(
         PairwisePrecomputedCostFunctionNetworkOptimizationProblems_APISP problems(
             masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblems_API >()
         );
-        problems->add_optimization_problem( construct_test_problem() );
+        problems->add_optimization_problem( construct_test_problem( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
 
         // Prepare the annealing schedule:
         LinearAnnealingSchedule_APISP anneal_sched(
