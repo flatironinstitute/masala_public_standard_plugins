@@ -161,10 +161,11 @@ main(
                 ++counter;
             }
             avgtime /= static_cast<Real>(total_replicates);
-            //counter -= total_replicates;
+            counter -= total_replicates;
             for( Size ireplicate(0); ireplicate < total_replicates; ++ireplicate ) {
                 Real const diff(static_cast< Real >( std::get<2>(jobs[counter]) ) - avgtime);
                 std_err += diff*diff;
+                ++counter;
             }
             std_err = std::sqrt(std_err)/static_cast<Real>(total_replicates);
             if(threadcount == 1) {
