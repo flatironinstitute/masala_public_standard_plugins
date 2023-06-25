@@ -851,6 +851,11 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     Real candidate_absolute_score( last_accepted_absolute_score );
     // write_to_tracer( "Initial score = " + std::to_string( last_accepted_absolute_score ) ); // DELETE ME
 
+    // Store the starting state as a solution encountered:
+    determine_whether_to_store_solution(
+        current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store, true /*forcing this solution to be stored*/
+    );
+
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
         if( use_multimutation ) {
@@ -868,7 +873,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         // Decide whether to store this solution.  (Even solutions we might not accept, we examine.)
         if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP ) {
             determine_whether_to_store_solution(
-                current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
+                current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store, false
             );
         }
 
@@ -879,7 +884,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
             if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
-                    current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store
+                    current_solution, candidate_absolute_score, local_solutions, n_solutions_to_store, false
                 );
             }
         } else {
@@ -982,19 +987,21 @@ MonteCarloCostFunctionNetworkOptimizer::make_mc_multimove(
 /// than N solutions have been stored, we append the solution in a CostFunctionNetworkOptimizationSolution container.  If
 /// the solution has not been seen, N solutions are stored, and this solution is lower-energy than the highest-energy
 /// solution, we replace the highest-energy solution with this one.
-/// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
+/// @param[in] current_solution The solution that we are considering, represented as a vector of choice indices where each
 /// entry in the vector corresponds to a variable node (in order).
-/// @param current_absolute_score The absolute score of this solution.
-/// @param solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
+/// @param[in] current_absolute_score The absolute score of this solution.
+/// @param[inout] solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
 /// each tuple is ( solution vector for variable nodes, solution score, number of times solution was seen ).
-/// @param n_solutions_to_store The number of solutions to store.
+/// @param[in] n_solutions_to_store The number of solutions to store.
+/// @param[in] force_store If true, we always store this solution.  If false, we use conditional logic.
 /*static*/
 void
 MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     std::vector< masala::base::Size > const & current_solution,
-    masala::base::Real current_absolute_score,
+    masala::base::Real const current_absolute_score,
     std::vector< std::tuple < std::vector< masala::base::Size >, masala::base::Real, masala::base::Size > > & solutions,
-    masala::base::Size const n_solutions_to_store
+    masala::base::Size const n_solutions_to_store,
+    bool const force_store
 ) {
     using masala::base::Size;
     using masala::base::Real;
@@ -1026,7 +1033,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
 
     // If we reach here, we have a full solution vector.  We only store this solution (and kick out the highest-energy solution)
     // if this solution is lower energy than the highest energy.
-    if( current_absolute_score < highestE ) {
+    if( force_store || current_absolute_score < highestE ) {
         std::get<0>(solutions[highestE_index]) = current_solution;
         std::get<1>(solutions[highestE_index]) = current_absolute_score;
         std::get<2>(solutions[highestE_index]) = 1;
