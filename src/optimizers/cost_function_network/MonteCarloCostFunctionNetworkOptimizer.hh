@@ -338,19 +338,21 @@ private:
 	/// than N solutions have been stored, we append the solution in a CostFunctionNetworkOptimizationSolution container.  If
 	/// the solution has not been seen, N solutions are stored, and this solution is lower-energy than the highest-energy
 	/// solution, we replace the highest-energy solution with this one.
-	/// @param current_solution The solution that we are considering, represented as a vector of choice indices where each
+	/// @param[in] current_solution The solution that we are considering, represented as a vector of choice indices where each
 	/// entry in the vector corresponds to a variable node (in order).
-	/// @param current_absolute_score The absolute score of this solution.
-	/// @param solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
+	/// @param[in] current_absolute_score The absolute score of this solution.
+	/// @param[inout] solutions The container of solutions.  This should be a thread-local copy.  This is a vector of tuples, where
 	/// each tuple is ( solution vector for variable nodes, solution score, number of times solution was seen ).
-	/// @param n_solutions_to_store The number of solutions to store.
+	/// @param[in] n_solutions_to_store The number of solutions to store.
+	/// @param[in] force_store If true, we always store this solution.  If false, we use conditional logic.
 	static
 	void
 	determine_whether_to_store_solution(
 		std::vector< masala::base::Size > const & current_solution,
-		masala::base::Real current_absolute_score,
+		masala::base::Real const current_absolute_score,
 		std::vector< std::tuple < std::vector< masala::base::Size >, masala::base::Real, masala::base::Size > > & solutions,
-		masala::base::Size const n_solutions_to_store
+		masala::base::Size const n_solutions_to_store,
+		bool const force_store
 	);
 
 private:
