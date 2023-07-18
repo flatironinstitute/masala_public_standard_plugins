@@ -806,7 +806,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Real;
     using masala::base::Size;
 
-    // Compute lambda for the Poisson distribtion for multiple moves.
+    // Compute lambda for the Poisson distribution for multiple moves.
     DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
         multimutation_probability_of_one_mutation > 0.0 && multimutation_probability_of_one_mutation <= 1.0,
         "run_mc_trajectory",
