@@ -253,6 +253,9 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
     std::pair< masala::base::Size, masala::base::Size > const & choice_indices,
     masala::base::Real penalty
 ) {
+    using masala::base::Size;
+    using masala::base::Real;
+
     std::lock_guard< std::mutex > lock( problem_mutex() );
 
     // Sanity check:
@@ -268,7 +271,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
     set_minimum_number_of_choices_at_node_mutex_locked( node_indices.second, choice_indices.second + 1 );
 
     // Update the penalties:
-    std::unordered_map< std::pair< base::Size, base::Size >, Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic >, masala::base::size_pair_hash >::iterator it(
+    std::unordered_map< std::pair< Size, Size >, Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic >, masala::base::size_pair_hash >::iterator it(
         pairwise_node_penalties_.find( node_indices )
     );
     if( it == pairwise_node_penalties_.end() ) {
@@ -299,7 +302,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 
     Real accumulator(
         total_constant_offset() +
-        masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution ) // Handles anything non-pairwise.
+        masala::numeric::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution ) // Handles anything non-pairwise.
     );
 
     Size const n_pos( candidate_solution.size() );
@@ -344,8 +347,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 /// threadsafe from a read-only context.
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
-    std::vector< base::Size > const & old_solution,
-    std::vector< base::Size > const & new_solution
+    std::vector< masala::base::Size > const & old_solution,
+    std::vector< masala::base::Size > const & new_solution
 ) const {
     using masala::base::Real;
     using masala::base::Size;
@@ -353,7 +356,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
         "before compute_score_change() can be called."
     );
 
-    base::Size const npos( protected_total_variable_nodes() ); //Only safe to call if finalized.
+    Size const npos( protected_total_variable_nodes() ); //Only safe to call if finalized.
     CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
         "The size of the old candidate solution vector was " + std::to_string( old_solution.size() ) + ", but "
         "there are " + std::to_string( npos ) + " variable positions."
@@ -420,6 +423,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 masala::base::api::MasalaObjectAPIDefinitionCWP
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() {
     using namespace masala::base::api;
+    using masala::base::Size;
+    using masala::base::Real;
     
     std::lock_guard< std::mutex > lock( problem_mutex() );
 
@@ -440,7 +445,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 
         // Getters:
         api_def->add_getter(
-            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< base::Real > >(
+            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
                 "background_constant_offset", "Get the fixed background constant offset.",
                 "background_contant_offset", "A fixed, constant value added to all energies for all solutions.  Useful for parts "
                 "of the problem that are not variable.", false, false,
@@ -448,7 +453,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
         api_def->add_getter(
-            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< base::Real > >(
+            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
                 "one_choice_node_constant_offset", "Get the constant offset for nodes.  This is the sum of onebody energies "
                 "for nodes that have exactly one choice, plus the twobdy energies between those nodes.  Note that this could "
                 "be rather slow.",
@@ -457,7 +462,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
         api_def->add_getter(
-            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< base::Real > >(
+            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
                 "total_constant_offset", "Get the total (background + node) constant offset.",
                 "total_constant_offset", "This is the sum of background_constant_offset() and one_choice_node_constant_offset().",
                 false, false,
@@ -500,7 +505,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
         api_def->add_setter(
-            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< base::Size, base::Size, base::Real > >(
+            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< Size, Size, Real > >(
                 "set_onebody_penalty", "Set the one-node penalty for a particular choice index selected at a particular node index.",
                 "node_index", "The index of the node for which we're setting a penalty.",
                 "choice_index", "The index of the choice at this node for which we're setting a penalty.",
@@ -509,7 +514,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
         api_def->add_setter(
-            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< base::Size, base::Size >, std::pair< base::Size, base::Size >, base::Real > >(
+            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size >, std::pair< Size, Size >, Real > >(
                 "set_twobody_penalty", "Set the two-node penalty for a pair of choices at a pair of nodes.",
 
                 "node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
@@ -528,8 +533,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
         );
 
         // Work functions
-        work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< masala::base::Real, std::vector< masala::base::Size > const & > compute_absolute_score_fxn(
-            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< masala::base::Real, std::vector< masala::base::Size > const & > >(
+        work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< Real, std::vector< Size > const & > compute_absolute_score_fxn(
+            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< Real, std::vector< Size > const & > >(
                 "compute_absolute_score", "Given a candidate solution, compute the score.  "
 	            "The candidate solution is expressed as a vector of choice indices, with "
                 "one entry per variable position, in order of position indices.  This override "
@@ -547,10 +552,10 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
         api_def->add_work_function( compute_absolute_score_fxn );
 
         work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP<
-            masala::base::Real, std::vector< masala::base::Size > const &,
-            std::vector< masala::base::Size > const &
+            Real, std::vector< Size > const &,
+            std::vector< Size > const &
         > compute_score_change_fxn(
-            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< masala::base::Real, std::vector< masala::base::Size > const &, std::vector< masala::base::Size > const & > >(
+            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, std::vector< Size > const & > >(
                 "compute_score_change", "Given two candidate solutions, compute the score difference.  "
 	            "The candidate solutions are expressed as a vector of choice indices, with "
                 "one entry per variable position, in order of position indices. (There may not be "
