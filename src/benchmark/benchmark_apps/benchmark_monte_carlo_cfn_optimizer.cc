@@ -30,10 +30,10 @@
 
 // Numeric API headers
 #include <numeric_api/utility/optimization/cost_function_network/util.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 
 // Base headers
@@ -90,8 +90,8 @@ main(
         tm->set_total_threads( nthread_total );
 
         // Prepare the problem that we'll solve over and over:
-        PairwisePrecomputedCostFunctionNetworkOptimizationProblems_APISP problems(
-            masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblems_API >()
+        CostFunctionNetworkOptimizationProblems_APISP problems(
+            masala::make_shared< CostFunctionNetworkOptimizationProblems_API >()
         );
         problems->add_optimization_problem( construct_test_problem( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
 
