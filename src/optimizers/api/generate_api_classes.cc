@@ -28,6 +28,7 @@
 #include <optimizers/annealing/ConstantAnnealingSchedule.hh>
 #include <optimizers/annealing/LinearAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
+#include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -46,6 +47,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< annealing::ConstantAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LinearAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
