@@ -197,7 +197,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::has_non_pairwise_scor
 void
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset() {
     std::lock_guard< std::mutex > lock( problem_mutex() );
-    masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_reset();
+    protected_reset();
 }
 
 /// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
@@ -205,7 +205,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset() {
 void
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalize() {
     std::lock_guard< std::mutex > lock( problem_mutex() );
-    masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_finalize();
+    protected_finalize();
 }
 
 /// @brief Add onebody penalty for a choice at a node.
@@ -593,7 +593,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_reset() {
     single_node_penalties_for_variable_nodes_.clear();
     interacting_variable_nodes_.clear();
     background_constant_offset_ = 0.0;
-    CostFunctionNetworkOptimizationProblem::protected_reset();
+    PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_reset();
 }
 
 /// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
@@ -603,7 +603,7 @@ void
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_finalize() {
     move_twobody_energies_involving_one_choice_nodes_to_onebody_for_variable_nodes();
     one_choice_node_constant_offset_ = compute_one_choice_node_constant_offset();
-    CostFunctionNetworkOptimizationProblem::protected_finalize();
+    PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem::protected_finalize();
     set_up_interacting_node_vector(); // Must come after base class protected_finalize().
     set_up_single_node_penalties_for_variable_nodes_vector(); // Must also come after base class protected_finalize();
     write_to_tracer( "Finalized problem description." );
