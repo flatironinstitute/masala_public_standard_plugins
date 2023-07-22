@@ -109,6 +109,11 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the category that this MasalaEngine fits into.
+	/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }
+	std::vector< std::vector< std::string > >
+	get_engine_categories() const override;
+
 	/// @brief Get the class name.
 	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
 	std::string class_name() const override;
