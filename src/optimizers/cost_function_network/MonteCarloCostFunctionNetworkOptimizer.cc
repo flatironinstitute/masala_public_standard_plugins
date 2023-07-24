@@ -154,6 +154,14 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
     return keywords;
 }
 
+/// @brief Get the category that this MasalaEngine fits into.
+/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }.
+std::vector< std::vector< std::string > >
+MonteCarloCostFunctionNetworkOptimizer::get_engine_categories() const {
+	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
+	return CostFunctionNetworkOptimizer::get_engine_categories();
+}
+
 /// @brief Get the class name.
 /// @returns "MonteCarloCostFunctionNetworkOptimizer".
 std::string
