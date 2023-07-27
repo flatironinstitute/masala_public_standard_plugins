@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric/optimization/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh
+/// @file src/optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh
 /// @brief Header for the SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctions class.
 /// @details SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctions define a penalty function which is based on the following:
 /// - One or more features are defined for each choice at each node.  (A feature could be a hydrogen bond
@@ -27,17 +27,17 @@
 /// satisfied by connections) is returned.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh
-#define Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh
 
 // Forward declarations:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.fwd.hh>
 
 // Parent header:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 
-// Numeric headers:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
 
 // Base headers:
 #include <base/types.hh>
@@ -47,9 +47,8 @@
 #include <unordered_map>
 #include <utility> //For std::pair.
 
-namespace masala {
-namespace numeric {
-namespace optimization {
+namespace standard_masala_plugins {
+namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 namespace feature_based {
@@ -63,7 +62,7 @@ namespace feature_based {
 /// - At calculation time, the SQUARE OF THE number of unsatisfied features (total features minus features
 /// satisfied by connections) is returned.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction : public masala::numeric::optimization::cost_function_network::cost_function::feature_based::SumOfUnsatisfiedChoiceFeaturesCostFunction {
+class SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based::SumOfUnsatisfiedChoiceFeaturesCostFunction {
 
 public:
 
@@ -87,7 +86,7 @@ public:
 	~SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction() override = default;
 
 	/// @brief Return a shared pointer to a copy of this object.
-	CostFunctionSP clone() const override;
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override;
 
 	/// @brief Deep-clone all data stored in this class.
 	void make_independent() override;
@@ -117,7 +116,7 @@ public:
 	/// @brief Return the name of this class ("SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction").
 	std::string class_name() const override;
 
-	/// @brief Return the namespace of this class ("masala::numeric::optimization::cost_function_network::cost_function::feature_based");
+	/// @brief Return the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based");
 	std::string class_namespace() const override;
 
 public:
@@ -215,8 +214,7 @@ private:
 } // namespace feature_based
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins
 
-#endif // Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction_hh

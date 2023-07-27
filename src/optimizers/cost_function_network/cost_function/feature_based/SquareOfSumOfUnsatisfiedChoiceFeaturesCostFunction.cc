@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric/optimization/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.cc
+/// @file src/optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.cc
 /// @brief Implementation for a pure virtual base class for SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctions.
 /// @details SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctions define a penalty function which is based on the following:
 /// - One or more features are defined for each choice at each node.  (A feature could be a hydrogen bond
@@ -30,7 +30,7 @@
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 
 // STL headers:
 #include <vector>
@@ -50,12 +50,11 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_ThreeInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_FiveInput.tmpl.hh>
 
-// Numeric headers:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 
-namespace masala {
-namespace numeric {
-namespace optimization {
+namespace standard_masala_plugins {
+namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 namespace feature_based {
@@ -89,7 +88,7 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::operator=(
 }
 
 /// @brief Return a shared pointer to a copy of this object.
-CostFunctionSP
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::clone() const {
     return masala::make_shared< SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >( *this );
 }
@@ -132,10 +131,10 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::class_name() const {
     return "SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction";
 }
 
-/// @brief Return the namespace of this class ("masala::numeric::optimization::cost_function_network::cost_function::feature_based");
+/// @brief Return the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based");
 std::string
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::class_namespace() const {
-    return "masala::numeric::optimization::cost_function_network::cost_function::feature_based";
+    return "standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -459,6 +458,5 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent_mutex_locke
 } // namespace feature_based
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins
