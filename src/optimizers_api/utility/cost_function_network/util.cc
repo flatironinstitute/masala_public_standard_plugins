@@ -30,6 +30,11 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/base_classes/optimization/cost_function_network/PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/SquareOfChoicePenaltySumCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/FunctionOfIntegerPenaltySumCostFunction.hh>
+
 // Base headers:
 #include <base/types.hh>
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
@@ -426,7 +431,7 @@ construct_test_problem_with_squared_choice_count_penalties(
 ) {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network::cost_function;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::cost_function;
 
     masala::base::Size const last_node( gapped ? 3 : 2 );
 
@@ -533,7 +538,7 @@ construct_test_problem_with_function_of_integer_penalty_sum_penalties(
 ) {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network::cost_function;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::cost_function;
 
     masala::base::Size const last_node( gapped ? 3 : 2 );
 
