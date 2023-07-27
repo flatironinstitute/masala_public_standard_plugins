@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.hh
+/// @file src/optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh
 /// @brief Headers for a class for ChoiceFeatures.
 /// @details ChoiceFeatures are objects attached to node choices, which can form connections across
 /// choices at different nodes.  Each feature has a minimum and maximum number of connections that
@@ -25,11 +25,11 @@
 /// it is read-only.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
-#define Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
 
 // Forward declarations:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
 
 // Parent header:
 #include <base/managers/plugin_module/MasalaPlugin.hh>
@@ -46,9 +46,8 @@
 #include <set>
 #include <unordered_map>
 
-namespace masala {
-namespace numeric {
-namespace optimization {
+namespace standard_masala_plugins {
+namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 namespace feature_based {
@@ -135,7 +134,7 @@ public:
 	static
 	std::string class_name_static();
 
-	/// @brief This returns the class namespace ("masala::numeric::optimization::cost_function_network::cost_function::feature_based").
+	/// @brief This returns the class namespace ("standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based").
 	/// Static version.
 	static
 	std::string class_namespace_static();
@@ -143,7 +142,7 @@ public:
 	/// @brief This returns the class name ("ChoiceFeature").
 	std::string class_name() const override;
 
-	/// @brief This returns the class namespace ("masala::numeric::optimization::cost_function_network::cost_function::feature_based").
+	/// @brief This returns the class namespace ("standard_masala_plugins::optimizers::cost_function_network::cost_function::feature_based").
 	std::string class_namespace() const override;
 
 public:
@@ -313,8 +312,7 @@ private:
 } // namespace feature_based
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins
 
-#endif // Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_ChoiceFeature_hh
