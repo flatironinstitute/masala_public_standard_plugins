@@ -202,8 +202,7 @@ private:
 
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins
 
 #endif // Masala_src_numeric_optimization_cost_function_network_cost_function_SquareOfChoicePenaltySumCostFunction_hh
