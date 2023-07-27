@@ -251,8 +251,8 @@ construct_test_problem_with_squared_unsatisfied_feature_penalties(
 ) {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network::cost_function;
-    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network::cost_function::feature_based;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::cost_function;
+    using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::cost_function::feature_based;
     using std::unordered_map;
     using std::vector;
     using std::pair;
