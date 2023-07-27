@@ -30,7 +30,7 @@
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 
 // STL headers:
 #include <vector>
@@ -40,12 +40,11 @@
 #include <base/error/ErrorHandling.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
-// Numeric headers:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 
-namespace masala {
-namespace numeric {
-namespace optimization {
+namespace standard_masala_plugins {
+namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 namespace feature_based {
@@ -58,7 +57,7 @@ namespace feature_based {
 SumOfUnsatisfiedChoiceFeaturesCostFunction::SumOfUnsatisfiedChoiceFeaturesCostFunction(
     SumOfUnsatisfiedChoiceFeaturesCostFunction const & src
 ) :
-    CostFunction( src )
+    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction( src )
 {
     std::lock( src.mutex(), mutex() );
     std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
@@ -545,7 +544,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_finalize(
     //Do NOT clear choice_features_by_absolute_node_and_choice_, since the shared pointers reside here, and the
     //choice_features_by_variable_node_and_choice_ map stores raw pointers.
 
-    CostFunction::protected_finalize( variable_node_indices );
+    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
 }
 
 /// @brief Override of assign_mutex_locked().  Calls parent function.
@@ -561,7 +560,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::assign_mutex_locked(
     choice_features_by_variable_node_and_choice_ = src_cast_ptr->choice_features_by_variable_node_and_choice_;
     fixed_choice_features_by_absolute_node_and_choice_ = src_cast_ptr->fixed_choice_features_by_absolute_node_and_choice_;
 
-    CostFunction::assign_mutex_locked( src );
+    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::assign_mutex_locked( src );
 }
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
@@ -603,7 +602,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent_mutex_locked() {
             }
         }
     }
-    CostFunction::make_independent_mutex_locked();
+    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::make_independent_mutex_locked();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -707,6 +706,5 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
 } // namespace feature_based
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins

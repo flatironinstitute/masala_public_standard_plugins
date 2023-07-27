@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric/optimization/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh
+/// @file src/optimizers/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.hh
 /// @brief Header for a pure virtual base class for SumOfUnsatisfiedChoiceFeaturesCostFunctions.
 /// @details SumOfUnsatisfiedChoiceFeaturesCostFunctions define a penalty function which is based on the following:
 /// - One or more features are defined for each choice at each node.  (A feature could be a hydrogen bond
@@ -29,17 +29,17 @@
 /// functions required by the MasalaObject base class, it remains pure virtual.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
-#define Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
 
 // Forward declarations:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/feature_based/SumOfUnsatisfiedChoiceFeaturesCostFunction.fwd.hh>
 
 // Parent header:
-#include <numeric/optimization/cost_function_network/cost_function/CostFunction.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/cost_function/PluginCostFunction.hh>
 
-// Numeric headers:
-#include <numeric/optimization/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.fwd.hh>
 
 // Base headers:
 #include <base/types.hh>
@@ -49,9 +49,8 @@
 #include <unordered_map>
 #include <utility> //For std::pair.
 
-namespace masala {
-namespace numeric {
-namespace optimization {
+namespace standard_masala_plugins {
+namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 namespace feature_based {
@@ -67,7 +66,7 @@ namespace feature_based {
 /// @note Since this class does not implement class_name() or class_namespace()
 /// functions required by the MasalaObject base class, it remains pure virtual.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class SumOfUnsatisfiedChoiceFeaturesCostFunction : public masala::numeric::optimization::cost_function_network::cost_function::CostFunction {
+class SumOfUnsatisfiedChoiceFeaturesCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
 
 public:
 
@@ -91,7 +90,7 @@ public:
 	~SumOfUnsatisfiedChoiceFeaturesCostFunction() override = default;
 
 	/// @brief This class is pure virtual, and does not define the clone function.
-	CostFunctionSP clone() const override = 0;
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override = 0;
 
 	/// @brief This class is pure virtual, and does not define the make independent function.
 	void make_independent() override = 0;
@@ -425,8 +424,7 @@ private:
 } // namespace feature_based
 } // namespace cost_function
 } // namespace cost_function_network
-} // namespace optimization
-} // namespace numeric
-} // namespace masala
+} // namespace optimizers
+} // namespace standard_masala_plugins
 
-#endif // Masala_src_numeric_optimization_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_feature_based_SumOfUnsatisfiedChoiceFeaturesCostFunction_hh
