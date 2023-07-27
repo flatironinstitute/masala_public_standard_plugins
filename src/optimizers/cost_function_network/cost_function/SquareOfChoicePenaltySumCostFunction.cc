@@ -76,7 +76,7 @@ SquareOfChoicePenaltySumCostFunction::operator=(
 }
 
 /// @brief Make a copy of this object.
-CostFunctionSP
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 SquareOfChoicePenaltySumCostFunction::clone() const {
     return masala::make_shared< SquareOfChoicePenaltySumCostFunction >( *this );
 }

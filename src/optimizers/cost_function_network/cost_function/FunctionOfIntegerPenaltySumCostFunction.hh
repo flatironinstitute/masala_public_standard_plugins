@@ -78,7 +78,7 @@ public:
 	~FunctionOfIntegerPenaltySumCostFunction() override = default;
 
 	/// @brief Make a copy of this object.
-	CostFunctionSP
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 	clone() const override;
 
 	/// @brief Make a copy of this object that is fully independent.

@@ -77,7 +77,7 @@ FunctionOfIntegerPenaltySumCostFunction::operator=(
 }
 
 /// @brief Make a copy of this object.
-CostFunctionSP
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 FunctionOfIntegerPenaltySumCostFunction::clone() const {
     return masala::make_shared< FunctionOfIntegerPenaltySumCostFunction >( *this );
 }
