@@ -374,7 +374,7 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
     penalties_by_variable_node_and_choice_.resize( n_variable_positions_ );
 
     for(
-        typename std::unordered_map< std::pair< Size, Size >, T, base::size_pair_hash >::const_iterator it( penalties_by_absolute_node_and_choice_.cbegin() );
+        typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it( penalties_by_absolute_node_and_choice_.cbegin() );
         it != penalties_by_absolute_node_and_choice_.cend();
         ++it
     ) {
@@ -398,7 +398,7 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
             //Check that we have only one choice at this node.
             Size tempcounter(0);
             for(
-                typename std::unordered_map< std::pair< Size, Size >, T, base::size_pair_hash >::const_iterator it3( penalties_by_absolute_node_and_choice_.cbegin() );
+                typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it3( penalties_by_absolute_node_and_choice_.cbegin() );
                 it3 != penalties_by_absolute_node_and_choice_.cend();
                 ++it3
             ) {

@@ -83,7 +83,7 @@ public:
 	~ChoicePenaltySumBasedCostFunction() override = default;
 
 	/// @brief This class is pure virtual, and does not define the clone function.
-	CostFunctionSP clone() const override = 0;
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override = 0;
 
 	/// @brief This class is pure virtual, and does not define the make independent function.
 	void make_independent() override = 0;
@@ -260,7 +260,7 @@ private:
 
 	/// @brief The penalties, stored as a pair of <absolute node index, choice index >.
 	/// @details Used during input/write phase.  Cleared by finalize() operation.
-	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, T, base::size_pair_hash > penalties_by_absolute_node_and_choice_;
+	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, T, masala::base::size_pair_hash > penalties_by_absolute_node_and_choice_;
 
 	/// @brief The penalties, stored as vectors indexed first byvariable node index, then by choice index.
 	/// @details Used during output/read phase.  Populated by finalize() operation.

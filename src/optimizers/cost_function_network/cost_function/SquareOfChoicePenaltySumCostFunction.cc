@@ -131,7 +131,8 @@ SquareOfChoicePenaltySumCostFunction::class_name() const {
 }
 
 /// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
-std::stringoptimizers() const {
+std::string
+SquareOfChoicePenaltySumCostFunction::class_namespace() const {
     return "standard_masala_plugins::optimizers::cost_function_network::cost_function";
 }
 
