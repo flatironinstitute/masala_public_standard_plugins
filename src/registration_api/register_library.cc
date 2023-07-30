@@ -27,8 +27,8 @@
 #include <base/managers/version/MasalaModuleVersionInfo.hh>
 #include <base/managers/version/MasalaVersionManager.hh>
 
-#declare STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
-#declare STANDARD_MASALA_LIBRARIES_MINOR_VERSION 2
+#define STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
+#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 2
 
 namespace standard_masala_plugins {
 namespace registration_api {
