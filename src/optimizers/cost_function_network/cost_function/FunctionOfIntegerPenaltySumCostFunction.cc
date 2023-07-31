@@ -175,6 +175,36 @@ FunctionOfIntegerPenaltySumCostFunction::get_categories() const {
 	return ChoicePenaltySumBasedCostFunction::get_categories();
 }
 
+/// @brief Get the category for this MasalaDataRepresentation.
+/// @returns { { "CostFunction", "ChoicePenaltySumBasedCostFunction", "IntegerPenaltySumBasedCostFunction", "FunctionOfIntegerPenaltySumCostFunction" } }.
+std::vector< std::vector< std::string > >
+FunctionOfIntegerPenaltySumCostFunction::get_data_representation_categories() const {
+    return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoicePenaltySumBasedCostFunction", "IntegerPenaltySumBasedCostFunction", "FunctionOfIntegerPenaltySumCostFunction" } };
+}
+
+/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+/// is compatible.
+/// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
+std::vector< std::string >
+FunctionOfIntegerPenaltySumCostFunction::get_compatible_masala_engines() const {
+    return std::vector< std::string >{"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"};
+}
+
+/// @brief Get the properties of this MasalaDataRepresentation.
+/// @returns { "choice_penalty_sum_based", "cost_function", "not_pairwise_decomposible", "function", "integer" }.
+std::vector< std::string >
+FunctionOfIntegerPenaltySumCostFunction::get_present_data_representation_properties() const {
+    return std::vector< std::string >{ "choice_penalty_sum_based", "cost_function", "not_pairwise_decomposible", "function", "integer" };
+}
+
+/// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
+/// non-exhaustive list.
+/// @returns { "pairwise_decomposible" }.
+std::vector< std::string >
+FunctionOfIntegerPenaltySumCostFunction::get_absent_data_representation_properties() const {
+    return std::vector< std::string >{ "pairwise_decomposible" };
+}
+
 /// @brief Get the keywords for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
 /// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible", "quadratic", "squared" }
