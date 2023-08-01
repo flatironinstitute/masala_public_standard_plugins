@@ -48,6 +48,7 @@
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationCreator.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -458,6 +459,18 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 "solutions", "A vector of solution sets.  Each CostFunctionNetworkOptimizationSolutions object contains the set of solutions for the problem "
                 "in the input vector with the corresponding index.  There may be multiple solutions, depending on settings.",
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer, this, std::placeholders::_1 )
+            )
+        );
+        api_description->add_work_function(
+            masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< bool, masala::base::managers::engine::MasalaDataRepresentationCreator const & > >(
+                "data_representation_is_incompatible_with_engine", "Is a particular data representation INcompatible with this engine?  Returns true to signal "
+                "incompatibility, false otherwise.  Default implementation always returns false.  May be overridden to allow engines to perform "
+                "runtime checks to assess whether a particular data representation will definitely NOT work with this engine.  Note that if this function "
+                "returns false, it is not a guarantee that a data representation will work with this engine, or work efficiently with this engine.",
+                true, false, true, false,
+                "representation", "The creator of a MasalaDataRepresentation.",
+                "is_incompatible", "If true, then the MasalaDataRepresentation created by this creator is NOT compatible with this engine.",
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::data_representation_is_incompatible_with_engine, this, std::placeholders::_1 )
             )
         );
 
