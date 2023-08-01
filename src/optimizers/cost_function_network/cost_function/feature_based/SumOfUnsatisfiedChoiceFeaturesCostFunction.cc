@@ -108,10 +108,10 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::get_keywords() const {
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.
-/// @returns { { "CostFunction", "ChoiceFeatureBasedCostFunction" } }.
+/// @returns { { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction" } }.
 std::vector< std::vector< std::string > >
 SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_categories() const {
-    return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoiceFeatureBasedCostFunction" } };
+    return std::vector< std::vector< std::string > >{ { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction" } };
 }
 
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
