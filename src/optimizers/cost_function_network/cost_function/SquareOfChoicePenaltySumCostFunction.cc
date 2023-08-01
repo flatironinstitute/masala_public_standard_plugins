@@ -124,6 +124,40 @@ SquareOfChoicePenaltySumCostFunction::get_keywords() const {
     return outvec;
 }
 
+/// @brief Get the category for this MasalaDataRepresentation.
+/// @returns { { "CostFunction", "ChoicePenaltySumBasedCostFunction", "SquareOfChoicePenaltySumCostFunction" } }.
+std::vector< std::vector< std::string > >
+SquareOfChoicePenaltySumCostFunction::get_data_representation_categories() const {
+    return std::vector< std::vector< std::string > > {
+        { "CostFunction", "ChoicePenaltySumBasedCostFunction", "SquareOfChoicePenaltySumCostFunction" }
+    };
+}
+
+/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+/// is compatible.
+/// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
+std::vector< std::string >
+SquareOfChoicePenaltySumCostFunction::get_compatible_masala_engines() const {
+    return std::vector< std::string >{"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"};
+}
+
+/// @brief Get the properties of this MasalaDataRepresentation.
+/// @returns { "choice_penalty_sum_based", "cost_function", "not_pairwise_decomposible", "squared" }.
+std::vector< std::string >
+SquareOfChoicePenaltySumCostFunction::get_present_data_representation_properties() const {
+    using namespace std;
+    return vector<string>{ "choice_penalty_sum_based", "cost_function", "not_pairwise_decomposible", "squared" };
+}
+
+/// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
+/// non-exhaustive list.
+/// @returns { "pairwise_decomposible" }.
+std::vector< std::string >
+SquareOfChoicePenaltySumCostFunction::get_absent_data_representation_properties() const {
+    using namespace std;
+    return vector<string>{ "pairwise_decomposible" };
+}
+
 /// @brief Get the name of this class ("SquareOfChoicePenaltySumCostFunction").
 std::string
 SquareOfChoicePenaltySumCostFunction::class_name() const {

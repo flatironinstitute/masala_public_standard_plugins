@@ -92,11 +92,11 @@ ChoicePenaltySumBasedCostFunction<T>::get_categories() const {
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.
-/// @returns { { "CostFunction" } }.
+/// @returns { { "CostFunction", "ChoicePenaltySumBasedCostFunction" } }.
 template< typename T >
 std::vector< std::vector< std::string > >
 ChoicePenaltySumBasedCostFunction<T>::get_data_representation_categories() const {
-    return std::vector< std::vector< std::string > >{ { "CostFunction" } };
+    return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoicePenaltySumBasedCostFunction" } };
 }
 
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation

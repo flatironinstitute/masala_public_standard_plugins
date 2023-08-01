@@ -110,6 +110,28 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the category for this MasalaDataRepresentation.
+	/// @returns { { "CostFunction", "ChoicePenaltySumBasedCostFunction", "SquareOfChoicePenaltySumCostFunction" } }.
+	std::vector< std::vector< std::string > >
+	get_data_representation_categories() const override;
+
+	/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+	/// is compatible.
+	/// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
+	std::vector< std::string >
+	get_compatible_masala_engines() const override;
+
+	/// @brief Get the properties of this MasalaDataRepresentation.
+	/// @returns { "choice_penalty_sum_based", "cost_function", "not_pairwise_decomposible", "squared" }.
+	std::vector< std::string >
+	get_present_data_representation_properties() const override;
+
+	/// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
+	/// non-exhaustive list.
+	/// @returns { "pairwise_decomposible" }.
+	std::vector< std::string >
+	get_absent_data_representation_properties() const override;
+
 	/// @brief Get the name of this class ("SquareOfChoicePenaltySumCostFunction").
 	std::string class_name() const override;
 

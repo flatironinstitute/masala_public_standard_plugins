@@ -106,7 +106,7 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the category for this MasalaDataRepresentation.
-	/// @returns { { "CostFunction" } }.
+	/// @returns { { "CostFunction", "ChoicePenaltySumBasedCostFunction" } }.
 	std::vector< std::vector< std::string > >
 	get_data_representation_categories() const override;
 
