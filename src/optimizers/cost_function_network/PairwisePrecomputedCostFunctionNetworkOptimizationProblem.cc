@@ -133,6 +133,37 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_keywords() const 
 	};
 }
 
+/// @brief Get the category for this MasalaDataRepresentation.
+/// @returns { { "OptimizationProblem", "CostFunctionNetworkOptimizationProblem", "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" } }.
+std::vector< std::vector< std::string > >
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_data_representation_categories() const {
+    using namespace std;
+    return vector< vector< string > >{ { "OptimizationProblem", "CostFunctionNetworkOptimizationProblem", "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" } };
+}
+
+/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+/// is compatible.
+/// @returns { "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer" }
+std::vector< std::string >
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_compatible_masala_engines() const {
+    return std::vector< std::string >{ "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer" };
+}
+
+/// @brief Get the properties of this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function_network_optimization_problem" }.
+std::vector< std::string >
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_present_data_representation_properties() const {
+    return std::vector< std::string >{ "optimization_problem", "cost_function_network_optimization_problem" };
+}
+
+/// @brief Get the properties of this MasalaDataRepresentation that might possibly be present.
+/// @details Obviously, this is a non-exhuastive list.
+/// @returns { "precomputed", "pairwise_decomposible", "partially_precomputed", "partially_pairwise_decomposible" }.
+std::vector< std::string >
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_possibly_present_data_representation_properties() const {
+    return std::vector< std::string >{ "precomputed", "pairwise_decomposible", "partially_precomputed", "partially_pairwise_decomposible" };
+}
+
 /// @brief Get the name of this class.
 /// @returns "PairwisePrecomputedCostFunctionNetworkOptimizationProblem".
 std::string

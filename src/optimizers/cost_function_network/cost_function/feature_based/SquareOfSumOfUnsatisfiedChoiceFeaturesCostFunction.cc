@@ -125,6 +125,46 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_keywords() const {
     return SumOfUnsatisfiedChoiceFeaturesCostFunction::get_keywords();
 }
 
+/// @brief Get the category for this MasalaDataRepresentation.
+/// @returns { { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction", "SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction" } }.
+std::vector< std::vector< std::string > >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_categories() const {
+    return std::vector< std::vector< std::string > >{
+        { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction", "SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction" }
+    };
+}
+
+/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+/// is compatible.
+/// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
+std::vector< std::string >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_compatible_masala_engines() const {
+    return std::vector< std::string >{
+        "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"
+    };
+}
+
+/// @brief Get the properties of this MasalaDataRepresentation.
+/// @returns { "choice_feature_based", "cost_function", "not_pairwise_decomposible", "squared" }.
+std::vector< std::string >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_present_data_representation_properties() const {
+    return std::vector< std::string >{
+        "choice_feature_based",
+        "cost_function",
+        "not_pairwise_decomposible",
+        "unsatisfied_choice_feature_sum_based",
+        "squared"
+    };
+}
+
+/// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
+/// non-exhaustive list.
+/// @returns { "pairwise_decomposible" }.
+std::vector< std::string >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_absent_data_representation_properties() const {
+    return std::vector< std::string >{ "pairwise_decomposible" };
+}
+
 /// @brief Return the name of this class ("SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction").
 std::string
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::class_name() const {

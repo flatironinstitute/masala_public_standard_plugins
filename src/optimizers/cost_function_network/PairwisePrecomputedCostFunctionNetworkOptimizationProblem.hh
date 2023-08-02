@@ -114,6 +114,28 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the category for this MasalaDataRepresentation.
+	/// @returns { { "OptimizationProblem", "CostFunctionNetworkOptimizationProblem", "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" } }.
+	std::vector< std::vector< std::string > >
+	get_data_representation_categories() const override;
+
+	/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
+	/// is compatible.
+	/// @returns { "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer" }
+	std::vector< std::string >
+	get_compatible_masala_engines() const override;
+
+	/// @brief Get the properties of this MasalaDataRepresentation.
+	/// @returns { "optimization_problem", "cost_function_network_optimization_problem" }.
+	std::vector< std::string >
+	get_present_data_representation_properties() const override;
+
+	/// @brief Get the properties of this MasalaDataRepresentation that might possibly be present.
+	/// @details Obviously, this is a non-exhuastive list.
+	/// @returns { "precomputed", "pairwise_decomposible", "partially_precomputed", "partially_pairwise_decomposible" }.
+	std::vector< std::string >
+	get_possibly_present_data_representation_properties() const override;
+
 	/// @brief Get the name of this class.
 	/// @returns "PairwisePrecomputedCostFunctionNetworkOptimizationProblem".
 	std::string
