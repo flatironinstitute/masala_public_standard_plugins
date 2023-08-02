@@ -514,7 +514,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
         api_def->add_setter(
-            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size >, std::pair< Size, Size >, Real > >(
+            masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size > const &, std::pair< Size, Size > const &, Real > >(
                 "set_twobody_penalty", "Set the two-node penalty for a pair of choices at a pair of nodes.",
 
                 "node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
