@@ -907,7 +907,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
         // Recompute energies of all solutions to correct numerical error.
 #ifndef NDEBUG
-        solutions.recompute_all_scores( 1.0e-6 ); // As a sanity check, make sure numerical errors are small.
+        solutions.recompute_all_scores( 1.0e-6 ); // As a sanity check, make sure that the numerical errors are small.
 #else
         solutions.recompute_all_scores();
 #endif
