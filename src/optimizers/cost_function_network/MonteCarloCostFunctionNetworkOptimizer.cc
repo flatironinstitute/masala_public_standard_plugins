@@ -904,15 +904,6 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
         solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
-
-        // Recompute energies of all solutions to correct numerical error.
-#ifndef NDEBUG
-        solutions.recompute_all_scores( 1.0e-6 ); // As a sanity check, make sure that the numerical errors are small.
-#else
-        solutions.recompute_all_scores();
-#endif
-        solutions.sort_by_score();
-
     } // End mutex lock scope.
 
     // Minimal output.
