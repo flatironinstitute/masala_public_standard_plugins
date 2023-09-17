@@ -723,7 +723,17 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     std::vector< std::mutex > solution_mutexes( nproblems );
     solutions_by_problem.reserve( nproblems );
     for( Size i(0); i<nproblems; ++i ) {
-        solutions_by_problem.push_back( masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >() );
+        CostFunctionNetworkOptimizationSolutions_APISP new_solutions_container(
+            std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >(
+                problems.problem(i)->create_solutions_container()
+            )
+        );
+        CHECK_OR_THROW_FOR_CLASS( new_solutions_container != nullptr, "run_cost_function_network_optimizer", "Problem "
+            + std::to_string(i) + " created a " + new_solutions_container->inner_class_name() + " container, but this function "
+            "only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
+            "this ought not to happen."
+        );
+        solutions_by_problem.push_back( new_solutions_container );
     }
     solutions_by_problem.shrink_to_fit();
 
