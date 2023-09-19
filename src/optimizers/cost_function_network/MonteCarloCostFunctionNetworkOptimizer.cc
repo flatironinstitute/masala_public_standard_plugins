@@ -723,7 +723,20 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     std::vector< std::mutex > solution_mutexes( nproblems );
     solutions_by_problem.reserve( nproblems );
     for( Size i(0); i<nproblems; ++i ) {
-        solutions_by_problem.push_back( masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >() );
+        masala::numeric_api::auto_generated_api::optimization::OptimizationSolutions_APISP new_solutions_container_uncast(
+            problems.problem(i)->create_solutions_container()
+        );
+        CostFunctionNetworkOptimizationSolutions_APISP new_solutions_container(
+            std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >(
+                new_solutions_container_uncast
+            )
+        );
+        CHECK_OR_THROW_FOR_CLASS( new_solutions_container != nullptr, "run_cost_function_network_optimizer", "Problem "
+            + std::to_string(i) + " created a " + new_solutions_container_uncast->inner_class_name() + " container, but this function "
+            "only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
+            "this ought not to happen."
+        );
+        solutions_by_problem.push_back( new_solutions_container );
     }
     solutions_by_problem.shrink_to_fit();
 
@@ -904,15 +917,6 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
         solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
-
-        // Recompute energies of all solutions to correct numerical error.
-#ifndef NDEBUG
-        solutions.recompute_all_scores( 1.0e-6 ); // As a sanity check, make sure numerical errors are small.
-#else
-        solutions.recompute_all_scores();
-#endif
-        solutions.sort_by_score();
-
     } // End mutex lock scope.
 
     // Minimal output.
