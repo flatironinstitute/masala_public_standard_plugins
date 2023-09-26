@@ -30,32 +30,15 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
-#include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
-#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
-#include <base/managers/threads/MasalaThreadManager.hh>
-#include <base/managers/threads/MasalaThreadedWorkRequest.hh>
-#include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
-#include <base/managers/random/MasalaRandomNumberGenerator.hh>
-#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
-#include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
 #include <vector>
 #include <string>
-#include <utility>
-#include <sstream>
-#include <iostream>
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -70,7 +53,7 @@ namespace cost_function_network {
 BinaryCostFunctionNetworkProblemFileInterpreter::BinaryCostFunctionNetworkProblemFileInterpreter(
     BinaryCostFunctionNetworkProblemFileInterpreter const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+    masala::base::managers::file_interpreter::MasalaFileInterpreter( src )
 {
     std::lock_guard< std::mutex > lock( src.file_interpreter_mutex_ );
     //TODO TODO TODO
@@ -84,6 +67,7 @@ BinaryCostFunctionNetworkProblemFileInterpreter::operator=( BinaryCostFunctionNe
     std::lock_guard< std::mutex > lock1( file_interpreter_mutex_, std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.file_interpreter_mutex_, std::adopt_lock );
     // TODO TODO TODO
+	masala::base::managers::file_interpreter::MasalaFileInterpreter::operator=( src );
     return *this;
 }
 
@@ -98,9 +82,8 @@ BinaryCostFunctionNetworkProblemFileInterpreter::deep_clone() const {
 /// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
 void
 BinaryCostFunctionNetworkProblemFileInterpreter::make_independent() {
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_ = annealing_schedule_->deep_clone();
-    }
+	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
+	//TODO TODO TODO
 }
 
 
@@ -118,7 +101,7 @@ BinaryCostFunctionNetworkProblemFileInterpreter::make_independent() {
 std::vector< std::vector< std::string > >
 BinaryCostFunctionNetworkProblemFileInterpreter::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemFileInterpreter" } }
+	return { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemFileInterpreter" } };
 }
 
 /// @brief Get the keywords for this plugin class.
@@ -167,10 +150,6 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 BinaryCostFunctionNetworkProblemFileInterpreter::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
-    using namespace masala::base::api::setter;
-    using namespace masala::base::api::getter;
-    using namespace masala::base::api::work_function;
-    using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );

@@ -33,6 +33,7 @@
 // Base headers:
 #include <base/types.hh>
 #include <base/managers/file_interpreter/MasalaFileInterpreter.hh>
+#include <base/api/MasalaObjectAPIDefinition.fwd.hh>
 
 // STL headers:
 #include <mutex>
@@ -155,6 +156,9 @@ private:
 
 	/// @brief A mutex for threadsafe operation.
 	mutable std::mutex file_interpreter_mutex_;
+
+	/// @brief The API description.
+	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
 
 }; // class BinaryCostFunctionNetworkProblemFileInterpreter
 
