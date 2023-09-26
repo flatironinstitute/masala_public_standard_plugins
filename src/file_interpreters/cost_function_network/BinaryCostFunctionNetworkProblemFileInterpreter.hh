@@ -97,6 +97,18 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief All MasalaFileInterpreter subclasses must list the file types that they create.  These are
+	/// provided as short descriptors (e.g. "protein_data_bank_file").
+	/// @returns { "cost_function_network_problem_definition_file" }
+	std::vector< std::string >
+	get_file_descriptors() const override;
+
+	/// @brief All MasalaFileInterpreter subclasses must list the file type extensions that they create.
+	/// @details Extensions are provided in lower-case (e.g. "pdb").
+	/// @returns { ".txt", ".pdb" }
+	std::vector< std::string >
+	get_file_extensions() const override;
+
 	/// @brief Get the class name.
 	/// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
 	std::string class_name() const override;

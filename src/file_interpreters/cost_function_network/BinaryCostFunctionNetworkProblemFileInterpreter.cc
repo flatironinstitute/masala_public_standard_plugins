@@ -111,6 +111,22 @@ BinaryCostFunctionNetworkProblemFileInterpreter::get_keywords() const {
     return { "file_interpreter", "cost_function_network", "problem", "binary" };
 }
 
+/// @brief All MasalaFileInterpreter subclasses must list the file types that they create.  These are
+/// provided as short descriptors (e.g. "protein_data_bank_file").
+/// @returns { "cost_function_network_problem_definition_file" }
+std::vector< std::string >
+BinaryCostFunctionNetworkProblemFileInterpreter::get_file_descriptors() const {
+	return { "cost_function_network_problem_definition_file" };
+}
+
+/// @brief All MasalaFileInterpreter subclasses must list the file type extensions that they create.
+/// @details Extensions are provided in lower-case (e.g. "pdb").
+/// @returns { ".txt", ".pdb" }
+std::vector< std::string >
+BinaryCostFunctionNetworkProblemFileInterpreter::get_file_extensions() const {
+	return { ".txt", ".pdb" };
+}
+
 /// @brief Get the class name.
 /// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
 std::string
