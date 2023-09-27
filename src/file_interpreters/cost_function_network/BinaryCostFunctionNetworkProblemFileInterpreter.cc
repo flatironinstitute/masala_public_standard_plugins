@@ -121,10 +121,10 @@ BinaryCostFunctionNetworkProblemFileInterpreter::get_file_descriptors() const {
 
 /// @brief All MasalaFileInterpreter subclasses must list the file type extensions that they create.
 /// @details Extensions are provided in lower-case (e.g. "pdb").
-/// @returns { ".txt", ".pdb" }
+/// @returns { "txt", "pdb" }
 std::vector< std::string >
 BinaryCostFunctionNetworkProblemFileInterpreter::get_file_extensions() const {
-	return { ".txt", ".pdb" };
+	return { "txt", "pdb" };
 }
 
 /// @brief Get the class name.
