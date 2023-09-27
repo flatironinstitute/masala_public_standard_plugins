@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemFileInterpreter.cc
+/// @file src/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.cc
 /// @brief Implementation for a CostFunctionNetworkOptimizer that solves a cost function network problem using Monte
 /// Carlo methods.
 /// @details This performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to
@@ -26,7 +26,7 @@
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemFileInterpreter.hh>
+#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
@@ -50,8 +50,8 @@ namespace cost_function_network {
 
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
-BinaryCostFunctionNetworkProblemFileInterpreter::BinaryCostFunctionNetworkProblemFileInterpreter(
-    BinaryCostFunctionNetworkProblemFileInterpreter const & src
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetworkProblemRosettaFileInterpreter(
+    BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src
 ) :
     masala::base::managers::file_interpreter::MasalaFileInterpreter( src )
 {
@@ -61,8 +61,8 @@ BinaryCostFunctionNetworkProblemFileInterpreter::BinaryCostFunctionNetworkProble
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
-BinaryCostFunctionNetworkProblemFileInterpreter &
-BinaryCostFunctionNetworkProblemFileInterpreter::operator=( BinaryCostFunctionNetworkProblemFileInterpreter const & src ) {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter &
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::operator=( BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src ) {
     std::lock( file_interpreter_mutex_, src.file_interpreter_mutex_ );
     std::lock_guard< std::mutex > lock1( file_interpreter_mutex_, std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.file_interpreter_mutex_, std::adopt_lock );
@@ -72,16 +72,16 @@ BinaryCostFunctionNetworkProblemFileInterpreter::operator=( BinaryCostFunctionNe
 }
 
 /// @brief Make a copy of this object that's wholly independent.
-BinaryCostFunctionNetworkProblemFileInterpreterSP
-BinaryCostFunctionNetworkProblemFileInterpreter::deep_clone() const {
-    BinaryCostFunctionNetworkProblemFileInterpreterSP new_optimizer( masala::make_shared< BinaryCostFunctionNetworkProblemFileInterpreter >(*this) );
+BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::deep_clone() const {
+    BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP new_optimizer( masala::make_shared< BinaryCostFunctionNetworkProblemRosettaFileInterpreter >(*this) );
     new_optimizer->make_independent();
     return new_optimizer;
 }
 
 /// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
 void
-BinaryCostFunctionNetworkProblemFileInterpreter::make_independent() {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::make_independent() {
 	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
 	//TODO TODO TODO
 }
@@ -99,15 +99,15 @@ BinaryCostFunctionNetworkProblemFileInterpreter::make_independent() {
 /// entry in the outher vector), but must be in at least one.  The first one is used as
 /// the primary key.
 std::vector< std::vector< std::string > >
-BinaryCostFunctionNetworkProblemFileInterpreter::get_categories() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemFileInterpreter" } };
+	return { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemRosettaFileInterpreter" } };
 }
 
 /// @brief Get the keywords for this plugin class.
 /// @returns { "file_interpreter", "cost_function_network", "problem", "binary" }
 std::vector< std::string >
-BinaryCostFunctionNetworkProblemFileInterpreter::get_keywords() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_keywords() const {
     return { "file_interpreter", "cost_function_network", "problem", "binary" };
 }
 
@@ -115,7 +115,7 @@ BinaryCostFunctionNetworkProblemFileInterpreter::get_keywords() const {
 /// provided as short descriptors (e.g. "protein_data_bank_file").
 /// @returns { "cost_function_network_problem_definition_file" }
 std::vector< std::string >
-BinaryCostFunctionNetworkProblemFileInterpreter::get_file_descriptors() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_file_descriptors() const {
 	return { "cost_function_network_problem_definition_file" };
 }
 
@@ -123,37 +123,37 @@ BinaryCostFunctionNetworkProblemFileInterpreter::get_file_descriptors() const {
 /// @details Extensions are provided in lower-case (e.g. "pdb").
 /// @returns { "txt", "pdb" }
 std::vector< std::string >
-BinaryCostFunctionNetworkProblemFileInterpreter::get_file_extensions() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_file_extensions() const {
 	return { "txt", "pdb" };
 }
 
 /// @brief Get the class name.
-/// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
+/// @returns "BinaryCostFunctionNetworkProblemRosettaFileInterpreter".
 std::string
-BinaryCostFunctionNetworkProblemFileInterpreter::class_name() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_name() const {
     return class_name_static();
 }
 
 /// @brief Get the class namespace.
 /// @returns "standard_masala_plugins::file_interpreters::cost_function_network".
 std::string
-BinaryCostFunctionNetworkProblemFileInterpreter::class_namespace() const {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace() const {
     return class_namespace_static();
 }
 
 /// @brief Get the class name (static version).
-/// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
+/// @returns "BinaryCostFunctionNetworkProblemRosettaFileInterpreter".
 //static
 std::string
-BinaryCostFunctionNetworkProblemFileInterpreter::class_name_static() {
-    return "BinaryCostFunctionNetworkProblemFileInterpreter";
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_name_static() {
+    return "BinaryCostFunctionNetworkProblemRosettaFileInterpreter";
 }
 
 /// @brief Get the class namespace (static version).
 /// @returns "standard_masala_plugins::file_interpreters::cost_function_network".
 //static
 std::string
-BinaryCostFunctionNetworkProblemFileInterpreter::class_namespace_static() {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace_static() {
     return "standard_masala_plugins::file_interpreters::cost_function_network";
 }
 
@@ -163,7 +163,7 @@ BinaryCostFunctionNetworkProblemFileInterpreter::class_namespace_static() {
 
 /// @brief Get the API definition for this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
-BinaryCostFunctionNetworkProblemFileInterpreter::get_api_definition() {
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
     using masala::base::Size;
@@ -179,7 +179,7 @@ BinaryCostFunctionNetworkProblemFileInterpreter::get_api_definition() {
         );
 
         // Constructors:
-        ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BinaryCostFunctionNetworkProblemFileInterpreter, api_description );
+        ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BinaryCostFunctionNetworkProblemRosettaFileInterpreter, api_description );
 
         // Setters:
 

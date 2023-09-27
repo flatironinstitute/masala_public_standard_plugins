@@ -25,7 +25,7 @@
 #include <file_interpreters/api/generate_api_classes.hh>
 
 // Optimizers headers
-#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemFileInterpreter.hh>
+#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.hh>
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -41,7 +41,7 @@ namespace api {
         using namespace standard_masala_plugins::file_interpreters;
 
         // Add to this vector whenever a class is added with a defined API:
-        outvec.emplace_back( masala::make_shared< cost_function_network::BinaryCostFunctionNetworkProblemFileInterpreter >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;

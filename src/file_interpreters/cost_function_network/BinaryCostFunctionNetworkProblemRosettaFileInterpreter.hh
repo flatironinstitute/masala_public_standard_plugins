@@ -16,16 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemFileInterpreter.hh
+/// @file src/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.hh
 /// @brief Headers for a file interpreter for reading and writing binary cost function network
 /// optimization problems.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemFileInterpreter_hh
-#define StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemFileInterpreter_hh
+#ifndef StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_hh
+#define StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_hh
 
 // Forward declarations:
-#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemFileInterpreter.fwd.hh>
+#include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.fwd.hh>
 
 // Parent header:
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
@@ -45,7 +45,7 @@ namespace cost_function_network {
 /// @brief A file interpreter for reading and writing binary cost function network
 /// optimization problems.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class BinaryCostFunctionNetworkProblemFileInterpreter : public masala::base::managers::file_interpreter::MasalaFileInterpreter {
+class BinaryCostFunctionNetworkProblemRosettaFileInterpreter : public masala::base::managers::file_interpreter::MasalaFileInterpreter {
 
 public:
 
@@ -54,19 +54,19 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	BinaryCostFunctionNetworkProblemFileInterpreter() = default;
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter() = default;
 
 	/// @brief Copy constructor.
 	/// @details Needed since we define a mutex.
-	BinaryCostFunctionNetworkProblemFileInterpreter( BinaryCostFunctionNetworkProblemFileInterpreter const & );
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter( BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & );
 
 	/// @brief Assignment operator.
 	/// @details Needed since we define a mutex.
-	BinaryCostFunctionNetworkProblemFileInterpreter &
-	operator=( BinaryCostFunctionNetworkProblemFileInterpreter const & );
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter &
+	operator=( BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & );
 
 	/// @brief Make a copy of this object that's wholly independent.
-	BinaryCostFunctionNetworkProblemFileInterpreterSP
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP
 	deep_clone() const;
 
 	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
@@ -74,7 +74,7 @@ public:
 	make_independent();
 
 	/// @brief Destructor.
-	~BinaryCostFunctionNetworkProblemFileInterpreter() override = default;
+	~BinaryCostFunctionNetworkProblemRosettaFileInterpreter() override = default;
 
 public:
 
@@ -83,7 +83,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Get the category or categories for this plugin class.
-	/// @returns { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemFileInterpreter" } }
+	/// @returns { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemRosettaFileInterpreter" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -110,7 +110,7 @@ public:
 	get_file_extensions() const override;
 
 	/// @brief Get the class name.
-	/// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
+	/// @returns "BinaryCostFunctionNetworkProblemRosettaFileInterpreter".
 	std::string class_name() const override;
 
 	/// @brief Get the class namespace.
@@ -118,7 +118,7 @@ public:
 	std::string class_namespace() const override;
 
 	/// @brief Get the class name (static version).
-	/// @returns "BinaryCostFunctionNetworkProblemFileInterpreter".
+	/// @returns "BinaryCostFunctionNetworkProblemRosettaFileInterpreter".
 	static std::string class_name_static();
 
 	/// @brief Get the class namespace (static version).
@@ -172,10 +172,10 @@ private:
 	/// @brief The API description.
 	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
 
-}; // class BinaryCostFunctionNetworkProblemFileInterpreter
+}; // class BinaryCostFunctionNetworkProblemRosettaFileInterpreter
 
 } // namespace cost_function_network
 } // namespace file_interpreters
 } // namesapce standard_masala_plugins
 
-#endif // StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemFileInterpreter_hh
+#endif // StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_hh
