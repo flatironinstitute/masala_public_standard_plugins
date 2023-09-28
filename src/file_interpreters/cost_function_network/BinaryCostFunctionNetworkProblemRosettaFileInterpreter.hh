@@ -190,6 +190,14 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Check whether the cost function network problem class is valid (i.e. whether it exists).
+	/// @details Must be called from a mutex-locked or finalized context.
+	void check_cfn_problem_class() const;
+
+	/// @brief Check whether the cost function network optimizer class is valid (i.e. whether it exists).
+	/// @details Must be called from a mutex-locked or finalized context.
+	void check_cfn_optimizer_class() const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

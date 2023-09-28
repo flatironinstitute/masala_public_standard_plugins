@@ -36,6 +36,9 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.fwd.hh>
+#include <base/managers/engine/MasalaDataRepresentationManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationRequest.hh>
+#include <base/managers/engine/MasalaEngineManager.hh>
 
 // STL headers:
 #include <vector>
@@ -296,6 +299,35 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::protected_assign(
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Check whether the cost function network problem class is valid (i.e. whether it exists).
+/// @details Must be called from a mutex-locked or finalized context.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::check_cfn_problem_class() const {
+	using namespace masala::base::managers::engine;
+	if( !cfn_problem_class_.empty() ) {
+		MasalaDataRepresentationRequest request;
+		request.add_data_representation_category_requirement( {{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" }}, true );
+		request.add_data_representation_name_requirement( cfn_problem_class_ );
+		std::vector<MasalaDataRepresentationCreatorCSP> const vec(
+			MasalaDataRepresentationManager::get_instance()->get_compatible_data_representation_creators( request )
+		);
+		CHECK_OR_THROW_FOR_CLASS( !vec.empty(), "check_cfn_problem_class", "No cost function network optimization problem data representaiton "
+			"subclass has been registered with name \"" + cfn_problem_class_ + "\"."
+		);
+		CHECK_OR_THROW_FOR_CLASS( vec.size() < 2, "check_cfn_problem_class", "More than one cost function network optimization problem data "
+			"representaiton subclass has been registered with name \"" + cfn_problem_class_ + "\".  Use full class namespace and name, "
+			"separated by double colons, to disambiguate.  For example, \""
+			"my_masala_library::my_domain_application::MySpecializedCFNDataRepresentation\"."
+		);
+	}
+}
+
+/// @brief Check whether the cost function network optimizer class is valid (i.e. whether it exists).
+/// @details Must be called from a mutex-locked or finalized context.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::check_cfn_optimizer_class() const {
+	TODO TODO TODO;
+}
 
 } // namespace cost_function_network
 } // namespace file_interpreters
