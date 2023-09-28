@@ -37,6 +37,8 @@
 
 // STL headers:
 #include <mutex>
+#include <string>
+#include <atomic>
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -54,7 +56,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	BinaryCostFunctionNetworkProblemRosettaFileInterpreter() = default;
+	/// @details Not defaulted since the atomic bool must be set.
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter();
 
 	/// @brief Copy constructor.
 	/// @details Needed since we define a mutex.
@@ -141,6 +144,23 @@ public:
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Set the name of the cost function network problem description class to generate.
+	/// @details This can be the short name or the full name (i.e. with or without namespace).
+	/// It need only include namespace if the short name is not unique.
+	/// @note If not set, then an optimizer must be specified instead.
+	void
+	set_cfn_problem_type_to_generate(
+		std::string const & class_name_in
+	);
+
+	/// @brief Set the name of the optimizer class that will be used to solve this problem.
+	/// @details This can be the short name or the full name (i.e. with or without namespace).
+	/// It need only include namespace if the short name is not unique.
+	/// @note If not set, then cost function network problem class must be specified instead.
+	void
+	set_cfn_optimizer_type(
+		std::string const & class_name_in
+	);
 
 public:
 
@@ -153,6 +173,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Assign src to this object.
+	/// @details Assumes both objects' mutexes have been locked.
+	void protected_assign( BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src );
 
 private:
 
@@ -169,8 +199,23 @@ private:
 	/// @brief A mutex for threadsafe operation.
 	mutable std::mutex file_interpreter_mutex_;
 
+	/// @brief Has this object been finalized?
+	std::atomic_bool finalized_;
+
 	/// @brief The API description.
 	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
+
+	/// @brief The name of the cost function network problem description class to generate.
+	/// @details This can be the short name or the full name (i.e. with or without namespace).
+	/// It need only include namespace if the short name is not unique.
+	/// @note If empty, then an optimizer must be specified instead.
+	std::string cfn_problem_class_;
+
+	/// @brief The name of the optimizer class that will be used to solve this problem.
+	/// @details This can be the short name or the full name (i.e. with or without namespace).
+	/// It need only include namespace if the short name is not unique.
+	/// @note If empty, then cost function network problem class must be specified instead.
+	std::string cfn_optimizer_class_;
 
 }; // class BinaryCostFunctionNetworkProblemRosettaFileInterpreter
 

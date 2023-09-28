@@ -35,6 +35,7 @@
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.fwd.hh>
 
 // STL headers:
 #include <vector>
@@ -48,6 +49,14 @@ namespace cost_function_network {
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/// @brief Default constructor.
+/// @details Not defaulted since the atomic bool must be set.
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetworkProblemRosettaFileInterpreter() :
+	masala::base::file_interpreters::MasalaFileInterpreter(),
+	finalized_( false )
+
+
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetworkProblemRosettaFileInterpreter(
@@ -56,6 +65,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetwor
     masala::base::managers::file_interpreter::MasalaFileInterpreter( src )
 {
     std::lock_guard< std::mutex > lock( src.file_interpreter_mutex_ );
+	protected_assign( src );
     //TODO TODO TODO
 }
 
@@ -66,8 +76,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::operator=( BinaryCostFun
     std::lock( file_interpreter_mutex_, src.file_interpreter_mutex_ );
     std::lock_guard< std::mutex > lock1( file_interpreter_mutex_, std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.file_interpreter_mutex_, std::adopt_lock );
-    // TODO TODO TODO
-	masala::base::managers::file_interpreter::MasalaFileInterpreter::operator=( src );
+	protected_assign(src);
     return *this;
 }
 
@@ -166,6 +175,7 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
+    using namespace masala::base::api::setter;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
@@ -173,7 +183,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
         MasalaObjectAPIDefinitionSP api_description(
             masala::make_shared< MasalaObjectAPIDefinition >(
                 *this,
-                "TODO TODO TODO",
+                "This class reads binary cost function network optimization problem files (or packing problem files) written by Rosetta, "
+				"and generates a user-selected type of cost function network optimization problem description.",
                 false, false
             )
         );
@@ -182,6 +193,27 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
         ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BinaryCostFunctionNetworkProblemRosettaFileInterpreter, api_description );
 
         // Setters:
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+				"set_cfn_problem_type_to_generate", "Set the name of the cost function network problem description class "
+				"to generate.  This can be the short name or the full name (i.e. with or without namespace).  It need only "
+				"include namespace if the short name is not unique.  If not set, then an optimizer must be specified instead.",
+				"problem_type_name_in", "The name of the cost function network optimization problem subclass to generate.  Namespace is "
+				"optional unless the name is not unique.", false, false,
+				std::bind( &set_cfn_problem_type_to_generate, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+				"set_cfn_optimizer_type", "Set the name of the optimizer class that will be used to solve this problem.  This can "
+				"be the short name or the full name (i.e. with or without namespace).  It need only include namespace if the short "
+				"name is not unique.  If not set, then cost function network problem class must be specified instead.",
+				"cfn_optimizer_name_in", "The name of the cost function network optimizer that will be used to solve the problem.  The "
+				"problem type generated will be chosen for its suitability for this optimizer.  Namespace is optional unless the name is "
+				"not unique.", false, false,
+				std::bind( &set_cfn_optimizer_type, this, std::placeholders::_1 )
+			)
+		);
 
 
 		// Getters:
@@ -199,6 +231,42 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the name of the cost function network problem description class to generate.
+/// @details This can be the short name or the full name (i.e. with or without namespace).
+/// It need only include namespace if the short name is not unique.
+/// @note If not set, then an optimizer must be specified instead.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_problem_type_to_generate(
+	std::string const & class_name_in
+) {
+	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( !(finalized_.load()), "set_cfn_problem_type_to_generate", "The problem type to generate must be "
+		"set prior to finalization.  This object has already been finalized."
+	);
+	cfn_problem_class_ = class_name_in;
+	if( !cfn_problem_class_.empty() ) {
+		check_cfn_problem_class();
+	}
+}
+
+/// @brief Set the name of the optimizer class that will be used to solve this problem.
+/// @details This can be the short name or the full name (i.e. with or without namespace).
+/// It need only include namespace if the short name is not unique.
+/// @note If not set, then cost function network problem class must be specified instead.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_optimizer_type(
+	std::string const & class_name_in
+) {
+	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( !(finalized_.load()), "set_cfn_optimizer_type", "The optimizer type must be "
+		"set prior to finalization.  This object has already been finalized."
+	);
+	cfn_optimizer_class_ = class_name_in;
+	if( !cfn_optimizer_class_.empty() ) {
+		check_cfn_optimizer_class();
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,6 +274,23 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assign src to this object.
+/// @details Assumes both objects' mutexes have been locked.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::protected_assign(
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src
+) {
+	finalized_.store( src.finalized_.load() );
+	// Deliberately do not copy api description.
+	cfn_problem_class_ = src.cfn_problem_class_;
+	cfn_optimizer_class_ = src.cfn_optimizer_class_;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
