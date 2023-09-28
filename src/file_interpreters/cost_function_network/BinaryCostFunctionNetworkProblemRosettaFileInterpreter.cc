@@ -39,7 +39,7 @@
 #include <base/managers/engine/MasalaDataRepresentationManager.hh>
 #include <base/managers/engine/MasalaDataRepresentationRequest.hh>
 #include <base/managers/engine/MasalaEngineManager.hh>
-#include <base/managers/engine/MasalaEngineRequest.hh>
+//#include <base/managers/engine/MasalaEngineRequest.hh>
 
 // STL headers:
 #include <vector>
@@ -57,9 +57,9 @@ namespace cost_function_network {
 /// @brief Default constructor.
 /// @details Not defaulted since the atomic bool must be set.
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetworkProblemRosettaFileInterpreter() :
-	masala::base::file_interpreters::MasalaFileInterpreter(),
+	masala::base::managers::file_interpreter::MasalaFileInterpreter(),
 	finalized_( false )
-
+{}
 
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
@@ -204,7 +204,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 				"include namespace if the short name is not unique.  If not set, then an optimizer must be specified instead.",
 				"problem_type_name_in", "The name of the cost function network optimization problem subclass to generate.  Namespace is "
 				"optional unless the name is not unique.", false, false,
-				std::bind( &set_cfn_problem_type_to_generate, this, std::placeholders::_1 )
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_problem_type_to_generate, this, std::placeholders::_1 )
 			)
 		);
 		api_description->add_setter(
@@ -215,7 +215,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 				"cfn_optimizer_name_in", "The name of the cost function network optimizer that will be used to solve the problem.  The "
 				"problem type generated will be chosen for its suitability for this optimizer.  Namespace is optional unless the name is "
 				"not unique.", false, false,
-				std::bind( &set_cfn_optimizer_type, this, std::placeholders::_1 )
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_optimizer_type, this, std::placeholders::_1 )
 			)
 		);
 
@@ -327,23 +327,23 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::check_cfn_problem_class(
 /// @details Must be called from a mutex-locked or finalized context.
 void
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::check_cfn_optimizer_class() const {
-	using namespace masala::base::managers::engine;
-	if( !cfn_optimizer_class_.empty() ) {
-		MasalaEngineRequest request;
-		request.add_engine_category_requirement( {{ "Optimizer", "CostFunctionNetworkOptimizer" }}, true );
-		request.add_engine_name_requirement( cfn_optimizer_class_ );
-		std::vector<MasalaEngineCreatorCSP> const vec(
-			MasalaEngineManager::get_instance()->get_compatible_engine_creators( request )
-		);
-		CHECK_OR_THROW_FOR_CLASS( !vec.empty(), "check_cfn_optimizer_class", "No cost function network optimizer engine "
-			"subclass has been registered with name \"" + cfn_problem_class_ + "\"."
-		);
-		CHECK_OR_THROW_FOR_CLASS( vec.size() < 2, "check_cfn_optimizer_class", "More than one cost function network optimizer "
-			"engine subclass has been registered with name \"" + cfn_problem_class_ + "\".  Use full class namespace and name, "
-			"separated by double colons, to disambiguate.  For example, \""
-			"my_masala_library::my_domain_application::MySpecializedCFNOptimizer\"."
-		);
-	}
+	// using namespace masala::base::managers::engine;
+	// if( !cfn_optimizer_class_.empty() ) {
+	// 	MasalaEngineRequest request;
+	// 	request.add_engine_category_requirement( {{ "Optimizer", "CostFunctionNetworkOptimizer" }}, true );
+	// 	request.add_engine_name_requirement( cfn_optimizer_class_ );
+	// 	std::vector<MasalaEngineCreatorCSP> const vec(
+	// 		MasalaEngineManager::get_instance()->get_compatible_engine_creators( request )
+	// 	);
+	// 	CHECK_OR_THROW_FOR_CLASS( !vec.empty(), "check_cfn_optimizer_class", "No cost function network optimizer engine "
+	// 		"subclass has been registered with name \"" + cfn_problem_class_ + "\"."
+	// 	);
+	// 	CHECK_OR_THROW_FOR_CLASS( vec.size() < 2, "check_cfn_optimizer_class", "More than one cost function network optimizer "
+	// 		"engine subclass has been registered with name \"" + cfn_problem_class_ + "\".  Use full class namespace and name, "
+	// 		"separated by double colons, to disambiguate.  For example, \""
+	// 		"my_masala_library::my_domain_application::MySpecializedCFNOptimizer\"."
+	// 	);
+	// }
 }
 
 } // namespace cost_function_network
