@@ -26,9 +26,14 @@
 // Unit headers:
 #include <file_interpreters_api/auto_generated_api/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API.hh>
 
+// Registration headers:
+#include <registration_api/register_library.hh>
+
 // Masala numeric headers:
 
 // Masala base headers:
+#include <base/managers/file_interpreter/MasalaFileInterpreterManager.hh>
+#include <base/managers/file_interpreter/MasalaFileInterpreterCreator.hh>
 
 // STL headers:
 
@@ -39,11 +44,37 @@ namespace file_interpreters {
 namespace cost_function_network {
 
 TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter.", "[standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API][instantiation]" ) {
+	using namespace file_interpreters_api::auto_generated_api::cost_function_network;
     REQUIRE_NOTHROW([&](){
-        file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_APISP mcopt(
-            masala::make_shared< file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API >()
+        BinaryCostFunctionNetworkProblemRosettaFileInterpreter_APISP fileinterp(
+            masala::make_shared< BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API >()
         );
-        mcopt->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter." );
+        fileinterp->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter." );
+    }() );
+}
+
+TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter from the MasalaFileInterpreterManager.", "[standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API][instantiation]" ) {
+	using namespace standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network;
+	using namespace masala::base::managers::file_interpreter;
+
+    REQUIRE_NOTHROW([&](){
+		registration_api::register_library();
+
+		std::vector< MasalaFileInterpreterCreatorCSP > const creators(
+			MasalaFileInterpreterManager::get_instance()->get_file_interpreter_by_name(
+				"BinaryCostFunctionNetworkProblemRosettaFileInterpreter"
+			)
+		);
+		CHECK( creators.size() == 1 );
+        BinaryCostFunctionNetworkProblemRosettaFileInterpreter_APISP fileinterp(
+            std::dynamic_pointer_cast< BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API >(
+				creators[0]->create_file_interpreter()
+			)
+        );
+		CHECK( fileinterp != nullptr );
+        fileinterp->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter from the MasalaFileInterpreterManager." );
+
+		registration_api::unregister_library();
     }() );
 }
 
