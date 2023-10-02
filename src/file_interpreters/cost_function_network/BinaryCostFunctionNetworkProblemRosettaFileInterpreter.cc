@@ -30,6 +30,7 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -41,6 +42,7 @@
 #include <base/managers/engine/MasalaDataRepresentationRequest.hh>
 #include <base/managers/engine/MasalaEngineManager.hh>
 #include <base/managers/engine/MasalaEngineRequest.hh>
+#include <base/utility/string/string_manipulation.hh>
 
 // STL headers:
 #include <vector>
@@ -296,6 +298,62 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_optimizer_type(
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Read the contents of a Rosetta-format binary cost function network problem
+/// file, and return a cost function network problem object (as a generic MasalaObject pointer).
+/// @details This override calls cfn_problems_from_ascii_file_contents().
+masala::base::MasalaObjectAPISP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_from_ascii_file_contents(
+	std::vector< std::string > const & filelines
+) const {
+	return cfn_problems_from_ascii_file_contents( filelines );
+}
+
+/// @brief Read the conents of a Rosetta-format binary cost function network problem
+/// file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).
+/// @details Throws if at least one problem was not successfully parsed.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_file_contents(
+	std::vector< std::string > const & filelines
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using masala::base::Size;
+
+	CostFunctionNetworkOptimizationProblems_APISP problems( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
+
+	bool in_block(false);
+	std::vector< std::string const * > line_subset;
+	Size counter(0);
+
+	for( std::string const & line : filelines ) {
+		std::string const linestripped( masala::base::utility::string::trim( line ) );
+		if( !in_block ) {
+			if( linestripped == "[BEGIN_BINARY_GRAPH_SUMMARY]" ) {
+				line_subset.clear();
+				line_subset.push_back( &line );
+				in_block = true;
+			}
+		} else {
+			line_subset.push_back( &line );
+			if( linestripped == "[END_BINARY_GRAPH_SUMMARY]" ) {
+				in_block = false;
+				++counter;
+				CostFunctionNetworkOptimizationProblem_APISP problem( cfn_problem_from_ascii_file_block( line_subset, counter ) );
+				if( problem != nullptr ) {
+					problems->add_optimization_problem( problem );
+				} else {
+					write_to_tracer( "Couldn't read problem " + std::to_string(counter) + " in file.  Skipping." );
+				}
+			}
+		}
+	}
+
+	CHECK_OR_THROW_FOR_CLASS( problems->n_problems() > 0, "cfn_problems_from_ascii_file_contents", "No problems were "
+		"successfully parsed from the file contents!"
+	);
+
+	return problems;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS

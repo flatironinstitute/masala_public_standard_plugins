@@ -35,6 +35,9 @@
 #include <base/managers/file_interpreter/MasalaFileInterpreter.hh>
 #include <base/api/MasalaObjectAPIDefinition.fwd.hh>
 
+// Numeric headers:
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+
 // STL headers:
 #include <mutex>
 #include <string>
@@ -179,6 +182,22 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Read the contents of a Rosetta-format binary cost function network problem
+	/// file, and return a cost function network problem object (as a generic MasalaObject pointer).
+	/// @details This override calls cfn_problems_from_ascii_file_contents().
+	masala::base::MasalaObjectAPISP
+	object_from_ascii_file_contents(
+		std::vector< std::string > const & filelines
+	) const override;
+
+	/// @brief Read the conents of a Rosetta-format binary cost function network problem
+	/// file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).
+	/// @details Throws if at least one problem was not successfully parsed.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+	cfn_problems_from_ascii_file_contents(
+		std::vector< std::string > const & filelines
+	) const;
 
 protected:
 
