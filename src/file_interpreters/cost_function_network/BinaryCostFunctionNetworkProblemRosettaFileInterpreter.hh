@@ -215,6 +215,15 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
+	/// convert these to a cost function network problem definition.
+	/// @param line_subset A vector of pointers to strings for the lines.
+	/// @return A cost function network optimization problem of the given type.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
+	cfn_problem_from_ascii_file_block(
+		std::vector< std::string const * > const & line_subset
+	) const;
+
 	/// @brief Check whether the cost function network problem class is valid (i.e. whether it exists).
 	/// @details Must be called from a mutex-locked or finalized context.
 	void check_cfn_problem_class() const;

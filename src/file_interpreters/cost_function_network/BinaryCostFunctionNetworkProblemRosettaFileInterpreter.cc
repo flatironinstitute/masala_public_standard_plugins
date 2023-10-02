@@ -338,7 +338,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 			if( linestripped == "[END_BINARY_GRAPH_SUMMARY]" ) {
 				in_block = false;
 				++counter;
-				CostFunctionNetworkOptimizationProblem_APISP problem( cfn_problem_from_ascii_file_block( line_subset, counter ) );
+				CostFunctionNetworkOptimizationProblem_APISP problem( cfn_problem_from_ascii_file_block( line_subset ) );
 				if( problem != nullptr ) {
 					problems->add_optimization_problem( problem );
 				} else {
@@ -375,6 +375,17 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::protected_assign(
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
+/// convert these to a cost function network problem definition.
+/// @param line_subset A vector of pointers to strings for the lines.
+/// @return A cost function network optimization problem of the given type.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_file_block(
+	std::vector< std::string const * > const & line_subset
+) const {
+	TODO TODO TODO;
+}
 
 /// @brief Check whether the cost function network problem class is valid (i.e. whether it exists).
 /// @details Must be called from a mutex-locked or finalized context.
