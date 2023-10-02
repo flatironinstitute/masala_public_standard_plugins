@@ -128,6 +128,12 @@ public:
 	/// @returns "standard_masala_plugins::file_interpreters::cost_function_network".
 	static std::string class_namespace_static();
 
+	/// @brief Indicate that this interpreter reads ASCII files.
+	/// @note Although this file format takes advantage of the trick of encoding 3 bytes of binary information
+	/// in 4 bytes of ASCII text, the file is still a text file.
+	/// @returns True.
+	bool filetype_is_ascii() const override;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

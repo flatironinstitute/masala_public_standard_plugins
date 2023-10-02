@@ -36,6 +36,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.fwd.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.fwd.hh>
 #include <base/managers/engine/MasalaDataRepresentationManager.hh>
 #include <base/managers/engine/MasalaDataRepresentationRequest.hh>
 #include <base/managers/engine/MasalaEngineManager.hh>
@@ -170,6 +171,15 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace_static()
     return "standard_masala_plugins::file_interpreters::cost_function_network";
 }
 
+/// @brief Indicate that this interpreter reads ASCII files.
+/// @note Although this file format takes advantage of the trick of encoding 3 bytes of binary information
+/// in 4 bytes of ASCII text, the file is still a text file.
+/// @returns True.
+bool
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::filetype_is_ascii() const {
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC API FUNCTION
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +190,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
+    using namespace masala::base::api::getter;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
@@ -219,9 +230,16 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 			)
 		);
 
-
 		// Getters:
-
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"filetype_is_ascii", "Does this interpreter read ASCII file types, or binary?  This override returns "
+				"true, indicating that this interpreter reads ASCII files.",
+				"is_ascii", "Is the filetype read by this interpreter an ASCII format?  (Yes, it is, so this "
+				"is always true.)", true, false,
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::filetype_is_ascii, this )
+			)
+		);
 
         // Work functions:
 
