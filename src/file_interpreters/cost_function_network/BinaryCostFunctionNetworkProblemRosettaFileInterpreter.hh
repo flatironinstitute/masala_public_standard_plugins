@@ -215,6 +215,12 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Generate an empty cost function network optimization problem description of a user-specified type.
+	/// @details This EITHER generates a problem of type cfn_problem_class_, OR generates a problem compatible with
+	/// cfn_optimizer_class_, depending on which is specified.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
+	generate_cfn_problem() const;
+
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 	/// convert these to a cost function network problem definition.
 	/// @param[in] lines A vector of file lines.

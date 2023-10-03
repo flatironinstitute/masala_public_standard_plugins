@@ -30,6 +30,7 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblemCreator.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 
 // Base headers:
@@ -377,6 +378,63 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::protected_assign(
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Generate an empty cost function network optimization problem description of a user-specified type.
+/// @details This EITHER generates a problem of type cfn_problem_class_, OR generates a problem compatible with
+/// cfn_optimizer_class_, depending on which is specified.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::generate_cfn_problem() const {
+	using namespace masala::base::managers::engine;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	CHECK_OR_THROW_FOR_CLASS( ( cfn_optimizer_class_.empty() && (!cfn_problem_class_.empty()) ) ||
+		( (!cfn_optimizer_class_.empty()) && cfn_problem_class_.empty() ), "generate_cfn_problem", "Either the "
+		"cost function network problem type, or the cost function network optimizer type, must be specified before "
+		"this function is called.  Both cannot be specified."
+	);
+
+	if( cfn_optimizer_class_.empty() ) {
+		// Creating cost function network optimization problem class subtype by name:
+		std::vector< MasalaDataRepresentationCreatorCSP > creators;
+		std::vector< CostFunctionNetworkOptimizationProblemCreatorCSP > creators_cast;
+		MasalaDataRepresentationRequest request;
+		request.add_data_representation_name_requirement( cfn_problem_class_ );
+		creators = MasalaDataRepresentationManager::get_instance()->get_compatible_data_representation_creators( request ) ;
+
+		for( auto const & creator : creators ) {
+			CostFunctionNetworkOptimizationProblemCreatorCSP creator_cast(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblemCreator const >( creator )
+			);
+			if( creator != nullptr ) {
+				creators_cast.push_back( creator_cast );
+			}
+		}
+
+		CHECK_OR_THROW_FOR_CLASS( creators_cast.size() > 0, "generate_cfn_problem", "Could not find a cost function "
+			"network optimization problem class matching name \"" + cfn_problem_class_ + "\"."
+		);
+		if( creators_cast.size() > 1 ) {
+			write_to_tracer( "Warning -- found more than one cost function network optimization problem class matching "
+				"name \"" + cfn_problem_class_ + "\".  Returning first.  Include the full namespace to specify which to "
+				"select."
+			);
+		}
+		CostFunctionNetworkOptimizationProblem_APISP returnobj(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >(
+				creators_cast[0]->create_data_representation()
+			)
+		);
+		CHECK_OR_THROW_FOR_CLASS( returnobj != nullptr, "generate_cfn_problem", "Error creating cost function network "
+			"problem creator.  Creator " + creators_cast[0]->class_name() + " did not return an object of expected class.  "
+			"This is a program error.  Please consult a developer."
+		);
+		return returnobj;
+	} else {
+		TODO TODO TODO;
+	}
+
+	return nullptr;
+}
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 /// convert these to a cost function network problem definition.
