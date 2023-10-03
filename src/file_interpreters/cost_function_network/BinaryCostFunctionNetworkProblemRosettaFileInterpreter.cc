@@ -556,7 +556,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 	);
 
 	Size read_step(0); // Which step are we on in reading the record?
-	Size n_variable_nodes_expected(0), choicecount_bytesize_expected(0);
+	Size n_variable_nodes_expected(0), choicecount_bytesize_expected(0),
+		n_onebody_penalties_expected(0), onebody_penalty_bytesize_expected(0),
+		n_twobody_penalties_expected(0), twobody_penalty_index_bytesize_expected(0),
+		twobody_penalty_bytesize_expected(0);
 	std::vector< Size > choices_by_variable_node_expected;
 
 	for( Size i(line_begin); i<=line_end; ++i ) {
@@ -575,7 +578,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				// used to represent choice counts.
 				std::istringstream ss(linestripped);
 				ss >> n_variable_nodes_expected >> choicecount_bytesize_expected;
-				CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
+				CHECK_OR_THROW_FOR_CLASS( ss.eof() && !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
 					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
 				);
 				++read_step;
@@ -591,7 +594,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			case 3 : {
 				// Read onebody penalty headers that tell us (a) how many onebody penalties (i.e. how many total choices)
 				// we have, and (b) how many bytes are being used to represent onebody peanlties.
-				TODO TODO TODO;
+				std::istringstream ss(linestripped);
+				ss >> n_onebody_penalties_expected >> onebody_penalty_bytesize_expected;
+				CHECK_OR_THROW_FOR_CLASS( ss.eof() && !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
+					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
+				);
+				++read_step;
 			}
 			case 4 : {
 				// Read onebody penalties list.
@@ -601,7 +609,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				// Read twobody penalty headers that tell us (a) how many twobody penalties we have, (b) how many
 				// bytes are being used to represent node and choice indices, and (c) how many bytes are being used
 				// to represent twobody penalties.
-				TODO TODO TODO;
+				std::istringstream ss(linestripped);
+				ss >> n_twobody_penalties_expected >> twobody_penalty_index_bytesize_expected >> twobody_penalty_bytesize_expected;
+				CHECK_OR_THROW_FOR_CLASS( ss.eof() && !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
+					"line \"" + linestripped + "\".  Expected three unsigned integer entries."
+				);
+				++read_step;
 			}
 			case 6 : {
 				// Read twobody penalties.
