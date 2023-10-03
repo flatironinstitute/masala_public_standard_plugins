@@ -598,6 +598,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
 				);
 				++read_step;
+				break;
 			}
 			case 2 : {
 				// Read the choice counts per variable node.
@@ -606,6 +607,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				);
 				decode_choices_per_variable_node( linestripped, n_variable_nodes_expected, choicecount_bytesize_expected, choices_by_variable_node_expected );
 				++read_step;
+				break;
 			}
 			case 3 : {
 				// Read onebody penalty headers that tell us (a) how many onebody penalties (i.e. how many total choices)
@@ -616,10 +618,13 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
 				);
 				++read_step;
+				break;
 			}
 			case 4 : {
 				// Read onebody penalties list.
 				decode_onebody_energies( linestripped, choices_by_variable_node_expected, onebody_penalty_bytesize_expected, *problem );
+				++read_step;
+				break;
 			}
 			case 5 : {
 				// Read twobody penalty headers that tell us (a) how many twobody penalties we have, (b) how many
@@ -631,10 +636,13 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 					"line \"" + linestripped + "\".  Expected three unsigned integer entries."
 				);
 				++read_step;
+				break;
 			}
 			case 6 : {
 				// Read twobody penalties.
 				TODO TODO TODO;
+				++read_step;
+				break;
 			}
 		}
 
