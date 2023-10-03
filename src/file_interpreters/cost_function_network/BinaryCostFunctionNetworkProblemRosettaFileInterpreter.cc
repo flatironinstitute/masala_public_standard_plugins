@@ -47,6 +47,7 @@
 // STL headers:
 #include <vector>
 #include <string>
+#include <sstream>
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -398,8 +399,36 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 		"function network optimization problem.  This is a program error.  Please consult a developer."
 	);
 
+	Size read_step(0); // Which step are we on in reading the record?
+	Size n_variable_nodes_expected(0), choicecount_bitsize_expected(0);
+	std::vector< Size > choices_by_variable_node_expected;
+
 	for( Size i(line_begin); i<=line_end; ++i ) {
 		std::string const linestripped( trim( lines[i] ) );
+		switch( read_step ) {
+			case 0 : {
+				CHECK_OR_THROW_FOR_CLASS( linestripped == "[BEGIN_BINARY_GRAPH_SUMMARY]", "cfn_problem_from_ascii_file_block",
+					"Expected the cost function network problem description to begin with \"[BEGIN_BINARY_GRAPH_SUMMARY]\"!"
+				);
+				++read_step;
+				break;
+			}
+			case 1 : {
+				std::istringstream ss(linestripped);
+				ss >> n_variable_nodes_expected >> choicecount_bitsize_expected;
+				CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
+					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
+				);
+				++read_step;
+			}
+			case 2 : {
+				CHECK_OR_THROW_FOR_CLASS( choicecount_bitsize_expected != 0, "cfn_problem_from_ascii_file_block", "Error "
+					"reading cost function network problem description: got an integer bitsize of 0!"
+				);
+
+			}
+		}
+
 		TODO TODO TODO;
 	}
 }
