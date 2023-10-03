@@ -322,23 +322,23 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 	CostFunctionNetworkOptimizationProblems_APISP problems( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
 
 	bool in_block(false);
-	std::vector< std::string const * > line_subset;
+	Size line_begin(0), line_end(0);
 	Size counter(0);
+	Size linecounter(0);
 
 	for( std::string const & line : filelines ) {
 		std::string const linestripped( masala::base::utility::string::trim( line ) );
 		if( !in_block ) {
 			if( linestripped == "[BEGIN_BINARY_GRAPH_SUMMARY]" ) {
-				line_subset.clear();
-				line_subset.push_back( &line );
+				line_begin = linecounter;
 				in_block = true;
 			}
 		} else {
-			line_subset.push_back( &line );
 			if( linestripped == "[END_BINARY_GRAPH_SUMMARY]" ) {
 				in_block = false;
+				line_end = linecounter;
 				++counter;
-				CostFunctionNetworkOptimizationProblem_APISP problem( cfn_problem_from_ascii_file_block( line_subset ) );
+				CostFunctionNetworkOptimizationProblem_APISP problem( cfn_problem_from_ascii_file_block( filelines, line_begin, line_end ) );
 				if( problem != nullptr ) {
 					problems->add_optimization_problem( problem );
 				} else {
@@ -346,6 +346,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 				}
 			}
 		}
+		++linecounter;
 	}
 
 	CHECK_OR_THROW_FOR_CLASS( problems->n_problems() > 0, "cfn_problems_from_ascii_file_contents", "No problems were "
@@ -378,13 +379,29 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::protected_assign(
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 /// convert these to a cost function network problem definition.
-/// @param line_subset A vector of pointers to strings for the lines.
-/// @return A cost function network optimization problem of the given type.
+/// @param[in] lines A vector of file lines.
+/// @param[in] line_begin The [BEGIN_BINARY_GRAPH_SUMMARY] line index.
+/// @param[in] line_end The [END_BINARY_GRAPH_SUMMARY] line index.
+/// @returns A cost function network optimization problem of the given type.
 masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_file_block(
-	std::vector< std::string const * > const & line_subset
+	std::vector< std::string > const & lines,
+	masala::base::Size const line_begin,
+	masala::base::Size const line_end
 ) const {
-	TODO TODO TODO;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using namespace masala::base::utility::string;
+	using masala::base::Size;
+
+	CostFunctionNetworkOptimizationProblem_APISP problem( generate_cfn_problem() );
+	CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "cfn_problem_from_ascii_file_block", "Unable to generate cost "
+		"function network optimization problem.  This is a program error.  Please consult a developer."
+	);
+
+	for( Size i(line_begin); i<=line_end; ++i ) {
+		std::string const linestripped( trim( lines[i] ) );
+		TODO TODO TODO;
+	}
 }
 
 /// @brief Check whether the cost function network problem class is valid (i.e. whether it exists).
