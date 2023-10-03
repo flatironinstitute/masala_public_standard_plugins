@@ -323,7 +323,6 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 	std::vector< std::string > const & filelines
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-	bytesize;
 
 	CostFunctionNetworkOptimizationProblems_APISP problems( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
 
@@ -520,18 +519,32 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		"integers on this system, yet the file indicates that choice counts are represented with "
 		+ std::to_string(entry_bytesize * CHAR_BIT) + " bits!"
 	);
-	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize) * 4.0 / 3.0) ) );
-	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize * vec_length, "decode_choices_per_variable_node",
-		"Expected " + std::to_string( char_bytesize * vec_length ) + " bytes of ASCII data, but got " +
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize*vec_length) * 4.0 / 3.0) ) );
+	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "decode_choices_per_variable_node",
+		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
 		std::to_string( line.size() ) + ".  Could not parse line \"" + line + "\"."
+	);
+	CHECK_OR_THROW_FOR_CLASS( entry_bytesize == 2 || entry_bytesize == 4 || entry_bytesize == sizeof(Size), "decode_choices_per_variable_node",
+		"This function currently only supports 2-, 4-, or " + std::to_string( sizeof(Size) ) + "-bit integers, but "
+		"received an integer byte size of " + std::to_string(entry_bytesize) + " bytes."
 	);
 
 	choices_by_variable_node_expected.clear();
 	choices_by_variable_node_expected.resize( vec_length, 0 );
-	Size counter(0);
-	for( Size i(0); i<line.size(); i += char_bytesize ) {
-		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &choices_by_variable_node_expected[0] ), line.substr(i, i+char_bytesize ), sizeof( Size ) * CHAR_BIT );
-		++counter;
+	if( entry_bytesize == 2 ) {
+		std::vector< std::uint16_t > two_byte_vec(vec_length, 0);
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &two_byte_vec[0] ), line, vec_length * 2 );
+		for( Size i(0); i<vec_length; ++i ) {
+			choices_by_variable_node_expected[i] = two_byte_vec[i];
+		}
+	} else if( entry_bytesize == 4 ) {
+		std::vector< std::uint32_t > four_byte_vec(vec_length, 0);
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &four_byte_vec[0] ), line, vec_length * 4 );
+		for( Size i(0); i<vec_length; ++i ) {
+			choices_by_variable_node_expected[i] = four_byte_vec[i];
+		}
+	} else if( entry_bytesize == sizeof(Size) ) {
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &choices_by_variable_node_expected[0] ), line, vec_length * sizeof(Size) );
 	}
 }
 
@@ -548,6 +561,11 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_energies(
 	masala::base::Size const onebody_penalty_bytesize_expected,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem
 ) const {
+	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected <= sizeof( Real ), "decode_onebody_energies",
+		"A maximum of " + std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits can be used to represent double-precision "
+		"floating point numbers on this system, yet the file indicates that choice counts are represented with "
+		+ std::to_string(onebody_penalty_bytesize_expected * CHAR_BIT) + " bits!"
+	);
 	TODO TODO TODO;
 }
 
