@@ -446,7 +446,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::generate_cfn_problem() c
 		CostFunctionNetworkOptimizer * engine(nullptr);
 		for( auto const & engine_creator : engine_creators ) {
 			MasalaEngineAPISP masala_engine( engine_creator->create_engine() );
-			engine = dynamic_cast<CostFunctionNetworkOptimizer >( masala_engine->get_inner_engine_object().get() );
+			engine = dynamic_cast< CostFunctionNetworkOptimizer * >( masala_engine->get_inner_engine_object().get() );
 			if( engine != nullptr ) break;
 		}
 		CHECK_OR_THROW_FOR_CLASS( engine != nullptr, "generate_cfn_problem", "Could not find a cost function "
