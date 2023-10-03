@@ -535,6 +535,22 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 	}
 }
 
+/// @brief Given a line encoding onebody penalties in ASCII text, set up the onebody penalties in a cost function
+/// network optimization problem object.
+/// @param[in] line The ASCII line we're decoding.
+/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
+/// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
+/// @param[inout] problem The cost function network optimization problem in which we're storing penalties.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_energies(
+	std::string const & line,
+	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
+	masala::base::Size const onebody_penalty_bytesize_expected,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem
+) const {
+	TODO TODO TODO;
+}
+
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 /// convert these to a cost function network problem definition.
 /// @param[in] lines A vector of file lines.
@@ -603,7 +619,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 			case 4 : {
 				// Read onebody penalties list.
-				TODO TODO TODO;
+				decode_onebody_energies( linestripped, choices_by_variable_node_expected, onebody_penalty_bytesize_expected, *problem );
 			}
 			case 5 : {
 				// Read twobody penalty headers that tell us (a) how many twobody penalties we have, (b) how many
