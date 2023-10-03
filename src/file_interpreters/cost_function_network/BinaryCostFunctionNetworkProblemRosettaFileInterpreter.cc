@@ -47,6 +47,9 @@
 #include <base/managers/engine/MasalaEngineRequest.hh>
 #include <base/utility/string/string_manipulation.hh>
 
+// Core API headers:
+#include <core_api/utility/binary_in_ascii_util.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -197,7 +200,6 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
     using namespace masala::base::api::getter;
-    using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
     if( api_description_ == nullptr ) {
@@ -321,7 +323,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 	std::vector< std::string > const & filelines
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-	using masala::base::Size;
+	bytesize;
 
 	CostFunctionNetworkOptimizationProblems_APISP problems( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
 
@@ -500,6 +502,34 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::generate_cfn_problem() c
 	return nullptr;
 }
 
+/// @brief Interpret a string of binary information encoded so that 3 bytes of binary occupy 4 bytes of ASCII text
+/// as a vector of integers.
+/// @param[in] line The line of ASCII text to decode.
+/// @param[in] vec_length The number of entries in the vector
+/// @param[in] entry_bytesize The number of bytes used to represent each unsigned integer.
+/// @param[out] choices_by_variable_node_expected The output vector.
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_variable_node(
+	std::string const & line,
+	masala::base::Size const vec_length,
+	masala::base::Size const entry_bytesize, 
+	std::vector< masala::base::Size > & choices_by_variable_node_expected
+) const {
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize) * 4.0 / 3.0) ) );
+	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize * vec_length, "decode_choices_per_variable_node",
+		"Expected " + std::to_string( char_bytesize * vec_length ) + " bytes of ASCII data, but got " +
+		std::to_string( line.size() ) + ".  Could not parse line \"" + line + "\"."
+	);
+
+	choices_by_variable_node_expected.clear();
+	choices_by_variable_node_expected.resize( vec_length, 0 );
+	Size counter(0);
+	for( Size i(0); i<line.size(); i += char_bytesize ) {
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &choices_by_variable_node_expected[0] ), line.substr(i, i+char_bytesize ), sizeof( Size ) * CHAR_BIT );
+		++counter;
+	}
+}
+
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 /// convert these to a cost function network problem definition.
 /// @param[in] lines A vector of file lines.
@@ -514,7 +544,6 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	using namespace masala::base::utility::string;
-	using masala::base::Size;
 
 	CostFunctionNetworkOptimizationProblem_APISP problem( generate_cfn_problem() );
 	CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "cfn_problem_from_ascii_file_block", "Unable to generate cost "
@@ -522,7 +551,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 	);
 
 	Size read_step(0); // Which step are we on in reading the record?
-	Size n_variable_nodes_expected(0), choicecount_bitsize_expected(0);
+	Size n_variable_nodes_expected(0), choicecount_bytesize_expected(0);
 	std::vector< Size > choices_by_variable_node_expected;
 
 	for( Size i(line_begin); i<=line_end; ++i ) {
@@ -537,17 +566,18 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 			case 1 : {
 				std::istringstream ss(linestripped);
-				ss >> n_variable_nodes_expected >> choicecount_bitsize_expected;
+				ss >> n_variable_nodes_expected >> choicecount_bytesize_expected;
 				CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
 					"line \"" + linestripped + "\".  Expected two unsigned integer entries."
 				);
 				++read_step;
 			}
 			case 2 : {
-				CHECK_OR_THROW_FOR_CLASS( choicecount_bitsize_expected != 0, "cfn_problem_from_ascii_file_block", "Error "
-					"reading cost function network problem description: got an integer bitsize of 0!"
+				CHECK_OR_THROW_FOR_CLASS( choicecount_bytesize_expected != 0, "cfn_problem_from_ascii_file_block", "Error "
+					"reading cost function network problem description: got an integer bytesize of 0!"
 				);
-
+				decode_choices_per_variable_node( linestripped, n_variable_nodes_expected, choicecount_bytesize_expected, choices_by_variable_node_expected );
+				++read_step;
 			}
 		}
 

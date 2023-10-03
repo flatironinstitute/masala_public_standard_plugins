@@ -52,6 +52,9 @@ namespace cost_function_network {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class BinaryCostFunctionNetworkProblemRosettaFileInterpreter : public masala::base::managers::file_interpreter::MasalaFileInterpreter {
 
+	typedef masala::base::Size Size;
+	typedef masala::base::Real Real;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,6 +223,20 @@ private:
 	/// cfn_optimizer_class_, depending on which is specified.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
 	generate_cfn_problem() const;
+
+	/// @brief Interpret a string of binary information encoded so that 3 bytes of binary occupy 4 bytes of ASCII text
+	/// as a vector of integers.
+	/// @param[in] line The line of ASCII text to decode.
+	/// @param[in] vec_length The number of entries in the vector
+	/// @param[in] entry_bytesize The number of bytes used to represent each unsigned integer.
+	/// @param[out] choices_by_variable_node_expected The output vector.
+	void
+	decode_choices_per_variable_node(
+		std::string const & line,
+		masala::base::Size const vec_length,
+		masala::base::Size const entry_bytesize, 
+		std::vector< masala::base::Size > & choices_by_variable_node_expected
+	) const;
 
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 	/// convert these to a cost function network problem definition.
