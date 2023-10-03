@@ -28,15 +28,15 @@
 #include <file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <base/managers/file_interpreter/MasalaFileInterpreter.hh>
 
 // Base headers:
 #include <base/types.hh>
-#include <base/managers/file_interpreter/MasalaFileInterpreter.hh>
 #include <base/api/MasalaObjectAPIDefinition.fwd.hh>
 
 // Numeric headers:
-#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.fwd.hh>
 
 // STL headers:
 #include <mutex>
