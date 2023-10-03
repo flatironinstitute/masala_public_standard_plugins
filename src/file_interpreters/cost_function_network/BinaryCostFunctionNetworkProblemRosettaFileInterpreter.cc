@@ -515,6 +515,11 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 	masala::base::Size const entry_bytesize, 
 	std::vector< masala::base::Size > & choices_by_variable_node_expected
 ) const {
+	CHECK_OR_THROW_FOR_CLASS( entry_bytesize <= sizeof( Size ), "decode_choices_per_variable_node",
+		"A maximum of " + std::to_string( sizeof( Size ) * CHAR_BIT ) + " bits can be used to represent unsigned "
+		"integers on this system, yet the file indicates that choice counts are represented with "
+		+ std::to_string(entry_bytesize * CHAR_BIT) + " bits!"
+	);
 	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize) * 4.0 / 3.0) ) );
 	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize * vec_length, "decode_choices_per_variable_node",
 		"Expected " + std::to_string( char_bytesize * vec_length ) + " bytes of ASCII data, but got " +
@@ -558,6 +563,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 		std::string const linestripped( trim( lines[i] ) );
 		switch( read_step ) {
 			case 0 : {
+				// Read BEGIN_BINARY_GRAPH_SUMMARY line.
 				CHECK_OR_THROW_FOR_CLASS( linestripped == "[BEGIN_BINARY_GRAPH_SUMMARY]", "cfn_problem_from_ascii_file_block",
 					"Expected the cost function network problem description to begin with \"[BEGIN_BINARY_GRAPH_SUMMARY]\"!"
 				);
@@ -565,6 +571,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				break;
 			}
 			case 1 : {
+				// Read headers that tell us how many variable nodes there are and how many binary bytes are being
+				// used to represent choice counts.
 				std::istringstream ss(linestripped);
 				ss >> n_variable_nodes_expected >> choicecount_bytesize_expected;
 				CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() ), "cfn_problem_from_ascii_file_block", "Error parsing "
@@ -573,11 +581,31 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				++read_step;
 			}
 			case 2 : {
+				// Read the choice counts per variable node.
 				CHECK_OR_THROW_FOR_CLASS( choicecount_bytesize_expected != 0, "cfn_problem_from_ascii_file_block", "Error "
 					"reading cost function network problem description: got an integer bytesize of 0!"
 				);
 				decode_choices_per_variable_node( linestripped, n_variable_nodes_expected, choicecount_bytesize_expected, choices_by_variable_node_expected );
 				++read_step;
+			}
+			case 3 : {
+				// Read onebody penalty headers that tell us (a) how many onebody penalties (i.e. how many total choices)
+				// we have, and (b) how many bytes are being used to represent onebody peanlties.
+				TODO TODO TODO;
+			}
+			case 4 : {
+				// Read onebody penalties list.
+				TODO TODO TODO;
+			}
+			case 5 : {
+				// Read twobody penalty headers that tell us (a) how many twobody penalties we have, (b) how many
+				// bytes are being used to represent node and choice indices, and (c) how many bytes are being used
+				// to represent twobody penalties.
+				TODO TODO TODO;
+			}
+			case 6 : {
+				// Read twobody penalties.
+				TODO TODO TODO;
 			}
 		}
 
