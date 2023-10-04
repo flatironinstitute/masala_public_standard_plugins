@@ -194,12 +194,21 @@ public:
 		std::vector< std::string > const & filelines
 	) const override;
 
-	/// @brief Read the conents of a Rosetta-format binary cost function network problem
+	/// @brief Read the contents of a Rosetta-format binary cost function network problem
 	/// file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).
 	/// @details Throws if at least one problem was not successfully parsed.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
 	cfn_problems_from_ascii_file_contents(
 		std::vector< std::string > const & filelines
+	) const;
+
+	/// @brief Read a Rosetta-format binary cost function network problem file, and return a set of cost function network 
+	/// problem objects (as a CostFunctionNetworkProblems pointer).
+	/// @details Throws if at least one problem was not successfully parsed.
+	/// @note Triggers disk i/o (through the MasalaDiskAccessManager)!
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+	cfn_problems_from_ascii_file(
+		std::string const & filename
 	) const;
 
 protected:

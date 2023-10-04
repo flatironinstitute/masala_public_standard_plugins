@@ -202,6 +202,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 	using namespace masala::base::api::constructor;
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::getter;
+	using namespace masala::base::api::work_function;
 
 	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
 	if( api_description_ == nullptr ) {
@@ -252,6 +253,34 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 		);
 
 		// Work functions:
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
+				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP,
+				std::vector< std::string > const &
+			> >(
+				"cfn_problems_from_ascii_file_contents", "Parse the contents of a Rosetta-format binary cost function network problem "
+				"file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).",
+				true, false, false, false,
+				"file_contents", "The contents of a Rosetta-style binary cost function network optimization problem file (a.k.a. a packing problem file), "
+				"expressed as a vector of strings (one string per file line).",
+				"problems", "A shared pointer to a container of cost function network optimization problems.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_file_contents, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
+				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP,
+				std::vector< std::string > const &
+			> >(
+				"cfn_problems_from_ascii_file", "Parse a Rosetta-format binary cost function network problem "
+				"file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).  Triggers disk i/o!  "
+				"Throws if the file contents cannot be parsed, or if the file does not exist.  (Uses the disk manager for disk access.)",
+				true, false, false, false,
+				"filename", "The name of the file to read.",
+				"problems", "A shared pointer to a container of cost function network optimization problems.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_file, this, std::placeholders::_1 )
+			)
+		);
 
 		// Convert nonconst to const:
 		api_description_ = api_description;
@@ -317,7 +346,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_from_ascii_file_c
 	return cfn_problems_from_ascii_file_contents( filelines );
 }
 
-/// @brief Read the conents of a Rosetta-format binary cost function network problem
+/// @brief Read the contents of a Rosetta-format binary cost function network problem
 /// file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).
 /// @details Throws if at least one problem was not successfully parsed.
 masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
@@ -325,6 +354,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 	std::vector< std::string > const & filelines
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
 
 	CostFunctionNetworkOptimizationProblems_APISP problems( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
 
@@ -361,6 +391,26 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 	);
 
 	return problems;
+}
+
+/// @brief Read a Rosetta-format binary cost function network problem file, and return a set of cost function network 
+/// problem objects (as a CostFunctionNetworkProblems pointer).
+/// @details Throws if at least one problem was not successfully parsed.
+/// @note Triggers disk i/o (through the MasalaDiskAccessManager)!
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_file(
+	std::string const & filename
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+#ifdef NDEBUG // Release mode -- just static-cast the object.
+	return std::static_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( object_from_file( filename ) );
+#else
+	CostFunctionNetworkOptimizationProblems_APISP returnobj( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( object_from_file( filename ) ) );
+	CHECK_OR_THROW_FOR_CLASS( returnobj != nullptr, "cfn_problems_from_ascii_file", "The return object could not be interpreted as a CostFunctionNetworkOptimizationProblems_API "
+		"container!  This ought not to happen.  It is a program error.  Please consult a developer."
+	);
+	return returnobj;
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
