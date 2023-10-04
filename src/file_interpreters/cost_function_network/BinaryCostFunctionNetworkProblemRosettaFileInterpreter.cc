@@ -831,9 +831,9 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	}
 
 	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
-		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<0>(entry), choices_by_variable_node_expected ) );
+		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<2>(entry), choices_by_variable_node_expected ) );
 		std::pair< Size, Size > const indices2( node_and_choice_from_global_index( std::get<1>(entry), choices_by_variable_node_expected ) );
-		problem->set_twobody_penalty( std::make_pair( indices1.first, indices2.first ), std::make_pair( indices1.second, indices2.second ), std::get<2>(entry) );
+		problem->set_twobody_penalty( std::make_pair( indices1.first, indices2.first ), std::make_pair( indices1.second, indices2.second ), std::get<0>(entry) );
 	}
 }
 
