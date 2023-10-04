@@ -715,7 +715,23 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	masala::base::Size const n_twobody_penalties_expected,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
-	TODO TODO TODO;
+	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
+	using namespace masala::core_api::utility;
+	PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemSP problem(
+		std::dynamic_pointer_cast< PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem >( problem_api.get_inner_data_representation_object() )
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "inner_decode_twobody_penalties", "The selected problem class, " + problem_api.inner_class_name() + ", is "
+		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed twobody penalties."
+	);
+
+	std::vector< std::tuple< INDEXTYPE, INDEXTYPE, VALTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected, {0, 0, 0.0} );
+	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( std::tuple< INDEXTYPE, INDEXTYPE, VALTYPE > ) * n_twobody_penalties_expected );
+	
+	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
+		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<0>(entry), choices_by_variable_node_expected ) );
+		std::pair< Size, Size > const indices2( node_and_choice_from_global_index( std::get<1>(entry), choices_by_variable_node_expected ) );
+		problem->set_twobody_penalty( std::make_pair( indices1.first, indices2.first ), std::make_pair( indices1.second, indices2.second ), std::get<2>(entry) );
+	}
 }
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
