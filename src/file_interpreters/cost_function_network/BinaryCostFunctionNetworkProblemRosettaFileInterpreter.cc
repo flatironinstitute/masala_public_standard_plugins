@@ -270,7 +270,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 		api_description->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
 				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP,
-				std::vector< std::string > const &
+				std::string const &
 			> >(
 				"cfn_problems_from_ascii_file", "Parse a Rosetta-format binary cost function network problem "
 				"file, and return a set of cost function network problem objects (as a CostFunctionNetworkProblems pointer).  Triggers disk i/o!  "
