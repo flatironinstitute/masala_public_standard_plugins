@@ -748,7 +748,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::node_and_choice_from_glo
 		accumulator += n_choices_by_variable_node[var_index];
 		++var_index;
 	}
-	return std::make_pair( var_index, global_index - accumulator );s
+	return std::make_pair( var_index, global_index - accumulator );
 }
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
@@ -777,6 +777,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 		n_twobody_penalties_expected(0), twobody_penalty_index_bytesize_expected(0),
 		twobody_penalty_bytesize_expected(0);
 	std::vector< Size > choices_by_variable_node_expected;
+	Size additional_ignored_line_count(0);
 
 	for( Size i(line_begin); i<=line_end; ++i ) {
 		std::string const linestripped( trim( lines[i] ) );
@@ -844,9 +845,17 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 				++read_step;
 				break;
 			}
-		}
+			default : {
+				// Ignore additional lines for now.
+				if( linestripped != "[END_BINARY_GRAPH_SUMMARY]" ) {
+					++additional_ignored_line_count;
+				}
+			}
+		} // switch
+	} // for
 
-		TODO TODO TODO;
+	if( additional_ignored_line_count > 0 ) {
+		write_to_tracer( "Ignored " + std::to_string( additional_ignored_line_count ) + " extra lines at end of graph summary block." );
 	}
 
 	return problem;
