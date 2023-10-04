@@ -245,7 +245,7 @@ private:
 	/// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
 	/// @param[inout] problem The cost function network optimization problem in which we're storing penalties.
 	void
-	decode_onebody_energies(
+	decode_onebody_penalties(
 		std::string const & line,
 		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 		masala::base::Size const onebody_penalty_bytesize_expected,

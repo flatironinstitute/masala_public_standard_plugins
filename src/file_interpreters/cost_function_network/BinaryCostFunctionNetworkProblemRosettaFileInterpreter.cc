@@ -554,32 +554,48 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 /// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
 /// @param[inout] problem The cost function network optimization problem in which we're storing penalties.
 void
-BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_energies(
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties(
 	std::string const & line,
 	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 	masala::base::Size const onebody_penalty_bytesize_expected,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem
 ) const {
-	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected <= sizeof( Real ), "decode_onebody_energies",
+	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected <= sizeof( Real ), "decode_onebody_penalties",
 		"A maximum of " + std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits can be used to represent double-precision "
 		"floating point numbers on this system, yet the file indicates that choice counts are represented with "
 		+ std::to_string(onebody_penalty_bytesize_expected * CHAR_BIT) + " bits!"
 	);
 	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected == sizeof(Real) || onebody_penalty_bytesize_expected == sizeof(float),
-		"decode_onebody_energies", "Expected a floating-point bit size of " + std::to_string( sizeof( float ) * CHAR_BIT ) + " or "
+		"decode_onebody_penalties", "Expected a floating-point bit size of " + std::to_string( sizeof( float ) * CHAR_BIT ) + " or "
 		+ std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits, but got " + std::to_string( onebody_penalty_bytesize_expected * CHAR_BIT )
 		+ " bits!"
 	);
 
 	Size const total_choices( std::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
 
-	TODO TODO TODO -- THE FOLLOWING IS A MISTAKE, AND MUST BE REFACTORED;
 	if( onebody_penalty_bytesize_expected == sizeof( float ) ) {
 		std::vector< std::tuple< float > onebody_floats( total_choices, 0.0 );
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_floats[0] ), line, total_choices * sizeof( float ) );
-		Size counter(0), varnode_index(0);
+		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
-			problem.set_onebody_penalty( 
+			problem.set_onebody_penalty( varnode_index, choice_counter, onebody_floats[i] );
+			++choice_counter;
+			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
+				++varnode_index;
+				choice_counter = 0;
+			}
+		}
+	} else if( onebody_penalty_bytesize_expected == sizeof( Real ) ) {
+		std::vector< std::tuple< Real > onebody_realss( total_choices, 0.0 );
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_reals[0] ), line, total_choices * sizeof( Real ) );
+		Size choice_counter(0), varnode_index(0);
+		for( Size i(0); i<total_choices; ++i ) {
+			problem.set_onebody_penalty( varnode_index, choice_counter, onebody_reals[i] );
+			++choice_counter;
+			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
+				++varnode_index;
+				choice_counter = 0;
+			}
 		}
 	}
 }
@@ -655,7 +671,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 			case 4 : {
 				// Read onebody penalties list.
-				decode_onebody_energies( linestripped, choices_by_variable_node_expected, onebody_penalty_bytesize_expected, *problem );
+				decode_onebody_penalties( linestripped, choices_by_variable_node_expected, onebody_penalty_bytesize_expected, *problem );
 				++read_step;
 				break;
 			}
