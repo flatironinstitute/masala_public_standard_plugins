@@ -254,6 +254,25 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 	) const;
 
+	/// @brief Convert a binary-as-ASCII-text string to two-body penalties, and load them into the precomputed cost function network problem description.
+	/// @param[in] line The ASCII line we're decoding.
+	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
+	/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
+	/// @param[in] twobody_penalty_index_bytesize_expected The number of bytes that a twobody penalty index (node index or choice index) takes up.  Must be 2, 4, or sizeof(Size).
+	/// @param[in] twobody_penalty_bytesize_expected The number of bytes that a twobody penalty takes up.  Must be sizeof(float) or sizeof(Real).
+	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
+	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
+	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
+	void
+	decode_twobody_penalties(
+		std::string const & line,
+		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
+		masala::base::Size const n_twobody_penalties_expected,
+		masala::base::Size twobody_penalty_index_bytesize_expected,
+		masala::base::Size twobody_penalty_bytesize_expected,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
+	) const;
+
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 	/// convert these to a cost function network problem definition.
 	/// @param[in] lines A vector of file lines.
