@@ -80,7 +80,6 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetwor
 {
 	std::lock_guard< std::mutex > lock( src.file_interpreter_mutex_ );
 	protected_assign( src );
-	//TODO TODO TODO
 }
 
 /// @brief Assignment operator.
@@ -525,8 +524,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		std::to_string( line.size() ) + ".  Could not parse line \"" + line + "\"."
 	);
 	CHECK_OR_THROW_FOR_CLASS( entry_bytesize == 2 || entry_bytesize == 4 || entry_bytesize == sizeof(Size), "decode_choices_per_variable_node",
-		"This function currently only supports 2-, 4-, or " + std::to_string( sizeof(Size) ) + "-bit integers, but "
-		"received an integer byte size of " + std::to_string(entry_bytesize) + " bytes."
+		"This function currently only supports 16-, 32-, or " + std::to_string( sizeof(Size) * CHAR_BIT ) + "-bit integers, but "
+		"received an integer bit size of " + std::to_string(entry_bytesize * CHAR_BIT) + " bits."
 	);
 
 	choices_by_variable_node_expected.clear();
@@ -566,7 +565,23 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_energies(
 		"floating point numbers on this system, yet the file indicates that choice counts are represented with "
 		+ std::to_string(onebody_penalty_bytesize_expected * CHAR_BIT) + " bits!"
 	);
-	TODO TODO TODO;
+	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected == sizeof(Real) || onebody_penalty_bytesize_expected == sizeof(float),
+		"decode_onebody_energies", "Expected a floating-point bit size of " + std::to_string( sizeof( float ) * CHAR_BIT ) + " or "
+		+ std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits, but got " + std::to_string( onebody_penalty_bytesize_expected * CHAR_BIT )
+		+ " bits!"
+	);
+
+	Size const total_choices( std::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
+
+	TODO TODO TODO -- THE FOLLOWING IS A MISTAKE, AND MUST BE REFACTORED;
+	if( onebody_penalty_bytesize_expected == sizeof( float ) ) {
+		std::vector< std::tuple< float > onebody_floats( total_choices, 0.0 );
+		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_floats[0] ), line, total_choices * sizeof( float ) );
+		Size counter(0), varnode_index(0);
+		for( Size i(0); i<total_choices; ++i ) {
+			problem.set_onebody_penalty( 
+		}
+	}
 }
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
