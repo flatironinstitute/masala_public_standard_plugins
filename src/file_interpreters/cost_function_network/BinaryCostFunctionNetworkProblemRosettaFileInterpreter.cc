@@ -74,32 +74,32 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetwor
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::BinaryCostFunctionNetworkProblemRosettaFileInterpreter(
-    BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src
 ) :
-    masala::base::managers::file_interpreter::MasalaFileInterpreter( src )
+	masala::base::managers::file_interpreter::MasalaFileInterpreter( src )
 {
-    std::lock_guard< std::mutex > lock( src.file_interpreter_mutex_ );
+	std::lock_guard< std::mutex > lock( src.file_interpreter_mutex_ );
 	protected_assign( src );
-    //TODO TODO TODO
+	//TODO TODO TODO
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter &
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::operator=( BinaryCostFunctionNetworkProblemRosettaFileInterpreter const & src ) {
-    std::lock( file_interpreter_mutex_, src.file_interpreter_mutex_ );
-    std::lock_guard< std::mutex > lock1( file_interpreter_mutex_, std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.file_interpreter_mutex_, std::adopt_lock );
+	std::lock( file_interpreter_mutex_, src.file_interpreter_mutex_ );
+	std::lock_guard< std::mutex > lock1( file_interpreter_mutex_, std::adopt_lock );
+	std::lock_guard< std::mutex > lock2( src.file_interpreter_mutex_, std::adopt_lock );
 	protected_assign(src);
-    return *this;
+	return *this;
 }
 
 /// @brief Make a copy of this object that's wholly independent.
 BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::deep_clone() const {
-    BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP new_optimizer( masala::make_shared< BinaryCostFunctionNetworkProblemRosettaFileInterpreter >(*this) );
-    new_optimizer->make_independent();
-    return new_optimizer;
+	BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP new_optimizer( masala::make_shared< BinaryCostFunctionNetworkProblemRosettaFileInterpreter >(*this) );
+	new_optimizer->make_independent();
+	return new_optimizer;
 }
 
 /// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
@@ -123,7 +123,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::make_independent() {
 /// the primary key.
 std::vector< std::vector< std::string > >
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_categories() const {
-    using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
+	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
 	return { { "FileInterpreter", "CostFunctionNetworkProblemFileInterpreter", "BinaryCostFunctionNetworkProblemRosettaFileInterpreter" } };
 }
 
@@ -131,7 +131,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_categories() const {
 /// @returns { "file_interpreter", "cost_function_network", "problem", "binary" }
 std::vector< std::string >
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_keywords() const {
-    return { "file_interpreter", "cost_function_network", "problem", "binary" };
+	return { "file_interpreter", "cost_function_network", "problem", "binary" };
 }
 
 /// @brief All MasalaFileInterpreter subclasses must list the file types that they create.  These are
@@ -154,14 +154,14 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_file_extensions() co
 /// @returns "BinaryCostFunctionNetworkProblemRosettaFileInterpreter".
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_name() const {
-    return class_name_static();
+	return class_name_static();
 }
 
 /// @brief Get the class namespace.
 /// @returns "standard_masala_plugins::file_interpreters::cost_function_network".
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace() const {
-    return class_namespace_static();
+	return class_namespace_static();
 }
 
 /// @brief Get the class name (static version).
@@ -169,7 +169,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace() const 
 //static
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_name_static() {
-    return "BinaryCostFunctionNetworkProblemRosettaFileInterpreter";
+	return "BinaryCostFunctionNetworkProblemRosettaFileInterpreter";
 }
 
 /// @brief Get the class namespace (static version).
@@ -177,7 +177,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_name_static() {
 //static
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::class_namespace_static() {
-    return "standard_masala_plugins::file_interpreters::cost_function_network";
+	return "standard_masala_plugins::file_interpreters::cost_function_network";
 }
 
 /// @brief Indicate that this interpreter reads ASCII files.
@@ -196,26 +196,26 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::filetype_is_ascii() cons
 /// @brief Get the API definition for this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
-    using namespace masala::base::api;
-    using namespace masala::base::api::constructor;
-    using namespace masala::base::api::setter;
-    using namespace masala::base::api::getter;
+	using namespace masala::base::api;
+	using namespace masala::base::api::constructor;
+	using namespace masala::base::api::setter;
+	using namespace masala::base::api::getter;
 
-    std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
-    if( api_description_ == nullptr ) {
-        MasalaObjectAPIDefinitionSP api_description(
-            masala::make_shared< MasalaObjectAPIDefinition >(
-                *this,
-                "This class reads binary cost function network optimization problem files (or packing problem files) written by Rosetta, "
+	std::lock_guard< std::mutex > lock( file_interpreter_mutex_ );
+	if( api_description_ == nullptr ) {
+		MasalaObjectAPIDefinitionSP api_description(
+			masala::make_shared< MasalaObjectAPIDefinition >(
+				*this,
+				"This class reads binary cost function network optimization problem files (or packing problem files) written by Rosetta, "
 				"and generates a user-selected type of cost function network optimization problem description.",
-                false, false
-            )
-        );
+				false, false
+			)
+		);
 
-        // Constructors:
-        ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BinaryCostFunctionNetworkProblemRosettaFileInterpreter, api_description );
+		// Constructors:
+		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BinaryCostFunctionNetworkProblemRosettaFileInterpreter, api_description );
 
-        // Setters:
+		// Setters:
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 				"set_cfn_problem_type_to_generate", "Set the name of the cost function network problem description class "
@@ -249,12 +249,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 			)
 		);
 
-        // Work functions:
+		// Work functions:
 
-        // Convert nonconst to const:
-        api_description_ = api_description;
-    }
-    return api_description_;
+		// Convert nonconst to const:
+		api_description_ = api_description;
+	}
+	return api_description_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
