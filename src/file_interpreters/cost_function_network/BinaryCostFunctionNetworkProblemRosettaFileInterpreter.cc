@@ -847,7 +847,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::node_and_choice_from_glo
 	std::vector< masala::base::Size > const & n_choices_by_variable_node
 ) const {
 	Size accumulator(0), var_index(0);
-	while( accumulator + n_choices_by_variable_node[var_index] < global_index ) {
+	while( accumulator + n_choices_by_variable_node[var_index] <= global_index ) {
 		accumulator += n_choices_by_variable_node[var_index];
 		++var_index;
 	}
