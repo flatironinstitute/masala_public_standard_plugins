@@ -30,6 +30,7 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblemCreator.hh>
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
@@ -46,6 +47,7 @@
 #include <base/managers/engine/MasalaEngineCreator.hh>
 #include <base/managers/engine/MasalaEngineRequest.hh>
 #include <base/utility/string/string_manipulation.hh>
+#include <base/utility/execution_policy/util.hh>
 
 // Core API headers:
 #include <core_api/utility/binary_in_ascii_util.hh>
@@ -54,6 +56,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -553,13 +556,17 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 /// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
 /// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
 /// @param[inout] problem The cost function network optimization problem in which we're storing penalties.
+/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
+/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
 void
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties(
 	std::string const & line,
 	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 	masala::base::Size const onebody_penalty_bytesize_expected,
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
+	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
+
 	CHECK_OR_THROW_FOR_CLASS( onebody_penalty_bytesize_expected <= sizeof( Real ), "decode_onebody_penalties",
 		"A maximum of " + std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits can be used to represent double-precision "
 		"floating point numbers on this system, yet the file indicates that choice counts are represented with "
@@ -571,14 +578,21 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 		+ " bits!"
 	);
 
+	PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemSP problem(
+		std::dynamic_pointer_cast< PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem >( problem_api.get_inner_data_representation_object() )
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "decode_onebody_penalties", "The selected problem class, " + problem_api.inner_class_name() + ", is "
+		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed onebody penalties."
+	);
+
 	Size const total_choices( std::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
 
 	if( onebody_penalty_bytesize_expected == sizeof( float ) ) {
-		std::vector< std::tuple< float > onebody_floats( total_choices, 0.0 );
+		std::vector< float > onebody_floats( total_choices, 0.0 );
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_floats[0] ), line, total_choices * sizeof( float ) );
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
-			problem.set_onebody_penalty( varnode_index, choice_counter, onebody_floats[i] );
+			problem->set_onebody_penalty( varnode_index, choice_counter, onebody_floats[i] );
 			++choice_counter;
 			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
 				++varnode_index;
@@ -586,11 +600,11 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 			}
 		}
 	} else if( onebody_penalty_bytesize_expected == sizeof( Real ) ) {
-		std::vector< std::tuple< Real > onebody_realss( total_choices, 0.0 );
+		std::vector< Real > onebody_reals( total_choices, 0.0 );
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_reals[0] ), line, total_choices * sizeof( Real ) );
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
-			problem.set_onebody_penalty( varnode_index, choice_counter, onebody_reals[i] );
+			problem->set_onebody_penalty( varnode_index, choice_counter, onebody_reals[i] );
 			++choice_counter;
 			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
 				++varnode_index;
