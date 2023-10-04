@@ -252,6 +252,8 @@ private:
 	/// @param[in] line The ASCII line we're decoding.
 	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
 	/// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
+	/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
+	/// information was not provided in the input file.
 	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -260,6 +262,7 @@ private:
 		std::string const & line,
 		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 		masala::base::Size const onebody_penalty_bytesize_expected,
+		std::vector< masala::base::Size > const & global_node_indices,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 	) const;
 
@@ -269,6 +272,8 @@ private:
 	/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
 	/// @param[in] twobody_penalty_index_bytesize_expected The number of bytes that a twobody penalty index (node index or choice index) takes up.  Must be 2, 4, or sizeof(Size).
 	/// @param[in] twobody_penalty_bytesize_expected The number of bytes that a twobody penalty takes up.  Must be sizeof(float) or sizeof(Real).
+	/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
+	/// information was not provided in the input file.
 	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -279,6 +284,7 @@ private:
 		masala::base::Size const n_twobody_penalties_expected,
 		masala::base::Size twobody_penalty_index_bytesize_expected,
 		masala::base::Size twobody_penalty_bytesize_expected,
+		std::vector< masala::base::Size > const & global_node_indices,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 	) const;
 
@@ -290,6 +296,8 @@ private:
 	/// @param[in] line The ASCII line we're decoding.
 	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
 	/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
+	/// @param[in] node_indices The global indices of the variable nodes.  Must be the same size as choices_by_variable_node_expected.  If
+	/// global node indices were not provided in the input file, this vector should be consecutively numbered indices starting from zero.
 	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -299,6 +307,7 @@ private:
 		std::string const & line,
 		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 		masala::base::Size const n_twobody_penalties_expected,
+		std::vector< masala::base::Size > const & node_indices,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 	) const;
 
@@ -310,6 +319,13 @@ private:
 	node_and_choice_from_global_index(
 		masala::base::Size const global_index,
 		std::vector< masala::base::Size > const & n_choices_by_variable_node
+	) const;
+
+	/// @brief Given a line consisting of a series of integer values, convert this to a vector of unsigned ntegers.
+	/// @returns A vector of integers, or, if the line could not be parsed as such, an empty vector.
+	std::vector< masala::base::Size >
+	parse_global_node_indices(
+		std::string const & line
 	) const;
 
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],

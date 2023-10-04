@@ -626,6 +626,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 /// @param[in] line The ASCII line we're decoding.
 /// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
 /// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
+/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
+/// information was not provided in the input file.
 /// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 /// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 /// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -634,6 +636,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 	std::string const & line,
 	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 	masala::base::Size const onebody_penalty_bytesize_expected,
+	std::vector< masala::base::Size > const & global_node_indices,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
@@ -648,6 +651,16 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 		+ std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits, but got " + std::to_string( onebody_penalty_bytesize_expected * CHAR_BIT )
 		+ " bits!"
 	);
+
+	std::vector< masala::base::Size > node_indices;
+	if( global_node_indices.empty() ) {
+		node_indices.reserve( choices_by_variable_node_expected.size() );
+		for( Size i(0); i<choices_by_variable_node_expected.size(); ++i ) {
+			node_indices.push_back( i );
+		}
+	} else {
+		node_indices = global_node_indices;
+	}
 
 	PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemSP problem(
 		std::dynamic_pointer_cast< PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem >( problem_api.get_inner_data_representation_object() )
@@ -676,7 +689,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
-			problem->set_onebody_penalty( varnode_index, choice_counter, onebody_floats[i] );
+			problem->set_onebody_penalty( node_indices[varnode_index], choice_counter, onebody_floats[i] );
 			++choice_counter;
 			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
 				++varnode_index;
@@ -711,6 +724,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 /// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
 /// @param[in] twobody_penalty_index_bytesize_expected The number of bytes that a twobody penalty index (node index or choice index) takes up.  Must be 2, 4, or sizeof(Size).
 /// @param[in] twobody_penalty_bytesize_expected The number of bytes that a twobody penalty takes up.  Must be sizeof(float) or sizeof(Real).
+/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
+/// information was not provided in the input file.
 /// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 /// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 /// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -721,6 +736,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 	masala::base::Size const n_twobody_penalties_expected,
 	masala::base::Size twobody_penalty_index_bytesize_expected,
 	masala::base::Size twobody_penalty_bytesize_expected,
+	std::vector< masala::base::Size > const & global_node_indices,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
 	CHECK_OR_THROW_FOR_CLASS( twobody_penalty_bytesize_expected <= sizeof( Real ), "decode_twobody_penalties",
@@ -733,19 +749,30 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 		"integers on this system, yet the file indicates that node and choice indicess are represented with "
 		+ std::to_string(twobody_penalty_index_bytesize_expected * CHAR_BIT) + " bits!"
 	);
+
+	std::vector< Size > node_indices;
+	if( global_node_indices.empty() ) {
+		node_indices.reserve( choices_by_variable_node_expected.size() );
+		for( Size i(0); i<choices_by_variable_node_expected.size(); ++i ) {
+			node_indices.push_back( i );
+		}
+	} else {
+		node_indices = global_node_indices;
+	}
+
 	switch( twobody_penalty_bytesize_expected ) {
 		case sizeof( float ) : {
 			switch( twobody_penalty_index_bytesize_expected ) {
 				case 2 : {
-					inner_decode_twobody_penalties< uint16_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< uint16_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				case 4 : {
-					inner_decode_twobody_penalties< uint32_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< uint32_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				case sizeof( Size ) : {
-					inner_decode_twobody_penalties< Size, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< Size, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				default : {
@@ -759,15 +786,15 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 		case sizeof( Real ) : {
 			switch( twobody_penalty_index_bytesize_expected ) {
 				case 2 : {
-					inner_decode_twobody_penalties< uint16_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< uint16_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				case 4 : {
-					inner_decode_twobody_penalties< uint32_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< uint32_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				case sizeof( Size ) : {
-					inner_decode_twobody_penalties< Size, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					inner_decode_twobody_penalties< Size, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, node_indices, problem_api );
 					break;
 				}
 				default : {
@@ -795,6 +822,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 /// @param[in] line The ASCII line we're decoding.
 /// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
 /// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
+/// @param[in] node_indices The global indices of the variable nodes.  Must be the same size as choices_by_variable_node_expected.  If
+/// global node indices were not provided in the input file, this vector should be consecutively numbered indices starting from zero.
 /// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
 /// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
 /// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
@@ -804,6 +833,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	std::string const & line,
 	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
 	masala::base::Size const n_twobody_penalties_expected,
+	std::vector< masala::base::Size > const & node_indices,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
@@ -833,7 +863,13 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
 		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<2>(entry), choices_by_variable_node_expected ) );
 		std::pair< Size, Size > const indices2( node_and_choice_from_global_index( std::get<1>(entry), choices_by_variable_node_expected ) );
-		problem->set_twobody_penalty( std::make_pair( indices1.first, indices2.first ), std::make_pair( indices1.second, indices2.second ), std::get<0>(entry) );
+		CHECK_OR_THROW_FOR_CLASS( indices1.first < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices1.first )
+			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
+		);
+		CHECK_OR_THROW_FOR_CLASS( indices1.second < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices1.second )
+			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
+		);
+		problem->set_twobody_penalty( std::make_pair( node_indices[indices1.first], indices2.first ), std::make_pair( node_indices[indices1.second], indices2.second ), std::get<0>(entry) );
 	}
 }
 
@@ -852,6 +888,29 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::node_and_choice_from_glo
 		++var_index;
 	}
 	return std::make_pair( var_index, global_index - accumulator );
+}
+
+/// @brief Given a line consisting of a series of integer values, convert this to a vector of unsigned integers.
+/// @returns A vector of integers, or, if the line could not be parsed as such, an empty vector.
+std::vector< masala::base::Size >
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::parse_global_node_indices(
+	std::string const & line
+) const {
+	if( line == "[END_BINARY_GRAPH_SUMMARY]" ) {
+		return std::vector< Size >{};
+	}
+	std::vector< Size > outvec;
+	std::istringstream ss(line);
+	Size buffer;
+	do {
+		ss >> buffer;
+		if( !(ss.bad() || ss.fail()) ) {
+			outvec.push_back(buffer);
+		} else {
+			return std::vector< Size >{};
+		}
+	} while( !ss.eof() );
+	return outvec;
 }
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
@@ -882,6 +941,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 	std::vector< Size > choices_by_variable_node_expected;
 	Size additional_ignored_line_count(0);
 
+	// Get the global node indices, if available.
+	std::vector< Size > global_node_indices;
+	if( lines.size() > 7 ) {
+		global_node_indices = parse_global_node_indices( trim(lines[7]) );
+	}
+
 	for( Size i(line_begin); i<=line_end; ++i ) {
 		std::string const linestripped( trim( lines[i] ) );
 		switch( read_step ) {
@@ -910,6 +975,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 					"reading cost function network problem description: got an integer bytesize of 0!"
 				);
 				decode_choices_per_variable_node( linestripped, n_variable_nodes_expected, choicecount_bytesize_expected, choices_by_variable_node_expected );
+				if( !global_node_indices.empty() ) {
+					CHECK_OR_THROW_FOR_CLASS( global_node_indices.size() == n_variable_nodes_expected, "cfn_problem_from_ascii_file_block",
+						"Incorrect number of global node indices found.  Expected " + std::to_string( n_variable_nodes_expected ) + ", but got "
+						+ std::to_string( global_node_indices.size() )
+					);
+				}
 				++read_step;
 				break;
 			}
@@ -926,7 +997,9 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 			case 4 : {
 				// Read onebody penalties list.
-				decode_onebody_penalties( linestripped, choices_by_variable_node_expected, onebody_penalty_bytesize_expected, *problem );
+				decode_onebody_penalties( linestripped, choices_by_variable_node_expected,
+					onebody_penalty_bytesize_expected, global_node_indices, *problem
+				);
 				++read_step;
 				break;
 			}
@@ -944,7 +1017,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 			case 6 : {
 				// Read twobody penalties.
-				decode_twobody_penalties( linestripped, choices_by_variable_node_expected, n_twobody_penalties_expected, twobody_penalty_index_bytesize_expected, twobody_penalty_bytesize_expected, *problem );
+				decode_twobody_penalties( linestripped, choices_by_variable_node_expected,
+					n_twobody_penalties_expected, twobody_penalty_index_bytesize_expected,
+					twobody_penalty_bytesize_expected, global_node_indices, *problem
+				);
 				++read_step;
 				break;
 			}
@@ -956,6 +1032,9 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 			}
 		} // switch
 	} // for
+
+
+	if( !global_node_indices.empty() && additional_ignored_line_count > 0 ) { --additional_ignored_line_count; }
 
 	if( additional_ignored_line_count > 0 ) {
 		write_to_tracer( "Ignored " + std::to_string( additional_ignored_line_count ) + " extra lines at end of graph summary block." );
