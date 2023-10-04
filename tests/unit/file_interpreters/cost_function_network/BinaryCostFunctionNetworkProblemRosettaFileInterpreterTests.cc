@@ -61,7 +61,7 @@ TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter
 		registration_api::register_library();
 
 		std::vector< MasalaFileInterpreterCreatorCSP > const creators(
-			MasalaFileInterpreterManager::get_instance()->get_file_interpreter_by_name(
+			MasalaFileInterpreterManager::get_instance()->get_file_interpreters_by_short_name(
 				"BinaryCostFunctionNetworkProblemRosettaFileInterpreter"
 			)
 		);
