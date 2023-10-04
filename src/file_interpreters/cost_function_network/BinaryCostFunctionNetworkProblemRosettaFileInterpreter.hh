@@ -293,6 +293,16 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 	) const;
 
+	/// @brief Given a global choice index and the number of choices per variable node, get the index of the variable node and local choice index.
+	/// @param[in] global_index The global choice index.  All choices are numbered consecutively from 0.
+	/// @param[in] n_choices_by_variable_node The number of choices at each variable index.
+	/// @return A pair of local node index and local choice index.
+	std::pair< masala::base::Size, masala::base::Size >
+	node_and_choice_from_global_index(
+		masala::base::Size const global_index,
+		std::vector< masala::base::Size > const & n_choices_by_variable_node
+	) const;
+
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 	/// convert these to a cost function network problem definition.
 	/// @param[in] lines A vector of file lines.
