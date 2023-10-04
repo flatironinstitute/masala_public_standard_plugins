@@ -815,19 +815,19 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed twobody penalties."
 	);
 
-	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>( sizeof( std::tuple<INDEXTYPE, INDEXTYPE, VALTYPE> ) * n_twobody_penalties_expected ) / 3.0) ) * 4 );
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>( sizeof( std::tuple<VALTYPE, INDEXTYPE, INDEXTYPE> ) * n_twobody_penalties_expected ) / 3.0) ) * 4 );
 	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "inner_decode_twobody_penalties",
 		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
 		std::to_string( line.size() ) + ".  Could not parse twobody penalties binary data."
 	);
 
-	std::vector< std::tuple< INDEXTYPE, INDEXTYPE, VALTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected, {0, 0, 0.0} );
-	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( std::tuple< INDEXTYPE, INDEXTYPE, VALTYPE > ) * n_twobody_penalties_expected );
+	std::vector< std::tuple< VALTYPE, INDEXTYPE, INDEXTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected, {0.0, 0, 0} );
+	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( std::tuple< VALTYPE, INDEXTYPE, INDEXTYPE > ) * n_twobody_penalties_expected );
 
 	// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
 	std::cout << "TWOBODY PENALTIES:" << std::endl;
 	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
-		std::cout << std::get<0>(entry) << "\t" << std::get<1>(entry) << "\t" << std::get<2>(entry) << std::endl; 
+		std::cout << std::get<2>(entry) << "\t" << std::get<1>(entry) << "\t" << std::get<0>(entry) << std::endl; 
 	}
 
 	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
