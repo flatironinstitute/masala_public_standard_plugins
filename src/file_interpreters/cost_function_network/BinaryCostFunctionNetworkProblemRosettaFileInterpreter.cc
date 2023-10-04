@@ -866,10 +866,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 		CHECK_OR_THROW_FOR_CLASS( indices1.first < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices1.first )
 			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
 		);
-		CHECK_OR_THROW_FOR_CLASS( indices1.second < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices1.second )
+		CHECK_OR_THROW_FOR_CLASS( indices2.first < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices2.first )
 			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
 		);
-		problem->set_twobody_penalty( std::make_pair( node_indices[indices1.first], indices2.first ), std::make_pair( node_indices[indices1.second], indices2.second ), std::get<0>(entry) );
+		problem->set_twobody_penalty( std::make_pair( node_indices[indices1.first], node_indices[indices2.first] ), std::make_pair( indices1.second, indices2.second ), std::get<0>(entry) );
 	}
 }
 
