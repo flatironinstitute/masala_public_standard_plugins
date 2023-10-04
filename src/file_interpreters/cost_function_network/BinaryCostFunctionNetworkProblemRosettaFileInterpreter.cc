@@ -696,6 +696,28 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 	}
 }
 
+/// @brief Template function for decoding twobody penalties from a binary-as-ASCII-text string.  This is templated for different types of indices
+/// (unsigned integers) and penalties (floating point numbers).
+/// @tparam INDEXTYPE The data type for twobody penalty indices.  The file format actually stores global indices, which this function internally converts
+/// to variable node index and choice index.  This compilation unit will support 16, 32, or sizeof(Size)*CHAR_BIT bit indices.
+/// @tparam VALTYPE The data type for twobody penalties.  This compilation unit will support sizeof(float)*CHAR_BIT or sizeof(Real)*CHAR_BIT sized values.
+/// @param[in] line The ASCII line we're decoding.
+/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
+/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
+/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
+/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
+/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
+template< typename INDEXTYPE, typename VALTYPE >
+void
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_penalties(
+	std::string const & line,
+	std::vector< masala::base::Size > const & choices_by_variable_node_expected,
+	masala::base::Size const n_twobody_penalties_expected,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
+) const {
+	TODO TODO TODO;
+}
+
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 /// convert these to a cost function network problem definition.
 /// @param[in] lines A vector of file lines.
