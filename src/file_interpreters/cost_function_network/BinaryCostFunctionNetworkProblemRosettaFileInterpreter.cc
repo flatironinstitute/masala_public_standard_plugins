@@ -57,7 +57,7 @@
 #include <string>
 #include <sstream>
 #include <tuple>
-#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
+//#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -589,10 +589,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &two_byte_vec[0] ), line, vec_length * 2 );
 
 		// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-		std::cout << "CHOICES PER NODE:" << std::endl;
-		for( Size i(0); i<two_byte_vec.size(); ++i ) {
-			std::cout << i << "\t" << two_byte_vec[i] << std::endl; 
-		}
+		// std::cout << "CHOICES PER NODE:" << std::endl;
+		// for( Size i(0); i<two_byte_vec.size(); ++i ) {
+		// 	std::cout << i << "\t" << two_byte_vec[i] << std::endl; 
+		// }
 
 		for( Size i(0); i<vec_length; ++i ) {
 			choices_by_variable_node_expected[i] = two_byte_vec[i];
@@ -602,10 +602,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &four_byte_vec[0] ), line, vec_length * 4 );
 		
 		// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-		std::cout << "CHOICES PER NODE:" << std::endl;
-		for( Size i(0); i<four_byte_vec.size(); ++i ) {
-			std::cout << i << "\t" << four_byte_vec[i] << std::endl; 
-		}
+		// std::cout << "CHOICES PER NODE:" << std::endl;
+		// for( Size i(0); i<four_byte_vec.size(); ++i ) {
+		// 	std::cout << i << "\t" << four_byte_vec[i] << std::endl; 
+		// }
 
 		for( Size i(0); i<vec_length; ++i ) {
 			choices_by_variable_node_expected[i] = four_byte_vec[i];
@@ -614,10 +614,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &choices_by_variable_node_expected[0] ), line, vec_length * sizeof(Size) );
 		
 		// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-		std::cout << "CHOICES PER NODE:" << std::endl;
-		for( Size i(0); i<choices_by_variable_node_expected.size(); ++i ) {
-			std::cout << i << "\t" << choices_by_variable_node_expected[i] << std::endl; 
-		}
+		// std::cout << "CHOICES PER NODE:" << std::endl;
+		// for( Size i(0); i<choices_by_variable_node_expected.size(); ++i ) {
+		// 	std::cout << i << "\t" << choices_by_variable_node_expected[i] << std::endl; 
+		// }
 	}
 }
 
@@ -682,10 +682,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_floats[0] ), line, total_choices * sizeof( float ) );
 
 		// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-		std::cout << "ONEBODY PENALTIES:" << std::endl;
-		for( auto const & entry : onebody_floats ) {
-			std::cout << entry << std::endl; 
-		}
+		// std::cout << "ONEBODY PENALTIES:" << std::endl;
+		// for( auto const & entry : onebody_floats ) {
+		// 	std::cout << entry << std::endl; 
+		// }
 
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
@@ -701,10 +701,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &onebody_reals[0] ), line, total_choices * sizeof( Real ) );
 
 		// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-		std::cout << "ONEBODY PENALTIES:" << std::endl;
-		for( auto const & entry : onebody_reals ) {
-			std::cout << entry << std::endl; 
-		}
+		// std::cout << "ONEBODY PENALTIES:" << std::endl;
+		// for( auto const & entry : onebody_reals ) {
+		// 	std::cout << entry << std::endl; 
+		// }
 
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
@@ -855,10 +855,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( std::tuple< VALTYPE, INDEXTYPE, INDEXTYPE > ) * n_twobody_penalties_expected );
 
 	// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-	std::cout << "TWOBODY PENALTIES:" << std::endl;
-	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
-		std::cout << std::get<2>(entry) << "\t" << std::get<1>(entry) << "\t" << std::get<0>(entry) << std::endl; 
-	}
+	// std::cout << "TWOBODY PENALTIES:" << std::endl;
+	// for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
+	// 	std::cout << std::get<2>(entry) << "\t" << std::get<1>(entry) << "\t" << std::get<0>(entry) << std::endl; 
+	// }
 
 	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
 		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<2>(entry), choices_by_variable_node_expected ) );
