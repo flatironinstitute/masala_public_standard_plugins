@@ -17,7 +17,9 @@
 */
 
 /// @file tests/unit/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreterTests.cc
-/// @brief Unit tests for the BinaryCostFunctionNetworkProblemRosettaFileInterpreter class.
+/// @brief Unit tests for the BinaryCostFunctionNetworkProblemRosettaFileInterpreter class.  This class reads the binary
+/// cost function network optimization problem file format written by Rosetta (a.k.a. the packing problem format) and
+/// constructs a user-defined type of CostFunctionNetworkOptimizationProblem.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit testing library (Catch2) headers:
@@ -37,6 +39,7 @@
 // Masala base headers:
 #include <base/managers/file_interpreter/MasalaFileInterpreterManager.hh>
 #include <base/managers/file_interpreter/MasalaFileInterpreterCreator.hh>
+#include <base/managers/tracer/MasalaTracerManager.hh>
 #include <base/managers/environment/MasalaEnvironmentManager.hh>
 
 // STL headers:
@@ -61,9 +64,9 @@ TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter
 	using namespace standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network;
 	using namespace masala::base::managers::file_interpreter;
 
-    REQUIRE_NOTHROW([&](){
-		registration_api::register_library();
+	registration_api::register_library();
 
+    REQUIRE_NOTHROW([&](){
 		std::vector< MasalaFileInterpreterCreatorCSP > const creators(
 			MasalaFileInterpreterManager::get_instance()->get_file_interpreters_by_short_name(
 				"BinaryCostFunctionNetworkProblemRosettaFileInterpreter"
@@ -77,9 +80,9 @@ TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter
         );
 		CHECK( fileinterp != nullptr );
         fileinterp->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter from the MasalaFileInterpreterManager." );
-
-		registration_api::unregister_library();
     }() );
+
+	registration_api::unregister_library();
 }
 
 TEST_CASE( "Read a large cost function network optimization problem.", "[standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API][file read]" ) {
@@ -88,13 +91,21 @@ TEST_CASE( "Read a large cost function network optimization problem.", "[standar
 	using namespace masala::base::managers::file_interpreter;
 	using namespace masala::base::managers::environment;
 	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+	using namespace masala::base::managers::tracer;
+
+	registration_api::register_library();
 
     REQUIRE_NOTHROW([&](){
-		registration_api::register_library();
-
-	
 		std::string library_path;
-		CHECK( MasalaEnvironmentManager::get_instance()->get_environment_variable( "MASALA_STANDARD_PLUGINS", library_path ) );
+		bool const env_var_success( MasalaEnvironmentManager::get_instance()->get_environment_variable( "MASALA_STANDARD_PLUGINS", library_path ) );
+		if( !env_var_success ) {
+			MasalaTracerManager::get_instance()->write_to_tracer(
+				"tests::unit::file_interpreters::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreterTests",
+				"Could not load the value of the MASALA_STANDARD_PLUGINS environment variable.  Note that this test suite assumes that "
+				"this environment variable has been set to point to the installation directory of the Masala standard plugins library."
+			);
+		}
+		CHECK(env_var_success);
 
 		MasalaFileInterpreterCreatorCSP creator(
 			MasalaFileInterpreterManager::get_instance()->get_file_interpreter_by_full_name(
@@ -121,14 +132,17 @@ TEST_CASE( "Read a large cost function network optimization problem.", "[standar
 		PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const >( problems->problem(0) ) );
 		CHECK( problem != nullptr );
 		
+		// Check that we have the correct number of variable nodes, and the correct number of
+		// choices at each node:
 		CHECK( problem->n_choices_at_variable_nodes().size() == 4 );
 		CHECK( problem->n_choices_at_variable_nodes()[0].second == 9 );
 		CHECK( problem->n_choices_at_variable_nodes()[1].second == 16 );
 		CHECK( problem->n_choices_at_variable_nodes()[2].second == 12 );
 		CHECK( problem->n_choices_at_variable_nodes()[3].second == 11 );
-
-		registration_api::unregister_library();
     }() );
+
+	// Clean up at the end.
+	registration_api::unregister_library();
 }
 
 } // namespace cost_function_network
