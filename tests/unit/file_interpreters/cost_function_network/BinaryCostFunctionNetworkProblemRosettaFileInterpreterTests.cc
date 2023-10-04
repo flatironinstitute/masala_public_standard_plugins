@@ -25,15 +25,19 @@
 
 // Unit headers:
 #include <file_interpreters_api/auto_generated_api/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API.hh>
+#include <optimizers_api/auto_generated_api/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
 
 // Registration headers:
 #include <registration_api/register_library.hh>
 
-// Masala numeric headers:
+// Masala numeric_api headers:
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 
 // Masala base headers:
 #include <base/managers/file_interpreter/MasalaFileInterpreterManager.hh>
 #include <base/managers/file_interpreter/MasalaFileInterpreterCreator.hh>
+#include <base/managers/environment/MasalaEnvironmentManager.hh>
 
 // STL headers:
 
@@ -73,6 +77,55 @@ TEST_CASE( "Instantiate a BinaryCostFunctionNetworkProblemRosettaFileInterpreter
         );
 		CHECK( fileinterp != nullptr );
         fileinterp->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter from the MasalaFileInterpreterManager." );
+
+		registration_api::unregister_library();
+    }() );
+}
+
+TEST_CASE( "Read a large cost function network optimization problem.", "[standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API][file read]" ) {
+	using namespace standard_masala_plugins::file_interpreters_api::auto_generated_api::cost_function_network;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using namespace masala::base::managers::file_interpreter;
+	using namespace masala::base::managers::environment;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+
+    REQUIRE_NOTHROW([&](){
+		registration_api::register_library();
+
+	
+		std::string library_path;
+		CHECK( MasalaEnvironmentManager::get_instance()->get_environment_variable( "MASALA_STANDARD_PLUGINS", library_path ) );
+
+		MasalaFileInterpreterCreatorCSP creator(
+			MasalaFileInterpreterManager::get_instance()->get_file_interpreter_by_full_name(
+				"standard_masala_plugins::file_interpreters::cost_function_network::BinaryCostFunctionNetworkProblemRosettaFileInterpreter"
+			)
+		);
+		CHECK( creator != nullptr );
+        BinaryCostFunctionNetworkProblemRosettaFileInterpreter_APISP fileinterp(
+            std::dynamic_pointer_cast< BinaryCostFunctionNetworkProblemRosettaFileInterpreter_API >(
+				creator->create_file_interpreter()
+			)
+        );
+		CHECK( fileinterp != nullptr );
+        fileinterp->write_to_tracer( "Instantiated a BinaryCostFunctionNetworkProblemRosettaFileInterpreter from the MasalaFileInterpreterManager." );
+
+		// Configure the reader:
+		fileinterp->set_cfn_problem_type_to_generate( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" );
+
+		// Read a file:
+		CostFunctionNetworkOptimizationProblems_APISP problems(
+			fileinterp->cfn_problems_from_ascii_file( library_path + "database/unit_test_data/file_interpreters/cost_function_network/1qys_16_bit_problem_binary.pdb" )
+		);
+		CHECK( problems->n_problems() == 1 );
+		PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const >( problems->problem(0) ) );
+		CHECK( problem != nullptr );
+		
+		CHECK( problem->n_choices_at_variable_nodes().size() == 4 );
+		CHECK( problem->n_choices_at_variable_nodes()[0].second == 9 );
+		CHECK( problem->n_choices_at_variable_nodes()[1].second == 16 );
+		CHECK( problem->n_choices_at_variable_nodes()[2].second == 12 );
+		CHECK( problem->n_choices_at_variable_nodes()[3].second == 11 );
 
 		registration_api::unregister_library();
     }() );
