@@ -534,13 +534,13 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 	choices_by_variable_node_expected.clear();
 	choices_by_variable_node_expected.resize( vec_length, 0 );
 	if( entry_bytesize == 2 ) {
-		std::vector< std::uint16_t > two_byte_vec(vec_length, 0);
+		std::vector< uint16_t > two_byte_vec(vec_length, 0);
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &two_byte_vec[0] ), line, vec_length * 2 );
 		for( Size i(0); i<vec_length; ++i ) {
 			choices_by_variable_node_expected[i] = two_byte_vec[i];
 		}
 	} else if( entry_bytesize == 4 ) {
-		std::vector< std::uint32_t > four_byte_vec(vec_length, 0);
+		std::vector< uint32_t > four_byte_vec(vec_length, 0);
 		masala::core_api::utility::decode_data_from_string( (unsigned char *)( &four_byte_vec[0] ), line, vec_length * 4 );
 		for( Size i(0); i<vec_length; ++i ) {
 			choices_by_variable_node_expected[i] = four_byte_vec[i];
@@ -632,7 +632,68 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_twobody_penalties
 	masala::base::Size twobody_penalty_bytesize_expected,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
 ) const {
-	TODO TODO TODO;
+	CHECK_OR_THROW_FOR_CLASS( twobody_penalty_bytesize_expected <= sizeof( Real ), "decode_twobody_penalties",
+		"A maximum of " + std::to_string( sizeof( Real ) * CHAR_BIT ) + " bits can be used to represent double-precision "
+		"floating point numbers on this system, yet the file indicates that choice counts are represented with "
+		+ std::to_string(twobody_penalty_bytesize_expected * CHAR_BIT) + " bits!"
+	);
+	CHECK_OR_THROW_FOR_CLASS( twobody_penalty_index_bytesize_expected <= sizeof( Size ), "decode_twobody_penalties",
+		"A maximum of " + std::to_string( sizeof( Size ) * CHAR_BIT ) + " bits can be used to represent unsigned "
+		"integers on this system, yet the file indicates that node and choice indicess are represented with "
+		+ std::to_string(twobody_penalty_index_bytesize_expected * CHAR_BIT) + " bits!"
+	);
+	switch( twobody_penalty_bytesize_expected ) {
+		case sizeof( float ) : {
+			switch( twobody_penalty_index_bytesize_expected ) {
+				case 2 : {
+					inner_decode_twobody_penalties< uint16_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				case 4 : {
+					inner_decode_twobody_penalties< uint32_t, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				case sizeof( Size ) : {
+					inner_decode_twobody_penalties< Size, float >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				default : {
+					MASALA_THROW( class_namespace_and_name(), "decode_twobody_penalties", "Two-body penalty node and choice indices must be 2, 4, or " + std::to_string( sizeof(Size) * CHAR_BIT )
+						+ " bits, but the file indicates that these values take up " + std::to_string( twobody_penalty_index_bytesize_expected * CHAR_BIT ) + " bits!"
+					);
+				}
+			}
+			break;
+		}
+		case sizeof( Real ) : {
+			switch( twobody_penalty_index_bytesize_expected ) {
+				case 2 : {
+					inner_decode_twobody_penalties< uint16_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				case 4 : {
+					inner_decode_twobody_penalties< uint32_t, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				case sizeof( Size ) : {
+					inner_decode_twobody_penalties< Size, Real >( line, choices_by_variable_node_expected, n_twobody_penalties_expected, problem_api );
+					break;
+				}
+				default : {
+					MASALA_THROW( class_namespace_and_name(), "decode_twobody_penalties", "Two-body penalty node and choice indices must be 2, 4, or " + std::to_string( sizeof(Size) * CHAR_BIT )
+						+ " bits, but the file indicates that these values take up " + std::to_string( twobody_penalty_index_bytesize_expected * CHAR_BIT ) + " bits!"
+					);
+				}
+			}
+			break;
+		}
+		default : {
+			MASALA_THROW( class_namespace_and_name(), "decode_twobody_penalties", "Two-body penalties must be single- or double-precision floating-point values (i.e. "
+				+ std::to_string( sizeof(float) * CHAR_BIT ) + "- or " + std::to_string( sizeof(Real) * CHAR_BIT ) + "-bit floating-point values), but the file indicates that these "
+				"values take up " + std::to_string( twobody_penalty_bytesize_expected * CHAR_BIT ) + " bits!"
+			);
+		}
+	}
 }
 
 /// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
