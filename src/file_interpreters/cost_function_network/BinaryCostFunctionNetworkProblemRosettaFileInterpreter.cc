@@ -571,7 +571,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_choices_per_varia
 		"integers on this system, yet the file indicates that choice counts are represented with "
 		+ std::to_string(entry_bytesize * CHAR_BIT) + " bits!"
 	);
-	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize*vec_length) * 4.0 / 3.0) ) );
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(entry_bytesize*vec_length) / 3.0) ) * 4 );
 	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "decode_choices_per_variable_node",
 		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
 		std::to_string( line.size() ) + ".  Could not parse line \"" + line + "\"."
@@ -636,6 +636,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 	);
 
 	Size const total_choices( std::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
+
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(onebody_penalty_bytesize_expected*total_choices) / 3.0) ) * 4 );
+	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "decode_onebody_penalties",
+		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
+		std::to_string( line.size() ) + ".  Could not parse onebody penalties binary data."
+	);
 
 	if( onebody_penalty_bytesize_expected == sizeof( float ) ) {
 		std::vector< float > onebody_floats( total_choices, 0.0 );
@@ -772,6 +778,12 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	);
 	CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "inner_decode_twobody_penalties", "The selected problem class, " + problem_api.inner_class_name() + ", is "
 		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed twobody penalties."
+	);
+
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>( sizeof( std::tuple<INDEXTYPE, INDEXTYPE, VALTYPE> ) * n_twobody_penalties_expected ) / 3.0) ) * 4 );
+	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "inner_decode_twobody_penalties",
+		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
+		std::to_string( line.size() ) + ".  Could not parse twobody penalties binary data."
 	);
 
 	std::vector< std::tuple< INDEXTYPE, INDEXTYPE, VALTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected, {0, 0, 0.0} );
