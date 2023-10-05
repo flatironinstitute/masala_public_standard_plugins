@@ -56,12 +56,21 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <tuple>
-//#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
+#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
 namespace cost_function_network {
+
+/// @brief A structure used for storing two-body penalties temporarily.
+/// @details This stores two global choice indices plus a penalty value.
+template< typename INDEXTYPE, typename VALTYPE >
+struct TwoBodyTuple {
+public:
+	INDEXTYPE choice1_ = 0;
+	INDEXTYPE choice2_ = 0;
+	VALTYPE penalty_ = 0.0;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
@@ -845,31 +854,31 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed twobody penalties."
 	);
 
-	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>( sizeof( std::tuple<VALTYPE, INDEXTYPE, INDEXTYPE> ) * n_twobody_penalties_expected ) / 3.0) ) * 4 );
+	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>( sizeof( TwoBodyTuple< INDEXTYPE, VALTYPE > ) * n_twobody_penalties_expected ) / 3.0) ) * 4 );
 	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "inner_decode_twobody_penalties",
 		"Expected " + std::to_string( char_bytesize ) + " bytes of ASCII data, but got " +
 		std::to_string( line.size() ) + ".  Could not parse twobody penalties binary data."
 	);
 
-	std::vector< std::tuple< VALTYPE, INDEXTYPE, INDEXTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected, {0.0, 0, 0} );
-	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( std::tuple< VALTYPE, INDEXTYPE, INDEXTYPE > ) * n_twobody_penalties_expected );
+	std::vector< TwoBodyTuple< INDEXTYPE, VALTYPE > > twobody_penalties_by_global_choice_indices( n_twobody_penalties_expected );
+	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( TwoBodyTuple< INDEXTYPE, VALTYPE > ) * n_twobody_penalties_expected );
 
 	// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-	// std::cout << "TWOBODY PENALTIES:" << std::endl;
-	// for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
-	// 	std::cout << std::get<2>(entry) << "\t" << std::get<1>(entry) << "\t" << std::get<0>(entry) << std::endl; 
-	// }
+	std::cout << "TWOBODY PENALTIES:" << std::endl;
+	for( TwoBodyTuple< INDEXTYPE, VALTYPE > const & entry : twobody_penalties_by_global_choice_indices ) {
+		std::cout << entry.choice1_ << "\t" << entry.choice2_ << "\t" << entry.penalty_ << std::endl; 
+	}
 
-	for( auto const & entry : twobody_penalties_by_global_choice_indices ) {
-		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( std::get<2>(entry), choices_by_variable_node_expected ) );
-		std::pair< Size, Size > const indices2( node_and_choice_from_global_index( std::get<1>(entry), choices_by_variable_node_expected ) );
+	for( TwoBodyTuple< INDEXTYPE, VALTYPE > const & entry : twobody_penalties_by_global_choice_indices ) {
+		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( entry.choice1_, choices_by_variable_node_expected ) );
+		std::pair< Size, Size > const indices2( node_and_choice_from_global_index( entry.choice2_, choices_by_variable_node_expected ) );
 		CHECK_OR_THROW_FOR_CLASS( indices1.first < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices1.first )
 			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
 		);
 		CHECK_OR_THROW_FOR_CLASS( indices2.first < node_indices.size(), "inner_decode_twobody_penalties", "Variable node index " + std::to_string( indices2.first )
 			+ " is out of range.  Expected " + std::to_string(node_indices.size()) + " variable nodes."
 		);
-		problem->set_twobody_penalty( std::make_pair( node_indices[indices1.first], node_indices[indices2.first] ), std::make_pair( indices1.second, indices2.second ), std::get<0>(entry) );
+		problem->set_twobody_penalty( std::make_pair( node_indices[indices1.first], node_indices[indices2.first] ), std::make_pair( indices1.second, indices2.second ), entry.penalty_ );
 	}
 }
 
