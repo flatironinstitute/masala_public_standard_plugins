@@ -126,7 +126,7 @@ TEST_CASE( "Read a large cost function network optimization problem.", "[standar
 
 		// Read a file:
 		CostFunctionNetworkOptimizationProblems_APISP problems(
-			fileinterp->cfn_problems_from_ascii_file( library_path + "database/unit_test_data/file_interpreters/cost_function_network/1qys_16_bit_problem_binary.pdb" )
+			fileinterp->cfn_problems_from_ascii_file( library_path + "/database/unit_test_data/file_interpreters/cost_function_network/1qys_16_bit_problem_binary.pdb" )
 		);
 		CHECK( problems->n_problems() == 1 );
 		PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API const >( problems->problem(0) ) );
