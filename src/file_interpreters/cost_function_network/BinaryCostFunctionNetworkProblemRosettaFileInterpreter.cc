@@ -952,8 +952,8 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_f
 
 	// Get the global node indices, if available.
 	std::vector< Size > global_node_indices;
-	if( lines.size() > 7 ) {
-		global_node_indices = parse_global_node_indices( trim(lines[7]) );
+	if( lines.size() > line_begin + 7 && line_end >= line_begin + 7 ) {
+		global_node_indices = parse_global_node_indices( trim(lines[line_begin + 7]) );
 	}
 
 	for( Size i(line_begin); i<=line_end; ++i ) {
