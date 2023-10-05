@@ -717,7 +717,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 
 		Size choice_counter(0), varnode_index(0);
 		for( Size i(0); i<total_choices; ++i ) {
-			problem->set_onebody_penalty( varnode_index, choice_counter, onebody_reals[i] );
+			problem->set_onebody_penalty( node_indices[varnode_index], choice_counter, onebody_reals[i] );
 			++choice_counter;
 			if( choice_counter >= choices_by_variable_node_expected[varnode_index] ) {
 				++varnode_index;
