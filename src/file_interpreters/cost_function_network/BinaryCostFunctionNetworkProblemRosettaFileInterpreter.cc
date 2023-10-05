@@ -56,7 +56,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
+//#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace file_interpreters {
@@ -864,10 +864,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::inner_decode_twobody_pen
 	decode_data_from_string( (unsigned char *)( &twobody_penalties_by_global_choice_indices[0] ), line, sizeof( TwoBodyTuple< INDEXTYPE, VALTYPE > ) * n_twobody_penalties_expected );
 
 	// DELETE THE FOLLOWING; FOR DEBUGGING ONLY:
-	std::cout << "TWOBODY PENALTIES:" << std::endl;
-	for( TwoBodyTuple< INDEXTYPE, VALTYPE > const & entry : twobody_penalties_by_global_choice_indices ) {
-		std::cout << entry.choice1_ << "\t" << entry.choice2_ << "\t" << entry.penalty_ << std::endl; 
-	}
+	// std::cout << "TWOBODY PENALTIES:" << std::endl;
+	// for( TwoBodyTuple< INDEXTYPE, VALTYPE > const & entry : twobody_penalties_by_global_choice_indices ) {
+	// 	std::cout << entry.choice1_ << "\t" << entry.choice2_ << "\t" << entry.penalty_ << std::endl; 
+	// }
 
 	for( TwoBodyTuple< INDEXTYPE, VALTYPE > const & entry : twobody_penalties_by_global_choice_indices ) {
 		std::pair< Size, Size > const indices1( node_and_choice_from_global_index( entry.choice1_, choices_by_variable_node_expected ) );
