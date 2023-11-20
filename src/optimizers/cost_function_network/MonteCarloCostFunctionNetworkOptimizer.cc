@@ -453,7 +453,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 >
             >(
                 "run_cost_function_network_optimizer", "Run the optimizer on a cost function network optimization problem, and produce a solution.",
-                true, false, true, false,
+                true, false, false, true,
                 "problems", "A set of problems to run.",
                 "solutions", "A vector of solution sets.  Each CostFunctionNetworkOptimizationSolutions object contains the set of solutions for the problem "
                 "in the input vector with the corresponding index.  There may be multiple solutions, depending on settings.",
