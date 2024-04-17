@@ -159,7 +159,7 @@ public:
 
 	/// @brief Get the API definition for this object.
 	masala::base::api::MasalaObjectAPIDefinitionCWP
-	get_api_definition();
+	get_api_definition() override;
 
 public:
 

@@ -30,6 +30,9 @@
 // Optimizers headers:
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
+// File interpreters headers:
+#include <file_interpreters_api/auto_generated_api/registration/register_file_interpreters.hh>
+
 namespace standard_masala_plugins {
 namespace registration {
 
@@ -38,6 +41,7 @@ void
 register_sub_libraries() {
     standard_masala_plugins::selectors_api::auto_generated_api::registration::register_selectors();
     standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
+    standard_masala_plugins::file_interpreters_api::auto_generated_api::registration::register_file_interpreters();
 }
 
 /// @brief Unregister sub-libraries with the Masala base plugin manager.
@@ -45,6 +49,7 @@ void
 unregister_sub_libraries() {
     standard_masala_plugins::selectors_api::auto_generated_api::registration::unregister_selectors();
     standard_masala_plugins::optimizers_api::auto_generated_api::registration::unregister_optimizers();
+    standard_masala_plugins::file_interpreters_api::auto_generated_api::registration::unregister_file_interpreters();
 }
 
 } // namespace registration
