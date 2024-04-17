@@ -109,6 +109,11 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the category that this MasalaEngine fits into.
+	/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }
+	std::vector< std::vector< std::string > >
+	get_engine_categories() const override;
+
 	/// @brief Get the class name.
 	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
 	std::string class_name() const override;
@@ -154,7 +159,7 @@ public:
 
 	/// @brief Get the API definition for this object.
 	masala::base::api::MasalaObjectAPIDefinitionCWP
-	get_api_definition();
+	get_api_definition() override;
 
 public:
 

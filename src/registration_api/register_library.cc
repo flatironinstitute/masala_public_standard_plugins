@@ -27,6 +27,9 @@
 #include <base/managers/version/MasalaModuleVersionInfo.hh>
 #include <base/managers/version/MasalaVersionManager.hh>
 
+#define STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
+#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 3
+
 namespace standard_masala_plugins {
 namespace registration_api {
 
@@ -43,17 +46,17 @@ register_library() {
     MasalaModuleVersionInfoSP module_version_info(
         masala::make_shared< MasalaModuleVersionInfo >(
             "Standard Masala Plugins",
-            std::pair< Size, Size >( 0, 1 )
+            std::pair< Size, Size >( STANDARD_MASALA_LIBRARIES_MAJOR_VERSION, STANDARD_MASALA_LIBRARIES_MINOR_VERSION )
         )
     );
-    module_version_info->add_requirement_with_minimum_and_maximum_version(
+    module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 1 ), // Min version
-        std::pair< Size, Size >( 0, 1 ), // Max version
-        "", "", "After version 0.1, Masala's SquareOfChoicePenaltySumCostFunction and "
-        "FunctionOfIntegerPenaltySumCostFunction will be moved to the Standard Masala "
-        "Plugins library."
+        std::pair< Size, Size >( 0, 3 ), // Min version
+        "",
+        "Prior to version 0.2, the Standard Masala Library's SquareOfChoicePenaltySumCostFunction "
+        "and FunctionOfIntegerPenaltySumCostFunction were in the core Masala library.  Prior to version 0.3, "
+		"certain accessor functions for setter descriptions in API definitions returned the wrong type."
     );
     MasalaVersionManager::get_instance()->add_library_information( module_version_info );
     standard_masala_plugins::registration::register_sub_libraries();
