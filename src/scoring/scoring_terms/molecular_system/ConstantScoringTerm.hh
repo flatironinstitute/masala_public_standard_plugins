@@ -112,6 +112,8 @@ public:
 	masala::base::api::MasalaObjectAPIDefinitionCWP
 	get_api_definition() override;
 
+protected:
+
 	/// @brief Score a vector of structures (molecular systems), and produce a
 	/// corresponding vector of scores.
 	/// @param[in] molecular_systems A vector of at least one molecular system to score.

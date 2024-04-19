@@ -24,17 +24,14 @@
 #include <scoring/scoring_terms/molecular_system/ConstantScoringTerm.hh>
 
 // Core API headers:
-#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
-#include <core_api/auto_generated_api/chemistry/MolecularGeometry_API.hh>
-#include <core_api/auto_generated_api/chemistry/atoms/AtomInstance_API.hh>
-#include <core_api/auto_generated_api/chemistry/atoms/AtomInstanceConstIterator_API.hh>
-#include <core_api/auto_generated_api/selection/atom_selection/AtomSelection_API.hh>
+#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.fwd.hh>
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_FourInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 namespace standard_masala_plugins {
 namespace scoring {
@@ -114,9 +111,10 @@ ConstantScoringTerm::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::constructor;
 	using namespace masala::base::api::setter;
+	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
 	using namespace masala::core_api::auto_generated_api::molecular_system;
-	using namespace masala::core_api::auto_generated_api::selection::atom_selection;
+	using namespace masala::core_api::base_classes::scoring::molecular_system;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
@@ -130,6 +128,25 @@ ConstantScoringTerm::get_api_definition() {
 		);
 		
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( ConstantScoringTerm, api_description );
+
+		api_description->add_getter(
+			std::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"get_constant_value",
+				"Get the constant value that this scoring term returns.",
+				"constant_value",
+				"The constant value that this scoring term always returns.",
+				false, false, std::bind( &ConstantScoringTerm::get_constant_value, this )
+			)
+		);
+		api_description->add_setter(
+			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_constant_value",
+				"Set the constant value that this scoring term returns.",
+				"constant_value_in",
+				"The constant value that this scoring term always returns.",
+				false, false, std::bind( &ConstantScoringTerm::set_constant_value, this, std::placeholders::_1 )
+			)
+		);
 
 		api_definition() = api_description;
 	}
