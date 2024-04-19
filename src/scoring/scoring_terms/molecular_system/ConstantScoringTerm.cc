@@ -157,7 +157,32 @@ ConstantScoringTerm::score_molecular_systems_derived(
 	std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermCacheSP > const * const,
 	std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermAdditionalOutputCSP > * const
 ) const {
+	std::lock_guard< std::mutex > lock( mutex() );
 	return std::vector< Real >( molecular_systems.size(), constant_value_ );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the constant value that this scoring term returns.
+void
+ConstantScoringTerm::set_constant_value(
+	masala::base::Real const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	constant_value_ = setting;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// GETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the constant value that this scoring term returns.
+masala::base::Real
+ConstantScoringTerm::get_constant_value() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return constant_value_;
 }
 
 } // namespace molecular_system
