@@ -25,6 +25,7 @@
 #include <scoring/api/generate_api_classes.hh>
 
 // Scoring headers
+#include <scoring/scoring_terms/molecular_system/ConstantScoringTerm.hh>
 
 namespace standard_masala_plugins {
 namespace scoring {
@@ -38,7 +39,7 @@ namespace api {
         std::vector< masala::base::MasalaObjectSP > outvec;
 
         // Add to this vector whenever a class is added with a defined API:
-        //outvec.emplace_back( masala::make_shared< standard_masala_plugins::scoring::atom_scoring::ElementTypeAtomSelector >() );
+        outvec.emplace_back( masala::make_shared< standard_masala_plugins::scoring::scoring_terms::molecular_system::ConstantScoringTerm >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
