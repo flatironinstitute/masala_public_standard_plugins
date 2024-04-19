@@ -30,8 +30,13 @@
 #include <scoring/scoring_terms/molecular_system/ConstantScoringTerm.fwd.hh>
 
 // Core API headers:
+#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.fwd.hh>
+#include <core_api/base_classes/scoring/molecular_system/PluginWholeMolecularSystemScoringTermAdditionalInput.fwd.hh>
+#include <core_api/base_classes/scoring/molecular_system/PluginWholeMolecularSystemScoringTermAdditionalOutput.fwd.hh>
+#include <core_api/base_classes/scoring/molecular_system/PluginWholeMolecularSystemScoringTermCache.fwd.hh>
 
 // Base headers:
+#include <base/types.hh>
 
 namespace standard_masala_plugins {
 namespace scoring {
@@ -44,6 +49,8 @@ namespace molecular_system {
 class ConstantScoringTerm : public masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTerm {
 
 	typedef masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTerm Parent;
+	typedef masala::base::Real Real;
+	typedef masala::base::Size Size;
 
 public:
 
@@ -105,19 +112,35 @@ public:
 	masala::base::api::MasalaObjectAPIDefinitionCWP
 	get_api_definition() override;
 
-public:
-
-////////////////////////////////////////////////////////////////////////////////
-// PLUGIN PUBLIC MEMBER FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
-
-
+	/// @brief Score a vector of structures (molecular systems), and produce a
+	/// corresponding vector of scores.
+	/// @param[in] molecular_systems A vector of at least one molecular system to score.
+	/// @param[in] additional_inputs_ptr A pointer to a vector of (optional) additional
+	/// inputs.  Can be nullptr.  If non-null, the vector must contain one entry for each
+	/// molecular system.
+	/// @param[in] caches_ptr A pointer to a vector of (optional) cache containers to permit
+	/// data that persists from scoring attempt to scoring attempt to be stored.  Can be
+	/// nullptr.  If non-null, the vector must contain one entry for each molecular system.
+	/// @param[in] additional_inputs_ptr A pointer to a vector of (optional) additional
+	/// outputs.  Can be nullptr.  If non-null, this vector will empty (length zero).  The derived
+	/// class is responsible for ensuring that the vector is either kept at length zero
+	/// or populated with one output per molecular system.
+	std::vector< masala::base::Real >
+	score_molecular_systems_derived(
+		std::vector< masala::core_api::auto_generated_api::molecular_system::MolecularSystem_APICSP > const & molecular_systems,
+		std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermAdditionalInputCSP > const * const additional_inputs_ptr,
+		std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermCacheSP > const * const caches_ptr,
+		std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermAdditionalOutputCSP > * const additional_outputs_ptr
+	) const override;
 
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE DATA
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The value that this scoring term always returns.
+	Real constant_value_ = 0.0;
 
 }; // class ConstantScoringTerm
 

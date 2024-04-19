@@ -137,38 +137,30 @@ ConstantScoringTerm::get_api_definition() {
 	return api_definition();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// PLUGIN PUBLIC MEMBER FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
-
-/// @brief Get the category or categories for this plugin class.
-/// @returns { { "Selector", "AtomSelector" } }
-/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
-/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
-/// in more than one hierarchical category (in which case there would be more than one
-/// entry in the outher vector), but must be in at least one.  The first one is used as
-/// the primary key.
-std::vector< std::vector< std::string > >
-ConstantScoringTerm::get_categories() const {
-	return std::vector< std::vector< std::string > > {
-		{ "Selector", "AtomSelector" }
-	};
+/// @brief Score a vector of structures (molecular systems), and produce a
+/// corresponding vector of scores.
+/// @param[in] molecular_systems A vector of at least one molecular system to score.
+/// @param[in] additional_inputs_ptr A pointer to a vector of (optional) additional
+/// inputs.  Can be nullptr.  If non-null, the vector must contain one entry for each
+/// molecular system.
+/// @param[in] caches_ptr A pointer to a vector of (optional) cache containers to permit
+/// data that persists from scoring attempt to scoring attempt to be stored.  Can be
+/// nullptr.  If non-null, the vector must contain one entry for each molecular system.
+/// @param[in] additional_inputs_ptr A pointer to a vector of (optional) additional
+/// outputs.  Can be nullptr.  If non-null, this vector will empty (length zero).  The derived
+/// class is responsible for ensuring that the vector is either kept at length zero
+/// or populated with one output per molecular system.
+std::vector< masala::base::Real >
+ConstantScoringTerm::score_molecular_systems_derived(
+	std::vector< masala::core_api::auto_generated_api::molecular_system::MolecularSystem_APICSP > const & molecular_systems,
+	std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermAdditionalInputCSP > const * const,
+	std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermCacheSP > const * const,
+	std::vector< masala::core_api::base_classes::scoring::molecular_system::PluginWholeMolecularSystemScoringTermAdditionalOutputCSP > * const
+) const {
+	return std::vector< Real >( molecular_systems.size(), constant_value_ );
 }
 
-/// @brief Get the keywords for this plugin class.
-/// @returns { "standard_masala_plugins", "selector", "atom_selector",
-///            "element", "elements" }
-std::vector< std::string >
-ConstantScoringTerm::get_keywords() const {
-	return std::vector< std::string > {
-		"standard_masala_plugins",
-		"selector",
-		"atom_selector",
-		"element",
-		"elements"
-	};
-}
-
-} // namespace atom_selectors
-} // namespace selectors
+} // namespace molecular_system
+} // namespace scoring_terms
+} // namespace scoring
 } // namespace standard_masala_plugins
