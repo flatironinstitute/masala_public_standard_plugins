@@ -42,6 +42,11 @@ INCLUDE_DIRECTORIES( SYSTEM ../ ../src/ ../headers/masala/headers/ )
 # Compiler settings and compilation flags:
 INCLUDE( compiler.cmake )
 
+# Generate the build lists for the scoring library and its API library:
+execute_process(
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins scoring ../src/scoring cmake_generated/scoring.cmake cmake_generated/scoring_api.cmake cmake_generated/scoring_tests.cmake
+)
+
 # Generate the build lists for the selectors library and its API library:
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
@@ -66,6 +71,12 @@ execute_process(
 execute_process(
     COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins benchmark ../src/benchmark cmake_generated/benchmark.cmake NONE NONE
 )
+
+# Build the scoring library:
+INCLUDE( ../build/cmake_generated/scoring.cmake )
+
+# Build the scoring API library:
+INCLUDE( ../build/cmake_generated/scoring_api.cmake )
 
 # Build the selectors library:
 INCLUDE( ../build/cmake_generated/selectors.cmake )
@@ -93,6 +104,9 @@ INCLUDE( ../build/cmake_generated/registration_api.cmake )
 
 # Build the benchmark library:
 INCLUDE( ../build/cmake_generated/benchmark.cmake )
+
+# Build tests for the scoring library.
+INCLUDE( ../build/cmake_generated/scoring_tests.cmake )
 
 # Build tests for the selectors library.
 INCLUDE( ../build/cmake_generated/selectors_tests.cmake )
