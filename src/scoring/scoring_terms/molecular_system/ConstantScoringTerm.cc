@@ -32,8 +32,7 @@
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
-#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_ZeroInput.tmpl.hh>
-#include <base/api/constructor/MasalaObjectAPIConstructorDefinition_OneInput.tmpl.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 
@@ -129,39 +128,13 @@ ConstantScoringTerm::get_api_definition() {
 				false, false
 			)
 		);
-		TODO TODO TODO;
-		api_description->add_constructor(
-			masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< ConstantScoringTerm > >(
-				"ConstantScoringTerm", "Default constructor."
-			)
-		);
-		api_description->add_constructor(
-			masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< ConstantScoringTerm, ConstantScoringTerm const & > >(
-				"ConstantScoringTerm", "Copy constructor.",
-				"src", "The other instance of an ConstantScoringTerm that we are copying."
-			)
-		);
-		api_description->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< AtomSelection_APICSP, MolecularSystem_API const & > >(
-				"generate_atom_selection", "Given a molecular system, generate a selection of atoms, by element type.",
-				true, false, true, false,
-				"molecular_system", "An input molecular system, for which a selection will be generated.",
-				"atom_selection", "A selection of atoms generated from the input molecular system, by element type.",
-				std::bind( &ConstantScoringTerm::generate_atom_selection, this, std::placeholders::_1 )
-			)
-		);
-		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
-				"set_element_type", "Sets the element type, by abbreviation string.  Elements should be expressed with proper case (e.g. \"Na\" for sodium, not \"NA\").",
-				"element_name", "The abbreviated name of the element, with proper capitalization.", false, false,
-				std::bind( static_cast< void(ConstantScoringTerm::*)(std::string const &) >( &ConstantScoringTerm::set_element_type ), this, std::placeholders::_1 )
-			)
-		);
+		
+		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( ConstantScoringTerm, api_description );
 
-		api_description_ = api_description;
+		api_definition() = api_description;
 	}
 
-	return api_description_;
+	return api_definition();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
