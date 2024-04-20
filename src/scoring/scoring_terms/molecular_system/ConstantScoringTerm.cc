@@ -24,7 +24,10 @@
 #include <scoring/scoring_terms/molecular_system/ConstantScoringTerm.hh>
 
 // Core API headers:
-#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.fwd.hh>
+#include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
+#include <core_api/auto_generated_api/scoring/ScoringTermAdditionalInput_API.hh>
+#include <core_api/auto_generated_api/scoring/ScoringTermAdditionalOutput_API.hh>
+#include <core_api/auto_generated_api/scoring/ScoringTermCache_API.hh>
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
@@ -161,7 +164,7 @@ ConstantScoringTerm::get_api_definition() {
 				"molecular_systems", "The vector of molecular systems to score.  At least one molecular system must be provided.",
 				"additional_inputs_ptr", "A pointer to a vector of (optional) additional inputs.  Can be nullptr.  If non-null, the vector must contain one entry for each molecular system.",
 				"caches_ptr", "A pointer to a vector of (optional) cache containers to permit data that persists from scoring attempt to scoring attempt to be stored.  Can be nullptr.  If non-null, the vector must contain one entry for each molecular system.",
-				"additional_inputs_ptr", "A pointer to a vector of (optional) additional outputs.  Can be nullptr.  If non-null, this vector will be cleared and populated with one output per molecular system.",
+				"additional_outputs_ptr", "A pointer to a vector of (optional) additional outputs.  Can be nullptr.  If non-null, this vector will be cleared and populated with one output per molecular system.",
 				"scores", "A vector of scores, one per input molecular system.",
 				std::bind( &ConstantScoringTerm::score, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4 )
 			)
