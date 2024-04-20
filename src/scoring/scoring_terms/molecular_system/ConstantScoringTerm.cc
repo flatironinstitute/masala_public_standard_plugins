@@ -113,8 +113,6 @@ ConstantScoringTerm::get_api_definition() {
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
-	using namespace masala::core_api::auto_generated_api::molecular_system;
-	using namespace masala::core_api::base_classes::scoring::molecular_system;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
@@ -130,7 +128,7 @@ ConstantScoringTerm::get_api_definition() {
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( ConstantScoringTerm, api_description );
 
 		api_description->add_getter(
-			std::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
 				"get_constant_value",
 				"Get the constant value that this scoring term returns.",
 				"constant_value",
@@ -139,12 +137,33 @@ ConstantScoringTerm::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			std::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_constant_value",
 				"Set the constant value that this scoring term returns.",
 				"constant_value_in",
 				"The constant value that this scoring term always returns.",
 				false, false, std::bind( &ConstantScoringTerm::set_constant_value, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_FourInput<
+				std::vector< masala::base::Real >,
+				std::vector< masala::core_api::auto_generated_api::molecular_system::MolecularSystem_APICSP > const &,
+				std::vector< masala::core_api::auto_generated_api::scoring::ScoringTermAdditionalInput_APICSP > const * const,
+				std::vector< masala::core_api::auto_generated_api::scoring::ScoringTermCache_APISP > const * const,
+				std::vector< masala::core_api::auto_generated_api::scoring::ScoringTermAdditionalOutput_APICSP > * const
+				>
+			>(
+				"score",
+				"Given a vector of molecular systems, return a vector of one score per molecular system.  "
+				"In the case of the ConstantScoringTerm, the scores returned are a user-set constant value.",
+				true, false, false, false,
+				"molecular_systems", "The vector of molecular systems to score.  At least one molecular system must be provided.",
+				"additional_inputs_ptr", "A pointer to a vector of (optional) additional inputs.  Can be nullptr.  If non-null, the vector must contain one entry for each molecular system.",
+				"caches_ptr", "A pointer to a vector of (optional) cache containers to permit data that persists from scoring attempt to scoring attempt to be stored.  Can be nullptr.  If non-null, the vector must contain one entry for each molecular system.",
+				"additional_inputs_ptr", "A pointer to a vector of (optional) additional outputs.  Can be nullptr.  If non-null, this vector will be cleared and populated with one output per molecular system.",
+				"scores", "A vector of scores, one per input molecular system.",
+				std::bind( &ConstantScoringTerm::score, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4 )
 			)
 		);
 
