@@ -20,13 +20,13 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
     export MASALA_PATH=<path-to-masala> # Change it to correct path 
     export MASALA_STANDARD_PLUGINS=<path-to-masala-plugins> # Change it to correct path
     ```
-5.  Set up a simlink to the Masala headers directory.
+5.  Set up a symlink to the Masala headers directory.
     
     ```
     ln -s $MASALA_PATH/headers/ $MASALA_STANDARD_PLUGINS/headers/masala/
     ```
     
-6.  Set up simlinks to the dynamic library files in your Masala build directory.
+6.  Set up symlinks to the dynamic library files in your Masala build directory.
 
     For Windows:
     ```
@@ -52,13 +52,13 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
     cd ..
     ```
     
-7.  Set up a simlink to the external/ directory.
+7.  Set up a symlink to the external/ directory.
 
   ```
   ln -s $MASALA_PATH/external $MASALA_STANDARD_PLUGINS/
   ```
   
-9.  Set up a simlink to the code_templates/ directory.
+9.  Set up a symlink to the code_templates/ directory.
 
    ```
    ln -s $MASALA_PATH/code_templates $MASALA_STANDARD_PLUGINS/
