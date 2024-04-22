@@ -118,7 +118,7 @@ TEST_CASE( "Score two empty molecular systems, loading the score term from the p
         std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
 
         scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
-        scores = score_workfxn->function( molsys_vec, nullptr, nullptr, nullptr );
+        scores = (*score_workfxn->function_raw_ptr())( molsys_vec, nullptr, nullptr, nullptr );
     }() );
     REQUIRE( scores.size() == 2 );
     CHECK( scores[0] == 0.25 );
