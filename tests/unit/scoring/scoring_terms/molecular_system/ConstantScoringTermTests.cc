@@ -25,6 +25,7 @@
 
 // Unit headers:
 #include <scoring_api/auto_generated_api/scoring_terms/molecular_system/ConstantScoringTerm_API.hh>
+#include <registration_api/register_library.hh>
 
 // Core headers:
 #include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
@@ -50,7 +51,7 @@ TEST_CASE( "Instantiate an ConstantScoringTerm", "[standard_masala_plugins::auto
     }() );
 }
 
-TEST_CASE( "Score an empty molecular system", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][score]" ) {
+TEST_CASE( "Score two empty molecular systems", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][score]" ) {
     using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
     using namespace masala::core_api::auto_generated_api::molecular_system;
 
@@ -62,11 +63,14 @@ TEST_CASE( "Score an empty molecular system", "[standard_masala_plugins::auto_ge
         MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
         MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
         std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
+        const_scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
         scores = const_scoreterm->score( molsys_vec, nullptr, nullptr, nullptr );
     }() );
     REQUIRE( scores.size() == 2 );
     CHECK( scores[0] == 0.25 );
     CHECK( scores[1] == 0.25 );
+    const_scoreterm->write_to_tracer( "Score1: " + std::to_string(scores[0]) );
+    const_scoreterm->write_to_tracer( "Score2: " + std::to_string(scores[1]) );
 }
 
 } // namespace molecular_system
