@@ -15,53 +15,53 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
    ```
    git clone git@github.com:flatironinstitute/masala_dev_standard_plugins.git .
    ```
-4.  Save the path to Masala and Masala-plugins for using throught the setup. 
+4.  Save the path to Masala and Masala-plugins for using throught the setup.  
     ```
-    export MASALA=<path-to-masala> # Change it to correct path
-    export MASALAPLUGINS=<path-to-masala-plugins> # Change it to correct path
+    export MASALA_PATH=<path-to-masala> # Change it to correct path 
+    export MASALA_STANDARD_PLUGINS=<path-to-masala-plugins> # Change it to correct path
     ```
 5.  Set up a simlink to the Masala headers directory.
     
     ```
-    ln -s $MASALA/headers/ $MASALAPLUGINS/headers/masala/
+    ln -s $MASALA_PATH/headers/ $MASALA_STANDARD_PLUGINS/headers/masala/
     ```
     
 6.  Set up simlinks to the dynamic library files in your Masala build directory.
 
     For Windows:
     ```
-    cd $MASALAPLUGINS/lib
-    for f in $MASALA/build/*.dylib; do ln -s ${f}; done;
-    for f in $MASALA/build/*.dylib.0.3; do ln -s ${f}; done;
+    cd $MASALA_STANDARD_PLUGINS/lib
+    for f in $MASALA_PATH/build/*.dylib; do ln -s ${f}; done;
+    for f in $MASALA_PATH/build/*.dylib.0.3; do ln -s ${f}; done;
     cd ..
     ```
 
     For Linux:
     ```
-    cd $MASALAPLUGINS/lib
-    for f in $MASALA/build/*.so; do ln -s ${f}; done;
-    for f in $MASALA/build/*.so.0.3; do ln -s ${f}; done;
+    cd $MASALA_STANDARD_PLUGINS/lib
+    for f in $MASALA_PATH/build/*.so; do ln -s ${f}; done;
+    for f in $MASALA_PATH/build/*.so.0.3; do ln -s ${f}; done;
     cd ..
     ```
 
     For Mac:
     ```
-    cd $MASALAPLUGINS/lib
-    for f in $MASALA/build/*.dll; do ln -s ${f}; done;
-    for f in $MASALA/build/*.dll.0.3; do ln -s ${f}; done;
+    cd $MASALA_STANDARD_PLUGINS/lib
+    for f in $MASALA_PATH/build/*.dll; do ln -s ${f}; done;
+    for f in $MASALA_PATH/build/*.dll.0.3; do ln -s ${f}; done;
     cd ..
     ```
     
 7.  Set up a simlink to the external/ directory.
 
   ```
-  ln -s $MASALA/external $MASALAPLUGINS/
+  ln -s $MASALA_PATH/external $MASALA_STANDARD_PLUGINS/
   ```
   
 9.  Set up a simlink to the code_templates/ directory.
 
    ```
-   ln -s $MASALA/code_templates $MASALAPLUGINS/
+   ln -s $MASALA_PATH/code_templates $MASALA_STANDARD_PLUGINS/
    ```
 
 ## Compilation
