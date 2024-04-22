@@ -3,6 +3,8 @@ masala_numeric
 masala_numeric_api
 masala_core
 masala_core_api
+standard_masala_plugins_scoring
+standard_masala_plugins_scoring_api
 standard_masala_plugins_selectors
 standard_masala_plugins_selectors_api
 standard_masala_plugins_optimizers

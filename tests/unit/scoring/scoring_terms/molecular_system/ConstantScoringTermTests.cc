@@ -88,7 +88,7 @@ TEST_CASE( "Score two empty molecular systems, loading the score term from the p
 	MasalaPluginAPISP scoreterm;
     std::vector< masala::base::Real > scores;
     REQUIRE_NOTHROW([&](){
-		scoreterm = MasalaPluginModuleManager::get_instance()->create_plugin_object_instance_by_short_name( { "ScoringTerm" }, "ConstantScoreTerm", true );
+		scoreterm = MasalaPluginModuleManager::get_instance()->create_plugin_object_instance_by_short_name( { "ScoringTerm" }, "ConstantScoringTerm", true );
 		MasalaObjectAPIDefinitionCSP api_def( scoreterm->get_api_definition_for_inner_class() );
 		REQUIRE( api_def != nullptr );
 		
