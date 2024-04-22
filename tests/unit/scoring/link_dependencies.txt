@@ -1,0 +1,8 @@
+masala_base
+masala_numeric
+masala_numeric_api
+masala_core_api
+standard_masala_plugins_scoring
+standard_masala_plugins_scoring_api
+standard_masala_plugins_registration
+standard_masala_plugins_registration_api
