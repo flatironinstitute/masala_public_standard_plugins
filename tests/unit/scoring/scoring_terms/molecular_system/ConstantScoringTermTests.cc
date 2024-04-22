@@ -93,7 +93,7 @@ TEST_CASE( "Score two empty molecular systems, loading the score term from the p
 		REQUIRE( api_def != nullptr );
 		
 		setter::MasalaObjectAPISetterDefinition_OneInputCSP< masala::base::Real > setterfxn(
-			api_def->get_oneinput_setter_function< masala::base::Real >( "set_constant_value ")
+			api_def->get_oneinput_setter_function< masala::base::Real >( "set_constant_value")
 		);
 		setterfxn->function( 0.25 );
 
