@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2022 Vikram K. Mulligan
+    Copyright (C) 2024 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -28,6 +28,10 @@
 
 // Core headers:
 #include <core_api/auto_generated_api/molecular_system/MolecularSystem_API.hh>
+#include <core_api/auto_generated_api/chemistry/MolecularGeometry_API.hh>
+
+// Base headers:
+#include <base/types.hh>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -37,7 +41,7 @@ namespace scoring {
 namespace scoring_terms {
 namespace molecular_system {
 
-TEST_CASE( "Instantiate an ConstantScoringTerm", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][instantiation]" ) {
+TEST_CASE( "Instantiate an ConstantScoringTerm", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][instantiation]" ) {
     REQUIRE_NOTHROW([&](){
         scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_APISP const_scoreterm(
             masala::make_shared< scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API >()
@@ -46,19 +50,24 @@ TEST_CASE( "Instantiate an ConstantScoringTerm", "[standard_masala_plugins::auto
     }() );
 }
 
-// TEST_CASE( "Select oxygen atoms in an empty molecular system", "[standard_masala_plugins::auto_generated_api::atom_selectors::ElementTypeAtomSelector_API][selection][apply]" ) {
-//     using namespace selectors_api::auto_generated_api::atom_selectors;
-//     using namespace masala::core_api::auto_generated_api::molecular_system;
-//     using namespace masala::core_api::auto_generated_api::selection::atom_selection;
+TEST_CASE( "Score an empty molecular system", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][score]" ) {
+    using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
+    using namespace masala::core_api::auto_generated_api::molecular_system;
 
-//     AtomSelection_APICSP selection;
-//     REQUIRE_NOTHROW([&](){
-//         ElementTypeAtomSelector_APISP elemsel( masala::make_shared< ElementTypeAtomSelector_API >() );
-//         MolecularSystem_APISP molecular_system( masala::make_shared< MolecularSystem_API >() );
-//         selection = elemsel->generate_atom_selection( *molecular_system );
-//     }() );
-//     REQUIRE( selection->num_selected_atoms() == 0 );
-// }
+    ConstantScoringTerm_APISP const_scoreterm;
+    std::vector< masala::base::Real > scores;
+    REQUIRE_NOTHROW([&](){
+        const_scoreterm = masala::make_shared< ConstantScoringTerm_API >();
+        const_scoreterm->set_constant_value( 0.25 );
+        MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
+        MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
+        std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
+        scores = const_scoreterm->score( molsys_vec, nullptr, nullptr, nullptr );
+    }() );
+    REQUIRE( scores.size() == 2 );
+    CHECK( scores[0] == 0.25 );
+    CHECK( scores[1] == 0.25 );
+}
 
 } // namespace molecular_system
 } // namespace scoring_terms
