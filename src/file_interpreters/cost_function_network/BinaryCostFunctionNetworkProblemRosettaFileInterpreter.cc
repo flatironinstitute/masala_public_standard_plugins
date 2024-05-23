@@ -423,6 +423,26 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 #endif
 }
 
+/// @brief Generate a Rosetta-readable CFN file from the contents of a CostFunctionNetworkSolution object.
+/// @details Generates one file per solution, with (node) (choice) appearing on each line.
+/// @note Triggers disk i/o (through the MasalaDiskAccessManager)!
+std::string
+BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_object(
+	masala::base::MasalaObjectAPICSP const & object
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	std::string solution_as_ascii_string;
+	CostFunctionNetworkOptimizationSolution_APISP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_APISP >( object ) );
+	CHECK_OR_THROW_FOR_CLASS( solution != nullptr, "ascii_file_contents_from_object", 
+		"The returned object could not be interpreted as a CostFunctionNetworkOptimizationSolution_API!"
+	);
+	std::vector< masala::base::Size > vector = solution->solution_at_all_positions();
+	for(int i(0); i<vector.size(); ++i) {
+		solution_as_ascii_string += std::to_string(i) + "\t" + std::to_string( vector[i] ) + "\n";
+	}
+	return solution_as_ascii_string;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
