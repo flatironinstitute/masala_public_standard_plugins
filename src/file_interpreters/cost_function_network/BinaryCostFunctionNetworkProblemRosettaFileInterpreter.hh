@@ -211,6 +211,14 @@ public:
 		std::string const & filename
 	) const;
 
+	/// @brief Generate a Rosetta-readable CFN file from the contents of a CostFunctionNetworkSolution object.
+	/// @details Generates one file per solution, with (node) (choice) appearing on each line.
+	/// @note Triggers disk i/o (through the MasalaDiskAccessManager)!
+	std::string
+	ascii_file_contents_from_object(
+		masala::base::MasalaObjectAPICSP const & object
+	) const override;
+
 protected:
 
 ////////////////////////////////////////////////////////////////////////////////
