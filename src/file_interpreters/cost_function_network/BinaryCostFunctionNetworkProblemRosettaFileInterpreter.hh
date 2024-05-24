@@ -37,6 +37,7 @@
 // Numeric headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.fwd.hh>
 
 // STL headers:
 #include <mutex>
@@ -212,12 +213,11 @@ public:
 	) const;
 
 	/// @brief Generate a Rosetta-readable CFN file from the contents of a CostFunctionNetworkSolution object.
-	/// @details Generates one file per solution, with (node) (choice) appearing on each line.
-	/// @note Triggers disk i/o (through the MasalaDiskAccessManager)!
+	/// @details This override calls ascii_file_contents_from_cfn_solution().
 	std::string
 	ascii_file_contents_from_object(
-		masala::base::MasalaObjectAPICSP const & object
-	) const override;
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP & object
+	) const;
 
 protected:
 
