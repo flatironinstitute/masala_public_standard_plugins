@@ -216,8 +216,8 @@ public:
 	/// @details This override calls ascii_file_contents_from_cfn_solution().
 	std::string
 	ascii_file_contents_from_object(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP & object
-	) const;
+		masala::base::MasalaObjectAPICSP & object
+	) const override;
 
 protected:
 
