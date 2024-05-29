@@ -304,6 +304,20 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_cfn_solution, this, std::placeholders::_1 )
 			)
 		);
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
+				std::string,
+				masala::base::MasalaObjectAPICSP &
+			> >(
+				"ascii_file_contents_from_object", "Generate a Rosetta-readable CFN string from the contents of a CostFunctionNetworkSolution object.  Throws "
+				"if the MasalaObjectAPICSP cannot be interpreted as a CostFunctionNetworkOptimizationSolution_APICSP.",
+				true, false, false, false,
+				"object", "A Masala object shared pointer that can be interpreted as a shared pointer to a container of cost function network optimization solutions.  Throws if the object is of the wrong type.",
+				"file_contents", "A string containing the contents of an ASCII file to write, generated from the input object.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_object, this, std::placeholders::_1 )
+			)
+		);
+
 
 		// Convert nonconst to const:
 		api_description_ = api_description;
