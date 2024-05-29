@@ -295,7 +295,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 		api_description->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
 				std::string,
-				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP &
+				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP const &
 			> >(
 				"ascii_file_contents_from_cfn_solution", "Generate a Rosetta-readable CFN string from the contents of a CostFunctionNetworkSolution object.",
 				true, false, false, false,
@@ -307,10 +307,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 		api_description->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
 				std::string,
-				masala::base::MasalaObjectAPICSP &
+				masala::base::MasalaObjectAPICSP const &
 			> >(
 				"ascii_file_contents_from_object", "Generate a Rosetta-readable CFN string from the contents of a CostFunctionNetworkSolution object.  Throws "
-				"if the MasalaObjectAPICSP cannot be interpreted as a CostFunctionNetworkOptimizationSolution_APICSP.",
+				"if the input object cannot be interpreted as a CostFunctionNetworkOptimizationSolution.",
 				true, false, false, false,
 				"object", "A Masala object shared pointer that can be interpreted as a shared pointer to a container of cost function network optimization solutions.  Throws if the object is of the wrong type.",
 				"file_contents", "A string containing the contents of an ASCII file to write, generated from the input object.",
@@ -376,7 +376,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::set_cfn_optimizer_type(
 /// @brief Read the contents of a Rosetta-format binary cost function network problem
 /// file, and return a cost function network problem object (as a generic MasalaObject pointer).
 /// @details This override calls cfn_problems_from_ascii_file_contents().
-masala::base::MasalaObjectAPISP
+masala::base::MasalaObjectSP
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_from_ascii_file_contents(
 	std::vector< std::string > const & filelines
 ) const {
@@ -454,7 +454,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::cfn_problems_from_ascii_
 /// @details This override calls ascii_file_contents_from_cfn_solution().
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_object(
-	masala::base::MasalaObjectAPICSP & object
+	masala::base::MasalaObjectAPICSP const & object
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	CostFunctionNetworkOptimizationSolution_APICSP solution = std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( object );
@@ -465,7 +465,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from
 /// @details Generates one file per solution, with (node) (choice) appearing on each line.
 std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_cfn_solution(
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP & object
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP const & object
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	std::string solution_as_ascii_string;

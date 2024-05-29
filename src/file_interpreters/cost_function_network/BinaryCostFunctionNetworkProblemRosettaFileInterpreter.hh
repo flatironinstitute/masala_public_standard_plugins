@@ -190,7 +190,7 @@ public:
 	/// @brief Read the contents of a Rosetta-format binary cost function network problem
 	/// file, and return a cost function network problem object (as a generic MasalaObject pointer).
 	/// @details This override calls cfn_problems_from_ascii_file_contents().
-	masala::base::MasalaObjectAPISP
+	masala::base::MasalaObjectSP
 	object_from_ascii_file_contents(
 		std::vector< std::string > const & filelines
 	) const override;
@@ -216,14 +216,14 @@ public:
 	/// @details This override calls ascii_file_contents_from_cfn_solution().
 	std::string
 	ascii_file_contents_from_object(
-		masala::base::MasalaObjectAPICSP & object
+		masala::base::MasalaObjectAPICSP const & object
 	) const override;
 
 	/// @brief Generate a Rosetta-readable CFN file from the contents of a CostFunctionNetworkSolution object.
 	/// @details This override calls ascii_file_contents_from_cfn_solution().
 	std::string
 	ascii_file_contents_from_cfn_solution(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP & object
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP const & object
 	) const;
 
 protected:
