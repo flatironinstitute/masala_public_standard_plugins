@@ -264,21 +264,21 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 		);
 
 		// Work functions:
-		// api_description->add_work_function(
-		// 	masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
-		// 		masala::base::MasalaObjectAPISP,
-		// 		std::vector< std::string > const &
-		// 	> >(
-		// 		"object_from_ascii_file_contents", "Read the contents of a Rosetta-format binary cost "
-		// 		"function network problem file, and return a cost function network problem object (as "
-		// 		"a generic MasalaObject pointer).",
-		// 		true, false, false, false,
-		// 		"file_contents", "The contents of a Rosetta-style binary cost function network optimization problem file (a.k.a. a packing problem file), "
-		// 		"expressed as a vector of strings (one string per file line).",
-		// 		"output_object", "A shared pointer to a container of cost function network optimization problems.",
-		// 		std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_from_ascii_file_contents, this, std::placeholders::_1 )
-		// 	)
-		// );
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
+				masala::base::MasalaObjectAPISP,
+				std::vector< std::string > const &
+			> >(
+				"object_from_ascii_file_contents", "Read the contents of a Rosetta-format binary cost "
+				"function network problem file, and return a cost function network problem object (as "
+				"a generic MasalaObject pointer).",
+				true, false, false, false,
+				"file_contents", "The contents of a Rosetta-style binary cost function network optimization problem file (a.k.a. a packing problem file), "
+				"expressed as a vector of strings (one string per file line).",
+				"output_object", "A shared pointer to a container of cost function network optimization problems.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_from_ascii_file_contents, this, std::placeholders::_1 )
+			)
+		);
 		api_description->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput<
 				masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP,
