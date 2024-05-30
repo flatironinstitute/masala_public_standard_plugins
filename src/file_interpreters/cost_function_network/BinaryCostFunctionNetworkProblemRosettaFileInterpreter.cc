@@ -472,7 +472,10 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from
 	masala::base::MasalaObjectAPICSP const & object
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
-	CostFunctionNetworkOptimizationSolution_APICSP solution = std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( object );
+	CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( object ) );
+	CHECK_OR_THROW_FOR_CLASS( solution != nullptr, "ascii_file_contents_from_object", "An object was passed to "
+		"this function that could not be interpreted as a CostFunctionNetworkOptimizationSolution object."
+	);
 	return ascii_file_contents_from_cfn_solution( solution );
 }
 
@@ -482,13 +485,14 @@ std::string
 BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_cfn_solution(
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APICSP const & object
 ) const {
+	using masala::base::Size;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	std::string solution_as_ascii_string;
 	CHECK_OR_THROW_FOR_CLASS( object != nullptr, "ascii_file_contents_from_object", 
 		"The returned object could not be interpreted as a CostFunctionNetworkOptimizationSolution_API!"
 	);
-	std::vector< long unsigned int > vector = object->solution_at_all_positions();
-	for( long unsigned int i( 0 ); i < vector.size(); ++i ) {
+	std::vector< Size > vector = object->solution_at_all_positions();
+	for( Size i( 0 ); i < vector.size(); ++i ) {
 		solution_as_ascii_string += std::to_string( i ) + "\t" + std::to_string( vector[i] ) + "\n";
 	}
 	return solution_as_ascii_string;
