@@ -190,7 +190,7 @@ public:
 	/// @brief Read the contents of a Rosetta-format binary cost function network problem
 	/// file, and return a cost function network problem object (as a generic MasalaObject pointer).
 	/// @details This override calls cfn_problems_from_ascii_file_contents().
-	masala::base::MasalaObjectSP
+	masala::base::MasalaObjectAPISP
 	object_from_ascii_file_contents(
 		std::vector< std::string > const & filelines
 	) const override;
