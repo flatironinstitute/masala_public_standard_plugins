@@ -332,7 +332,20 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_object, this, std::placeholders::_1 )
 			)
 		);
-
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput<
+				void,
+				masala::base::MasalaObjectAPICSP const &,
+				std::string const &
+			> >(
+				"object_to_file", "Call ascii_file_contents_from_object() in order to write CFN solution string to file. Uses MasalaDiskManager.",
+				true, false, false, false,
+				"object", "The CFN solution to be written to a file.",
+				"filename", "The file that the CFN solution is to be written to.",
+				"void", "The output is written to a file.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_to_file, this, std::placeholders::_1, std::placeholders::_2 )
+			)
+		);
 
 		// Convert nonconst to const:
 		api_description_ = api_description;
