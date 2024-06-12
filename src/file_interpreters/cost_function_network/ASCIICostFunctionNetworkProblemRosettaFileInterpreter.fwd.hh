@@ -30,7 +30,7 @@ namespace standard_masala_plugins {
 namespace file_interpreters {
 namespace cost_function_network {
 
-	class BinaryCostFunctionNetworkProblemRosettaFileInterpreter;
+	class ASCIICostFunctionNetworkProblemRosettaFileInterpreter;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.

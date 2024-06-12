@@ -50,7 +50,7 @@ namespace cost_function_network {
 
 /// @brief A file interpreter for reading and writing ASCII cost function network
 /// optimization problems.
-/// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
+/// @author Tristan Zaborniak (tzaborniak@flatironinstitute.org).
 class ASCIICostFunctionNetworkProblemRosettaFileInterpreter : public masala::base::managers::file_interpreter::MasalaFileInterpreter {
 
 	typedef masala::base::Size Size;
@@ -247,101 +247,6 @@ private:
 	/// cfn_optimizer_class_, depending on which is specified.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP
 	generate_cfn_problem() const;
-
-	/// @brief Interpret a string of binary information encoded so that 3 bytes of binary occupy 4 bytes of ASCII text
-	/// as a vector of integers.
-	/// @param[in] line The line of ASCII text to decode.
-	/// @param[in] vec_length The number of entries in the vector
-	/// @param[in] entry_bytesize The number of bytes used to represent each unsigned integer.
-	/// @param[out] choices_by_variable_node_expected The output vector.
-	void
-	decode_choices_per_variable_node(
-		std::string const & line,
-		masala::base::Size const vec_length,
-		masala::base::Size const entry_bytesize, 
-		std::vector< masala::base::Size > & choices_by_variable_node_expected
-	) const;
-
-	/// @brief Given a line encoding onebody penalties in ASCII text, set up the onebody penalties in a cost function
-	/// network optimization problem object.
-	/// @param[in] line The ASCII line we're decoding.
-	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
-	/// @param[in] onebody_penalty_bytesize_expected The number of bytes used to encode each onebody penalty.
-	/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
-	/// information was not provided in the input file.
-	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
-	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
-	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
-	void
-	decode_onebody_penalties(
-		std::string const & line,
-		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
-		masala::base::Size const onebody_penalty_bytesize_expected,
-		std::vector< masala::base::Size > const & global_node_indices,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
-	) const;
-
-	/// @brief Convert a binary-as-ASCII-text string to two-body penalties, and load them into the precomputed cost function network problem description.
-	/// @param[in] line The ASCII line we're decoding.
-	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
-	/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
-	/// @param[in] twobody_penalty_index_bytesize_expected The number of bytes that a twobody penalty index (node index or choice index) takes up.  Must be 2, 4, or sizeof(Size).
-	/// @param[in] twobody_penalty_bytesize_expected The number of bytes that a twobody penalty takes up.  Must be sizeof(float) or sizeof(Real).
-	/// @param[in] global_node_indices The global index of each variable node.  May be an empty vector if this
-	/// information was not provided in the input file.
-	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
-	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
-	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
-	void
-	decode_twobody_penalties(
-		std::string const & line,
-		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
-		masala::base::Size const n_twobody_penalties_expected,
-		masala::base::Size twobody_penalty_index_bytesize_expected,
-		masala::base::Size twobody_penalty_bytesize_expected,
-		std::vector< masala::base::Size > const & global_node_indices,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
-	) const;
-
-	/// @brief Template function for decoding twobody penalties from a binary-as-ASCII-text string.  This is templated for different types of indices
-	/// (unsigned integers) and penalties (floating point numbers).
-	/// @tparam INDEXTYPE The data type for twobody penalty indices.  The file format actually stores global indices, which this function internally converts
-	/// to variable node index and choice index.  This compilation unit will support 16, 32, or sizeof(Size)*CHAR_BIT bit indices.
-	/// @tparam VALTYPE The data type for twobody penalties.  This compilation unit will support sizeof(float)*CHAR_BIT or sizeof(Real)*CHAR_BIT sized values.
-	/// @param[in] line The ASCII line we're decoding.
-	/// @param[in] choices_by_variable_node_expected The number of onebody penalties by variable node index.
-	/// @param[in] n_twobody_penalties_expected The number of pairs of twobody penalties that we expect to find.
-	/// @param[in] node_indices The global indices of the variable nodes.  Must be the same size as choices_by_variable_node_expected.  If
-	/// global node indices were not provided in the input file, this vector should be consecutively numbered indices starting from zero.
-	/// @param[inout] problem_api The cost function network optimization problem in which we're storing penalties.
-	/// @note This function will throw if the CostFunctionNetworkOptimizationProblem isn't a
-	/// PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.
-	template< typename INDEXTYPE, typename VALTYPE >
-	void
-	inner_decode_twobody_penalties(
-		std::string const & line,
-		std::vector< masala::base::Size > const & choices_by_variable_node_expected,
-		masala::base::Size const n_twobody_penalties_expected,
-		std::vector< masala::base::Size > const & node_indices,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API & problem_api
-	) const;
-
-	/// @brief Given a global choice index and the number of choices per variable node, get the index of the variable node and local choice index.
-	/// @param[in] global_index The global choice index.  All choices are numbered consecutively from 0.
-	/// @param[in] n_choices_by_variable_node The number of choices at each variable index.
-	/// @return A pair of local node index and local choice index.
-	std::pair< masala::base::Size, masala::base::Size >
-	node_and_choice_from_global_index(
-		masala::base::Size const global_index,
-		std::vector< masala::base::Size > const & n_choices_by_variable_node
-	) const;
-
-	/// @brief Given a line consisting of a series of integer values, convert this to a vector of unsigned ntegers.
-	/// @returns A vector of integers, or, if the line could not be parsed as such, an empty vector.
-	std::vector< masala::base::Size >
-	parse_global_node_indices(
-		std::string const & line
-	) const;
 
 	/// @brief Given a set of lines starting with [BEGIN_BINARY_GRAPH_SUMMARY] and ending with [END_BINARY_GRAPH_SUMMARY],
 	/// convert these to a cost function network problem definition.
