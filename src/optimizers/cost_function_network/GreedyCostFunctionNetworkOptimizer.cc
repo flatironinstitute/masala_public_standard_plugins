@@ -303,7 +303,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 		CostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem(iproblem) ) );
 		CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "run_cost_function_network_optimizer", "The "
 			+ class_name() + " optimizer is only compatible with CostFunctionNetworkOptimizationProblem "
-			"objects.  A problem of type " + problems.problem(iproblem)->get_inner_object()->class_name()
+			"objects.  A problem of type " + problems.problem(iproblem)->inner_class_name()
 			+ " was passed to this function!"
 		);
 
