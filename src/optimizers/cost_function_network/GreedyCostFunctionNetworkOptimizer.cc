@@ -279,12 +279,99 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 ) const {
     using namespace masala::base::managers::threads;
+	using namespace masala::base::managers::random;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using masala::base::Size;
 
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 
-	TODO TODO TODO:
+	// Get the random number generator:
+	MasalaRandomNumberGeneratorHandle rg( MasalaRandomNumberGenerator::get_instance() );
+
+	MasalaThreadedWorkRequest work_request;
+
+	// Starting states: outer vector is by problem, middle vector is a bunch of starting states for the
+	// nth problem, inner vector is a single starting state (one choice index per variable node).
+	std::vector< std::vector< std::vector< Size > > > starting_states_by_problem;
+
+	// Storage for solutions:
+	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_by_problem;
+	solutions_by_problem.reserve( problems.n_problems() );
+
+	for( Size iproblem(0); iproblem < problems.n_problems(); ++iproblem ) {
+		// Check the problem:
+		CostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem(iproblem) ) );
+		CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "run_cost_function_network_optimizer", "The "
+			+ class_name() + " optimizer is only compatible with CostFunctionNetworkOptimizationProblem "
+			"objects.  A problem of type " + problems.problem(iproblem)->get_inner_object()->class_name()
+			+ " was passed to this function!"
+		);
+
+		// Create the container for the solution:
+		masala::numeric_api::auto_generated_api::optimization::OptimizationSolutions_APISP new_solutions_container_uncast(
+            problems.problem(iproblem)->create_solutions_container()
+        );
+        CostFunctionNetworkOptimizationSolutions_APISP new_solutions_container(
+            std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >(
+                new_solutions_container_uncast
+            )
+        );
+        CHECK_OR_THROW_FOR_CLASS( new_solutions_container != nullptr, "run_cost_function_network_optimizer", "Problem "
+            + std::to_string(iproblem) + " created a " + new_solutions_container_uncast->inner_class_name() + " container, but this function "
+            "only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
+            "this ought not to happen."
+        );
+        solutions_by_problem.push_back( new_solutions_container );
+
+		// If this problem has starting states, use those:
+		CostFunctionNetworkOptimizationRefinementProblem_APICSP problem_cast(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationRefinementProblem_API const >( problem )
+		);
+		if( problem_cast != nullptr ) {
+			starting_states_by_problem.push_back( problem_cast->starting_states() );
+			// Size const n_starting_states( problem_cast->starting_states.size() );
+			// for( Size j(0); j<n_starting_states; ++j ) {
+			// 	solutions_by_problem[iproblem]->add_optimization_solution(
+			// 		masala::make_shared< CostFunctionNetworkOptimizationSolution_API >()
+			// 	);
+			// }
+		} else {
+			// Otherwise, use random starting states:
+			std::vector< std::vector< Size > > random_starting_states( n_starting_states_ );
+			for( masala::base::Size i(0); i<n_starting_states_; ++i ) {
+				random_starting_states[i] = generate_random_starting_state( problem, rg );
+			}
+			starting_states_by_problem.push_back( random_starting_states );
+		}
+
+		// Make a vector of work to do:
+		for( std::vector< std::vector< Size > > const & starting_states : starting_states_by_problem ) {
+			for( std::vector< Size > const & starting_state : starting_states ) {
+				work_request.add_job(
+					std::bind(
+						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job(),
+						this,
+						starting_state,
+						problem,
+						solutions_by_problem[iproblem]
+					)
+				);
+			}
+		}
+	}
+
+	masala::base::managers::threads::MasalaThreadedWorkExecutionSummary const thread_summary(
+		MasalaThreadManager::get_instance()->do_work_in_threads( work_request )
+	);
+    thread_summary.write_summary_to_tracer();
+
+    // Nonconst to const requires a silly extra step:
+    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( solutions_by_problem.size() );
+    for( Size i(0); i<solutions_by_problem.size(); ++i ) {
+        const_solutions_by_problem[i] = solutions_by_problem[i];
+    }
+
+    return const_solutions_by_problem;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
