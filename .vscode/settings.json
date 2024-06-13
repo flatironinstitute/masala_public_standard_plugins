@@ -104,6 +104,7 @@
 		"mprealsupport": "cpp",
 		"__verbose_abort": "cpp",
 		"charconv": "cpp",
-		"format": "cpp"
+		"format": "cpp",
+		"execution": "cpp"
 	}
 }
