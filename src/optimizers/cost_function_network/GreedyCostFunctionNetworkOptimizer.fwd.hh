@@ -17,12 +17,8 @@
 */
 
 /// @file src/optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.fwd.hh
-/// @brief Forward declarations for a CostFunctionNetworkOptimizer that solves a cost function network problem
-/// using Monte Carlo methods.
-/// @details This performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to
-/// pick a node at random and change its setting at random, compute the change in overall energy or score, and
-/// accept or reject the move based on the difference in energy and the Metropolis criterion.
-/// @note If the annealing schedule used ramps temperature, this does simulated annealing.
+/// @brief Forward declarations for a CostFunctionNetworkOptimizer that refines a cost function network
+/// optimization problem by greedy descent.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef StandardMaslaPlugins_src_optimizers_cost_function_network_GreedyCostFunctionNetworkOptimizer_fwd_hh
