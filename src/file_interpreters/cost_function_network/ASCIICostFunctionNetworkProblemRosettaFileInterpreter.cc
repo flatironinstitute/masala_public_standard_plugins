@@ -721,7 +721,7 @@ ASCIICostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_fi
                 problem->set_twobody_penalty(
                     std::pair( std::stoul( parts[0] ), std::stoul( parts[2] ) ), 
                     std::pair( std::stoul( parts[1] ), std::stoul( parts[3] ) ), 
-                    std::stof( parts[5] ) 
+                    std::stof( parts[4] ) 
                 );
         }
     }
