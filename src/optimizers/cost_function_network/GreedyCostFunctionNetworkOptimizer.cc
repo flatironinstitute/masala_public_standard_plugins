@@ -288,7 +288,13 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	// Get the random number generator:
 	MasalaRandomNumberGeneratorHandle rg( MasalaRandomNumberGenerator::get_instance() );
 
+	// Create the multithreaded work request:
 	MasalaThreadedWorkRequest work_request;
+	if( cpu_threads_to_request_ > 0 ) {
+		work_request.set_n_threads_to_request( cpu_threads_to_request_ );
+	} else {
+		work_request.set_request_all_threads();
+	}
 
 	// Starting states: outer vector is by problem, middle vector is a bunch of starting states for the
 	// nth problem, inner vector is a single starting state (one choice index per variable node).
@@ -337,7 +343,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 			// }
 		} else {
 			// Otherwise, use random starting states:
-			std::vector< std::vector< Size > > random_starting_states( n_starting_states_ );
+			std::vector< std::vector< Size > > random_starting_states( n_random_starting_states_ );
 			for( masala::base::Size i(0); i<n_starting_states_; ++i ) {
 				random_starting_states[i] = generate_random_starting_state( problem, rg );
 			}
