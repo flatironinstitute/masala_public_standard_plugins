@@ -224,21 +224,6 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::has_non_pairwise_scor
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Reset all data in this object.
-void
-PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset() {
-    std::lock_guard< std::mutex > lock( problem_mutex() );
-    protected_reset();
-}
-
-/// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
-/// and making the object read-only.
-void
-PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalize() {
-    std::lock_guard< std::mutex > lock( problem_mutex() );
-    protected_finalize();
-}
-
 /// @brief Add onebody penalty for a choice at a node.
 /// @details If the node has not yet been listed, it's added to the n_choices_by_node_index_ map.
 /// If the number of choices at the node is currently less than the node index, the number of

@@ -178,15 +178,6 @@ public:
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Reset all data in this object.
-	void
-	reset() override;
-
-	/// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
-	/// and making the object read-only.
-	void
-	finalize() override;
-
 	/// @brief Add onebody penalty for a choice at a node.
 	/// @details If the node has not yet been listed, it's added to the n_choices_by_node_index_ map.
 	/// If the number of choices at the node is currently less than the node index, the number of
