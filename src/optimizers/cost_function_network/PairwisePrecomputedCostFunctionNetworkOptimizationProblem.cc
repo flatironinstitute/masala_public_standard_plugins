@@ -501,9 +501,27 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
                 "complete and the object locked to now be read-only?",
                 "finalized", "True if the object has been finalized, false otherwise.",
                 false, false,
-                std::bind( &OptimizationProblem::finalized, this )
+                std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalized, this )
             )
         );
+		api_def->add_getter(
+			masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"has_candidate_starting_solutions", "Does this cost function network optimization problem have "
+				"one or more candidate solutions defined?  These can be used as starting points for some optimizers, "
+				"or can be ignored.",
+				"has_candidate_starting_solutions", "True if there is at least one candidate starting solution, false otherwise.",
+				false, false, std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::has_candidate_starting_solutions, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::vector< masala::base::Size > > const & > >(
+				"candidate_starting_solutions", "Returns candidate starting solutions for this cost functoin network optimization problem.  "
+				"These can be used as starting points for some optimizers, or can be ignored.",
+				"candidate_starting_solutions", "A vector of vectors of candidate starting solutions for this problem, where the length of "
+				"each vector matches the number of variable positions and the entries are choice indices.",
+				false, false, std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::candidate_starting_solutions, this )
+			)
+		);
 
         // Setters:
         api_def->add_setter(
