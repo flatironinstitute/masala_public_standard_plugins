@@ -548,6 +548,16 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
             )
         );
 
+		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_OneInput< std::vector< masala::base::Size > const & > >(
+				"add_candidate_solution", "Add a candidate solution.  This may or may not be used as a starting point by a given solver.  This function "
+				"locks the problem mutex.  It throws if the problem has already been finalized.",
+				"candidate_solution_in", "The input candidate solution.  This should be a vector of zero-based choice indices, with one "
+				"index for each variable node in the problem.", false, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_candidate_solution, this, std::placeholders::_1 )
+			)
+		);
+
         // Work functions
         work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< Real, std::vector< Size > const & > compute_absolute_score_fxn(
             masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< Real, std::vector< Size > const & > >(
