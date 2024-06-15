@@ -330,11 +330,8 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
         solutions_by_problem.push_back( new_solutions_container );
 
 		// If this problem has starting states, use those:
-		CostFunctionNetworkOptimizationRefinementProblem_APICSP problem_cast(
-			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationRefinementProblem_API const >( problem )
-		);
-		if( problem_cast != nullptr ) {
-			starting_states_by_problem.push_back( problem_cast->starting_states() );
+		if( problem->has_candidate_starting_solutions() ) {
+			starting_states_by_problem.push_back( problem->candidate_starting_solutions() );
 			// Size const n_starting_states( problem_cast->starting_states.size() );
 			// for( Size j(0); j<n_starting_states; ++j ) {
 			// 	solutions_by_problem[iproblem]->add_optimization_solution(
