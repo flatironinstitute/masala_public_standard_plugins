@@ -173,6 +173,14 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 
+	/// @brief Generate a bunch of random starting vectors.
+	std::vector< std::vector< masala::base::Size > >
+	generate_random_starting_states(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
+		masala::base::managers::random::MasalaRandomNumberGeneratorHandle const rg,
+		masala::base::Size const n_random_starting_states_
+	) const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

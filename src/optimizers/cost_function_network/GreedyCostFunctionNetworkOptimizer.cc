@@ -340,10 +340,9 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 			// }
 		} else {
 			// Otherwise, use random starting states:
-			std::vector< std::vector< Size > > random_starting_states( n_random_starting_states_ );
-			for( masala::base::Size i(0); i<n_starting_states_; ++i ) {
-				random_starting_states[i] = generate_random_starting_state( problem, rg );
-			}
+			std::vector< std::vector< Size > > const random_starting_states(
+				generate_random_starting_states( *problem, rg, n_random_starting_states_ )
+			);
 			starting_states_by_problem.push_back( random_starting_states );
 		}
 
@@ -380,6 +379,27 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Generate a bunch of random starting vectors.
+std::vector< std::vector< masala::base::Size > >
+GreedyCostFunctionNetworkOptimizer::generate_random_starting_states(
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem,
+	masala::base::managers::random::MasalaRandomNumberGeneratorHandle const rg,
+	masala::base::Size const n_random_starting_states_
+) const {
+	using masala::base::Size;
+	Size const n_varnodes( problem.total_variable_nodes() );
+	auto const n_choices_by_varnode( problem.n_choices_at_variable_nodes() );
+
+	std::vector< std::vector< Size > > outvec( n_random_starting_states_, std::vector< masala::base::Size >( problem.total_variable_nodes() ) );
+	for( Size i(0); i<n_random_starting_states_; ++i ) {
+		for( Size j(0); j<n_varnodes; ++j ) {
+			outvec[i][j] = rg->uniform_size_distribution( 0, n_choices_by_varnode[j].second-1 );
+		}
+	}
+
+	return outvec;
+}
 
 
 } // namespace cost_function_network
