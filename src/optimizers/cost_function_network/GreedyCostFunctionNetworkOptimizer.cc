@@ -413,7 +413,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 				"run_cost_function_network_optimizer", "Expected non-null pointer to a solution!"
 			);
 			solutions_containers_by_problem[iproblem]->add_optimization_solution(
-				solutions_by_problem_and_replicate[iproblem][jreplicate]
+				solutions_by_problem_and_replicate[iproblem][jreplicate] // TODO FIX THIS --> use the merge_in_lowest_scoring_solutions() function instead, to properly handle duplicate solutions.
 			);
 		}
 	}
