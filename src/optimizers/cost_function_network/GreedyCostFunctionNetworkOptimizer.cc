@@ -382,7 +382,6 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 
 		// Make a vector of work to do:
 		for( std::vector< std::vector< Size > > const & starting_states : starting_states_by_problem ) {
-			Size starting_state_index(0);
 			for( std::vector< Size > const & starting_state : starting_states ) {
 				work_request.add_job(
 					std::bind(
@@ -394,7 +393,6 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						std::ref(*solutions_containers_by_problem[iproblem])
 					)
 				);
-				++starting_state_index;
 			}
 		}
 	}
