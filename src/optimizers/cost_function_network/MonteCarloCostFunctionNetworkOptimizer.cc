@@ -436,6 +436,31 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
             )
         );
 
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "do_greedy_refinement", "Get whether we do greedy optimization at the end on each solution "
+				"found by the Monte Carlo search.  False by default.",
+                "do_greedy_refinement", "True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"Get whether we keep both the original solutions and the ones found by greedy refinement if doing "
+				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
+				"scores).  True by default.  Not used if do_greedy_refinement is false.",
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions,
+					this
+				)
+            )
+        );
+
         // Work functions:
         api_description->add_work_function(
             masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API & > > (
@@ -685,6 +710,21 @@ masala::base::Real
 MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return multimutation_probability_of_one_mutation_;
+}
+
+/// @brief Get whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+/// False by default.
+bool
+MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
+	return do_greedy_refinement_;
+}
+
+/// @brief Get whether we keep both the original solutions and the ones found by greedy refinement if doing
+/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+bool
+MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions() const {
+	return keep_original_mc_solutions_alongside_greedy_refinement_solutions_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
