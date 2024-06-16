@@ -391,7 +391,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads,
 						this,
 						std::cref(starting_state),
-						std::cref(problem),
+						problem,
 						std::ref(solutions_by_problem_and_replicate[iproblem][starting_state_index])
 					)
 				);
@@ -457,7 +457,7 @@ GreedyCostFunctionNetworkOptimizer::generate_random_starting_states(
 void
 GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	std::vector< masala::base::Size > const & starting_state,
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem_ptr,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem_ptr,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP & solution_ptr
 ) const {
 	using masala::base::Size;
@@ -488,7 +488,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			for( Size j(0); j<nchoice; ++j ) {
 				candidate_state[i] = j;
 				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state );
-				write_to_tracer( "[" + masala::base::utility::container::container_to_string( best_candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
+				write_to_tracer( "[" + masala::base::utility::container::container_to_string( candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
 
 				if( candidate_score < best_candidate_score ) {
 					best_candidate_score = candidate_score;

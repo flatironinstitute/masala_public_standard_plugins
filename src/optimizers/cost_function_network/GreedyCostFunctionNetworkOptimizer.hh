@@ -195,7 +195,7 @@ private:
 	void
 	do_one_greedy_optimization_job_in_threads(
 		std::vector< masala::base::Size > const & starting_state,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem_ptr,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem_ptr,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP & solution_ptr
 	) const;
 
