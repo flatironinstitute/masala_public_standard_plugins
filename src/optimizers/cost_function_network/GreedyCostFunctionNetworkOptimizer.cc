@@ -465,7 +465,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	Real candidate_score( current_score ), best_candidate_score( current_score );
 	
 	do {
-		write_to_tracer( "********************" ); // DELETE ME.
+		//write_to_tracer( "********************" ); // DELETE ME.
 		current_state = best_candidate_state;
 		current_score = best_candidate_score;
 		for( Size i(0); i<n_var_pos; ++i ) {
@@ -475,12 +475,12 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			for( Size j(0); j<nchoice; ++j ) {
 				candidate_state[i] = j;
 				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state );
-				write_to_tracer( "[" + masala::base::utility::container::container_to_string( candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
+				//write_to_tracer( "[" + masala::base::utility::container::container_to_string( candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
 
 				if( candidate_score < best_candidate_score ) {
 					best_candidate_score = candidate_score;
 					best_candidate_state = candidate_state;
-					write_to_tracer( "Best this round." ); // DELETE ME.
+					//write_to_tracer( "Best this round." ); // DELETE ME.
 				}
 			}
 		}
