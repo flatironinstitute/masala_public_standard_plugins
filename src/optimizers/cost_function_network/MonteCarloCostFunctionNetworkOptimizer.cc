@@ -864,6 +864,12 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_request ) );
     threading_summary.write_summary_to_tracer();
 
+	// Do the greedy refinement, if we're doing that.
+	if( do_greedy_refinement_ ) {
+		write_to_tracer( "Carrying out greedy refinement of all solutions found." );
+		carry_out_greedy_refinement( problems, solutions_by_problem );
+	}
+
     // Nonconst to const requires a silly extra step:
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( nproblems );
     for( Size i(0); i<nproblems; ++i ) {
