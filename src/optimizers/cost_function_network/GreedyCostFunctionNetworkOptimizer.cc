@@ -43,7 +43,6 @@
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
-#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -389,10 +388,10 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 			for( std::vector< Size > const & starting_state : starting_states ) {
 				work_request.add_job(
 					std::bind(
-						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job(),
+						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads,
 						this,
 						std::cref(starting_state),
-						std::cref(problem),
+						std::cref(*problem),
 						std::ref(solutions_by_problem_and_replicate[iproblem][starting_state_index])
 					)
 				);
@@ -451,6 +450,58 @@ GreedyCostFunctionNetworkOptimizer::generate_random_starting_states(
 	}
 
 	return outvec;
+}
+
+/// @brief Do a single greedy optimizaton job, given a starting state.
+/// @details This function runs in threads.  It requires no mutex since all storage is pre-allocated and all writes are to different vector entries.
+void
+GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
+	std::vector< masala::base::Size > const & starting_state,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem_ptr,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP & solution_ptr
+) const {
+	using masala::base::Size;
+	using masala::base::Real;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	CHECK_OR_THROW_FOR_CLASS( problem_ptr != nullptr, "do_one_greedy_optimization_job_in_threads", "A null pointer for the problem was passed to this function." );
+	CostFunctionNetworkOptimizationProblem_API const & problem( *problem_ptr );
+
+	std::vector< std::pair< Size, Size > > const nchoices_at_varnodes( problem.n_choices_at_variable_nodes() );
+	Size const n_var_pos( nchoices_at_varnodes.size() );
+
+	// Current state: state at the start of this round.
+	// Candidate state: states considered this round.  Iterates through all possible single-point changes.
+	// Best candidate state: lowest-scoring state considered so far this round.
+	std::vector< Size > current_state( starting_state ), candidate_state( starting_state ), best_candidate_state( starting_state );
+	Real current_score( problem.compute_non_approximate_absolute_score( current_state ) );
+	Real candidate_score( current_score ), best_candidate_score( current_score );
+	
+	do {
+		write_to_tracer( "********************" ); // DELETE ME.
+		current_state = best_candidate_state;
+		current_score = best_candidate_score;
+		for( Size i(0); i<n_var_pos; ++i ) {
+			Size const nchoice( nchoices_at_varnodes[i].second );
+			candidate_state = current_state;
+			candidate_score = current_score;
+			for( Size j(0); j<nchoice; ++j ) {
+				candidate_state[i] = j;
+				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state );
+				write_to_tracer( "[" + masala::base::utility::container::container_to_string( best_candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
+
+				if( candidate_score < best_candidate_score ) {
+					best_candidate_score = candidate_score;
+					best_candidate_state = candidate_state;
+					write_to_tracer( "Best this round." ); // DELETE ME.
+				}
+			}
+		}
+	} while( best_candidate_state != current_state );
+
+	solution_ptr = masala::make_shared< CostFunctionNetworkOptimizationSolution_API >(
+		problem_ptr, best_candidate_state, best_candidate_score, best_candidate_score, best_candidate_score
+	);
 }
 
 

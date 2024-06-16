@@ -189,6 +189,15 @@ private:
 		masala::base::Size const n_random_starting_states_
 	) const;
 
+	/// @brief Do a single greedy optimizaton job, given a starting state.
+	/// @details This function runs in threads.  It requires no mutex since all storage is pre-allocated and all writes are to different vector entries.
+	void
+	do_one_greedy_optimization_job_in_threads(
+		std::vector< masala::base::Size > const & starting_state,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem_ptr,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP & solution_ptr
+	) const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
