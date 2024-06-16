@@ -391,7 +391,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads,
 						this,
 						std::cref(starting_state),
-						std::cref(*problem),
+						std::cref(problem),
 						std::ref(solutions_by_problem_and_replicate[iproblem][starting_state_index])
 					)
 				);

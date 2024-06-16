@@ -29,6 +29,7 @@
 
 // Parent header:
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.fwd.hh>
 
 // Numeric API headers:
 #include <base/types.hh>
