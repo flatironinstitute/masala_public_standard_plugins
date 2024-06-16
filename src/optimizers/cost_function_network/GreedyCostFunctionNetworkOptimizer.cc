@@ -341,7 +341,6 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	// Storage for solutions:
 	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_containers_by_problem;
 	solutions_containers_by_problem.reserve( problems.n_problems() );
-	std::vector< std::vector< CostFunctionNetworkOptimizationSolution_APISP > > solutions_by_problem_and_replicate( problems.n_problems() );
 
 	for( Size iproblem(0); iproblem < problems.n_problems(); ++iproblem ) {
 		// Check the problem:
@@ -380,7 +379,6 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 			);
 			n_replicates = n_random_starting_states_;
 		}
-		solutions_by_problem_and_replicate[iproblem].resize( n_replicates, nullptr );
 
 		// Make a vector of work to do:
 		for( std::vector< std::vector< Size > > const & starting_states : starting_states_by_problem ) {
@@ -391,8 +389,9 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads,
 						this,
 						std::cref(starting_state),
+						n_replicates,
 						problem,
-						std::ref(solutions_by_problem_and_replicate[iproblem][starting_state_index])
+						std::ref(*solutions_containers_by_problem[iproblem])
 					)
 				);
 				++starting_state_index;
@@ -404,19 +403,6 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 		MasalaThreadManager::get_instance()->do_work_in_threads( work_request )
 	);
     thread_summary.write_summary_to_tracer();
-
-	// Put the the individual solution objects in their containers:
-	for( Size iproblem(0); iproblem < problems.n_problems(); ++iproblem ) {
-		for( Size jreplicate(0); jreplicate < solutions_by_problem_and_replicate[iproblem].size(); ++jreplicate ) {
-			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
-				solutions_by_problem_and_replicate[iproblem][jreplicate] != nullptr,
-				"run_cost_function_network_optimizer", "Expected non-null pointer to a solution!"
-			);
-			solutions_containers_by_problem[iproblem]->add_optimization_solution(
-				solutions_by_problem_and_replicate[iproblem][jreplicate] // TODO FIX THIS --> use the merge_in_lowest_scoring_solutions() function instead, to properly handle duplicate solutions.
-			);
-		}
-	}
 
     // Nonconst to const requires a silly extra step:
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_containers_by_problem( solutions_containers_by_problem.size() );
@@ -457,8 +443,9 @@ GreedyCostFunctionNetworkOptimizer::generate_random_starting_states(
 void
 GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	std::vector< masala::base::Size > const & starting_state,
+	masala::base::Size const n_replicates,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem_ptr,
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP & solution_ptr
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -499,8 +486,12 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 		}
 	} while( best_candidate_state != current_state );
 
-	solution_ptr = masala::make_shared< CostFunctionNetworkOptimizationSolution_API >(
-		problem_ptr, best_candidate_state, best_candidate_score, best_candidate_score, best_candidate_score
+	solutions.merge_in_lowest_scoring_solutions(
+		std::vector< std::tuple< std::vector< unsigned long int >, double, unsigned long int > >{
+			{ best_candidate_state, best_candidate_score, 1 }
+		},
+		n_replicates,
+		problem_ptr
 	);
 }
 
