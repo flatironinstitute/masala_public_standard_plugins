@@ -372,6 +372,30 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation, this, std::placeholders::_1 )
             )
         );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool const > >(
+                "set_do_greedy_refinement", "Set whether we do greedy optimization at the end on each solution "
+				"found by the Monte Carlo search.  False by default.",
+                "do_greedy_refinement_in", "True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement, this, std::placeholders::_1 )
+            )
+        );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool const > >(
+                "set_keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"Set whether we keep both the original solutions and the ones found by greedy refinement if doing "
+				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
+				"scores).  True by default.  Not used if do_greedy_refinement is false.",
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions_in",
+				"True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions,
+					this, std::placeholders::_1
+				)
+            )
+        );
 
 		// Getters:
 		api_description->add_getter(
@@ -435,7 +459,6 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation, this )
             )
         );
-
         api_description->add_getter(
             masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
                 "do_greedy_refinement", "Get whether we do greedy optimization at the end on each solution "
@@ -639,6 +662,27 @@ MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mut
     multimutation_probability_of_one_mutation_ = probability_in;
 }
 
+/// @brief Set whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+/// False by default.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement(
+	bool const do_greedy_refinement_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	do_greedy_refinement_ = do_greedy_refinement_in;
+}
+
+/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
+/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions(
+	bool const keep_original_solutions_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	keep_original_mc_solutions_alongside_greedy_refinement_solutions_ = keep_original_solutions_in;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -716,6 +760,7 @@ MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutatio
 /// False by default.
 bool
 MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	return do_greedy_refinement_;
 }
 
@@ -724,6 +769,7 @@ MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
 /// scores).  True by default.  Not used if do_greedy_refinement_ is false.
 bool
 MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	return keep_original_mc_solutions_alongside_greedy_refinement_solutions_;
 }
 

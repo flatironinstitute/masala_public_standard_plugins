@@ -214,6 +214,15 @@ public:
 		masala::base::Real const probability_in
 	);
 
+	/// @brief Set whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	void set_do_greedy_refinement( bool const do_greedy_refinement_in );
+
+	/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
+	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+	void set_keep_original_mc_solutions_alongside_greedy_refinement_solutions( bool const keep_original_solutions_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
