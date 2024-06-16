@@ -867,7 +867,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	// Do the greedy refinement, if we're doing that.
 	if( do_greedy_refinement_ ) {
 		write_to_tracer( "Carrying out greedy refinement of all solutions found." );
-		carry_out_greedy_refinement( problems, solutions_by_problem );
+		carry_out_greedy_refinement( problems, solutions_by_problem, keep_original_mc_solutions_alongside_greedy_refinement_solutions_ );
 	}
 
     // Nonconst to const requires a silly extra step:
