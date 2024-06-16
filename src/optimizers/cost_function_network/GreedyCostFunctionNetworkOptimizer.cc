@@ -340,8 +340,9 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	std::vector< std::vector< std::vector< Size > > > starting_states_by_problem;
 
 	// Storage for solutions:
-	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_by_problem;
-	solutions_by_problem.reserve( problems.n_problems() );
+	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_containers_by_problem;
+	solutions_containers_by_problem.reserve( problems.n_problems() );
+	std::vector< std::vector< CostFunctionNetworkOptimizationSolution_APISP > > solutions_by_problem_and_replicate( problems.n_problems() );
 
 	for( Size iproblem(0); iproblem < problems.n_problems(); ++iproblem ) {
 		// Check the problem:
@@ -366,37 +367,36 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
             "only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
             "this ought not to happen."
         );
-        solutions_by_problem.push_back( new_solutions_container );
+        solutions_containers_by_problem.push_back( new_solutions_container );
 
 		// If this problem has starting states, use those:
+		Size n_replicates;
 		if( problem->has_candidate_starting_solutions() ) {
 			starting_states_by_problem.push_back( problem->candidate_starting_solutions() );
-			// Size const n_starting_states( problem_cast->starting_states.size() );
-			// for( Size j(0); j<n_starting_states; ++j ) {
-			// 	solutions_by_problem[iproblem]->add_optimization_solution(
-			// 		masala::make_shared< CostFunctionNetworkOptimizationSolution_API >()
-			// 	);
-			// }
+			n_replicates = problem->candidate_starting_solutions().size();
 		} else {
 			// Otherwise, use random starting states:
-			std::vector< std::vector< Size > > const random_starting_states(
+			starting_states_by_problem.push_back(
 				generate_random_starting_states( *problem, rg, n_random_starting_states_ )
 			);
-			starting_states_by_problem.push_back( random_starting_states );
+			n_replicates = n_random_starting_states_;
 		}
+		solutions_by_problem_and_replicate[iproblem].resize( n_replicates, nullptr );
 
 		// Make a vector of work to do:
 		for( std::vector< std::vector< Size > > const & starting_states : starting_states_by_problem ) {
+			Size starting_state_index(0);
 			for( std::vector< Size > const & starting_state : starting_states ) {
 				work_request.add_job(
 					std::bind(
 						&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job(),
 						this,
-						starting_state,
-						problem,
-						solutions_by_problem[iproblem]
+						std::cref(starting_state),
+						std::cref(problem),
+						std::ref(solutions_by_problem_and_replicate[iproblem][starting_state_index])
 					)
 				);
+				++starting_state_index;
 			}
 		}
 	}
@@ -406,13 +406,26 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	);
     thread_summary.write_summary_to_tracer();
 
+	// Put the the individual solution objects in their containers:
+	for( Size iproblem(0); iproblem < problems.n_problems(); ++iproblem ) {
+		for( Size jreplicate(0); jreplicate < solutions_by_problem_and_replicate[iproblem].size(); ++jreplicate ) {
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+				solutions_by_problem_and_replicate[iproblem][jreplicate] != nullptr,
+				"run_cost_function_network_optimizer", "Expected non-null pointer to a solution!"
+			);
+			solutions_containers_by_problem[iproblem]->add_optimization_solution(
+				solutions_by_problem_and_replicate[iproblem][jreplicate]
+			);
+		}
+	}
+
     // Nonconst to const requires a silly extra step:
-    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( solutions_by_problem.size() );
-    for( Size i(0); i<solutions_by_problem.size(); ++i ) {
-        const_solutions_by_problem[i] = solutions_by_problem[i];
+    std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_containers_by_problem( solutions_containers_by_problem.size() );
+    for( Size i(0); i<solutions_containers_by_problem.size(); ++i ) {
+        const_solutions_containers_by_problem[i] = solutions_containers_by_problem[i];
     }
 
-    return const_solutions_by_problem;
+    return const_solutions_containers_by_problem;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
