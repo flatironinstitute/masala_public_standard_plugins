@@ -142,6 +142,10 @@ public:
 	/// @details The default setting of 0 means "request all available".
 	void set_cpu_threads_to_request( masala::base::Size const threads_in );
 
+	/// @brief If starting states are not provided in the problem definition, indicate
+	/// the number of random starting states to use.  Defaults to 1.
+	void set_n_random_starting_states( masala::base::Size const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +155,10 @@ public:
 	/// @brief Get the number of threads to request.
 	/// @details The default setting of 0 means "request all available".
 	masala::base::Size cpu_threads_to_request() const;
+
+	/// @brief If starting states are not provided in the problem definition, get
+	/// the number of random starting states to use.  Defaults to 1.
+	masala::base::Size n_random_starting_states() const;
 
 public:
 
@@ -196,6 +204,10 @@ private:
 	/// @brief The maximum number of CPU threads to request for parallel execution.
 	/// @details The default of 0 means "all available".
 	masala::base::Size cpu_threads_to_request_ = 0;
+
+	/// @brief If starting states are not provided in the problem definition, indicate
+	/// the number of random starting states to use.  Defaults to 1.
+	masala::base::Size n_random_starting_states_ = 1;
 
 }; // class GreedyCostFunctionNetworkOptimizer
 

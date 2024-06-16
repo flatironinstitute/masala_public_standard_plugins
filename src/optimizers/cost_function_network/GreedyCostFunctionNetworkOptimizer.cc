@@ -207,6 +207,16 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &GreedyCostFunctionNetworkOptimizer::set_cpu_threads_to_request, this, std::placeholders::_1 )
 			)
 		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"set_n_random_starting_states", "If starting states are not provided in the problem definition, indicate "
+				"the number of random starting states to use.  Defaults to 1.",
+				"n_random_starting_states_in", "The number of random starting states to use.  This number of greedy "
+				"descent trajectories will be carried out for all problems that do not provide starting states.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::set_n_random_starting_states, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_description->add_getter(
@@ -215,6 +225,16 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 				"cpu_threads_to_request", "The number of CPU threads to request.  This is a maximum; fewer are requested if there are fewer "
 				"problem replicates to try.  A setting of 0 means \"request all available\".", false, false,
 				std::bind( &GreedyCostFunctionNetworkOptimizer::cpu_threads_to_request, this )
+			)
+		);
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
+				"n_random_starting_states", "If starting states are not provided in the problem definition, get "
+				"the number of random starting states to use.  Defaults to 1.",
+				"n_random_starting_states", "The number of random starting states to use.  This number of greedy "
+				"descent trajectories will be carried out for all problems that do not provide starting states.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::n_random_starting_states, this )
 			)
 		);
 
@@ -255,6 +275,18 @@ GreedyCostFunctionNetworkOptimizer::set_cpu_threads_to_request(
     cpu_threads_to_request_ = threads_in;
 }
 
+/// @brief If starting states are not provided in the problem definition, indicate
+/// the number of random starting states to use.  Defaults to 1.
+void
+GreedyCostFunctionNetworkOptimizer::set_n_random_starting_states(
+	masala::base::Size const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 1, "set_n_random_starting_states",
+		"The number of random starting states must be at least 1.  Got " + std::to_string( setting ) + "."
+	);
+	n_random_starting_states_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -265,6 +297,13 @@ masala::base::Size
 GreedyCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return cpu_threads_to_request_;
+}
+
+/// @brief If starting states are not provided in the problem definition, get
+/// the number of random starting states to use.  Defaults to 1.
+masala::base::Size
+GreedyCostFunctionNetworkOptimizer::n_random_starting_states() const {
+	return n_random_starting_states_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
