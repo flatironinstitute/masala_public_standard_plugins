@@ -28,6 +28,10 @@
 // Unit header:
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
+
+
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
@@ -914,9 +918,6 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		problems_copies.emplace_back( nsols, nullptr );
 		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
-			// Allocate greedy solutions objects:
-			greedy_solutions[iprob][jsol] = masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >();
-
 			// Make copies of the problems objects, and ensure that the MC solutions are the unique starting points
 			// for each new problem:
 			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
@@ -934,15 +935,16 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 			);
 			problem_copy->clear_candidate_solutions();
 			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
+			problem_copy->finalize();
 			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
 
 			// Prepare the vector of work to do in threads:
 			work_vector.add_job(
 				std::bind(
-					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement,
+					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads,
 					this,
-					problems_copies[iprob][jsol],
-					greedy_solutions[iprob][jsol]
+					std::cref(*problems_copies[iprob][jsol]),
+					std::ref(greedy_solutions[iprob][jsol])
 				)
 			);
 		}
@@ -955,6 +957,29 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	// Repackage greedy solutions into solutions objects, preserving or not preserving the old solutions:
 	TODO TODO TODO;
 
+}
+
+/// @brief Carry out a single greedy optimization/
+/// @details This function runs in threads.
+void
+MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	CHECK_OR_THROW_FOR_CLASS( greedy_problems.n_problems() == 1, "do_one_greedy_refinement_in_threads", "Program error.  Expected exactly "
+		"one problem in the greedy problems container, but got " + std::to_string( greedy_problems.n_problems() ) + "."
+	);
+	CHECK_OR_THROW_FOR_CLASS( greedy_solutions == nullptr, "do_one_greedy_refinement_in_threads", "Program error.  Expected solutiuons object to be nullptr." );
+
+	GreedyCostFunctionNetworkOptimizer greedyopt;
+	greedyopt.set_cpu_threads_to_request(1);
+	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > sols( greedyopt.run_cost_function_network_optimizer( greedy_problems ) );
+	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
+		"Expected exactly one solution."
+	);
+	greedy_solutions = sols[0];
 }
 
 /// @brief Run a single Monte Carlo trajectory.

@@ -303,6 +303,14 @@ private:
 		bool keep_original_mc_solutions_alongside_greedy
 	) const;
 
+	/// @brief Carry out a single greedy optimization/
+	/// @details This function runs in threads.
+	void
+	do_one_greedy_refinement_in_threads(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+	) const;
+
 	/// @brief Run a single Monte Carlo trajectory.
 	/// @details This function runs in threads.
 	/// @param[in] replicate_index The index of this replicate for this problem.
