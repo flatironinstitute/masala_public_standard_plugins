@@ -914,7 +914,11 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		problems_copies.emplace_back( nsols, nullptr );
 		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
+			// Allocate greedy solutions objects:
+			greedy_solutions[iprob][jsol] = masala::make_shared< CostFunctionNetworkOptimizationSolutions_API >();
 
+			// Make copies of the problems objects, and ensure that the MC solutions are the unique starting points
+			// for each new problem:
 			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
 			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
@@ -928,11 +932,11 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
 				+ " was not a cost function network optimization solution."
 			);
-
 			problem_copy->clear_candidate_solutions();
 			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
 			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
 
+			// Prepare the vector of work to do in threads:
 			work_vector.add_job(
 				std::bind(
 					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement,
@@ -943,6 +947,10 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 			);
 		}
 	}
+
+	// Run the work vector in threads:
+	MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_vector ) );
+    threading_summary.write_summary_to_tracer();
 
 	// Repackage greedy solutions into solutions objects, preserving or not preserving the old solutions:
 	TODO TODO TODO;
