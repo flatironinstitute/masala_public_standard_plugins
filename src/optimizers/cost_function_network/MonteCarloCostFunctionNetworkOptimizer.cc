@@ -903,7 +903,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	CHECK_OR_THROW_FOR_CLASS( nprob == solutions_by_problem.size(), "carry_out_greedy_refinement", "The number of problems and solutions objects didn't match!" );
 
 	// Prepare a vector of jobs to do.
-	MasalaThreadedWorkRequest work_vector;
+	MasalaThreadedWorkRequest work_vector( cpu_threads_to_request_ );
 	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
 	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > greedy_solutions; // Will ultimately have one solution per solutions object.
 
