@@ -901,7 +901,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	// Prepare a vector of jobs to do.
 	MasalaThreadedWorkRequest work_vector;
 	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
-	//std::vector< CostFunctionNetworkOptimizationSolution_APISP > mc_solution_copies;
+	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > greedy_solutions; // Will ultimately have one solution per solutions object.
 
 	for( Size iprob(0); iprob<nprob; ++iprob ) {
 		CostFunctionNetworkOptimizationProblem_APICSP problem_cast(
@@ -910,6 +910,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "carry_out_greedy_refinement", "Optimization problem " + std::to_string(iprob) + " is not a cost function network optimization problem." );
 
 		Size const nsols( solutions_by_problem[iprob]->n_solutions() );
+		greedy_solutions.emplace_back( nsols, nullptr );
 		problems_copies.emplace_back( nsols, nullptr );
 		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
@@ -943,6 +944,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		}
 	}
 
+	// Repackage greedy solutions into solutions objects, preserving or not preserving the old solutions:
 	TODO TODO TODO;
 
 }
