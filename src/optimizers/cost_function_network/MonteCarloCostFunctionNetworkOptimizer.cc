@@ -905,7 +905,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	// Prepare a vector of jobs to do.
 	MasalaThreadedWorkRequest work_vector( cpu_threads_to_request_ );
 	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
-	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > greedy_solutions; // Will ultimately have one solution per solutions object.
+	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > > greedy_solutions; // Will ultimately have one solution per solutions object.
 
 	for( Size iprob(0); iprob<nprob; ++iprob ) {
 		CostFunctionNetworkOptimizationProblem_APICSP problem_cast(
