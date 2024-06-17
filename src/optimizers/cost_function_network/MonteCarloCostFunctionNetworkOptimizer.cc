@@ -900,11 +900,26 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 
 	// Prepare a vector of jobs to do.
 	MasalaThreadedWorkRequest work_vector;
-	std::vector< CostFunctionNetworkOptimizationSolution_APISP > mc_solution_copies;
+	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
+	//std::vector< CostFunctionNetworkOptimizationSolution_APISP > mc_solution_copies;
 
 	for( Size iprob(0); iprob<nprob; ++iprob ) {
+		CostFunctionNetworkOptimizationProblem_APICSP problem_cast(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem( iprob ) )
+		);
+		CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "carry_out_greedy_refinement", "Optimization problem " + std::to_string(iprob) + " is not a cost function network optimization problem." );
+
 		Size const nsols( solutions_by_problem[iprob]->n_solutions() );
+		problems_copies.emplace_back( nsols, nullptr );
+		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
+
+			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
+			);
+			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
+
 			CostFunctionNetworkOptimizationSolution_APISP mc_solution_cast(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solutions_by_problem[iprob]->solution( jsol ) )
 			);
@@ -912,13 +927,23 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
 				+ " was not a cost function network optimization solution."
 			);
-			mc_solution_copies.push_back( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( mc_solution_cast->deep_clone() ) );
-			CHECK_OR_THROW_FOR_CLASS( mc_solution_copies[mc_solution_copies.size()-1] != nullptr, "carry_out_greedy_refinement",
-				"Deep cloning failed for MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob ) + "."
+
+			problem_copy->clear_candidate_solutions();
+			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
+			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
+
+			work_vector.add_job(
+				std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement,
+					this,
+					problems_copies[iprob][jsol],
+					greedy_solutions[iprob][jsol]
+				)
 			);
-			TODO TODO TODO;
 		}
 	}
+
+	TODO TODO TODO;
 
 }
 
