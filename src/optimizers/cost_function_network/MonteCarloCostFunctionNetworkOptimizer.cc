@@ -890,7 +890,36 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
 	bool keep_original_mc_solutions_alongside_greedy
 ) const {
-	TODO TODO TODO:
+	using namespace masala::base::managers::threads;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using masala::base::Size;
+
+	// Sanity check:
+	Size const nprob( problems.n_problems() );
+	CHECK_OR_THROW_FOR_CLASS( nprob == solutions_by_problem.size(), "carry_out_greedy_refinement", "The number of problems and solutions objects didn't match!" );
+
+	// Prepare a vector of jobs to do.
+	MasalaThreadedWorkRequest work_vector;
+	std::vector< CostFunctionNetworkOptimizationSolution_APISP > mc_solution_copies;
+
+	for( Size iprob(0); iprob<nprob; ++iprob ) {
+		Size const nsols( solutions_by_problem[iprob]->n_solutions() );
+		for( Size jsol(0); jsol<nsols; ++jsol ) {
+			CostFunctionNetworkOptimizationSolution_APISP mc_solution_cast(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solutions_by_problem[iprob]->solution( jsol ) )
+			);
+			CHECK_OR_THROW_FOR_CLASS( mc_solution_cast != nullptr, "carry_out_greedy_refinement",
+				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
+				+ " was not a cost function network optimization solution."
+			);
+			mc_solution_copies.push_back( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( mc_solution_cast->deep_clone() ) );
+			CHECK_OR_THROW_FOR_CLASS( mc_solution_copies[mc_solution_copies.size()-1] != nullptr, "carry_out_greedy_refinement",
+				"Deep cloning failed for MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob ) + "."
+			);
+			TODO TODO TODO;
+		}
+	}
+
 }
 
 /// @brief Run a single Monte Carlo trajectory.
