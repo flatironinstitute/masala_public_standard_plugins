@@ -295,6 +295,14 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Perform greedy refinement on all solutions found.
+	void
+	carry_out_greedy_refinement(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
+		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
+		bool keep_original_mc_solutions_alongside_greedy
+	) const;
+
 	/// @brief Run a single Monte Carlo trajectory.
 	/// @details This function runs in threads.
 	/// @param[in] replicate_index The index of this replicate for this problem.
