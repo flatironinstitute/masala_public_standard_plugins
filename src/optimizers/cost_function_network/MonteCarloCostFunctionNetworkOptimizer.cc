@@ -926,8 +926,8 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 			);
 			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
 
-			CostFunctionNetworkOptimizationSolution_APISP mc_solution_cast(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solutions_by_problem[iprob]->solution( jsol ) )
+			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions_by_problem[iprob]->solution( jsol ) )
 			);
 			CHECK_OR_THROW_FOR_CLASS( mc_solution_cast != nullptr, "carry_out_greedy_refinement",
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
@@ -959,7 +959,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		CostFunctionNetworkOptimizationSolutions_API & cursols( *solutions_by_problem[iprob] );
 		Size const noldsols( cursols.n_solutions() );
 		Size n_to_keep;
-		if( !keep_original_mc_solutions_alongside_greedy_refinement_solutions_ ) {
+		if( !keep_original_mc_solutions_alongside_greedy ) {
 			n_to_keep = noldsols;
 			for( Size isol( noldsols ); isol > 0; --isol ) {
 				cursols.remove_optimization_solution( isol-1 );
