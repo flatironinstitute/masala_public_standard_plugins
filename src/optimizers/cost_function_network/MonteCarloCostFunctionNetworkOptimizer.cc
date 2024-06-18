@@ -955,8 +955,49 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
     threading_summary.write_summary_to_tracer();
 
 	// Repackage greedy solutions into solutions objects, preserving or not preserving the old solutions:
-	TODO TODO TODO;
+	for( Size iprob(0); iprob < nprob; ++iprob ) {
+		CostFunctionNetworkOptimizationSolutions_API & cursols( *solutions_by_problem[iprob] );
+		Size const noldsols( cursols.n_solutions() );
+		Size n_to_keep;
+		if( !keep_original_mc_solutions_alongside_greedy_refinement_solutions_ ) {
+			n_to_keep = noldsols;
+			for( Size isol( noldsols ); isol > 0; --isol ) {
+				cursols.remove_optimization_solution( isol-1 );
+			}
+		} else {
+			n_to_keep = noldsols * 2;
+		}
 
+		Size const nnewsol( greedy_solutions[iprob].size() );
+		CHECK_OR_THROW_FOR_CLASS( nnewsol == noldsols, "carry_out_greedy_refinement", "Program error.  Expected number of new solutions to match number of old solutions." );
+		for( Size jsol(0); jsol < nnewsol; ++jsol ) {
+			CHECK_OR_THROW_FOR_CLASS( greedy_solutions[iprob][jsol]->n_solutions() == 1, "carry_out_greedy_refinement",
+				"Program error.  Expected 1 solution from greedy refinement for problem " + std::to_string(iprob) + ", Monte Carlo solution "
+				+ std::to_string(jsol) + ", but got " + std::to_string( greedy_solutions[iprob][jsol]->n_solutions() ) + "."
+			);
+			CostFunctionNetworkOptimizationSolution_APICSP curgreedysol(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
+					greedy_solutions[iprob][jsol]->solution(0)
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysol != nullptr, "carry_out_greedy_refinement", "Program error.  The solution from greedy refinement of problem "
+				+ std::to_string(iprob) + ", Monte Carlo solution " + std::to_string(jsol) + " is not a cost function network optimization solution."
+			);
+			CostFunctionNetworkOptimizationProblem_APICSP curgreedysolprob(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(
+					curgreedysol->problem()
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  Expected a CostFunctionNetworkOptimizationProblem "
+				"class defining the greedy optimization problem, but got " + curgreedysol->problem()->inner_class_name() + "."
+			);
+			cursols.merge_in_lowest_scoring_solutions(
+				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+				n_to_keep,
+				curgreedysolprob
+			);
+		}
+	}
 }
 
 /// @brief Carry out a single greedy optimization/
