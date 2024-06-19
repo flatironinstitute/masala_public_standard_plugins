@@ -87,10 +87,17 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::operator=(
     return *this;
 }
 
+/// @brief Make a copy of this object, and return a shared pointer to the copy.
+/// @details Does NOT copy all the internal data, but retains pointers to existing data.
+masala::numeric::optimization::OptimizationProblemSP
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::clone() const {
+	return masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( *this );
+}
+
 /// @brief Make a fully independent copy of this object.
 PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::deep_clone() const {
-    PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP new_problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( *this ) );
+    PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP new_problem( std::static_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( clone() ) );
     new_problem->make_independent();
     return new_problem;
 }
@@ -223,21 +230,6 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::has_non_pairwise_scor
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
-
-/// @brief Reset all data in this object.
-void
-PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset() {
-    std::lock_guard< std::mutex > lock( problem_mutex() );
-    protected_reset();
-}
-
-/// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
-/// and making the object read-only.
-void
-PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalize() {
-    std::lock_guard< std::mutex > lock( problem_mutex() );
-    protected_finalize();
-}
 
 /// @brief Add onebody penalty for a choice at a node.
 /// @details If the node has not yet been listed, it's added to the n_choices_by_node_index_ map.
@@ -516,9 +508,27 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
                 "complete and the object locked to now be read-only?",
                 "finalized", "True if the object has been finalized, false otherwise.",
                 false, false,
-                std::bind( &OptimizationProblem::finalized, this )
+                std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalized, this )
             )
         );
+		api_def->add_getter(
+			masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"has_candidate_starting_solutions", "Does this cost function network optimization problem have "
+				"one or more candidate solutions defined?  These can be used as starting points for some optimizers, "
+				"or can be ignored.",
+				"has_candidate_starting_solutions", "True if there is at least one candidate starting solution, false otherwise.",
+				false, false, std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::has_candidate_starting_solutions, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< getter::MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::vector< masala::base::Size > > const & > >(
+				"candidate_starting_solutions", "Returns candidate starting solutions for this cost functoin network optimization problem.  "
+				"These can be used as starting points for some optimizers, or can be ignored.",
+				"candidate_starting_solutions", "A vector of vectors of candidate starting solutions for this problem, where the length of "
+				"each vector matches the number of variable positions and the entries are choice indices.",
+				false, false, std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::candidate_starting_solutions, this )
+			)
+		);
 
         // Setters:
         api_def->add_setter(
@@ -562,6 +572,16 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
                 std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
             )
         );
+
+		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_OneInput< std::vector< masala::base::Size > const & > >(
+				"add_candidate_solution", "Add a candidate solution.  This may or may not be used as a starting point by a given solver.  This function "
+				"locks the problem mutex.  It throws if the problem has already been finalized.",
+				"candidate_solution_in", "The input candidate solution.  This should be a vector of zero-based choice indices, with one "
+				"index for each variable node in the problem.", false, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_candidate_solution, this, std::placeholders::_1 )
+			)
+		);
 
         // Work functions
         work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< Real, std::vector< Size > const & > compute_absolute_score_fxn(

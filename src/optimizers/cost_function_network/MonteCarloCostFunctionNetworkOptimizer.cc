@@ -28,6 +28,10 @@
 // Unit header:
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
+
+
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
@@ -372,6 +376,30 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mutation, this, std::placeholders::_1 )
             )
         );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool const > >(
+                "set_do_greedy_refinement", "Set whether we do greedy optimization at the end on each solution "
+				"found by the Monte Carlo search.  False by default.",
+                "do_greedy_refinement_in", "True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement, this, std::placeholders::_1 )
+            )
+        );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool const > >(
+                "set_keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"Set whether we keep both the original solutions and the ones found by greedy refinement if doing "
+				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
+				"scores).  True by default.  Not used if do_greedy_refinement is false.",
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions_in",
+				"True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions,
+					this, std::placeholders::_1
+				)
+            )
+        );
 
 		// Getters:
 		api_description->add_getter(
@@ -433,6 +461,30 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 "multimutation_probability_of_one_mutation", "The probability of having exactly one mutation if multimutations are being used.",
                 false, false,
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "do_greedy_refinement", "Get whether we do greedy optimization at the end on each solution "
+				"found by the Monte Carlo search.  False by default.",
+                "do_greedy_refinement", "True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind( &MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"Get whether we keep both the original solutions and the ones found by greedy refinement if doing "
+				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
+				"scores).  True by default.  Not used if do_greedy_refinement is false.",
+                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
+				"True if we're doing greedy refinement, false otherwise.",
+                false, false,
+                std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions,
+					this
+				)
             )
         );
 
@@ -614,6 +666,27 @@ MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mut
     multimutation_probability_of_one_mutation_ = probability_in;
 }
 
+/// @brief Set whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+/// False by default.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement(
+	bool const do_greedy_refinement_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	do_greedy_refinement_ = do_greedy_refinement_in;
+}
+
+/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
+/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions(
+	bool const keep_original_solutions_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	keep_original_mc_solutions_alongside_greedy_refinement_solutions_ = keep_original_solutions_in;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -685,6 +758,23 @@ masala::base::Real
 MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
     return multimutation_probability_of_one_mutation_;
+}
+
+/// @brief Get whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+/// False by default.
+bool
+MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return do_greedy_refinement_;
+}
+
+/// @brief Get whether we keep both the original solutions and the ones found by greedy refinement if doing
+/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+bool
+MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return keep_original_mc_solutions_alongside_greedy_refinement_solutions_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -778,6 +868,12 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_request ) );
     threading_summary.write_summary_to_tracer();
 
+	// Do the greedy refinement, if we're doing that.
+	if( do_greedy_refinement_ ) {
+		write_to_tracer( "Carrying out greedy refinement of all solutions found." );
+		carry_out_greedy_refinement( problems, solutions_by_problem, keep_original_mc_solutions_alongside_greedy_refinement_solutions_ );
+	}
+
     // Nonconst to const requires a silly extra step:
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( nproblems );
     for( Size i(0); i<nproblems; ++i ) {
@@ -790,6 +886,143 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Perform greedy refinement on all solutions found.
+void
+MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
+	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
+	bool keep_original_mc_solutions_alongside_greedy
+) const {
+	using namespace masala::base::managers::threads;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using masala::base::Size;
+
+	// Sanity check:
+	Size const nprob( problems.n_problems() );
+	CHECK_OR_THROW_FOR_CLASS( nprob == solutions_by_problem.size(), "carry_out_greedy_refinement", "The number of problems and solutions objects didn't match!" );
+
+	// Prepare a vector of jobs to do.
+	MasalaThreadedWorkRequest work_vector( cpu_threads_to_request_ );
+	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
+	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > > greedy_solutions; // Will ultimately have one solution per solutions object.
+
+	for( Size iprob(0); iprob<nprob; ++iprob ) {
+		CostFunctionNetworkOptimizationProblem_APICSP problem_cast(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem( iprob ) )
+		);
+		CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "carry_out_greedy_refinement", "Optimization problem " + std::to_string(iprob) + " is not a cost function network optimization problem." );
+
+		Size const nsols( solutions_by_problem[iprob]->n_solutions() );
+		greedy_solutions.emplace_back( nsols, nullptr );
+		problems_copies.emplace_back( nsols, nullptr );
+		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
+		for( Size jsol(0); jsol<nsols; ++jsol ) {
+			// Make copies of the problems objects, and ensure that the MC solutions are the unique starting points
+			// for each new problem:
+			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
+			);
+			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
+			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "carry_out_greedy_refinement", "Program error.  Could not get non-finalized problem description for problem " + std::to_string( iprob ) + "." );
+
+			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions_by_problem[iprob]->solution( jsol ) )
+			);
+			CHECK_OR_THROW_FOR_CLASS( mc_solution_cast != nullptr, "carry_out_greedy_refinement",
+				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
+				+ " was not a cost function network optimization solution."
+			);
+			problem_copy->clear_candidate_solutions();
+			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
+			problem_copy->finalize();
+			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
+
+			// Prepare the vector of work to do in threads:
+			work_vector.add_job(
+				std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads,
+					this,
+					std::cref(*problems_copies[iprob][jsol]),
+					std::ref(greedy_solutions[iprob][jsol])
+				)
+			);
+		}
+	}
+
+	// Run the work vector in threads:
+	MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_vector ) );
+    threading_summary.write_summary_to_tracer();
+
+	// Repackage greedy solutions into solutions objects, preserving or not preserving the old solutions:
+	for( Size iprob(0); iprob < nprob; ++iprob ) {
+		CostFunctionNetworkOptimizationSolutions_API & cursols( *solutions_by_problem[iprob] );
+		Size const noldsols( cursols.n_solutions() );
+		Size n_to_keep;
+		if( !keep_original_mc_solutions_alongside_greedy ) {
+			n_to_keep = noldsols;
+			for( Size isol( noldsols ); isol > 0; --isol ) {
+				cursols.remove_optimization_solution( isol-1 );
+			}
+		} else {
+			n_to_keep = noldsols * 2;
+		}
+
+		Size const nnewsol( greedy_solutions[iprob].size() );
+		CHECK_OR_THROW_FOR_CLASS( nnewsol == noldsols, "carry_out_greedy_refinement", "Program error.  Expected number of new solutions to match number of old solutions." );
+		for( Size jsol(0); jsol < nnewsol; ++jsol ) {
+			CHECK_OR_THROW_FOR_CLASS( greedy_solutions[iprob][jsol]->n_solutions() == 1, "carry_out_greedy_refinement",
+				"Program error.  Expected 1 solution from greedy refinement for problem " + std::to_string(iprob) + ", Monte Carlo solution "
+				+ std::to_string(jsol) + ", but got " + std::to_string( greedy_solutions[iprob][jsol]->n_solutions() ) + "."
+			);
+			CostFunctionNetworkOptimizationSolution_APICSP curgreedysol(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
+					greedy_solutions[iprob][jsol]->solution(0)
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysol != nullptr, "carry_out_greedy_refinement", "Program error.  The solution from greedy refinement of problem "
+				+ std::to_string(iprob) + ", Monte Carlo solution " + std::to_string(jsol) + " is not a cost function network optimization solution."
+			);
+			CostFunctionNetworkOptimizationProblem_APICSP curgreedysolprob(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(
+					curgreedysol->problem()
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  Expected a CostFunctionNetworkOptimizationProblem "
+				"class defining the greedy optimization problem, but got " + curgreedysol->problem()->inner_class_name() + "."
+			);
+			cursols.merge_in_lowest_scoring_solutions(
+				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+				n_to_keep,
+				curgreedysolprob
+			);
+		}
+	}
+}
+
+/// @brief Carry out a single greedy optimization/
+/// @details This function runs in threads.
+void
+MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	CHECK_OR_THROW_FOR_CLASS( greedy_problems.n_problems() == 1, "do_one_greedy_refinement_in_threads", "Program error.  Expected exactly "
+		"one problem in the greedy problems container, but got " + std::to_string( greedy_problems.n_problems() ) + "."
+	);
+	CHECK_OR_THROW_FOR_CLASS( greedy_solutions == nullptr, "do_one_greedy_refinement_in_threads", "Program error.  Expected solutiuons object to be nullptr." );
+
+	GreedyCostFunctionNetworkOptimizer greedyopt;
+	greedyopt.set_cpu_threads_to_request(1);
+	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > sols( greedyopt.run_cost_function_network_optimizer( greedy_problems ) );
+	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
+		"Expected exactly one solution."
+	);
+	greedy_solutions = sols[0];
+}
 
 /// @brief Run a single Monte Carlo trajectory.
 /// @details This function runs in threads.

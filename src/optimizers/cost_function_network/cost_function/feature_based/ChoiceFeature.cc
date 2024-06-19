@@ -465,7 +465,7 @@ void
 ChoiceFeature::protected_assign(
     ChoiceFeature const & src
 ) {
-    finalized_.store( src.finalized_.load() );
+    //finalized_.store( src.finalized_.load() );
     min_connections_ = src.min_connections_;
     max_connections_ = src.max_connections_;
     offset_ = src.offset_;

@@ -90,7 +90,8 @@ public:
 	~SumOfUnsatisfiedChoiceFeaturesCostFunction() override = default;
 
 	/// @brief This class is pure virtual, and does not define the clone function.
-	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override = 0;
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
+	clone() const override = 0;
 
 	/// @brief This class is pure virtual, and does not define the make independent function.
 	void make_independent() override = 0;

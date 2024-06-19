@@ -84,6 +84,11 @@ public:
 	/// @brief Destructor.
 	~PairwisePrecomputedCostFunctionNetworkOptimizationProblem() override = default;
 
+	/// @brief Make a copy of this object, and return a shared pointer to the copy.
+	/// @details Does NOT copy all the internal data, but retains pointers to existing data.
+	masala::numeric::optimization::OptimizationProblemSP
+	clone() const override;
+
 	/// @brief Make a fully independent copy of this object.
 	PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP
 	deep_clone() const;
@@ -177,15 +182,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
-
-	/// @brief Reset all data in this object.
-	void
-	reset() override;
-
-	/// @brief Indicates that problem setup is complete, locking the one- and two-node penalties
-	/// and making the object read-only.
-	void
-	finalize() override;
 
 	/// @brief Add onebody penalty for a choice at a node.
 	/// @details If the node has not yet been listed, it's added to the n_choices_by_node_index_ map.
