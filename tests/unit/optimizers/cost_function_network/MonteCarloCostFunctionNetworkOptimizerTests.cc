@@ -408,7 +408,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 				}
 				std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions;
 
-				//REQUIRE_NOTHROW([&](){
+				REQUIRE_NOTHROW([&](){
 
 					CostFunctionNetworkOptimizationProblems_APISP problem_container( masala::make_shared< CostFunctionNetworkOptimizationProblems_API >() );
 					problem_container->add_optimization_problem(
@@ -432,7 +432,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 					
 					solutions = mcopt->run_cost_function_network_optimizer( *problem_container );
 
-				//}() );
+				}() );
 
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ( gapped ? "Gapped results" : "Ungapped results" ) );
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
