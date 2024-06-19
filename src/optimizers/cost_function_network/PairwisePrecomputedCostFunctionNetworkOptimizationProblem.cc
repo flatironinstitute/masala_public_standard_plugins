@@ -87,10 +87,18 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::operator=(
     return *this;
 }
 
+/// @brief Make a copy of this object, and return a shared pointer to the copy.
+/// @details Does NOT copy all the internal data, but retains pointers to existing data.
+masala::numeric::optimization::OptimizationProblemSP
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::clone() const {
+	std::lock_guard< std::mutex > lock( problem_mutex() );
+	return masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( *this );
+}
+
 /// @brief Make a fully independent copy of this object.
 PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::deep_clone() const {
-    PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP new_problem( masala::make_shared< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( *this ) );
+    PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP new_problem( std::static_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( clone() ) );
     new_problem->make_independent();
     return new_problem;
 }
