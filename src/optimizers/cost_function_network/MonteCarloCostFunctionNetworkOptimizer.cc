@@ -925,6 +925,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
 			);
 			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
+			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "carry_out_greedy_refinement", "Program error.  Could not get non-finalized problem description for problem " + std::to_string( iprob ) + "." );
 
 			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions_by_problem[iprob]->solution( jsol ) )
