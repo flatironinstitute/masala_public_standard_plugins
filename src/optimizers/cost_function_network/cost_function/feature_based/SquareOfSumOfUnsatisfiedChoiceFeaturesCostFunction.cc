@@ -93,6 +93,14 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::clone() const {
     return masala::make_shared< SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >( *this );
 }
 
+/// @brief Make a fully independent copy of this object.
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctionSP
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::deep_clone() const {
+    SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctionSP newobj( std::static_pointer_cast< SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >( clone() ) );
+    newobj->make_independent();
+    return newobj;
+}
+
 /// @brief Deep-clone all data stored in this class.
 void
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent() {

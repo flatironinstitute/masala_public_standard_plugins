@@ -86,7 +86,12 @@ public:
 	~SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction() override = default;
 
 	/// @brief Return a shared pointer to a copy of this object.
-	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override;
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone()
+	const override;
+
+	/// @brief Make a fully independent copy of this object.
+	SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunctionSP
+	deep_clone() const;
 
 	/// @brief Deep-clone all data stored in this class.
 	void make_independent() override;

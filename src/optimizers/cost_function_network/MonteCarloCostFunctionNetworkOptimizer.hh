@@ -214,6 +214,15 @@ public:
 		masala::base::Real const probability_in
 	);
 
+	/// @brief Set whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	void set_do_greedy_refinement( bool const do_greedy_refinement_in );
+
+	/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
+	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+	void set_keep_original_mc_solutions_alongside_greedy_refinement_solutions( bool const keep_original_solutions_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -253,6 +262,15 @@ public:
 	/// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
 	masala::base::Real multimutation_probability_of_one_mutation() const;
 
+	/// @brief Get whether we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	bool do_greedy_refinement() const;
+
+	/// @brief Get whether we keep both the original solutions and the ones found by greedy refinement if doing
+	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+	bool keep_original_mc_solutions_alongside_greedy_refinement_solutions() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,6 +294,22 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Perform greedy refinement on all solutions found.
+	void
+	carry_out_greedy_refinement(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
+		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
+		bool keep_original_mc_solutions_alongside_greedy
+	) const;
+
+	/// @brief Carry out a single greedy optimization/
+	/// @details This function runs in threads.
+	void
+	do_one_greedy_refinement_in_threads(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+	) const;
 
 	/// @brief Run a single Monte Carlo trajectory.
 	/// @details This function runs in threads.
@@ -389,6 +423,15 @@ private:
 	/// mutate one node at a time.  True by default.
 	/// @details We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
 	bool use_multimutation_ = true;
+
+	/// @brief If true, we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	bool do_greedy_refinement_ = false;
+
+	/// @brief If true, we keep both the original solutions and the ones found by greedy refinement if doing
+	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
+	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
+	bool keep_original_mc_solutions_alongside_greedy_refinement_solutions_ = true;
 
 	/// @brief The probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
 	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
