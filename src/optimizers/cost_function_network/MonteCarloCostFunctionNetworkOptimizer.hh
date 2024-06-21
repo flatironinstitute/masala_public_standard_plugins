@@ -246,6 +246,12 @@ public:
 	/// False by default.
 	void set_do_greedy_refinement( bool const do_greedy_refinement_in );
 
+	/// @brief Set the greedy refinement mode.
+	void set_greedy_refinement_mode( MCOptimizerGreedyRefinementMode const mode_in );
+
+	/// @brief Set the greedy refinement mode, by string.
+	void set_greedy_refinement_mode( std::string const & mode_name_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

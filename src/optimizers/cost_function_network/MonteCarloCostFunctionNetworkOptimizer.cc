@@ -703,6 +703,31 @@ MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement(
 	do_greedy_refinement_ = do_greedy_refinement_in;
 }
 
+/// @brief Set the greedy refinement mode.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
+	MCOptimizerGreedyRefinementMode const mode_in
+) {
+	CHECK_OR_THROW_FOR_CLASS( mode_in != MCOptimizerGreedyRefinementMode::INVALID_MODE && mode_in <= MCOptimizerGreedyRefinementMode::N_MODES,
+		"set_greedy_refinment_mode", "An invalid greedy refinement mode was passed to this function."
+	);
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	greedy_refinement_mode_ = mode_in;
+}
+
+/// @brief Set the greedy refinement mode, by string.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
+	std::string const & mode_name_in
+) {
+	MCOptimizerGreedyRefinementMode const mode_in( greedy_refinement_mode_from_name( mode_name_in ) );
+	CHECK_OR_THROW_FOR_CLASS( mode_in != MCOptimizerGreedyRefinementMode::INVALID_MODE,
+		"set_greedy_refinement_mode", "Could not parse the string \"" + mode_name_in + "\" as a "
+		"valid greedy refinement mode.  Allowed modes are: " + get_all_greedy_refinement_modes() + "."
+	);
+    set_greedy_refinement_mode( mode_in );
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
