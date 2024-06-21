@@ -186,10 +186,10 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
         MasalaObjectAPIDefinitionSP api_description(
             masala::make_shared< MasalaObjectAPIDefinition >(
                 *this,
-                "An optimizer for cost function network problems that uses a Monte Carlo search to optimize.  This "
-                "performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to "
-                "pick a node at random and change its setting at random, compute the change in overall energy or score, "
-                "and accept or reject the move based on the difference in energy and the Metropolis criterion.",
+                "A deterministic optimizer for cost function network problems that uses a greedy algorithm to find the "
+				"nearest local solution to a starting state.  If starting states are provided in the CFN problem definition, "
+				"these are used; otherwise a user-specified nunmber of random starting states is used.  Each starting state "
+				"can be optimized in parallel.",
                 false, false
             )
         );
