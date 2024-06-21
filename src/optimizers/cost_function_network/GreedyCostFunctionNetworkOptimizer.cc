@@ -189,7 +189,9 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
                 "A deterministic optimizer for cost function network problems that uses a greedy algorithm to find the "
 				"nearest local solution to a starting state.  If starting states are provided in the CFN problem definition, "
 				"these are used; otherwise a user-specified nunmber of random starting states is used.  Each starting state "
-				"can be optimized in parallel.",
+				"can be optimized in parallel.  The optimization algorithm is to make movies that conist of conisdering "
+				"every possible point mutation and accepting the one that reduces the energy the most.  This is repeated until "
+				"the energy does not improve any further.",
                 false, false
             )
         );
