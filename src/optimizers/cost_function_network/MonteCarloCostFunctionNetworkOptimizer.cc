@@ -66,6 +66,63 @@ namespace optimizers {
 namespace cost_function_network {
 
 ////////////////////////////////////////////////////////////////////////////////
+// ENUM HELPER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Given a greedy optimization refinement mode, get its name string.
+std::string
+greedy_refinement_name_from_mode(
+	MCOptimizerGreedyRefinementMode const greedy_mode
+) {
+	switch( greedy_mode ) {
+		case MCOptimizerGreedyRefinementMode::REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES :
+			return "refine_top";
+		case MCOptimizerGreedyRefinementMode::REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES_KEEPING_ORIGINAL :
+			return "refine_top_keeping_original";
+		case MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY :
+			return "refine_all";
+		default:
+			MASALA_THROW( "standard_masala_plugins::optimizers::cost_function_network", "greedy_refinement_name_from_mode",
+				"An unrecognized greedy refinement mode was passed to this function!"
+			);
+	}
+	return "";
+}
+
+/// @brief Given a greedy optimization mode name string, get its enum.
+/// @details Returns MCOptimizerGreedyRefinementMode::INVALID_MODE if the string could not be
+/// parsed as a valid mode.
+MCOptimizerGreedyRefinementMode
+greedy_refinement_mode_from_name(
+	std::string const & greedy_mode_string
+) {
+	using masala::base::Size;
+	for( Size i(1); i<=static_cast<Size>(MCOptimizerGreedyRefinementMode::N_MODES); ++i ) {
+		if( greedy_refinement_name_from_mode( static_cast< MCOptimizerGreedyRefinementMode >( i ) ) == greedy_mode_string ) {
+			return static_cast< MCOptimizerGreedyRefinementMode >( i );
+		}
+	}
+	return MCOptimizerGreedyRefinementMode::INVALID_MODE;
+}
+
+/// @brief List all greedy optimization modes, as a comma-separated list.
+std::string
+get_all_greedy_refinement_modes() {
+	using masala::base::Size;
+	std::stringstream ss;
+	for( Size i(1); i<=static_cast<Size>(MCOptimizerGreedyRefinementMode::N_MODES); ++i ) {
+		if( i != 1 ) {
+			ss << ", ";
+		}
+		if( i == static_cast<Size>(MCOptimizerGreedyRefinementMode::N_MODES) ) {
+			ss << "and ";
+		}
+		ss << greedy_refinement_name_from_mode( static_cast< MCOptimizerGreedyRefinementMode >( i ) );
+	}
+	return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -385,21 +442,6 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement, this, std::placeholders::_1 )
             )
         );
-        api_description->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool const > >(
-                "set_keep_original_mc_solutions_alongside_greedy_refinement_solutions",
-				"Set whether we keep both the original solutions and the ones found by greedy refinement if doing "
-				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
-				"scores).  True by default.  Not used if do_greedy_refinement is false.",
-                "keep_original_mc_solutions_alongside_greedy_refinement_solutions_in",
-				"True if we're doing greedy refinement, false otherwise.",
-                false, false,
-                std::bind(
-					&MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions,
-					this, std::placeholders::_1
-				)
-            )
-        );
 
 		// Getters:
 		api_description->add_getter(
@@ -470,21 +512,6 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 "do_greedy_refinement", "True if we're doing greedy refinement, false otherwise.",
                 false, false,
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement, this )
-            )
-        );
-        api_description->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
-                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
-				"Get whether we keep both the original solutions and the ones found by greedy refinement if doing "
-				"greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower "
-				"scores).  True by default.  Not used if do_greedy_refinement is false.",
-                "keep_original_mc_solutions_alongside_greedy_refinement_solutions",
-				"True if we're doing greedy refinement, false otherwise.",
-                false, false,
-                std::bind(
-					&MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions,
-					this
-				)
             )
         );
 
@@ -676,17 +703,6 @@ MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement(
 	do_greedy_refinement_ = do_greedy_refinement_in;
 }
 
-/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
-/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
-/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
-void
-MonteCarloCostFunctionNetworkOptimizer::set_keep_original_mc_solutions_alongside_greedy_refinement_solutions(
-	bool const keep_original_solutions_in
-) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
-	keep_original_mc_solutions_alongside_greedy_refinement_solutions_ = keep_original_solutions_in;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -766,15 +782,6 @@ bool
 MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	return do_greedy_refinement_;
-}
-
-/// @brief Get whether we keep both the original solutions and the ones found by greedy refinement if doing
-/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
-/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
-bool
-MonteCarloCostFunctionNetworkOptimizer::keep_original_mc_solutions_alongside_greedy_refinement_solutions() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
-	return keep_original_mc_solutions_alongside_greedy_refinement_solutions_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -858,6 +865,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
                     ( n_solutions_to_store_per_problem_ > 1 ? solution_storage_mode_ : MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ), // The solution storage mode
                     use_multimutation_, // Do we do more than one mutation at a time?
                     multimutation_probability_of_one_mutation_, // Probability of doing just one mutation, in multimutation mode.
+					greedy_refinement_mode_, // Greedy refinement mode.
                     std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
                 )
             );
@@ -869,9 +877,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     threading_summary.write_summary_to_tracer();
 
 	// Do the greedy refinement, if we're doing that.
-	if( do_greedy_refinement_ ) {
+	if( do_greedy_refinement_ && greedy_refinement_mode_ != MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
 		write_to_tracer( "Carrying out greedy refinement of all solutions found." );
-		carry_out_greedy_refinement( problems, solutions_by_problem, keep_original_mc_solutions_alongside_greedy_refinement_solutions_ );
+		carry_out_greedy_refinement( problems, solutions_by_problem, greedy_refinement_mode_ );
 	}
 
     // Nonconst to const requires a silly extra step:
@@ -892,7 +900,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
 	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
-	bool keep_original_mc_solutions_alongside_greedy
+	MCOptimizerGreedyRefinementMode const greedy_mode
 ) const {
 	using namespace masala::base::managers::threads;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -960,7 +968,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		CostFunctionNetworkOptimizationSolutions_API & cursols( *solutions_by_problem[iprob] );
 		Size const noldsols( cursols.n_solutions() );
 		Size n_to_keep;
-		if( !keep_original_mc_solutions_alongside_greedy ) {
+		if( greedy_mode != MCOptimizerGreedyRefinementMode::REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES_KEEPING_ORIGINAL ) {
 			n_to_keep = noldsols;
 			for( Size isol( noldsols ); isol > 0; --isol ) {
 				cursols.remove_optimization_solution( isol-1 );
@@ -1039,6 +1047,8 @@ MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 /// If false, we do one mutation at a time.
 /// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
 /// multimutation mode.
+/// @param do_greedy Are we doing greedy refinement?
+/// @param greedy_mode The mode for greedy refinement.
 /// @param solutions_mutex A mutex for the collection of solutions.
 void
 MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
@@ -1052,6 +1062,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
     bool const use_multimutation,
     masala::base::Real const multimutation_probability_of_one_mutation,
+	bool const do_greedy,
+	MCOptimizerGreedyRefinementMode const greedy_mode,
     std::mutex & solutions_mutex
 ) const {
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -1146,6 +1158,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             candidate_absolute_score = last_accepted_absolute_score;
         }
     }
+
+	if( do_greedy && greedy_mode == MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
+		TODO TODO TODO;
+	}
 
     { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
