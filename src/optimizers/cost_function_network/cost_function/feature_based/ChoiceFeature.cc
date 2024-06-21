@@ -83,7 +83,10 @@ ChoiceFeature::ChoiceFeature(
 /// @brief Copy constructor.
 ChoiceFeature::ChoiceFeature(
     ChoiceFeature const & src
-) {
+) :
+    masala::base::managers::plugin_module::MasalaPlugin( src ),
+    finalized_(false)
+{
     std::lock( src.mutex_, mutex_ );
     std::lock_guard< std::mutex > lock_this( mutex_, std::adopt_lock );
     std::lock_guard< std::mutex > lock_that( src.mutex_, std::adopt_lock );
