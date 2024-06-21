@@ -809,6 +809,20 @@ MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
 	return do_greedy_refinement_;
 }
 
+/// @brief Get the greedy refinement mode.
+MCOptimizerGreedyRefinementMode
+MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return greedy_refinement_mode_;
+}
+
+/// @brief Get the greedy refinement mode string.
+std::string
+MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return greedy_refinement_name_from_mode( greedy_refinement_mode_ );
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
