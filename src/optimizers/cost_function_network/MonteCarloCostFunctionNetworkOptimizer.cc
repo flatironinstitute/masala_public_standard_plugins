@@ -1079,7 +1079,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"class defining the greedy optimization problem, but got " + curgreedysol->problem()->inner_class_name() + "."
 			);
 			cursols.merge_in_lowest_scoring_solutions(
-				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 				n_to_keep,
 				curgreedysolprob
 			);
@@ -1097,6 +1097,8 @@ MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
+	//write_to_tracer( "************ n_times_seen: " + std::to_string(n_times_seen) ); // DELETE ME
+
 	CHECK_OR_THROW_FOR_CLASS( greedy_problems.n_problems() == 1, "do_one_greedy_refinement_in_threads", "Program error.  Expected exactly "
 		"one problem in the greedy problems container, but got " + std::to_string( greedy_problems.n_problems() ) + "."
 	);
@@ -1109,6 +1111,9 @@ MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
 		"Expected exactly one solution."
 	);
+
+	//write_to_tracer( "************ n_times_seen_by_greedy: " + std::to_string(sols[0]->solution(0)->n_times_solution_was_produced()) ); // DELETE ME
+
 	greedy_solutions = sols[0];
 }
 
@@ -1296,8 +1301,6 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 					"Expected a CostFunctionNetworkOptimizationProblem class defining the greedy optimization problem, "
 					"but got " + curgreedysol->problem()->inner_class_name() + "."
 				);
-				
-				write_to_tracer( "NTIMES: " + std::to_string( curgreedysol->n_times_solution_was_produced() ) );
 
 				solutions.merge_in_lowest_scoring_solutions(
 					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
