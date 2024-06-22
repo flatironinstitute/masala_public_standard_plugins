@@ -417,7 +417,7 @@ FunctionOfIntegerPenaltySumCostFunction::compute_cost_function(
     std::vector< masala::base::Size > const & candidate_solution
 ) const {
     signed long const sum( ChoicePenaltySumBasedCostFunction< signed long int >::protected_compute_cost_function_no_weight( candidate_solution ) );
-	write_to_tracer( "***** [" + masala::base::utility::container::container_to_string( candidate_solution, "," ) + "] " + std::to_string(sum) + " "  + std::to_string( protected_weight() * function_of_sum( sum ) ) + " *****" ); // DELETE ME
+	// write_to_tracer( "***** [" + masala::base::utility::container::container_to_string( candidate_solution, "," ) + "] " + std::to_string(sum) + " "  + std::to_string( protected_weight() * function_of_sum( sum ) ) + " *****" ); // DELETE ME
     return protected_weight() * function_of_sum( sum );
 }
 
