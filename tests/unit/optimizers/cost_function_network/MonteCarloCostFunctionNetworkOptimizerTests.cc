@@ -425,7 +425,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 					mcopt->set_n_solutions_to_store_per_problem(5);
 					mcopt->set_cpu_threads_to_request(3);
 					mcopt->set_do_greedy_refinement( greedy );
-					mcopt->set_keep_original_mc_solutions_alongside_greedy_refinement_solutions(false);
+					mcopt->set_greedy_refinement_mode( "refine_top" );
 
 					LinearAnnealingSchedule_APISP annealing_schedule( masala::make_shared< LinearAnnealingSchedule_API >() );
 					mcopt->set_annealing_schedule( *annealing_schedule );
