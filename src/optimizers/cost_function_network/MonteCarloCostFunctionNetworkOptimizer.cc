@@ -1240,7 +1240,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 	// this is just once per MC trajectory (at the end), and shared pointer stuff is just for setup and
 	// teardown of threaded work.
 	if( do_greedy && greedy_mode == MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
-		Size const nsol( solutions.n_solutions() );
+		Size const nsol( local_solutions.size() );
 
 		// Set up nsol solutions containers, each to hold one greedy solution.
 		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > greedy_solutions( nsol, nullptr );
@@ -1259,61 +1259,48 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 			);
 #endif
 
-#ifndef NDEBUG
-			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution( isol ) )
-			);
-			CHECK_OR_THROW_FOR_CLASS( mc_solution_cast != nullptr, "run_mc_trajectory",
-				"MC solution " + std::to_string( isol ) + " was not a cost function network "
-				"optimization solution."
-			);
-#else
-			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
-				std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution( isol ) )
-			);
-#endif
 			problem_copy->clear_candidate_solutions();
-			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
+			problem_copy->add_candidate_solution( std::get<0>( local_solutions[isol] ) );
 			problem_copy->finalize();
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
 			greedy_problems.add_optimization_problem( problem_copy );
 			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol]);
 		}
-		for( Size isol(nsol); isol > 0; --isol ) {
-			solutions.remove_optimization_solution( isol - 1 );
-		}
-		for( Size isol(0); isol < nsol; ++isol ) {
-			CHECK_OR_THROW_FOR_CLASS( greedy_solutions[isol]->n_solutions() == 1, "run_mc_trajectory",
-				"Program error.  Expected 1 solution from greedy refinement for Monte Carlo solution "
-				+ std::to_string(isol) + ", but got " + std::to_string( greedy_solutions[isol]->n_solutions() ) + "."
-			);
-			CostFunctionNetworkOptimizationSolution_APICSP curgreedysol(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
-					greedy_solutions[isol]->solution(0)
-				)
-			);
-			CHECK_OR_THROW_FOR_CLASS( curgreedysol != nullptr, "carry_out_greedy_refinement", "Program error.  "
-				"The solution from greedy refinement of Monte Carlo solution " + std::to_string(isol)
-				+ " is not a cost function network optimization solution."
-			);
-			CostFunctionNetworkOptimizationProblem_APICSP curgreedysolprob(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(
-					curgreedysol->problem()
-				)
-			);
-			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  "
-				"Expected a CostFunctionNetworkOptimizationProblem class defining the greedy optimization problem, "
-				"but got " + curgreedysol->problem()->inner_class_name() + "."
-			);
-			solutions.merge_in_lowest_scoring_solutions(
-				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
-				n_solutions_to_store,
-				curgreedysolprob
-			);
-		}
-	}
 
-    { // Mutex lock scope
+		{ // Mutex lock scope
+			std::lock_guard< std::mutex > lock( solutions_mutex );
+			for( Size isol(0); isol < nsol; ++isol ) {
+				CHECK_OR_THROW_FOR_CLASS( greedy_solutions[isol]->n_solutions() == 1, "run_mc_trajectory",
+					"Program error.  Expected 1 solution from greedy refinement for Monte Carlo solution "
+					+ std::to_string(isol) + ", but got " + std::to_string( greedy_solutions[isol]->n_solutions() ) + "."
+				);
+				CostFunctionNetworkOptimizationSolution_APICSP curgreedysol(
+					std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
+						greedy_solutions[isol]->solution(0)
+					)
+				);
+				CHECK_OR_THROW_FOR_CLASS( curgreedysol != nullptr, "carry_out_greedy_refinement", "Program error.  "
+					"The solution from greedy refinement of Monte Carlo solution " + std::to_string(isol)
+					+ " is not a cost function network optimization solution."
+				);
+				CostFunctionNetworkOptimizationProblem_APICSP curgreedysolprob(
+					std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(
+						curgreedysol->problem()
+					)
+				);
+				CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  "
+					"Expected a CostFunctionNetworkOptimizationProblem class defining the greedy optimization problem, "
+					"but got " + curgreedysol->problem()->inner_class_name() + "."
+				);
+				
+				solutions.merge_in_lowest_scoring_solutions(
+					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+					n_solutions_to_store,
+					curgreedysolprob
+				);
+			}
+		} // Mutex lock scope.
+	} else { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
         solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
     } // End mutex lock scope.
