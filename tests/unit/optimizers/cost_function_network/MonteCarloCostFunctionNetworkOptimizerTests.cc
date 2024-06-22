@@ -368,20 +368,24 @@ TEST_CASE( "Solve a problem with a sum of count function using the MonteCarloCos
 				}
 
 				CHECK( solutions.size() == 1 );
-				CHECK( solutions[0]->n_solutions() == 5 );
+				CHECK( solutions[0]->n_solutions() == (greedy ? 1 : 5 ) );
 
 				if( gapped ) {
 					CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 39.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 45.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 55.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 57.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 62.0 ) < 1.0e-8 );
+					if( !greedy ) {
+						CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 45.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 55.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 57.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 62.0 ) < 1.0e-8 );
+					}
 				} else {
 					CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 7.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 21.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 33.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 38.0 ) < 1.0e-8 );
-					CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 40.0 ) < 1.0e-8 );
+					if( !greedy ) {
+						CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 21.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 33.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 38.0 ) < 1.0e-8 );
+						CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 40.0 ) < 1.0e-8 );
+					}
 				}
 			}
         }
