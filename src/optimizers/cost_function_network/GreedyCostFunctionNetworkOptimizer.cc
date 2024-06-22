@@ -69,6 +69,8 @@ GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
 {
     std::lock_guard< std::mutex > lock( src.optimizer_mutex_ );
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
+	n_random_starting_states_ = src.n_random_starting_states_;
+	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
 }
 
 /// @brief Assignment operator.
@@ -80,6 +82,8 @@ GreedyCostFunctionNetworkOptimizer::operator=( GreedyCostFunctionNetworkOptimize
     std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
+	n_random_starting_states_ = src.n_random_starting_states_;
+	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
     return *this;
 }
 
@@ -285,7 +289,25 @@ GreedyCostFunctionNetworkOptimizer::set_n_random_starting_states(
 	CHECK_OR_THROW_FOR_CLASS( setting >= 1, "set_n_random_starting_states",
 		"The number of random starting states must be at least 1.  Got " + std::to_string( setting ) + "."
 	);
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	n_random_starting_states_ = setting;
+}
+
+/// @brief By default, a single greedy optimization trajectory results in a solution being seen
+/// once.  This option lets other code specify that it should be higher.  Useful when other code,
+/// like the MonteCaroCostFunctionNetworkOptimizer, wants to use this for greedy refinement of
+/// solutions that it has produced many times.
+/// @note NOT part of the public-facing interface.  Intended only for use by code within this
+/// plugin sub-library.
+void
+GreedyCostFunctionNetworkOptimizer::set_n_times_seen_multiplier(
+	masala::base::Size const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting > 0, "set_n_times_seen_multiplier", "The multiplier must be "
+		"greater than or equal to 1."
+	);
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	n_times_seen_multiplier_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +326,20 @@ GreedyCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
 /// the number of random starting states to use.  Defaults to 1.
 masala::base::Size
 GreedyCostFunctionNetworkOptimizer::n_random_starting_states() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	return n_random_starting_states_;
+}
+
+/// @brief By default, a single greedy optimization trajectory results in a solution being seen
+/// once.  This option lets other code specify that it should be higher.  Useful when other code,
+/// like the MonteCaroCostFunctionNetworkOptimizer, wants to use this for greedy refinement of
+/// solutions that it has produced many times.
+/// @note NOT part of the public-facing interface.  Intended only for use by code within this
+/// plugin sub-library.
+masala::base::Size
+GreedyCostFunctionNetworkOptimizer::n_times_seen_multiplier() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return n_times_seen_multiplier_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -392,7 +427,8 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						std::cref(starting_state),
 						n_replicates,
 						problem,
-						std::ref(*solutions_containers_by_problem[iproblem])
+						std::ref(*solutions_containers_by_problem[iproblem]),
+						n_times_seen_multiplier_
 					)
 				);
 			}
@@ -456,7 +492,8 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	std::vector< masala::base::Size > const & starting_state,
 	masala::base::Size const n_replicates,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem_ptr,
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+	masala::base::Size const n_times_seen_multiplier
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -497,9 +534,11 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 		}
 	} while( best_candidate_state != current_state );
 
+	//write_to_tracer( "NTIMES: " + std::to_string( n_times_seen_multiplier ) ); // DELETE ME
+
 	solutions.merge_in_lowest_scoring_solutions(
 		std::vector< std::tuple< std::vector< unsigned long int >, double, unsigned long int > >{
-			{ best_candidate_state, best_candidate_score, 1 }
+			{ best_candidate_state, best_candidate_score, n_times_seen_multiplier }
 		},
 		n_replicates,
 		problem_ptr

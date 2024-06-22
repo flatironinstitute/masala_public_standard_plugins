@@ -338,7 +338,8 @@ private:
 	void
 	do_one_greedy_refinement_in_threads(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+		masala::base::Size const n_times_seen
 	) const;
 
 	/// @brief Run a single Monte Carlo trajectory.

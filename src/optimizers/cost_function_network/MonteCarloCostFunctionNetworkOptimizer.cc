@@ -1030,7 +1030,8 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads,
 					this,
 					std::cref(*problems_copies[iprob][jsol]),
-					std::ref(greedy_solutions[iprob][jsol])
+					std::ref(greedy_solutions[iprob][jsol]),
+					mc_solution_cast->n_times_solution_was_produced()
 				)
 			);
 		}
@@ -1091,7 +1092,8 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 void
 MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+	masala::base::Size const n_times_seen
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
@@ -1101,7 +1103,8 @@ MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 	CHECK_OR_THROW_FOR_CLASS( greedy_solutions == nullptr, "do_one_greedy_refinement_in_threads", "Program error.  Expected solutiuons object to be nullptr." );
 
 	GreedyCostFunctionNetworkOptimizer greedyopt;
-	greedyopt.set_cpu_threads_to_request(1);
+	greedyopt.set_cpu_threads_to_request( 1 );
+	greedyopt.set_n_times_seen_multiplier( n_times_seen );
 	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > sols( greedyopt.run_cost_function_network_optimizer( greedy_problems ) );
 	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
 		"Expected exactly one solution."
@@ -1265,7 +1268,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 			problem_copy->finalize();
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
 			greedy_problems.add_optimization_problem( problem_copy );
-			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol]);
+			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol], std::get<2>( local_solutions[isol] ) );
 		}
 
 		{ // Mutex lock scope
@@ -1294,8 +1297,10 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 					"but got " + curgreedysol->problem()->inner_class_name() + "."
 				);
 				
+				write_to_tracer( "NTIMES: " + std::to_string( curgreedysol->n_times_solution_was_produced() ) );
+
 				solutions.merge_in_lowest_scoring_solutions(
-					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 					n_solutions_to_store,
 					curgreedysolprob
 				);
