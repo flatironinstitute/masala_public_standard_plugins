@@ -941,6 +941,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
                     ( n_solutions_to_store_per_problem_ > 1 ? solution_storage_mode_ : MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ), // The solution storage mode
                     use_multimutation_, // Do we do more than one mutation at a time?
                     multimutation_probability_of_one_mutation_, // Probability of doing just one mutation, in multimutation mode.
+					do_greedy_refinement_, // Do greedy refinement?
 					greedy_refinement_mode_, // Greedy refinement mode.
                     std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
                 )
@@ -1235,14 +1236,47 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         }
     }
 
+	// Greedy refinement -- necessarily kills threaded performance a bit due to shared pointers.  However,
+	// this is just once per MC trajectory (at the end), and shared pointer stuff is just for setup and
+	// teardown of threaded work.
 	if( do_greedy && greedy_mode == MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
 		Size const nsol( solutions.n_solutions() );
 
-		// Set up a problems container with one greedy refinement problem.
 		// Set up nsol solutions containers, each to hold one greedy solution.
 		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > greedy_solutions( nsol, nullptr );
 
 		for( Size isol(0); isol<nsol; ++isol ) {
+			// Set up a problems container with one greedy refinement problem.
+#ifndef NDEBUG
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
+			);
+			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "run_mc_trajectory", "Program error.  Could not deep clone problem." );
+			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "run_mc_trajectory", "Program error.  Could not get non-finalized problem description for problem." );
+#else
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
+				std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
+			);
+#endif
+
+#ifndef NDEBUG
+			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution( isol ) )
+			);
+			CHECK_OR_THROW_FOR_CLASS( mc_solution_cast != nullptr, "run_mc_trajectory",
+				"MC solution " + std::to_string( isol ) + " was not a cost function network "
+				"optimization solution."
+			);
+#else
+			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
+				std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions.solution( isol ) )
+			);
+#endif
+			problem_copy->clear_candidate_solutions();
+			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
+			problem_copy->finalize();
+			CostFunctionNetworkOptimizationProblems_API greedy_problems;
+			greedy_problems.add_optimization_problem( problem_copy );
 			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol]);
 		}
 		for( Size isol(nsol); isol > 0; --isol ) {
