@@ -186,10 +186,12 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
         MasalaObjectAPIDefinitionSP api_description(
             masala::make_shared< MasalaObjectAPIDefinition >(
                 *this,
-                "An optimizer for cost function network problems that uses a Monte Carlo search to optimize.  This "
-                "performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to "
-                "pick a node at random and change its setting at random, compute the change in overall energy or score, "
-                "and accept or reject the move based on the difference in energy and the Metropolis criterion.",
+                "A deterministic optimizer for cost function network problems that uses a greedy algorithm to find the "
+				"nearest local solution to a starting state.  If starting states are provided in the CFN problem definition, "
+				"these are used; otherwise a user-specified nunmber of random starting states is used.  Each starting state "
+				"can be optimized in parallel.  The optimization algorithm is to make movies that conist of conisdering "
+				"every possible point mutation and accepting the one that reduces the energy the most.  This is repeated until "
+				"the energy does not improve any further.",
                 false, false
             )
         );
@@ -405,6 +407,17 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     // Nonconst to const requires a silly extra step:
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_containers_by_problem( solutions_containers_by_problem.size() );
     for( Size i(0); i<solutions_containers_by_problem.size(); ++i ) {
+		// Comment the following out; just for debugging:
+		// write_to_tracer(
+		// 	"Problem " + std::to_string(i) + " returned ["
+		// 	+ masala::base::utility::container::container_to_string(
+		// 		std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
+		// 			solutions_containers_by_problem[i]->solution(0)
+		// 		)->solution_at_variable_positions(), ","
+		// 	) + "] with penalty "
+		// 	+ std::to_string( solutions_containers_by_problem[i]->solution(0)->solution_score() )
+		// );
+
         const_solutions_containers_by_problem[i] = solutions_containers_by_problem[i];
     }
 

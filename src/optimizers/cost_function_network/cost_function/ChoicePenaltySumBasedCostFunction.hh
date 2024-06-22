@@ -273,6 +273,10 @@ private:
 	/// @brief A constant offset added to the sum of the penalties for the choices.
 	T constant_offset_ = 0.0;
 
+	/// @brief Another constant offset, computed by the finalize function, added to
+	/// the sum of the penalties for the choices.
+	T computed_constant_offset_ = 0.0;
+
 }; // class ChoicePenaltySumBasedCostFunction
 
 } // namespace cost_function

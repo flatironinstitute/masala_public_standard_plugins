@@ -49,6 +49,34 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 
+////////////////////////////////////////////////////////////////////////////////
+// ENUM HELPER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief An enum for the greedy optimization refinement modes that are
+/// allowed for the MonteCarloCostFunctionNetworkOptimizer.
+/// @details If you add to this list, update greedy_refinement_name_from_mode and
+/// the description in MonteCarloCostFunctionNetworkOptimizer::get_api_definition().
+enum class MCOptimizerGreedyRefinementMode {
+	INVALID_MODE = 0, // Keep first.
+	REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES_KEEPING_ORIGINAL,
+	REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES,
+	REFINE_BEST_OF_EACH_TRAJECTORY, // Keep second-to-last.
+	N_MODES = MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY // Keep last.
+};
+
+/// @brief Given a greedy optimization refinement mode, get its name string.
+/// @details Returns MCOptimizerGreedyRefinementMode::INVALID_MODE if the string could not be
+/// parsed as a valid mode.
+std::string greedy_refinement_name_from_mode( MCOptimizerGreedyRefinementMode const greedy_mode );
+
+/// @brief Given a greedy optimization mode name string, get its enum.
+MCOptimizerGreedyRefinementMode greedy_refinement_mode_from_name( std::string const & greedy_mode_string );
+
+/// @brief List all greedy optimization modes, as a comma-separated list.
+std::string get_all_greedy_refinement_modes();
+
+
 /// @brief A CostFunctionNetworkOptimizer that solves a cost function network problem using Monte Carlo methods.
 /// @details This performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to
 /// pick a node at random and change its setting at random, compute the change in overall energy or score, and
@@ -218,10 +246,11 @@ public:
 	/// False by default.
 	void set_do_greedy_refinement( bool const do_greedy_refinement_in );
 
-	/// @brief Set whether we keep both the original solutions and the ones found by greedy refinement if doing
-	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
-	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
-	void set_keep_original_mc_solutions_alongside_greedy_refinement_solutions( bool const keep_original_solutions_in );
+	/// @brief Set the greedy refinement mode.
+	void set_greedy_refinement_mode( MCOptimizerGreedyRefinementMode const mode_in );
+
+	/// @brief Set the greedy refinement mode, by string.
+	void set_greedy_refinement_mode( std::string const & mode_name_in );
 
 public:
 
@@ -266,10 +295,11 @@ public:
 	/// False by default.
 	bool do_greedy_refinement() const;
 
-	/// @brief Get whether we keep both the original solutions and the ones found by greedy refinement if doing
-	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
-	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
-	bool keep_original_mc_solutions_alongside_greedy_refinement_solutions() const;
+	/// @brief Get the greedy refinement mode.
+	MCOptimizerGreedyRefinementMode greedy_refinement_mode() const;
+
+	/// @brief Get the greedy refinement mode string.
+	std::string greedy_refinement_mode_string() const;
 
 public:
 
@@ -300,7 +330,7 @@ private:
 	carry_out_greedy_refinement(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
 		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
-		bool keep_original_mc_solutions_alongside_greedy
+		MCOptimizerGreedyRefinementMode const greedy_mode
 	) const;
 
 	/// @brief Carry out a single greedy optimization/
@@ -326,6 +356,8 @@ private:
 	/// If false, we do one mutation at a time.
 	/// @param[in] multimutation_probability_of_one_mutation The probability of just doing one mutation in
 	/// multimutation mode.
+	/// @param do_greedy Are we doing greedy refinement?
+	/// @param greedy_mode The mode for greedy refinement.
 	/// @param solutions_mutex A mutex for the collection of solutions.
 	void
 	run_mc_trajectory(
@@ -339,6 +371,8 @@ private:
 		MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode const solution_storage_mode,
 		bool const use_multimutation,
 		masala::base::Real const multimutation_probability_of_one_mutation,
+		bool const do_greedy,
+		MCOptimizerGreedyRefinementMode const greedy_mode,
 		std::mutex & solutions_mutex
 	) const;
 
@@ -428,10 +462,8 @@ private:
 	/// False by default.
 	bool do_greedy_refinement_ = false;
 
-	/// @brief If true, we keep both the original solutions and the ones found by greedy refinement if doing
-	/// greedy optimization (for greater diversity).  If false, we just keep the greedy solutions (for lower
-	/// scores).  True by default.  Not used if do_greedy_refinement_ is false.
-	bool keep_original_mc_solutions_alongside_greedy_refinement_solutions_ = true;
+	/// @brief The greedy refinement mode.
+	MCOptimizerGreedyRefinementMode greedy_refinement_mode_ = MCOptimizerGreedyRefinementMode::REFINE_BEST_COLLECTED_FROM_ALL_TRAJECTORIES;
 
 	/// @brief The probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
 	/// @details Used to find the value of lambda for the Poisson distribution.  Since we add 1 to the value
