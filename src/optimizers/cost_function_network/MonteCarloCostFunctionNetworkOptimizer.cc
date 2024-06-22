@@ -1260,6 +1260,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 #endif
 
 			problem_copy->clear_candidate_solutions();
+			write_to_tracer( "Adding candidate solution [" + masala::base::utility::container::container_to_string( std::get<0>( local_solutions[isol] ), "," ) + "]." );
 			problem_copy->add_candidate_solution( std::get<0>( local_solutions[isol] ) );
 			problem_copy->finalize();
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
