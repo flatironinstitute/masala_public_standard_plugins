@@ -358,9 +358,7 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
 ) {
     using masala::base::Size;
 
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( penalties_by_variable_node_and_choice_.empty(),
-        "protected_finalize", "Program error: the penalties_by_variable_node_and_choice_ vector isn't empty!"
-    );
+	penalties_by_variable_node_and_choice_.clear();
 
     std::unordered_map< Size, Size > absolute_to_variable_index;
     for( Size i(0), imax(variable_node_indices.size()); i<imax; ++i ) {
