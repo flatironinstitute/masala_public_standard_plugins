@@ -323,6 +323,8 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using masala::base::Size;
 
+	write_to_tracer( "Doing greedy refinement..." );
+
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 
 	// Get the random number generator:
@@ -407,6 +409,7 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     // Nonconst to const requires a silly extra step:
     std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_containers_by_problem( solutions_containers_by_problem.size() );
     for( Size i(0); i<solutions_containers_by_problem.size(); ++i ) {
+		write_to_tracer( "Problem " + std::to_string(i) + " returned " + std::to_string( solutions_containers_by_problem[i]->solution(0)->solution_score() ) );
         const_solutions_containers_by_problem[i] = solutions_containers_by_problem[i];
     }
 
