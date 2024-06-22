@@ -442,6 +442,27 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement, this, std::placeholders::_1 )
             )
         );
+        api_description->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+                "set_greedy_refinement_mode", "Set the greedy refinement mode, as a string.  Allowed modes are: "
+				+ get_all_greedy_refinement_modes() + ".  Briefly, refine_top will perform greedy optimization refinement "
+				"on the top solutions collected from Monte Carlo trajectories (returning only refined solutions), refine_top_keeping_original will do the same, "
+				"but will return both the original MC trajectory top solutions and the refined solutions in the same "
+				"output list, and refine_all will refine the top solutions from each Monte Carlo trajectory (returning only refined solutions)."
+				,
+                "greedy_refinement_mode_in", "The greedy refinement mode.  Allowed options are " + get_all_greedy_refinement_modes() + ".",
+                false, false,
+                std::bind(
+					static_cast<
+						void(MonteCarloCostFunctionNetworkOptimizer::*)(std::string const &)
+					> (
+						&MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode
+					),
+					this,
+					std::placeholders::_1
+				)
+            )
+        );
 
 		// Getters:
 		api_description->add_getter(
@@ -512,6 +533,22 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
                 "do_greedy_refinement", "True if we're doing greedy refinement, false otherwise.",
                 false, false,
                 std::bind( &MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement, this )
+            )
+        );
+        api_description->add_getter(
+            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::string > >(
+                "greedy_refinement_mode_string", "Get the greedy refinement mode, as a string.  Possible modes are: "
+				+ get_all_greedy_refinement_modes() + ".  Briefly, refine_top will perform greedy optimization refinement "
+				"on the top solutions collected from Monte Carlo trajectories (returning only refined solutions), refine_top_keeping_original will do the same, "
+				"but will return both the original MC trajectory top solutions and the refined solutions in the same "
+				"output list, and refine_all will refine the top solutions from each Monte Carlo trajectory (returning only refined solutions)."
+				,
+                "greedy_refinement_mode_string", "The greedy refinement mode, as a string.  Possible outputs are " + get_all_greedy_refinement_modes() + ".",
+                false, false,
+                std::bind(
+					&MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string,
+					this
+				)
             )
         );
 
@@ -1199,7 +1236,47 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     }
 
 	if( do_greedy && greedy_mode == MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
-		TODO TODO TODO;
+		Size const nsol( solutions.n_solutions() );
+
+		// Set up a problems container with one greedy refinement problem.
+		// Set up nsol solutions containers, each to hold one greedy solution.
+		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > greedy_solutions( nsol, nullptr );
+
+		for( Size isol(0); isol<nsol; ++isol ) {
+			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol]);
+		}
+		for( Size isol(nsol); isol > 0; --isol ) {
+			solutions.remove_optimization_solution( isol - 1 );
+		}
+		for( Size isol(0); isol < nsol; ++isol ) {
+			CHECK_OR_THROW_FOR_CLASS( greedy_solutions[isol]->n_solutions() == 1, "run_mc_trajectory",
+				"Program error.  Expected 1 solution from greedy refinement for Monte Carlo solution "
+				+ std::to_string(isol) + ", but got " + std::to_string( greedy_solutions[isol]->n_solutions() ) + "."
+			);
+			CostFunctionNetworkOptimizationSolution_APICSP curgreedysol(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >(
+					greedy_solutions[isol]->solution(0)
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysol != nullptr, "carry_out_greedy_refinement", "Program error.  "
+				"The solution from greedy refinement of Monte Carlo solution " + std::to_string(isol)
+				+ " is not a cost function network optimization solution."
+			);
+			CostFunctionNetworkOptimizationProblem_APICSP curgreedysolprob(
+				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(
+					curgreedysol->problem()
+				)
+			);
+			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  "
+				"Expected a CostFunctionNetworkOptimizationProblem class defining the greedy optimization problem, "
+				"but got " + curgreedysol->problem()->inner_class_name() + "."
+			);
+			solutions.merge_in_lowest_scoring_solutions(
+				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), 1 ) },
+				n_solutions_to_store,
+				curgreedysolprob
+			);
+		}
 	}
 
     { // Mutex lock scope
