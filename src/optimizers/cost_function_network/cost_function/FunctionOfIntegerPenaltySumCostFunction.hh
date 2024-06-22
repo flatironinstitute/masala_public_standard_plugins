@@ -352,7 +352,6 @@ private:
 	/// @param[out] b The slope, fitted by this function (for linear or quadratic).  Will be 0 for constant.
 	/// @param[out] c The quadratic term coefficient, fitted by this function (for quadratic).  Will be 0 for
 	/// constant or linear.
-	static
 	void
 	fit_tail_function(
 		bool const high,
