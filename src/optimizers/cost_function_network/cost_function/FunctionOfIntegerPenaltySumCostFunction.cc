@@ -31,6 +31,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
@@ -42,6 +43,7 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_TwoInput.tmpl.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/error/ErrorHandling.hh>
+#include <base/utility/container/container_util.tmpl.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -641,6 +643,22 @@ FunctionOfIntegerPenaltySumCostFunction::protected_finalize(
     fit_tail_functions_mutex_locked();
 
     ChoicePenaltySumBasedCostFunction< signed long int >::protected_finalize( variable_node_indices );
+
+	// DELETE THE FOLLOWING: FOR DEBUGGING ONLY.
+	// std::stringstream ss;
+	// ss << "COPIED:\n"
+	// 	<< "a_high=" << a_high_ << "\n"
+	// 	<< "b_high=" << b_high_ << "\n"
+	// 	<< "c_high=" << c_high_ << "\n"
+	// 	<< "a_low=" << a_low_ << "\n"
+	// 	<< "b_low=" << b_low_ << "\n"
+	// 	<< "c_low=" << c_low_ << "\n"
+	// 	<< "penalty_range_start=" << penalty_range_start_ << "\n"
+	// 	<< "penalty_values=[ " << masala::base::utility::container::container_to_string( penalty_values_, ", " ) << " ]\n"
+	// 	<< "behaviour_low=" << penalty_behaviour_string_from_enum( behaviour_low_ ) << "\n"
+	// 	<< "behaviour_high=" << penalty_behaviour_string_from_enum( behaviour_high_ );
+	// write_to_tracer( ss.str() );
+
 }
 
 /// @brief Override of assign_mutex_locked().  Calls parent function.
