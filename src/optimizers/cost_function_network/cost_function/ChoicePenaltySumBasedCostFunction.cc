@@ -332,7 +332,7 @@ ChoicePenaltySumBasedCostFunction<T>::protected_compute_cost_function_no_weight(
     for( Size i(0); i<nentries; ++i ) { indices[i] = i; }
     return std::transform_reduce(
         MASALA_SEQ_EXECUTION_POLICY
-        indices.cbegin(), indices.cend(), constant_offset_, std::plus{},
+        indices.cbegin(), indices.cend(), constant_offset_ + computed_constant_offset_, std::plus{},
         [this, &candidate_solution]( Size const i ) {
             DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( i < penalties_by_variable_node_and_choice_.size(),
                 "protected_compute_cost_function_no_weight", "Program error: penalties_by_variable_node_and_choice_ too small!"
@@ -359,6 +359,7 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
     using masala::base::Size;
 
 	penalties_by_variable_node_and_choice_.clear();
+	computed_constant_offset_ = 0.0;
 
     std::unordered_map< Size, Size > absolute_to_variable_index;
     for( Size i(0), imax(variable_node_indices.size()); i<imax; ++i ) {
@@ -408,10 +409,10 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
                 "for node " + std::to_string( absindex ) + ", but got " + std::to_string( tempcounter ) + "!"
             );
 #endif
-            constant_offset_ += penalty;
-            write_to_tracer( "Adjusting constant offset for penalty of " + std::to_string( penalty )
+            computed_constant_offset_ += penalty;
+            write_to_tracer( "Adjusting computed constant offset for penalty of " + std::to_string( penalty )
                 + " at constant node " + std::to_string( absindex ) + ".  Offset is now "
-                + std::to_string( constant_offset_ ) + "."
+                + std::to_string( computed_constant_offset_ ) + "."
             );
         }
     }
@@ -432,6 +433,9 @@ ChoicePenaltySumBasedCostFunction<T>::assign_mutex_locked(
 
     penalties_by_absolute_node_and_choice_ = src_cast_ptr->penalties_by_absolute_node_and_choice_;
     penalties_by_variable_node_and_choice_ = src_cast_ptr->penalties_by_variable_node_and_choice_;
+	n_variable_positions_ = src_cast_ptr->n_variable_positions_;
+	constant_offset_ = src_cast_ptr->constant_offset_;
+	computed_constant_offset_ = src_cast_ptr->computed_constant_offset_;
     // TODO OTHER ASSIGNMENT.
 
     masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::assign_mutex_locked( src );
