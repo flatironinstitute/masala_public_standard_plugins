@@ -353,8 +353,8 @@ TEST_CASE( "Solve a problem with a sum of count function using the MonteCarloCos
 
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ( gapped ? "Gapped results" : "Ungapped results" ) );
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
-				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
-				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tDR_SCORE\tS_SCORE\tCHOICE_SELECTION" );
+				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t--------\t-------\t----------------" );
 
 				for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
 					CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
@@ -363,6 +363,8 @@ TEST_CASE( "Solve a problem with a sum of count function using the MonteCarloCos
 					ss << std::setw(8) << i << "\t"
 						<< std::setw(10) << solution->n_times_solution_was_produced() << "\t"
 						<< std::setw(5) << solution->solution_score() << "\t"
+						<< std::setw(8) << solution->solution_score_data_representation_approximation() << "\t"
+						<< std::setw(7) << solution->solution_score_solver_approximation() << "\t"
 						<< "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
 					tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ss.str() );
 				}
@@ -450,8 +452,8 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ( gapped ? "Gapped results" : "Ungapped results" ) );
 				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
-				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
-				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tDR_SCORE\tS_SCORE\tCHOICE_SELECTION" );
+				tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t--------\t-------\t----------------" );
 
 				for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
 					CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
@@ -460,6 +462,8 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 					ss << std::setw(8) << i << "\t"
 						<< std::setw(10) << solution->n_times_solution_was_produced() << "\t"
 						<< std::setw(5) << solution->solution_score() << "\t"
+						<< std::setw(8) << solution->solution_score_data_representation_approximation() << "\t"
+						<< std::setw(7) << solution->solution_score_solver_approximation() << "\t"
 						<< "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
 					tracer->write_to_tracer( "MonteCarloCostFunctionNetworkOptimizerTests", ss.str() );
 				}
