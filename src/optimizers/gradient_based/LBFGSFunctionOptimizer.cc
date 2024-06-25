@@ -169,9 +169,13 @@ LBFGSFunctionOptimizer::get_api_definition() {
 /// the problem with the same index.
 std::vector< masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationSolutions_APICSP >
 LBFGSFunctionOptimizer::run_gradient_based_optimizer(
-	masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationProblems_API const & problems
+	masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationProblems_API const & //problems
 ) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::gradient_based;
+
+	std::vector< GradientBasedFunctionOptimizationSolutions_APICSP > outvec;
 	TODO TODO TODO;
+	return outvec;
 }
 
 } // namespace gradient_based
