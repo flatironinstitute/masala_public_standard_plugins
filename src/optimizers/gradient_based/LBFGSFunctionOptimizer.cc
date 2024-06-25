@@ -34,6 +34,8 @@
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/types.hh>
+#include <base/api/MasalaObjectAPIDefinition.hh>
+#include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 
 // STL headers:
 #include <vector>
@@ -120,6 +122,42 @@ LBFGSFunctionOptimizer::class_name_static() {
 std::string
 LBFGSFunctionOptimizer::class_namespace_static() {
 	return "standard_masala_plugins::optimizers::gradient_based";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// API DEFINITION FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get an object describing the API for this object.
+/// @note This is a weak pointer rather than a shared pointer since the
+/// original object is expected to hold on to its API definition (which includes
+/// funciton pointers to the functions of the instance).  Querying whether the
+/// weak pointer can be converted to a shared pointer serves on a check as to
+/// whether it is safe to use the function pointers.  Not ideal, but better than
+/// nothing.
+masala::base::api::MasalaObjectAPIDefinitionCWP
+LBFGSFunctionOptimizer::get_api_definition() {
+	using namespace masala::base::api;
+
+	std::lock_guard< std::mutex > lock( mutex() );
+
+	if( api_definition() == nullptr ) {
+		MasalaObjectAPIDefinitionSP api_def(
+			masala::make_shared< MasalaObjectAPIDefinition >(
+				*this,
+				"A gradient-descent function optimizer that uses the limited-memory Broyden–Fletcher–Goldfarb–Shanno "
+				"algorithm (L-BFGS), a quasi-Newtonian method that relies only on gradients to approximate the inverse "
+				"Hessian matrix, to carry out gradient descent for a differentiable function in R^N.",
+				false, false
+			)
+		);
+		
+		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( LBFGSFunctionOptimizer, api_def );
+
+		api_definition() = api_def;
+	}
+
+	return api_definition();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

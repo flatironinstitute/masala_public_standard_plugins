@@ -112,6 +112,22 @@ public:
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
+// API DEFINITION FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get an object describing the API for this object.
+	/// @note This is a weak pointer rather than a shared pointer since the
+	/// original object is expected to hold on to its API definition (which includes
+	/// funciton pointers to the functions of the instance).  Querying whether the
+	/// weak pointer can be converted to a shared pointer serves on a check as to
+	/// whether it is safe to use the function pointers.  Not ideal, but better than
+	/// nothing.
+	masala::base::api::MasalaObjectAPIDefinitionCWP
+	get_api_definition() override;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
