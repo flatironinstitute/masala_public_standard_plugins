@@ -58,7 +58,7 @@ LBFGSFunctionOptimizer::clone() const {
 
 /// @brief Deep clone operation: copy this object and return a shared pointer to the
 /// copy, making sure that all contained objects are also copied.
-masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+LBFGSFunctionOptimizerSP
 LBFGSFunctionOptimizer::deep_clone() const {
 	LBFGSFunctionOptimizerSP new_obj( std::static_pointer_cast< LBFGSFunctionOptimizer >( clone() ) );
 	new_obj->make_independent();
@@ -193,7 +193,7 @@ LBFGSFunctionOptimizer::run_gradient_based_optimizer(
 	using namespace masala::numeric_api::auto_generated_api::optimization::gradient_based;
 
 	std::vector< GradientBasedFunctionOptimizationSolutions_APICSP > outvec;
-	TODO TODO TODO;
+	//TODO TODO TODO;
 	return outvec;
 }
 
