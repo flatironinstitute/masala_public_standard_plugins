@@ -62,6 +62,7 @@ masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFu
 LBFGSFunctionOptimizer::deep_clone() const {
 	LBFGSFunctionOptimizerSP new_obj( std::static_pointer_cast< LBFGSFunctionOptimizer >( clone() ) );
 	new_obj->make_independent();
+	return new_obj;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
