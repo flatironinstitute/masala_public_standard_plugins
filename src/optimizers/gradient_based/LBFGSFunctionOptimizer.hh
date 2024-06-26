@@ -48,6 +48,10 @@ class LBFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimiz
 
 public:
 
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION AND DESTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+
 	/// @brief Default constructor.
 	LBFGSFunctionOptimizer() = default;
 
@@ -56,6 +60,16 @@ public:
 
 	/// @brief Destructor.
 	~LBFGSFunctionOptimizer() override = default;
+
+	/// @brief Clone operation: copy this object and return a shared pointer to the
+	/// copy.  Contained objects may still be shared.
+	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+	clone() const override;
+
+	/// @brief Deep clone operation: copy this object and return a shared pointer to the
+	/// copy, making sure that all contained objects are also copied.
+	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+	deep_clone() const override;
 
 public:
 
@@ -124,6 +138,27 @@ public:
 	/// nothing.
 	masala::base::api::MasalaObjectAPIDefinitionCWP
 	get_api_definition() override;
+
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Assignment: must be implemented by derived classes, which must call the base
+	/// class protected_assign().
+	/// @details Performs no mutex locking.
+	void
+	protected_assign(
+		masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer const & src
+	) override;
+
+	/// @brief Make independent: must be implemented by derived classes, which must call the base
+	/// class protected_make_independent().
+	/// @details Performs no mutex locking.
+	virtual
+	void
+	protected_make_independent() override;
 
 public:
 

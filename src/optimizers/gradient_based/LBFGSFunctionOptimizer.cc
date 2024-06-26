@@ -45,6 +45,24 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION AND DESTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Clone operation: copy this object and return a shared pointer to the
+/// copy.  Contained objects may still be shared.
+masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+LBFGSFunctionOptimizer::clone() const {
+	return masala::make_shared< LBFGSFunctionOptimizer >(*this);
+}
+
+/// @brief Deep clone operation: copy this object and return a shared pointer to the
+/// copy, making sure that all contained objects are also copied.
+masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+LBFGSFunctionOptimizer::deep_clone() const {
+	LBFGSFunctionOptimizerSP new_obj( std::static_pointer_cast< LBFGSFunctionOptimizer >( clone() ) );
+	new_obj->make_independent();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
@@ -176,6 +194,31 @@ LBFGSFunctionOptimizer::run_gradient_based_optimizer(
 	std::vector< GradientBasedFunctionOptimizationSolutions_APICSP > outvec;
 	TODO TODO TODO;
 	return outvec;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assignment: must be implemented by derived classes, which must call the base
+/// class protected_assign().
+/// @details Performs no mutex locking.
+void
+LBFGSFunctionOptimizer::protected_assign(
+	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer const & src
+) {
+	LBFGSFunctionOptimizer const * src_ptr_cast( dynamic_cast< LBFGSFunctionOptimizer cons * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
+	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer::protected_assign( src );
+}
+
+/// @brief Make independent: must be implemented by derived classes, which must call the base
+/// class protected_make_independent().
+/// @details Performs no mutex locking.
+void
+LBFGSFunctionOptimizer::protected_make_independent() {
+	// TODO
+	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based
