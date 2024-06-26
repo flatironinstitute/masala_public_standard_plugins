@@ -207,7 +207,7 @@ void
 LBFGSFunctionOptimizer::protected_assign(
 	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer const & src
 ) {
-	LBFGSFunctionOptimizer const * src_ptr_cast( dynamic_cast< LBFGSFunctionOptimizer cons * >( &src ) );
+	LBFGSFunctionOptimizer const * src_ptr_cast( dynamic_cast< LBFGSFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
 	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer::protected_assign( src );
 }
