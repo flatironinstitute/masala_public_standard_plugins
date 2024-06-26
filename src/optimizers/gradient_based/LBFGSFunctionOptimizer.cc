@@ -28,8 +28,8 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
-#include <numeric_api/auto_generated_api/optimization/gradient_based/GradientBasedFunctionOptimizationProblems_API.hh>
-#include <numeric_api/auto_generated_api/optimization/gradient_based/GradientBasedFunctionOptimizationSolutions_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -51,7 +51,7 @@ namespace gradient_based {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
 LBFGSFunctionOptimizer::clone() const {
 	return masala::make_shared< LBFGSFunctionOptimizer >(*this);
 }
@@ -71,7 +71,7 @@ LBFGSFunctionOptimizer::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "GradientBased", "LBFGSFunctionOptimizer" } }
+/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -80,17 +80,19 @@ LBFGSFunctionOptimizer::deep_clone() const {
 std::vector< std::vector< std::string > >
 LBFGSFunctionOptimizer::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "GradientBased", "LBFGSFunctionOptimizer" }
+		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer" }
 	};
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
 std::vector< std::string >
 LBFGSFunctionOptimizer::get_keywords() const {
 	return std::vector< std::string > {
 		"optimizer",
+		"real_valued",
+		"local_optimizer",
         "gradient_based",
 		"numeric",
 		"quasi-newtonian",
@@ -107,10 +109,10 @@ LBFGSFunctionOptimizer::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "GradientBased", "LBFGSFunctionOptimizer"} }
+/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 LBFGSFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "GradientBased", "LBFGSFunctionOptimizer" } };
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer" } };
 }
 
 /// @brief Every class can name itself.
@@ -186,13 +188,13 @@ LBFGSFunctionOptimizer::get_api_definition() {
 /// @brief Run the optimizer on a set of gradient-based loss function minimization problems, and produce a set of solutions.
 /// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 /// the problem with the same index.
-std::vector< masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationSolutions_APICSP >
-LBFGSFunctionOptimizer::run_gradient_based_optimizer(
-	masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationProblems_API const & //problems
+std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
+LBFGSFunctionOptimizer::run_real_valued_local_optimizer(
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & //problems
 ) const {
-	using namespace masala::numeric_api::auto_generated_api::optimization::gradient_based;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 
-	std::vector< GradientBasedFunctionOptimizationSolutions_APICSP > outvec;
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec;
 	//TODO TODO TODO;
 	return outvec;
 }
@@ -206,11 +208,11 @@ LBFGSFunctionOptimizer::run_gradient_based_optimizer(
 /// @details Performs no mutex locking.
 void
 LBFGSFunctionOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer const & src
+	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
 ) {
 	LBFGSFunctionOptimizer const * src_ptr_cast( dynamic_cast< LBFGSFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
-	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -219,7 +221,7 @@ LBFGSFunctionOptimizer::protected_assign(
 void
 LBFGSFunctionOptimizer::protected_make_independent() {
 	// TODO
-	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based

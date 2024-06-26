@@ -30,11 +30,11 @@
 #include <optimizers/gradient_based/LBFGSFunctionOptimizer.fwd.hh>
 
 // Numeric API headers:
-#include <numeric_api/auto_generated_api/optimization/gradient_based/GradientBasedFunctionOptimizationProblems_API.fwd.hh>
-#include <numeric_api/auto_generated_api/optimization/gradient_based/GradientBasedFunctionOptimizationSolutions_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/gradient_based/GradientBasedFunctionOptimizer.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/RealValuedFunctionLocalOptimizer.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -44,7 +44,7 @@ namespace gradient_based {
 /// for which gradients are available using the quasi-Newtonian limited-memory Broyden–Fletcher–Goldfarb–Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class LBFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer {
+class LBFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer {
 
 public:
 
@@ -63,7 +63,7 @@ public:
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
-	masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizerSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
 	clone() const override;
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
@@ -79,7 +79,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "GradientBased", "LBFGSFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -90,7 +90,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -103,7 +103,7 @@ public:
     /// a list of hierarchical categories, and the inner vector is the particular hierarchical
     /// category, from most general to most specific.  Also note that this function is pure
     /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "GradientBased", "LBFGSFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
@@ -150,7 +150,7 @@ protected:
 	/// @details Performs no mutex locking.
 	void
 	protected_assign(
-		masala::numeric_api::base_classes::optimization::gradient_based::GradientBasedFunctionOptimizer const & src
+		masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
 	) override;
 
 	/// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -170,9 +170,9 @@ public:
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (L-BFGS)
 	/// to carry out gradient-descent minimization.
-	std::vector< masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationSolutions_APICSP >
-	run_gradient_based_optimizer(
-		masala::numeric_api::auto_generated_api::optimization::gradient_based::GradientBasedFunctionOptimizationProblems_API const & problems
+	std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
+	run_real_valued_local_optimizer(
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 	) const override;
 
 }; // class LBFGSFunctionOptimizer
