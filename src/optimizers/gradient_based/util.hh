@@ -29,11 +29,37 @@
 // Base headers:
 #include <base/types.hh>
 
+// Numeric API headers:
+#include <numeric_api/utility/constants/constants.hh>
+
+// STL headers:
+#include <functional>
+#include <algorithm>
+
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
+	inline
+	void
+	bracket_minimum_with_parabolic_extrapolation(
+		masala::base::Real & left,
+		masala::base::Real & right,
+		std::function< masala::base::Real( masala::base::Real ) > const & fxn
+	) {
+		// Evaluate the function at the starting points:
+		masala::base::Real fxn_left( fxn(left) );
+		masala::base::Real fxn_right( fxn(right) );
+		bool swapped(false);
+		if( fxn_right > fxn_left ) {
+			std::swap( fxn_right, fxn_left );
+			std::swap( right, left );
+		}
+		masala::base::Real centre( right + MASALA_GOLDEN_RATIO*( right-left ) );
+		masala::base::Real fxn_centre( fxn(centre) );
+		TODO CONTINUE HERE;
 
+	}
 
 } // namespace gradient_based
 } // namespace optimizers
