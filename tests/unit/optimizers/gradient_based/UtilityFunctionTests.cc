@@ -80,8 +80,9 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 		bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
 	}() );
 
-	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) );
-	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) );
+	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) + "\tfxn_left = " + std::to_string( fxn_left ) );
+	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "centre = " + std::to_string(centre) + "\tfxn_centre = " + std::to_string( fxn_centre ) );
+	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) + "\tfxn_right = " + std::to_string( fxn_right ) );
 
 	CHECK( left < 2.002 );
 	CHECK( right > 2.002 );
