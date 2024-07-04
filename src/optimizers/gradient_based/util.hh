@@ -28,6 +28,7 @@
 
 // Base headers:
 #include <base/types.hh>
+#include <base/error/ErrorHandling.hh>
 
 // Numeric API headers:
 #include <numeric_api/utility/constants/constants.hh>
@@ -35,6 +36,7 @@
 // STL headers:
 #include <functional>
 #include <algorithm>
+#include <cmath>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -45,19 +47,59 @@ namespace gradient_based {
 	bracket_minimum_with_parabolic_extrapolation(
 		masala::base::Real & left,
 		masala::base::Real & right,
-		std::function< masala::base::Real( masala::base::Real ) > const & fxn
+		std::function< masala::base::Real( masala::base::Real ) > const & fxn,
+		masala::base::Real const min_denom = 1.0e-20,
+		masala::base::Real const max_parabolic_mag_factor = 100.0
 	) {
+		using masala::base::Real;
+
+		CHECK_OR_THROW( min_denom > 0, "standard_masala_plugins::optimizers::gradient_based", "bracket_minimum_with_parabolic_extrapolation", "Minimum denominator size must be positive.  Got " + std::to_string( min_denom ) + "." );
+		CHECK_OR_THROW( max_parabolic_mag_factor > 1.0, "standard_masala_plugins::optimizers::gradient_based", "bracket_minimum_with_parabolic_extrapolation", "Maximum parabolic magnification factor must be positive and greater than 1.0.  Got " + std::to_string( max_parabolic_mag_factor ) + "." );
+
 		// Evaluate the function at the starting points:
-		masala::base::Real fxn_left( fxn(left) );
-		masala::base::Real fxn_right( fxn(right) );
+		Real fxn_left( fxn(left) );
+		Real fxn_right( fxn(right) );
 		bool swapped(false);
 		if( fxn_right > fxn_left ) {
 			std::swap( fxn_right, fxn_left );
 			std::swap( right, left );
+			swapped = true;
 		}
-		masala::base::Real centre( right + MASALA_GOLDEN_RATIO*( right-left ) );
-		masala::base::Real fxn_centre( fxn(centre) );
-		TODO CONTINUE HERE;
+		Real centre( right + MASALA_GOLDEN_RATIO*( right-left ) );
+		Real fxn_centre( fxn(centre) );
+
+		// Scratch space vars:
+		Real right_left,
+			right_centre,
+			fxn_right_fxn_left,
+			fxn_right_fxn_ctr,
+			r_l_x_fr_fc,
+			r_c_x_fr_fl,
+			denom,
+			parabolic_min;
+
+		while( fxn_right > fxn_centre ) {
+			// Update differences:
+			right_left = right - left;
+			fxn_right_fxn_ctr = fxn_right - fxn_centre;
+			right_centre = right - centre;
+			fxn_right_fxn_left = fxn_right = fxn_left;
+
+			// Update products:
+			r_l_x_fr_fc = right_left * fxn_right_fxn_ctr;
+			r_c_x_fr_fl = right_centre * fxn_right_fxn_left;
+
+			// Compute parabolic extrapolation minimum:
+			denom = r_c_x_fr_fl - r_l_x_fr_fc;
+			if( std::abs(denom) < min_denom ) {
+				denom = std::copysign( min_denom, denom );
+			}
+			parabolic_min = right - (right_centre * r_c_x_fr_fl - right_left * r_l_x_fr_fc ) / (2.0*denom);
+
+			// Test possibilities:
+
+		}
+		//TODO CONTINUE HERE;
 
 	}
 
