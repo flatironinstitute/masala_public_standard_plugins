@@ -75,9 +75,9 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
 	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
-	Real left(1.0), right( 1.1 );
+	Real left(1.0), centre( 1.1 ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
 	REQUIRE_NOTHROW([&](){
-		bracket_minimum_with_parabolic_extrapolation( left, right, fxn1 );
+		bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
 	}() );
 
 	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) );
