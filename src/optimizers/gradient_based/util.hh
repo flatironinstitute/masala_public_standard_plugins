@@ -1,6 +1,6 @@
 /*
     Masala
-    Copyright (C) 2024 Vikram K. Mulligan
+    Copycentre (C) 2024 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -46,7 +46,11 @@ namespace gradient_based {
 	void
 	bracket_minimum_with_parabolic_extrapolation(
 		masala::base::Real & left,
+		masala::base::Real & centre,
 		masala::base::Real & right,
+		masala::base::Real & fxn_left,
+		masala::base::Real & fxn_centre,
+		masala::base::Real & fxn_right,
 		std::function< masala::base::Real( masala::base::Real ) > const & fxn,
 		masala::base::Real const min_denom = 1.0e-20,
 		masala::base::Real const max_parabolic_mag_factor = 100.0
@@ -57,46 +61,70 @@ namespace gradient_based {
 		CHECK_OR_THROW( max_parabolic_mag_factor > 1.0, "standard_masala_plugins::optimizers::gradient_based", "bracket_minimum_with_parabolic_extrapolation", "Maximum parabolic magnification factor must be positive and greater than 1.0.  Got " + std::to_string( max_parabolic_mag_factor ) + "." );
 
 		// Evaluate the function at the starting points:
-		Real fxn_left( fxn(left) );
-		Real fxn_right( fxn(right) );
+		fxn_left = fxn(left); // FUNCTION EVALUATION.
+		fxn_centre = fxn(centre); // FUNCTION EVALUATION.
 		bool swapped(false);
-		if( fxn_right > fxn_left ) {
-			std::swap( fxn_right, fxn_left );
-			std::swap( right, left );
+		if( fxn_centre > fxn_left ) {
+			std::swap( fxn_centre, fxn_left );
+			std::swap( centre, left );
 			swapped = true;
 		}
-		Real centre( right + MASALA_GOLDEN_RATIO*( right-left ) );
-		Real fxn_centre( fxn(centre) );
+		right = centre + MASALA_GOLDEN_RATIO*( centre-left );
+		fxn_right = fxn(right); // FUNCTION EVALUATION.
 
 		// Scratch space vars:
-		Real right_left,
-			right_centre,
-			fxn_right_fxn_left,
-			fxn_right_fxn_ctr,
-			r_l_x_fr_fc,
-			r_c_x_fr_fl,
+		Real centre_left,
+			centre_right,
+			fxn_centre_fxn_left,
+			fxn_centre_fxn_right,
+			c_l_x_fc_fr,
+			c_r_x_fc_fl,
 			denom,
-			parabolic_min;
+			parabolic_min,
+			fxn_parabolic_min;
 
-		while( fxn_right > fxn_centre ) {
+		while( fxn_centre > fxn_right ) {
 			// Update differences:
-			right_left = right - left;
-			fxn_right_fxn_ctr = fxn_right - fxn_centre;
-			right_centre = right - centre;
-			fxn_right_fxn_left = fxn_right = fxn_left;
+			centre_left = centre - left;
+			fxn_centre_fxn_right = fxn_centre - fxn_right;
+			centre_right = centre - right;
+			fxn_centre_fxn_left = fxn_centre = fxn_left;
 
 			// Update products:
-			r_l_x_fr_fc = right_left * fxn_right_fxn_ctr;
-			r_c_x_fr_fl = right_centre * fxn_right_fxn_left;
+			c_l_x_fc_fr = centre_left * fxn_centre_fxn_right;
+			c_r_x_fc_fl = centre_right * fxn_centre_fxn_left;
 
 			// Compute parabolic extrapolation minimum:
-			denom = r_c_x_fr_fl - r_l_x_fr_fc;
+			denom = c_r_x_fc_fl - c_l_x_fc_fr;
 			if( std::abs(denom) < min_denom ) {
 				denom = std::copysign( min_denom, denom );
 			}
-			parabolic_min = right - (right_centre * r_c_x_fr_fl - right_left * r_l_x_fr_fc ) / (2.0*denom);
+			parabolic_min = centre - (centre_right * c_r_x_fc_fl - centre_left * c_l_x_fc_fr ) / (2.0*denom);
 
-			// Test possibilities:
+			// Test possibilities for the parabolic minimum:
+			if( centre < parabolic_min && parabolic_min < right ) {
+				// The parabolic minimum is between the right and the centre, so test it.
+				fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+				if( fxn_parabolic_min < fxn_right ) {
+					// The minimum is between centre and right.  So set:
+					// - new left = centre
+					// - new centre = parabolic min
+					// - new right = right (change nothing)
+					left = centre;
+					fxn_left = fxn_centre;
+					centre = parabolic_min;
+					fxn_centre = fxn_parabolic_min;
+					return;
+				} else if ( fxn_parabolic_min > fxn_centre ) {
+					// The minimum is between left and parabolic min, with centre less than either.  So set:
+					// - new left = left (no change)
+					// - new centre = centre (no change)
+					// - new right = parabolic min
+					right = parabolic_min;
+					fxn_right = fxn_parabolic_min;
+					return;
+				}
+			}
 
 		}
 		//TODO CONTINUE HERE;
