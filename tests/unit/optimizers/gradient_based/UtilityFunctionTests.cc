@@ -86,6 +86,11 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 
 	CHECK( left < 2.002 );
 	CHECK( right > 2.002 );
+	CHECK( right > centre );
+	CHECK( right > left );
+	CHECK( left < centre );
+	CHECK( fxn_centre < fxn_left );
+	CHECK( fxn_centre < fxn_right );
 }
 
 } // namespace cost_function_network
