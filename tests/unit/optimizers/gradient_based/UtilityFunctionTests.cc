@@ -34,6 +34,7 @@
 
 // STL headers
 #include <cmath>
+#include <functional>
 
 namespace standard_masala_plugins {
 namespace tests {
@@ -52,19 +53,38 @@ test_gaussian(
 }
 
 /// @brief See util_test_fxn_1.png to see this plotted.
+/// @details Has minima at (2.002, -2.018), (2.995, -0.999), and (3.397,-0.475).
+/// Has maxima at (2.440, -0.376) and (3.266,-0.266).  Can be multiplied by -1 by
+/// setting invert true.
 masala::base::Real
 test_function_1(
-	masala::base::Real const x
+	masala::base::Real const x,
+	bool invert
 ) {
 	// For plotting using Desmos:
 	// -1.0\cdot\exp\left(-\left(\frac{\left(x-3\right)}{0.5}\right)^{2}\right)-2.0\cdot\exp\left(-\left(\frac{\left(x-2\right)}{0.25}\right)^{2}\right)+0.5\cdot\exp\left(-\left(\frac{\left(x-3.25\right)}{0.1}\right)^{2}\right)
-	return test_gaussian( x, -1.0, 3.0, 0.5 ) + test_gaussian( x, -2.0, 2.0, 0.25 ) + test_gaussian( x, 0.5, 3.25, 0.1 );
+	return ( invert ? -1.0 : 1.0 ) * ( test_gaussian( x, -1.0, 3.0, 0.5 ) + test_gaussian( x, -2.0, 2.0, 0.25 ) + test_gaussian( x, 0.5, 3.25, 0.1 ) );
 }
 
 TEST_CASE( "Find the bounds of a local minimization problem using parabolic extrapolation.", "[standard_masala_plugins::optimizers::gradient_based::bracket_minimum_with_parabolic_extrapolation][local_minimization][bounds]" ) {
-    //REQUIRE_NOTHROW([&](){
-        
-    //}() );
+	using masala::base::Real;
+	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using masala::base::managers::tracer::MasalaTracerManager;
+	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+
+	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+
+	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
+	Real left(1.0), right( 1.1 );
+	REQUIRE_NOTHROW([&](){
+		bracket_minimum_with_parabolic_extrapolation( left, right, fxn1 );
+	}() );
+
+	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) );
+	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) );
+
+	CHECK( left < 2.002 );
+	CHECK( right > 2.002 );
 }
 
 } // namespace cost_function_network
