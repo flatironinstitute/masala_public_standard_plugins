@@ -145,7 +145,7 @@ namespace gradient_based {
 					centre = parabolic_min;
 					fxn_centre = fxn_parabolic_min;
 
-					if( swapped ) {
+					if( left > right ) {
 						std::swap( left, right );
 						std::swap( fxn_left, fxn_right );
 					}
@@ -158,7 +158,7 @@ namespace gradient_based {
 					right = parabolic_min;
 					fxn_right = fxn_parabolic_min;
 
-					if( swapped ) {
+					if( left > right ) {
 						std::swap( left, right );
 						std::swap( fxn_left, fxn_right );
 					}
