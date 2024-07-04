@@ -130,7 +130,7 @@ namespace gradient_based {
 			centre_left = centre - left;
 			fxn_centre_fxn_right = fxn_centre - fxn_right;
 			centre_right = centre - right;
-			fxn_centre_fxn_left = fxn_centre = fxn_left;
+			fxn_centre_fxn_left = fxn_centre - fxn_left;
 
 			// Update products:
 			c_l_x_fc_fr = centre_left * fxn_centre_fxn_right;
@@ -145,6 +145,7 @@ namespace gradient_based {
 
 			// Test possibilities for the parabolic minimum:
 			if(
+				//(centre-parabolic_min)*(parabolic_min-right) > 0.0
 				( (!swapped) && (centre < parabolic_min && parabolic_min < right) ) ||
 				( swapped && (centre > parabolic_min && parabolic_min > right) )
 			) {
@@ -185,7 +186,9 @@ namespace gradient_based {
 				}
 			} else {
 				parabolic_min_limit = centre - max_parabolic_mag_factor * centre_right;
-				if( ( (!swapped) && (parabolic_min > right && parabolic_min < parabolic_min_limit ) ) ||
+				if(
+					//(right-parabolic_min)*(parabolic_min-parabolic_min_limit) > 0.0
+					( (!swapped) && (parabolic_min > right && parabolic_min < parabolic_min_limit ) ) ||
 					( swapped && (parabolic_min < right && parabolic_min > parabolic_min_limit ) )
 				) {
 					// If we're past the rightmost point, but within the magnification limit:
