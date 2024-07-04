@@ -67,7 +67,7 @@ namespace gradient_based {
 	/// extrapolation.  Used to avoid divide-by-zero errors; in most cases, the default value of
 	/// 1.0e-20 is reasonable.
 	/// @param[in] max_parabolic_mag_factor The largest amount by which the parabolic extrapolation
-	/// may increase the step size.  Must be greater than 1.0.  Usually, the default of 100.0 is
+	/// may increase the step size.  Must be greater than 1.0.  Usually, the default of 10.0 is
 	/// reasonable.
 	inline
 	void
@@ -80,7 +80,7 @@ namespace gradient_based {
 		masala::base::Real & fxn_right,
 		std::function< masala::base::Real( masala::base::Real ) > const & fxn,
 		masala::base::Real const min_denom = 1.0e-20,
-		masala::base::Real const max_parabolic_mag_factor = 100.0
+		masala::base::Real const max_parabolic_mag_factor = 10.0
 	) {
 		using masala::base::Real;
 
@@ -222,6 +222,10 @@ namespace gradient_based {
 			fxn_right = fxn_parabolic_min;
 		}
 
+		if( left > right ) {
+			std::swap( left, right );
+			std::swap( fxn_left, fxn_right );
+		}
 	}
 
 } // namespace gradient_based
