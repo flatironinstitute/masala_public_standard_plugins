@@ -81,6 +81,7 @@ namespace gradient_based {
 			c_r_x_fc_fl,
 			denom,
 			parabolic_min,
+			parabolic_min_limit,
 			fxn_parabolic_min;
 
 		while( fxn_centre > fxn_right ) {
@@ -102,7 +103,10 @@ namespace gradient_based {
 			parabolic_min = centre - (centre_right * c_r_x_fc_fl - centre_left * c_l_x_fc_fr ) / (2.0*denom);
 
 			// Test possibilities for the parabolic minimum:
-			if( centre < parabolic_min && parabolic_min < right ) {
+			if(
+				( (!swapped) && (centre < parabolic_min && parabolic_min < right) ) ||
+				( swapped && (centre > parabolic_min && parabolic_min > right) )
+			) {
 				// The parabolic minimum is between the right and the centre, so test it.
 				fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
 				if( fxn_parabolic_min < fxn_right ) {
@@ -114,6 +118,11 @@ namespace gradient_based {
 					fxn_left = fxn_centre;
 					centre = parabolic_min;
 					fxn_centre = fxn_parabolic_min;
+
+					if( swapped ) {
+						std::swap( left, right );
+						std::swap( fxn_left, fxn_right );
+					}
 					return;
 				} else if ( fxn_parabolic_min > fxn_centre ) {
 					// The minimum is between left and parabolic min, with centre less than either.  So set:
@@ -122,12 +131,55 @@ namespace gradient_based {
 					// - new right = parabolic min
 					right = parabolic_min;
 					fxn_right = fxn_parabolic_min;
+
+					if( swapped ) {
+						std::swap( left, right );
+						std::swap( fxn_left, fxn_right );
+					}
 					return;
+				} else {
+					// The parabolic fit did not work.  Use a golden ratio search instead.
+					parabolic_min = right - MASALA_GOLDEN_RATIO * centre_right;
+					fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+				}
+			} else {
+				parabolic_min_limit = centre - max_parabolic_mag_factor * centre_right;
+				if( ( (!swapped) && (parabolic_min > right && parabolic_min < parabolic_min_limit ) ) ||
+					( swapped && (parabolic_min < right && parabolic_min > parabolic_min_limit ) )
+				) {
+					// If we're past the rightmost point, but within the magnification limit:
+					fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+					if( fxn_parabolic_min < fxn_right ) {
+						// If the function is decreasing, keep shifting to the right by golden
+						// section search.
+						centre = right;
+						fxn_centre = fxn_right;
+						right = parabolic_min;
+						fxn_centre_fxn_right = fxn_parabolic_min;
+						parabolic_min += MASALA_GOLDEN_RATIO * ( parabolic_min - right );
+						fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+					}
+				} else if(
+					( (!swapped) && (parabolic_min > parabolic_min_limit ) ) ||
+					( swapped && (parabolic_min < parabolic_min_limit ) )
+				) {
+					// We're beyond the allowed maximium step size.
+					parabolic_min = parabolic_min_limit;
+					fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+				} else {
+					// Fall back on a golden search.
+					parabolic_min = right - MASALA_GOLDEN_RATIO * centre_right;
+					fxn_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
 				}
 			}
-
+			// If we reach here, shift points appropriately.
+			left = centre;
+			fxn_left = fxn_centre;
+			centre = right;
+			fxn_centre = fxn_right;
+			right = parabolic_min;
+			fxn_right = fxn_parabolic_min;
 		}
-		//TODO CONTINUE HERE;
 
 	}
 
