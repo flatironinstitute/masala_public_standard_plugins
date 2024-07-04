@@ -86,7 +86,7 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 	masala::base::Size counter(0);
 	for( auto const & entry : initial_lefts_and_centres ) {
 		++counter;
-		Real left(1.0), centre( 1.1 ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
+		Real left( entry.first ), centre( entry.second ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
 		REQUIRE_NOTHROW([&](){
 			bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
 		}() );
@@ -99,10 +99,14 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 		if( counter <= 3 ) {
 			CHECK( left <= 2.002 );
 			CHECK( right >= 2.002 );
+			CHECK( right < 2.440 );
 		} else if( counter == 4 ) {
+			CHECK( left > 2.440 );
 			CHECK( left <= 2.995 );
 			CHECK( right >= 2.995 );
+			CHECK( right < 3.266 );
 		} else {
+			CHECK( left > 3.266 );
 			CHECK( left <= 3.397 );
 			CHECK( right >= 3.397 );
 		}
