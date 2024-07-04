@@ -75,22 +75,47 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
 	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
-	Real left(1.0), centre( 1.1 ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
-	REQUIRE_NOTHROW([&](){
-		bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
-	}() );
+	std::vector< std::pair< Real, Real > > initial_lefts_and_centres {
+		std::make_pair( 1.0, 1.1 ),
+		std::make_pair( 2.4, 2.41 ),
+		std::make_pair( 1.0, 0.9 ),
+		std::make_pair( 2.45, 2.46 ),
+		std::make_pair( 5.0, 5.1 )
+	};
 
-	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) + "\tfxn_left = " + std::to_string( fxn_left ) );
-	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "centre = " + std::to_string(centre) + "\tfxn_centre = " + std::to_string( fxn_centre ) );
-	tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) + "\tfxn_right = " + std::to_string( fxn_right ) );
+	masala::base::Size counter(0);
+	for( auto const entry : initial_lefts_and_centres ) {
+		++counter;
+		Real left(1.0), centre( 1.1 ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
+		REQUIRE_NOTHROW([&](){
+			bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
+		}() );
 
-	CHECK( left < 2.002 );
-	CHECK( right > 2.002 );
-	CHECK( right > centre );
-	CHECK( right > left );
-	CHECK( left < centre );
-	CHECK( fxn_centre < fxn_left );
-	CHECK( fxn_centre < fxn_right );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_left = " + std::to_string(entry.first) + "\tinitial_centre = " + std::to_string(entry.second)  );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) + "\tfxn_left = " + std::to_string( fxn_left ) );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "centre = " + std::to_string(centre) + "\tfxn_centre = " + std::to_string( fxn_centre ) );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) + "\tfxn_right = " + std::to_string( fxn_right ) );
+
+		if( counter <= 3 ) {
+			CHECK( left <= 2.002 );
+			CHECK( right >= 2.002 );
+			CHECK( right < 2.440 );
+		} else if( counter == 4 ) {
+			CHECK( left > 2.440 );
+			CHECK( left <= 2.995 );
+			CHECK( right >= 2.995 );
+			CHECK( right < 3.266 );
+		} else {
+			CHECK( left > 3.266 );
+			CHECK( left <= 3.397 );
+			CHECK( right >= 3.397 );
+		}
+		CHECK( right > centre );
+		CHECK( right > left );
+		CHECK( left < centre );
+		CHECK( fxn_centre < fxn_left );
+		CHECK( fxn_centre < fxn_right );
+	}
 }
 
 } // namespace cost_function_network
