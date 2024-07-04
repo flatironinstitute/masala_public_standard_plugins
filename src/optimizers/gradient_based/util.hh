@@ -42,6 +42,32 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
+
+	/// @brief Given a function f(x) of one variable x, and two starting points (left and centre),
+	/// bracket the (hopefully nearest) local minimum.
+	/// @details After this function completes, the values of left, centre, and right are updated
+	/// so that left and right bracket the local minimum, and centre is somewhere in between.  This
+	/// function also evaluates the function f(x) at left, centre, and right, and stores the
+	/// function's value in fxn_left, fxn_centre, and fxn_right, respectively.
+	/// @param[inout] left On input, an initial guess for the lower extreme for the possible value
+	/// of x that minimizes f(x).  On output, a best estimate of the lower extreme of the possible
+	/// value of x that minimizes f(x).
+	/// @param[inout] centre On input, a point a small distance from left that establishes initial
+	/// step size for the braketing search.  On output, a point somewhere between left and right
+	/// where f(centre) < f(left) and f(centre) < f(right).
+	/// @param[out] right On output, a best estimate of the upper extreme of the possible value of
+	/// x that minimizes f(x).
+	/// @param[out] fxn_left The function f(x) evaluated at left.  (That is, f(left)).
+	/// @param[out] fxn_centre The function f(x) evaluated at centre.  (That is, f(centre)).
+	/// @param[out] fxn_right The function f(x) evaluated at right.  (That is, f(right)).
+	/// @param[in] fxn The function f(x).  This should be a std::fxn with one real input and one
+	/// real output.
+	/// @param[in] min_denom The smallest value of the denominator when carrying out parabolic
+	/// extrapolation.  Used to avoid divide-by-zero errors; in most cases, the default value of
+	/// 1.0e-20 is reasonable.
+	/// @param[in] max_parabolic_mag_factor The largest amount by which the parabolic extrapolation
+	/// may increase the step size.  Must be greater than 1.0.  Usually, the default of 100.0 is
+	/// reasonable.
 	inline
 	void
 	bracket_minimum_with_parabolic_extrapolation(
