@@ -37,6 +37,7 @@
 #include <functional>
 #include <algorithm>
 #include <cmath>
+#include <iostream> // COMMENT ME OUT -- FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -110,7 +111,21 @@ namespace gradient_based {
 			parabolic_min_limit,
 			fxn_parabolic_min;
 
+		masala::base::Size counter(0); // COMMENT ME OUT -- FOR DEBUGGING ONLY.
+
 		while( fxn_centre > fxn_right ) {
+			++counter; // COMMENT ME OUT -- FOR DEBUGGING ONLY.
+			std::cout << "Round " << counter
+				<< ":\tleft=" << left
+				<< "\tcen=" << centre 
+				<< "\tright=" << right
+				<< "\tparab_min=" << parabolic_min
+				<< "\tf(left)=" << fxn_left
+				<< "\tf(cen)=" << fxn_centre 
+				<< "\tf(right)=" << fxn_right
+				<< "\tf(parab_min)=" << fxn_parabolic_min
+				<< std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY.
+
 			// Update differences:
 			centre_left = centre - left;
 			fxn_centre_fxn_right = fxn_centre - fxn_right;
