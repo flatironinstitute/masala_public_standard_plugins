@@ -184,11 +184,11 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 /// @param[out] fxn_at_x The value of f(x) where x (locally) minimizes f(x).
 void
 BrentAlgorithmLineOptimizer::run_line_optimizer(
-	std::function< masala::base::Real( masala::base::Real ) > const & fxn,
-	masala::base::Real & x,
-	masala::base::Real & fxn_at_x
+	std::function< masala::base::Real( masala::base::Real ) > const & ,//fxn,
+	masala::base::Real & ,//x,
+	masala::base::Real & //fxn_at_x
 ) const {
-	TODO TODO TODO;
+	//TODO TODO TODO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

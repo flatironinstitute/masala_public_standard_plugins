@@ -35,6 +35,7 @@
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 #include <optimizers/gradient_based/LBFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -60,6 +61,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::ChoiceFeature >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
         outvec.emplace_back( masala::make_shared< gradient_based::LBFGSFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::BrentAlgorithmLineOptimizer >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
