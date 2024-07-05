@@ -156,7 +156,6 @@ protected:
 	/// @brief Make independent: must be implemented by derived classes, which must call the base
 	/// class protected_make_independent().
 	/// @details Performs no mutex locking.
-	virtual
 	void
 	protected_make_independent() override;
 
