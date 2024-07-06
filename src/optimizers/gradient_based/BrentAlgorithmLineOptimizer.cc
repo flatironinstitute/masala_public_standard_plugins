@@ -26,6 +26,9 @@
 // Unit header:
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
+// Optimizers headers:
+#include <optimizers/gradient_based/util.hh>
+
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/types.hh>
@@ -184,10 +187,45 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 /// @param[out] fxn_at_x The value of f(x) where x (locally) minimizes f(x).
 void
 BrentAlgorithmLineOptimizer::run_line_optimizer(
-	std::function< masala::base::Real( masala::base::Real ) > const & ,//fxn,
-	masala::base::Real & ,//x,
-	masala::base::Real & //fxn_at_x
+	std::function< masala::base::Real( masala::base::Real ) > const & fxn,
+	masala::base::Real & x,
+	masala::base::Real & fxn_at_x
 ) const {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	// note: a -> left, b -> right.  xmin: use x directly; fmin: use fxn_at_x directly.
+
+	// Defined in util.hh -- find bounds for the minimum:
+	Real left(x-initial_stepsize_), right, fxn_at_left, fxn_at_right;
+	bracket_minimum_with_parabolic_extrapolation(
+		left, x, right, fxn_at_left, fxn_at_x, fxn_at_right, fxn
+	);
+	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
+
+	Real ddd(0.0), etemp, fu, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
+		ppp, qqq, rrr, tol1, tol2, uuu, vvv, www, xxxm, eee(0.0);
+
+	// Start with the best estimate for a lowish value between the
+	// extrema from the initial bracketing:
+	www = vvv = x;
+	fw = fv = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
+
+	// Lock mutex.
+	std::lock_guard< std::mutex > lock( mutex() );
+
+	Size iter_counter(0);
+	while( TODO_CONDITION && ( max_iters_ > 0 ? iter_counter < max_iters_ : true ) ) {
+		++iter_counter;
+		xxxm = 0.5*(left+right);
+		tol1 = tolerance_ * std::abs(x) + small_epsilon;
+		tol2 = 2.0*(tol1);
+		if( abs(x - xxxm) <- (tol2 - 0.5 * (right-left) ) ) {
+			return;
+		}
+		CONTINUE HERE;
+	}
+
 	//TODO TODO TODO;
 }
 

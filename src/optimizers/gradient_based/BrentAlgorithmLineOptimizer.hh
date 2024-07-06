@@ -36,6 +36,10 @@
 // Parent header:
 #include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
 
+// STL headers:
+#include <cmath>
+#include <limits>
+
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
@@ -176,6 +180,24 @@ public:
 		masala::base::Real & x,
 		masala::base::Real & fxn_at_x
 	) const override;
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE VARIABLES
+////////////////////////////////////////////////////////////////////////////////
+
+private:
+
+	/// @brief The tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() );
+
+	/// @brief Maximum number of iterations.
+	/// @details Defaults to 100.
+	masala::base::Size max_iters_ = 100;
+
+	/// @brief Step size for initially bracketing x.  Set to 0.001 by default.
+	masala::base::Real initial_stepsize_ = 1.0e-3;
 
 }; // class BrentAlgorithmLineOptimizer
 
