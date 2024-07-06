@@ -199,6 +199,10 @@ private:
 	/// @brief Step size for initially bracketing x.  Set to 0.001 by default.
 	masala::base::Real initial_stepsize_ = 1.0e-3;
 
+	/// @brief Should we throw if iterations are exceeded (true), or just warn
+	/// (false, the default)?
+	bool throw_if_iterations_exceeded_ = false;
+
 }; // class BrentAlgorithmLineOptimizer
 
 } // namespace gradient_based

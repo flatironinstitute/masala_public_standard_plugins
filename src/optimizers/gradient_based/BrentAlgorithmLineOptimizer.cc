@@ -204,7 +204,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
 	Real ddd(0.0), etemp, fu, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
-		ppp, qqq, rrr, tol1, tol2, uuu, vvv, www, xxxm, eee(0.0);
+		ppp, qqq, rrr, tol1, tol2, uuu, vvv, www, xxxm, eee(0.0), x_minus_www, x_minus_vvv;
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
@@ -220,13 +220,81 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 		xxxm = 0.5*(left+right);
 		tol1 = tolerance_ * std::abs(x) + small_epsilon;
 		tol2 = 2.0*(tol1);
-		if( abs(x - xxxm) <- (tol2 - 0.5 * (right-left) ) ) {
+		if( std::abs(x - xxxm) <= (tol2 - 0.5 * (right-left) ) ) {
 			return;
 		}
-		CONTINUE HERE;
+		if( std::abs(eee) > tol1 ) {
+			x_minus_www = x - www;
+			x_minus_vvv = x - vvv;
+			rrr = x_minus_www * (fxn_at_x - fv );
+			qqq = x_minus_vvv * (fxn_at_x - fw );
+			ppp = x_minus_vvv * qqq - x_minus_www * rrr;
+			qqq = 2.0 * (qqq - rrr);
+			if( qqq > 0.0 ) {
+				ppp *= -1;
+			} else {
+				qqq = std::abs(qqq);
+			}
+			etemp = eee;
+			eee = ddd;
+			if( std::abs(ppp) >= std::abs(qqq*etemp/2.0) ||
+				ppp <= qqq*(left-x) ||
+				ppp >= qqq*(right-x)
+			) {
+				eee = (x >= xxxm ? left-x : right-x);
+				ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
+			} else {
+				ddd = ppp/qqq;
+				uuu = x+ddd;
+				if( uuu-left < tol2 ||
+					right-uuu < tol2
+				) {
+					ddd = std::copysign( tol1, xxxm-x );
+				}
+			}
+		} else {
+			eee = (x >= xxxm ? left-x : right-x );
+			ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
+		}
+		uuu = (std::abs(ddd) >= tol1 ? x + ddd : x + std::copysign(tol1,d) );
+		fu = fxn(uuu); // FUNCTION EVALUATION.
+
+		if( fu <= fxn_at_x ) {
+			if( uuu >= x ) {
+				left = x;
+			} else {
+				right = x;
+			}
+			vvv = www;
+			fv = fw;
+			www = x;
+			fw = fxn_at_x;
+			x = uuu;
+			fxn_at_x = fu;
+		} else {
+			if( uuu < x ) {
+				left = uuu;
+			} else {
+				right = uuu;
+			}
+			if( fu <= fw || www == x ) {
+				vvv = www;
+				www = uuu;
+				fv = fw;
+				fw = fu;
+			} else if( fu <= fv || vvv == x || vvv == www ) {
+				vvv = uuu;
+				fv = fu;
+			}
+		}
 	}
 
-	//TODO TODO TODO;
+	if( throw_if_iterations_exceeded_ ) {
+		MASALA_THROW( class_namespace_and_name(), "run_line_optimizer", "Iterations exceeded and function not converged!" );
+ 	} else {
+		write_to_tracer( "Warning: After " + std::to_string( iter_counter ) + " iterations, the function has not converged!" );
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
