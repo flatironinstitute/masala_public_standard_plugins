@@ -130,6 +130,28 @@ public:
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
+// GETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	masala::base::Real tolerance() const;
+
+	/// @brief Get the maximum number of iterations.
+	/// @details Defaults to 1000.
+	masala::base::Size max_iters() const;
+
+	/// @brief Get the step size for initially bracketing x.  Set to 0.001 by default.
+	masala::base::Real initial_stepsize() const;
+
+	/// @brief Should we throw if iterations are exceeded (true), or just warn
+	/// (false, the default)?
+	bool throw_if_iterations_exceeded() const;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
 // API DEFINITION FUNCTION
 ////////////////////////////////////////////////////////////////////////////////
 
