@@ -203,8 +203,8 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	);
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
-	Real ddd(0.0), etemp, fu, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
-		ppp, qqq, rrr, tol1, tol2, uuu, vvv, www, xxxm, eee(0.0), x_minus_www, x_minus_vvv;
+	Real ddd(0.0), etemp, fxn_at_parabolic_min, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
+		ppp, qqq, rrr, tol1, tol2, parabolic_min, vvv, www, xxxm, eee(0.0), x_minus_www, x_minus_vvv;
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
@@ -215,7 +215,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	std::lock_guard< std::mutex > lock( mutex() );
 
 	Size iter_counter(0);
-	while( TODO_CONDITION && ( max_iters_ > 0 ? iter_counter < max_iters_ : true ) ) {
+	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
 		++iter_counter;
 		xxxm = 0.5*(left+right);
 		tol1 = tolerance_ * std::abs(x) + small_epsilon;
@@ -245,9 +245,9 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 				ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
 			} else {
 				ddd = ppp/qqq;
-				uuu = x+ddd;
-				if( uuu-left < tol2 ||
-					right-uuu < tol2
+				parabolic_min = x+ddd;
+				if( parabolic_min-left < tol2 ||
+					right-parabolic_min < tol2
 				) {
 					ddd = std::copysign( tol1, xxxm-x );
 				}
@@ -256,11 +256,11 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			eee = (x >= xxxm ? left-x : right-x );
 			ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
 		}
-		uuu = (std::abs(ddd) >= tol1 ? x + ddd : x + std::copysign(tol1,d) );
-		fu = fxn(uuu); // FUNCTION EVALUATION.
+		parabolic_min = (std::abs(ddd) >= tol1 ? x + ddd : x + std::copysign(tol1, ddd) );
+		fxn_at_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
 
-		if( fu <= fxn_at_x ) {
-			if( uuu >= x ) {
+		if( fxn_at_parabolic_min <= fxn_at_x ) {
+			if( parabolic_min >= x ) {
 				left = x;
 			} else {
 				right = x;
@@ -269,22 +269,22 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			fv = fw;
 			www = x;
 			fw = fxn_at_x;
-			x = uuu;
-			fxn_at_x = fu;
+			x = parabolic_min;
+			fxn_at_x = fxn_at_parabolic_min;
 		} else {
-			if( uuu < x ) {
-				left = uuu;
+			if( parabolic_min < x ) {
+				left = parabolic_min;
 			} else {
-				right = uuu;
+				right = parabolic_min;
 			}
-			if( fu <= fw || www == x ) {
+			if( fxn_at_parabolic_min <= fw || www == x ) {
 				vvv = www;
-				www = uuu;
+				www = parabolic_min;
 				fv = fw;
-				fw = fu;
-			} else if( fu <= fv || vvv == x || vvv == www ) {
-				vvv = uuu;
-				fv = fu;
+				fw = fxn_at_parabolic_min;
+			} else if( fxn_at_parabolic_min <= fv || vvv == x || vvv == www ) {
+				vvv = parabolic_min;
+				fv = fxn_at_parabolic_min;
 			}
 		}
 	}

@@ -193,8 +193,8 @@ private:
 	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() );
 
 	/// @brief Maximum number of iterations.
-	/// @details Defaults to 100.
-	masala::base::Size max_iters_ = 100;
+	/// @details Defaults to 1000.
+	masala::base::Size max_iters_ = 1000;
 
 	/// @brief Step size for initially bracketing x.  Set to 0.001 by default.
 	masala::base::Real initial_stepsize_ = 1.0e-3;
