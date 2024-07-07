@@ -297,8 +297,8 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	);
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
-	Real ddd(0.0), etemp, fxn_at_parabolic_min, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
-		ppp, qqq, rrr, tol1, tol2, parabolic_min, vvv, www, left_right_midpoint, eee(0.0), x_minus_www, x_minus_vvv;
+	Real step_offset(0.0), etemp, fxn_at_parabolic_min, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
+		quotient_numerator, quotient_denominator, rrr, tol1, tol2, parabolic_min, vvv, www, left_right_midpoint, x_dist_to_furthest_edge(0.0), x_minus_www, x_minus_vvv;
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
@@ -319,40 +319,40 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 		if( std::abs(x - left_right_midpoint) <= (tol2 - 0.5 * (right-left) ) ) {
 			return;
 		}
-		if( std::abs(eee) > tol1 ) {
+		if( std::abs(x_dist_to_furthest_edge) > tol1 ) {
 			x_minus_www = x - www;
 			x_minus_vvv = x - vvv;
 			rrr = x_minus_www * (fxn_at_x - fv );
-			qqq = x_minus_vvv * (fxn_at_x - fw );
-			ppp = x_minus_vvv * qqq - x_minus_www * rrr;
-			qqq = 2.0 * (qqq - rrr);
-			if( qqq > 0.0 ) {
-				ppp *= -1;
+			quotient_denominator = x_minus_vvv * (fxn_at_x - fw );
+			quotient_numerator = x_minus_vvv * quotient_denominator - x_minus_www * rrr;
+			quotient_denominator = 2.0 * (quotient_denominator - rrr);
+			if( quotient_denominator > 0.0 ) {
+				quotient_numerator *= -1;
 			} else {
-				qqq = std::abs(qqq);
+				quotient_denominator = std::abs(quotient_denominator);
 			}
-			etemp = eee;
-			eee = ddd;
-			if( std::abs(ppp) >= std::abs(qqq*etemp/2.0) ||
-				ppp <= qqq*(left-x) ||
-				ppp >= qqq*(right-x)
+			etemp = x_dist_to_furthest_edge;
+			x_dist_to_furthest_edge = step_offset;
+			if( std::abs(quotient_numerator) >= std::abs(quotient_denominator*etemp/2.0) ||
+				quotient_numerator <= quotient_denominator*(left-x) ||
+				quotient_numerator >= quotient_denominator*(right-x)
 			) {
-				eee = (x >= left_right_midpoint ? left-x : right-x);
-				ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
+				x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x);
+				step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
 			} else {
-				ddd = ppp/qqq;
-				parabolic_min = x+ddd;
+				step_offset = quotient_numerator/quotient_denominator;
+				parabolic_min = x+step_offset;
 				if( parabolic_min-left < tol2 ||
 					right-parabolic_min < tol2
 				) {
-					ddd = std::copysign( tol1, left_right_midpoint-x );
+					step_offset = std::copysign( tol1, left_right_midpoint-x );
 				}
 			}
 		} else {
-			eee = (x >= left_right_midpoint ? left-x : right-x );
-			ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
+			x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x );
+			step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
 		}
-		parabolic_min = (std::abs(ddd) >= tol1 ? x + ddd : x + std::copysign(tol1, ddd) );
+		parabolic_min = (std::abs(step_offset) >= tol1 ? x + step_offset : x + std::copysign(tol1, step_offset) );
 		fxn_at_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
 
 		if( fxn_at_parabolic_min <= fxn_at_x ) {
