@@ -137,6 +137,7 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 		REQUIRE_NOTHROW([&](){
 			BrentAlgorithmLineOptimizer brent_optimizer;
 			//brent_optimizer.set_max_iters(0);
+			//brent_optimizer.set_tolerance(3.0e-8);
 			brent_optimizer.run_line_optimizer( fxn1, x, f_at_x );
 		}() );
 

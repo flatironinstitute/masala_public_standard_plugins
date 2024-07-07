@@ -236,7 +236,7 @@ private:
 	/// @brief The tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
 	/// any sensible value of tolerance).
-	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() );
+	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() );
 
 	/// @brief Maximum number of iterations.
 	/// @details Defaults to 1000.

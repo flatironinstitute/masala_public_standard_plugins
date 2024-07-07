@@ -189,9 +189,9 @@ void
 BrentAlgorithmLineOptimizer::set_tolerance(
 	masala::base::Real const setting
 ) {
-	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() ),
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
 		"set_tolerance", "The tolerance must be greater than or equal to the square root of machine precision ("
-		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() ) )
+		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ) )
 		+ ").  Got " + std::to_string( setting ) + "."
 	);
 	std::lock_guard< std::mutex > lock( mutex() );
@@ -216,8 +216,8 @@ BrentAlgorithmLineOptimizer::set_initial_stepsize(
 ) {
 	CHECK_OR_THROW_FOR_CLASS(
 		initial_stepsize_ >= std::numeric_limits< masala::base::Real >::denorm_min(),
-		"set_initial_stepsize", "The intial step size must be greater than or equal to machine "
-		"precision (" + std::to_string(std::numeric_limits< masala::base::Real >::denorm_min())
+		"set_initial_stepsize", "The intial step size must be greater than or equal to the minimum "
+		"double-precision float size (" + std::to_string(std::numeric_limits< masala::base::Real >::denorm_min())
 		+ ").  Got " + std::to_string(setting) + "."
 	);
 	std::lock_guard< std::mutex > lock( mutex() );
@@ -307,7 +307,8 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	www = vvv = x;
 	fw = fv = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
 
-	std::cout << std::setprecision(30);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+	std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+	std::cout << "Tol=" << tolerance_ << std::endl;
 
 	Size iter_counter(0);
 	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
