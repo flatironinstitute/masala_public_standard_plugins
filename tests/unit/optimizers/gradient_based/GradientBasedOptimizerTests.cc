@@ -128,7 +128,7 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
 	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
-	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 5.0 };
+	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 3.6, 5.0 };
 
 	masala::base::Size counter(0);
 	for( Real const entry : initial_points ) {
@@ -144,10 +144,10 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 		if( counter <= 2 ) {
 			CHECK( std::abs(x - 2.002) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
-		} else if( counter == 3 ) {
+		} else if( counter == 3 || counter == 5 ) {
 			CHECK( std::abs(x - 2.995) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
-		} else {
+		} else if( counter == 4 ) {
 			CHECK( std::abs(x - 3.397) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
 		}
