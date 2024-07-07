@@ -38,7 +38,7 @@
 // STL headers:
 #include <vector>
 #include <string>
-#include <iostream> // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+//#include <iostream> // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -307,13 +307,13 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	www = vvv = x;
 	fw = fv = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
 
-	std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
-	std::cout << "Tol=" << tolerance_ << std::endl;
+	// std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+	// std::cout << "Tol=" << tolerance_ << std::endl;
 
 	Size iter_counter(0);
 	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
 		++iter_counter;
-		std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+		//std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 		left_right_midpoint = (left+right)/2.0;
 		tol1 = tolerance_ * std::abs(x) + small_epsilon;
 		tol2 = 2.0*(tol1);
