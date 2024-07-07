@@ -26,6 +26,7 @@
 
 // Unit headers:
 #include <optimizers/gradient_based/util.hh>
+#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
 // Masala base headers:
 #include <base/types.hh>
@@ -115,6 +116,41 @@ TEST_CASE( "Find the bounds of a local minimization problem using parabolic extr
 		CHECK( left < centre );
 		CHECK( fxn_centre < fxn_left );
 		CHECK( fxn_centre < fxn_right );
+	}
+}
+
+TEST_CASE( "Find the local minimum of a function using the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][brent_algorithm][line_optimizer]" ) {
+	using masala::base::Real;
+	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using masala::base::managers::tracer::MasalaTracerManager;
+	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+
+	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+
+	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
+	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 5.0 };
+
+	masala::base::Size counter(0);
+	for( Real const entry : initial_points ) {
+		++counter;
+		Real x( entry ), f_at_x( 0.0 );
+		REQUIRE_NOTHROW([&](){
+			BrentAlgorithmLineOptimizer brent_optimizer;
+			brent_optimizer.run_line_optimizer( fxn1, x, f_at_x );
+		}() );
+
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(x) + "\tf(x) = " + std::to_string(f_at_x)  );
+
+		if( counter <= 2 ) {
+			CHECK( std::abs(x - 2.002) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
+		} else if( counter == 3 ) {
+			CHECK( std::abs(x - 2.995) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
+		} else {
+			CHECK( std::abs(x - 3.397) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
+		}
 	}
 }
 
