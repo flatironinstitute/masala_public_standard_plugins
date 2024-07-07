@@ -166,7 +166,7 @@ public:
 	/// the number of iterations taken.
 	void set_max_iters( masala::base::Size const setting );
 
-	/// @brief GSet the step size for initially bracketing x.  Set to 0.001 by default.
+	/// @brief Set the step size for initially bracketing x.  Set to 0.001 by default.
 	void set_initial_stepsize( masala::base::Real const setting );
 
 	/// @brief Set whether we should we throw if iterations are exceeded (true), or just warn
