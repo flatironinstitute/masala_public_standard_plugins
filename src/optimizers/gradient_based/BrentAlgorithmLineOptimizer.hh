@@ -139,7 +139,8 @@ public:
 	masala::base::Real tolerance() const;
 
 	/// @brief Get the maximum number of iterations.
-	/// @details Defaults to 1000.
+	/// @details Defaults to 1000.  A setting of 0 means to loop until convergence, regardless
+	/// the number of iterations taken.
 	masala::base::Size max_iters() const;
 
 	/// @brief Get the step size for initially bracketing x.  Set to 0.001 by default.
@@ -148,6 +149,29 @@ public:
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded() const;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	void set_tolerance( masala::base::Real const setting );
+
+	/// @brief Set the maximum number of iterations.
+	/// @details Defaults to 1000.  A setting of 0 means to loop until convergence, regardless
+	/// the number of iterations taken.
+	void set_max_iters( masala::base::Size const setting );
+
+	/// @brief GSet the step size for initially bracketing x.  Set to 0.001 by default.
+	void set_initial_stepsize( masala::base::Real const setting );
+
+	/// @brief Set whether we should we throw if iterations are exceeded (true), or just warn
+	/// (false, the default).
+	void set_throw_if_iterations_exceeded( bool const setting );
 
 public:
 

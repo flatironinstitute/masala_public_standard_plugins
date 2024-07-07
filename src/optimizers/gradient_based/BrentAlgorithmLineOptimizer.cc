@@ -154,7 +154,8 @@ BrentAlgorithmLineOptimizer::tolerance() const {
 }
 
 /// @brief Get the maximum number of iterations.
-/// @details Defaults to 1000.
+/// @details Defaults to 1000.  A setting of 0 means to loop until convergence, regardless
+/// the number of iterations taken.
 masala::base::Size
 BrentAlgorithmLineOptimizer::max_iters() const {
 	std::lock_guard< std::mutex > lock( mutex() );
@@ -174,6 +175,62 @@ bool
 BrentAlgorithmLineOptimizer::throw_if_iterations_exceeded() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return throw_if_iterations_exceeded_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the tolerance for determining whether or not we've finished our search.
+/// @details The default is the square root of machine precision (the theoretical lower limit for
+/// any sensible value of tolerance).
+void
+BrentAlgorithmLineOptimizer::set_tolerance(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() ),
+		"set_tolerance", "The tolerance must be greater than or equal to the square root of machine precision ("
+		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::denorm_min() ) )
+		+ ").  Got " + std::to_string( setting ) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	tolerance_ = setting;
+}
+
+/// @brief Set the maximum number of iterations.
+/// @details Defaults to 1000.  A setting of 0 means to loop until convergence, regardless
+/// the number of iterations taken.
+void
+BrentAlgorithmLineOptimizer::set_max_iters(
+	masala::base::Size const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	max_iters_ = setting;
+}
+
+/// @brief GSet the step size for initially bracketing x.  Set to 0.001 by default.
+void
+BrentAlgorithmLineOptimizer::set_initial_stepsize(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS(
+		initial_stepsize_ >= std::numeric_limits< masala::base::Real >::denorm_min(),
+		"set_initial_stepsize", "The intial step size must be greater than or equal to machine "
+		"precision (" + std::to_string(std::numeric_limits< masala::base::Real >::denorm_min())
+		+ ").  Got " + std::to_string(setting) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	initial_stepsize_ = setting;
+}
+
+/// @brief Set whether we should we throw if iterations are exceeded (true), or just warn
+/// (false, the default).
+void
+BrentAlgorithmLineOptimizer::set_throw_if_iterations_exceeded(
+	bool const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	throw_if_iterations_exceeded_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
