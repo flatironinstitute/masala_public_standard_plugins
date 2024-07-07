@@ -288,6 +288,9 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	using masala::base::Size;
 	using masala::base::Real;
 
+	// Lock mutex.
+	std::lock_guard< std::mutex > lock( mutex() );
+
 	// Defined in util.hh -- find bounds for the minimum:
 	Real left(x-initial_stepsize_), right, fxn_at_left, fxn_at_right;
 	bracket_minimum_with_parabolic_extrapolation(
@@ -295,23 +298,22 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	);
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
-	Real step_offset(0.0), etemp, fxn_at_parabolic_min, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
+	Real step_offset(0.0), etemp, fxn_at_parabolic_min, fv, fw,
 		quotient_numerator, quotient_denominator, rrr, tol1, tol2, parabolic_min, vvv, www, left_right_midpoint, x_dist_to_furthest_edge(0.0), x_minus_www, x_minus_vvv;
+	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
 	www = vvv = x;
 	fw = fv = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
 
-	// Lock mutex.
-	std::lock_guard< std::mutex > lock( mutex() );
 	std::cout << std::setprecision(30);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 
 	Size iter_counter(0);
 	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
 		++iter_counter;
 		std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
-		left_right_midpoint = 0.5*(left+right);
+		left_right_midpoint = (left+right)/2.0;
 		tol1 = tolerance_ * std::abs(x) + small_epsilon;
 		tol2 = 2.0*(tol1);
 		if( std::abs(x - left_right_midpoint) <= (tol2 - 0.5 * (right-left) ) ) {
@@ -327,7 +329,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			if( quotient_denominator > 0.0 ) {
 				quotient_numerator *= -1;
 			} else {
-				quotient_denominator = std::abs(quotient_denominator);
+				quotient_denominator *= -1;
 			}
 			etemp = x_dist_to_furthest_edge;
 			x_dist_to_furthest_edge = step_offset;
