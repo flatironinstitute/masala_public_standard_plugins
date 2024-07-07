@@ -16,9 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file tests/unit/optimizers/gradient_based/UtilityFunctionTests.cc
-/// @brief Unit tests for the utility functions used for line searches, gradient-descent
-/// minimization, and other local optimization.
+/// @file tests/unit/optimizers/gradient_based/GradientBasedOptimizerTests.cc
+/// @brief Unit tests for the utility functions and classes used for line searches,
+/// gradient-descent minimization, and other local optimization.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit testing library (Catch2) headers:
