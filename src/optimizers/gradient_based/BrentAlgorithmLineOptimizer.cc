@@ -13,7 +13,7 @@
     GNU Affero General Public License for more details.
 
     You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    along with this program.  If not, see <https://current_secondleast.gnu.org/licenses/>.
 */
 
 /// @file src/numeric_api/base_classes/optimization/gradient_based/BrentAlgorithmLineOptimizer.cc
@@ -385,14 +385,17 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	);
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
-	Real step_offset(0.0), etemp, fxn_at_parabolic_min, fv, fw,
-		quotient_numerator, quotient_denominator, rrr, tol1, tol2, parabolic_min, vvv, www, left_right_midpoint, x_dist_to_furthest_edge(0.0), x_minus_www, x_minus_vvv;
+	Real step_offset(0.0), etemp, fxn_at_parabolic_min, previous_secondleast,
+		current_secondleast, fxn_at_previous_secondleast, fxn_at_current_secondleast,
+		quotient_numerator, quotient_denominator, rrr, absolute_tolerance,
+		twice_absolute_tolerance, parabolic_min, left_right_midpoint,
+		x_dist_to_furthest_edge(0.0), x_minus_current_secondleast, x_minus_previous_secondleast;
 	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
-	www = vvv = x;
-	fw = fv = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
+	current_secondleast = previous_secondleast = x;
+	fxn_at_current_secondleast = fxn_at_previous_secondleast = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
 
 	// std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 	// std::cout << "Tol=" << tolerance_ << std::endl;
@@ -402,17 +405,17 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 		++iter_counter;
 		//std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 		left_right_midpoint = (left+right)/2.0;
-		tol1 = tolerance_ * std::abs(x) + small_epsilon;
-		tol2 = 2.0*(tol1);
-		if( std::abs(x - left_right_midpoint) <= (tol2 - 0.5 * (right-left) ) ) {
+		absolute_tolerance = tolerance_ * std::abs(x) + small_epsilon;
+		twice_absolute_tolerance = 2.0*(absolute_tolerance);
+		if( std::abs(x - left_right_midpoint) <= (twice_absolute_tolerance - 0.5 * (right-left) ) ) {
 			return;
 		}
-		if( std::abs(x_dist_to_furthest_edge) > tol1 ) {
-			x_minus_www = x - www;
-			x_minus_vvv = x - vvv;
-			rrr = x_minus_www * (fxn_at_x - fv );
-			quotient_denominator = x_minus_vvv * (fxn_at_x - fw );
-			quotient_numerator = x_minus_vvv * quotient_denominator - x_minus_www * rrr;
+		if( std::abs(x_dist_to_furthest_edge) > absolute_tolerance ) {
+			x_minus_current_secondleast = x - current_secondleast;
+			x_minus_previous_secondleast = x - previous_secondleast;
+			rrr = x_minus_current_secondleast * (fxn_at_x - fxn_at_previous_secondleast );
+			quotient_denominator = x_minus_previous_secondleast * (fxn_at_x - fxn_at_current_secondleast );
+			quotient_numerator = x_minus_previous_secondleast * quotient_denominator - x_minus_current_secondleast * rrr;
 			quotient_denominator = 2.0 * (quotient_denominator - rrr);
 			if( quotient_denominator > 0.0 ) {
 				quotient_numerator *= -1;
@@ -430,17 +433,17 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			} else {
 				step_offset = quotient_numerator/quotient_denominator;
 				parabolic_min = x+step_offset;
-				if( parabolic_min-left < tol2 ||
-					right-parabolic_min < tol2
+				if( parabolic_min-left < twice_absolute_tolerance ||
+					right-parabolic_min < twice_absolute_tolerance
 				) {
-					step_offset = std::copysign( tol1, left_right_midpoint-x );
+					step_offset = std::copysign( absolute_tolerance, left_right_midpoint-x );
 				}
 			}
 		} else {
 			x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x );
 			step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
 		}
-		parabolic_min = (std::abs(step_offset) >= tol1 ? x + step_offset : x + std::copysign(tol1, step_offset) );
+		parabolic_min = (std::abs(step_offset) >= absolute_tolerance ? x + step_offset : x + std::copysign(absolute_tolerance, step_offset) );
 		fxn_at_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
 
 		if( fxn_at_parabolic_min <= fxn_at_x ) {
@@ -449,10 +452,10 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			} else {
 				right = x;
 			}
-			vvv = www;
-			fv = fw;
-			www = x;
-			fw = fxn_at_x;
+			previous_secondleast = current_secondleast;
+			fxn_at_previous_secondleast = fxn_at_current_secondleast;
+			current_secondleast = x;
+			fxn_at_current_secondleast = fxn_at_x;
 			x = parabolic_min;
 			fxn_at_x = fxn_at_parabolic_min;
 		} else {
@@ -461,14 +464,14 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 			} else {
 				right = parabolic_min;
 			}
-			if( fxn_at_parabolic_min <= fw || www == x ) {
-				vvv = www;
-				www = parabolic_min;
-				fv = fw;
-				fw = fxn_at_parabolic_min;
-			} else if( fxn_at_parabolic_min <= fv || vvv == x || vvv == www ) {
-				vvv = parabolic_min;
-				fv = fxn_at_parabolic_min;
+			if( fxn_at_parabolic_min <= fxn_at_current_secondleast || current_secondleast == x ) {
+				previous_secondleast = current_secondleast;
+				current_secondleast = parabolic_min;
+				fxn_at_previous_secondleast = fxn_at_current_secondleast;
+				fxn_at_current_secondleast = fxn_at_parabolic_min;
+			} else if( fxn_at_parabolic_min <= fxn_at_previous_secondleast || previous_secondleast == x || previous_secondleast == current_secondleast ) {
+				previous_secondleast = parabolic_min;
+				fxn_at_previous_secondleast = fxn_at_parabolic_min;
 			}
 		}
 	}
