@@ -38,6 +38,7 @@
 // STL headers:
 #include <vector>
 #include <string>
+#include <iostream> // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -297,7 +298,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 
 	Real ddd(0.0), etemp, fxn_at_parabolic_min, fv, fw, small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 ),
-		ppp, qqq, rrr, tol1, tol2, parabolic_min, vvv, www, xxxm, eee(0.0), x_minus_www, x_minus_vvv;
+		ppp, qqq, rrr, tol1, tol2, parabolic_min, vvv, www, left_right_midpoint, eee(0.0), x_minus_www, x_minus_vvv;
 
 	// Start with the best estimate for a lowish value between the
 	// extrema from the initial bracketing:
@@ -306,14 +307,16 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 
 	// Lock mutex.
 	std::lock_guard< std::mutex > lock( mutex() );
+	std::cout << std::setprecision(30);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
 
 	Size iter_counter(0);
 	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
 		++iter_counter;
-		xxxm = 0.5*(left+right);
+		std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+		left_right_midpoint = 0.5*(left+right);
 		tol1 = tolerance_ * std::abs(x) + small_epsilon;
 		tol2 = 2.0*(tol1);
-		if( std::abs(x - xxxm) <= (tol2 - 0.5 * (right-left) ) ) {
+		if( std::abs(x - left_right_midpoint) <= (tol2 - 0.5 * (right-left) ) ) {
 			return;
 		}
 		if( std::abs(eee) > tol1 ) {
@@ -334,7 +337,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 				ppp <= qqq*(left-x) ||
 				ppp >= qqq*(right-x)
 			) {
-				eee = (x >= xxxm ? left-x : right-x);
+				eee = (x >= left_right_midpoint ? left-x : right-x);
 				ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
 			} else {
 				ddd = ppp/qqq;
@@ -342,11 +345,11 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 				if( parabolic_min-left < tol2 ||
 					right-parabolic_min < tol2
 				) {
-					ddd = std::copysign( tol1, xxxm-x );
+					ddd = std::copysign( tol1, left_right_midpoint-x );
 				}
 			}
 		} else {
-			eee = (x >= xxxm ? left-x : right-x );
+			eee = (x >= left_right_midpoint ? left-x : right-x );
 			ddd = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * eee;
 		}
 		parabolic_min = (std::abs(ddd) >= tol1 ? x + ddd : x + std::copysign(tol1, ddd) );
