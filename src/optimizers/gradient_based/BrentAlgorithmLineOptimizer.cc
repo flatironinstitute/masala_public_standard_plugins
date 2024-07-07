@@ -288,8 +288,6 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	using masala::base::Size;
 	using masala::base::Real;
 
-	// note: a -> left, b -> right.  xmin: use x directly; fmin: use fxn_at_x directly.
-
 	// Defined in util.hh -- find bounds for the minimum:
 	Real left(x-initial_stepsize_), right, fxn_at_left, fxn_at_right;
 	bracket_minimum_with_parabolic_extrapolation(
