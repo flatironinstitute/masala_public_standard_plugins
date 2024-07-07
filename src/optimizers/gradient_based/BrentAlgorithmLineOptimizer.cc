@@ -35,7 +35,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
-#include <base/api/getter/MasalaObjectAPIGetterDefinition_OneInput.tmpl.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -226,7 +226,7 @@ BrentAlgorithmLineOptimizer::set_initial_stepsize(
 	initial_stepsize_ = setting;
 }
 
-/// @brief Set whether we should we throw if iterations are exceeded (true), or just warn
+/// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 /// (false, the default).
 void
 BrentAlgorithmLineOptimizer::set_throw_if_iterations_exceeded(
@@ -270,6 +270,47 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 		
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( BrentAlgorithmLineOptimizer, api_def );
 
+		// Getters:
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"tolerance", "Get the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance", "The tolerance for determining whether the search has converged.",
+				false, false,
+				std::bind( &BrentAlgorithmLineOptimizer::tolerance, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"max_iters", "Get the maximum number of iterations.  Defaults to 1000.  "
+				"A setting of 0 means to loop until convergence, regardless the number of "
+				"iterations taken.",
+				"max_iters", "The maximum iterations, or 0 if we loop until convergence.",
+				false, false,
+				std::bind( &BrentAlgorithmLineOptimizer::max_iters, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"initial_stepsize", "Get the step size for initially bracketing x.  "
+				"Set to 0.001 by default.",
+				"initial_stepsize", "The initial step size.",
+				false, false,
+				std::bind( &BrentAlgorithmLineOptimizer::initial_stepsize, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"throw_if_iterations_exceeded", "Get whether we throw if "
+				"iteration maximum is exceeded (true), or just warn (false, the default).",
+				"throw_if_iterations_exceeded", "True if we throw if iteration maximum is "
+				"exceeded, false otherwise.",
+				false, false,
+				std::bind( &BrentAlgorithmLineOptimizer::throw_if_iterations_exceeded, this )
+			)
+		);
+
 		// Setters:
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
@@ -302,7 +343,7 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 		);
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool > >(
-				"set_throw_if_iterations_exceeded", "Set whether we should we throw if "
+				"set_throw_if_iterations_exceeded", "Set whether we should throw if "
 				"iteration maximum is exceeded (true), or just warn (false, the default).",
 				"setting", "True if we want to throw if iteration maximum is exceeded, false otherwise.",
 				false, false,

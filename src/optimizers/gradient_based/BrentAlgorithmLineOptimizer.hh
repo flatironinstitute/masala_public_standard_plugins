@@ -169,7 +169,7 @@ public:
 	/// @brief Set the step size for initially bracketing x.  Set to 0.001 by default.
 	void set_initial_stepsize( masala::base::Real const setting );
 
-	/// @brief Set whether we should we throw if iterations are exceeded (true), or just warn
+	/// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 	/// (false, the default).
 	void set_throw_if_iterations_exceeded( bool const setting );
 
