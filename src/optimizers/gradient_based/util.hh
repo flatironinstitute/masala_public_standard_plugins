@@ -1,6 +1,6 @@
 /*
-    Masala
-    Copycentre (C) 2024 Vikram K. Mulligan
+    Standard Masala Plugins
+    Copyright (C) 2024 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
