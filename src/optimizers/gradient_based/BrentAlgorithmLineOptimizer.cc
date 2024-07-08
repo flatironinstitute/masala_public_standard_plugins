@@ -436,7 +436,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 		}
 	}
 
-	x = x0 + x * search_dir;
+	x = x0 + linex * search_dir;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
