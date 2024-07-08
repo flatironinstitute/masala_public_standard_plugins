@@ -47,25 +47,59 @@ namespace optimizers {
 namespace gradient_based {
 
 	/// @brief Given a function f(x) (fxn), a starting point (x0), the gradient
-	/// at this point (grad), a search direction (dir), and Armijo parameters c
-	/// (function decrease factor) and tau (stepsize decrease factor), find the
-	/// largest step that we can that satisfies the Armijo condition.
+	/// at this point (grad_of_fxn_at_x0), a search direction (search_dir), and Armijo
+	/// parameters c (function decrease factor) and tau (stepsize decrease factor), find
+	/// the largest step that we can that satisfies the Armijo condition.  This does
+	/// NOT find the minimum in the search direction, but only a point with "sufficient"
+	/// decrease in the function value.
 	/// @details The Armijo condition is f(x0+alpha*dir) <= f(x0) + alpha*c*m, where
 	/// alpha is a step size multiplier, dir is a search direction, c is a constant
 	/// (1/2 is viable), and m is the slope of f in the direction dir at x0.
 	/// @returns The value of alpha, the largest value of the multiplier found that
-	/// satisfies the Armijo condition.  Also, updates x0 to be x = x0 + alpha * dir.
+	/// satisfies the Armijo condition.  Also, updates x to be x0 + alpha * dir.
 	inline
 	masala::base::Real
-	armijo_linesearch(
+	armijo_inexact_linesearch(
+		std::function< masala::base::Real( Eigen::VectorXd const & ) > const & fxn,
+		Eigen::VectorXd const & x0,
+		masala::base::Real const& fxn_at_x0,
+		Eigen::VectorXd const & grad_of_fxn_at_x0,
+		Eigen::VectorXd const & search_dir,
 		Eigen::VectorXd & x,
-		std::function< masala::base::Real( Eigen::VectorXd const & ) > fxn,
-		Eigen::VectorXd const & dir,
-		Eigen::VectorXd const & grad,
-		masala::base::Real const c,
-		masala::base::Real const tau
+		masala::base::Real & fxn_at_x,
+		masala::base::Real const c = 0.5,
+		masala::base::Real const tau = 0.5
 	) {
-		TODO TODO TODO;
+		using masala::base::Size;
+		using masala::base::Real;
+		Size const ndims( x0.size() );
+		CHECK_OR_THROW( grad_of_fxn_at_x0.size() == ndims, "standard_masala_plugins::optimizers::gradient_based",
+			"armijo_inexact_linesearch", "Expected dimensions of point and gradient to match, but got x0.size(): "
+			+ std::to_string( x0.size() ) + ", gradient.size(): " + std::to_string( grad_of_fxn_at_x0.size( )) + "."
+		);
+		CHECK_OR_THROW( search_dir.size() == ndims, "standard_masala_plugins::optimizers::gradient_based",
+			"armijo_inexact_linesearch", "Expected dimensions of point and search direction to match, but got x0.size(): "
+			+ std::to_string( x0.size() ) + ", search_dir.size(): " + std::to_string( search_dir.size( )) + "."
+		);
+		CHECK_OR_THROW( 0.0 < tau && tau < 1.0, "standard_masala_plugins::optimizers::gradient_based",
+			"armijo_inexact_linesearch", "Tau was set to " + std::to_string(tau) + ", but it must be "
+			"between 0.0 and 1.0, exclusive."
+		);
+
+		x.resize( ndims );
+
+		Real const m( grad_of_fxn_at_x0.dot( search_dir ) );
+		Real const t = -c*m;
+		Real alpha(1.0);
+
+		x = x0 + alpha * search_dir;
+		fxn_at_x = fxn( x );
+
+		while( fxn_at_x0 - fxn_at_x < alpha * t ) {
+			alpha *= tau;
+			x = x0 + alpha * search_dir;
+			fxn_at_x = fxn( x );
+		}
 	}
 
 
