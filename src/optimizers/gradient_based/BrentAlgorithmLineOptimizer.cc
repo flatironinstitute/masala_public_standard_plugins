@@ -354,27 +354,27 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 		);
 
 		// Work functions:
-		api_def->add_work_function(
-			masala::make_shared<
-				MasalaObjectAPIWorkFunctionDefinition_ThreeInput<
-					void,
-					std::function< Real( Real ) > const &,
-					Real &,
-					Real &
-				>
-			> (
-				"run_line_optimizer", "Run the line optimizer on a single line optimization problem, and produce a single solution.  "
-				"The solution is a pair of (x, f(x)) where x minimizes f.  Note that this function locks the object mutex, so this object "
-				"is intended to be used to minimize a single function at a time (unlike other optimizers that take a vector of minimization "
-				"problems to carry out in parallel).",
-				true, false, true, false,
-				"fxn", "The function, f(x), to minimize.  This should be a std::function object that takes a Real and returns a Real.",
-				"x", "The value of x that (locally) minimizes f(x).  Set by this function.  (The input value is used as the starting point to find a local minimum.)",
-				"fxn_at_x", "The value of the function f(x) at the value of x that locally minimizes f(x).  Set by this function.",
-				"void", "This function produces no return value.  Instead, x and fxn_at_x are set by this function.",
-				std::bind( &BrentAlgorithmLineOptimizer::run_line_optimizer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
-			)
-		);
+		// api_def->add_work_function(
+		// 	masala::make_shared<
+		// 		MasalaObjectAPIWorkFunctionDefinition_ThreeInput<
+		// 			void,
+		// 			std::function< Real( Real ) > const &,
+		// 			Real &,
+		// 			Real &
+		// 		>
+		// 	> (
+		// 		"run_line_optimizer", "Run the line optimizer on a single line optimization problem, and produce a single solution.  "
+		// 		"The solution is a pair of (x, f(x)) where x minimizes f.  Note that this function locks the object mutex, so this object "
+		// 		"is intended to be used to minimize a single function at a time (unlike other optimizers that take a vector of minimization "
+		// 		"problems to carry out in parallel).",
+		// 		true, false, true, false,
+		// 		"fxn", "The function, f(x), to minimize.  This should be a std::function object that takes a Real and returns a Real.",
+		// 		"x", "The value of x that (locally) minimizes f(x).  Set by this function.  (The input value is used as the starting point to find a local minimum.)",
+		// 		"fxn_at_x", "The value of the function f(x) at the value of x that locally minimizes f(x).  Set by this function.",
+		// 		"void", "This function produces no return value.  Instead, x and fxn_at_x are set by this function.",
+		// 		std::bind( &BrentAlgorithmLineOptimizer::run_line_optimizer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
+		// 	)
+		// );
 
 		api_definition() = api_def;
 	}
@@ -391,12 +391,20 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 /// that this function locks the object mutex, so this object is intended to be used to minimize a single function
 /// at a time (unlike other optimizers that take a vector of minimization problems to carry out in parallel).
 /// @param[in] fxn The function to minimize.
-/// @param[inout] x The value of x that (locally) minimizes f(x).  This is also used as the starting point of the search.
-/// @param[out] fxn_at_x The value of f(x) where x (locally) minimizes f(x).
+/// @param[in] x0 The starting point for the search.
+/// @param[in] fxn_at_x0 The value of the function at the starting point for the search.
+/// @param[in] grad_of_fxn_at_x0 The gradient of the function at the starting point for the search.
+/// @param[in] search_dir The search direction, which may or may not match the negative gradient of the starting point.
+/// @param[out] x The output value of x that (locally) minimizes f(x).
+/// @param[out] fxn_at_x The output value of f(x) where x (locally) minimizes f(x).
 void
 BrentAlgorithmLineOptimizer::run_line_optimizer(
-	std::function< masala::base::Real( masala::base::Real ) > const & fxn,
-	masala::base::Real & x,
+	std::function< masala::base::Real( Eigen::VectorXd const & ) > const & fxn,
+	Eigen::VectorXd const & x0,
+	masala::base::Real const & /*fxn_at_x0*/,
+	Eigen::VectorXd const & /*grad_of_fxn_at_x0*/,
+	Eigen::VectorXd const & search_dir,
+	Eigen::VectorXd & x,
 	masala::base::Real & fxn_at_x
 ) const {
 	using masala::base::Size;
@@ -406,109 +414,29 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	std::lock_guard< std::mutex > lock( mutex() );
 
 	// Defined in util.hh -- find bounds for the minimum:
-	Real left(x-initial_stepsize_), right, fxn_at_left, fxn_at_right;
+	Real linex(0.0);
+	std::function< Real( Real ) > const linefxn( std::bind( &line_function, fxn, x0, search_dir, std::placeholders::_1 ) );
+	Real left(linex-initial_stepsize_), right, fxn_at_left, fxn_at_right;
 	bracket_minimum_with_parabolic_extrapolation(
-		left, x, right, fxn_at_left, fxn_at_x, fxn_at_right, fxn
+		left, linex, right, fxn_at_left, fxn_at_x, fxn_at_right, linefxn
 	);
 	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
-
-	Real step_offset(0.0), etemp, fxn_at_parabolic_min, previous_secondleast,
-		current_secondleast, fxn_at_previous_secondleast, fxn_at_current_secondleast,
-		quotient_numerator, quotient_denominator, rrr, absolute_tolerance,
-		twice_absolute_tolerance, parabolic_min, left_right_midpoint,
-		x_dist_to_furthest_edge(0.0), x_minus_current_secondleast, x_minus_previous_secondleast;
-	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
-
-	// Start with the best estimate for a lowish value between the
-	// extrema from the initial bracketing:
-	current_secondleast = previous_secondleast = x;
-	fxn_at_current_secondleast = fxn_at_previous_secondleast = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
-
-	// std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
-	// std::cout << "Tol=" << tolerance_ << std::endl;
-
+	
 	Size iter_counter(0);
-	while( max_iters_ > 0 ? iter_counter < max_iters_ : true ) {
-		++iter_counter;
-		//std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
-		left_right_midpoint = (left+right)/2.0;
-		absolute_tolerance = tolerance_ * std::abs(x) + small_epsilon;
-		twice_absolute_tolerance = 2.0*(absolute_tolerance);
-		if( std::abs(x - left_right_midpoint) <= (twice_absolute_tolerance - 0.5 * (right-left) ) ) {
-			return;
-		}
-		if( std::abs(x_dist_to_furthest_edge) > absolute_tolerance ) {
-			x_minus_current_secondleast = x - current_secondleast;
-			x_minus_previous_secondleast = x - previous_secondleast;
-			rrr = x_minus_current_secondleast * (fxn_at_x - fxn_at_previous_secondleast );
-			quotient_denominator = x_minus_previous_secondleast * (fxn_at_x - fxn_at_current_secondleast );
-			quotient_numerator = x_minus_previous_secondleast * quotient_denominator - x_minus_current_secondleast * rrr;
-			quotient_denominator = 2.0 * (quotient_denominator - rrr);
-			if( quotient_denominator > 0.0 ) {
-				quotient_numerator *= -1;
-			} else {
-				quotient_denominator *= -1;
-			}
-			etemp = x_dist_to_furthest_edge;
-			x_dist_to_furthest_edge = step_offset;
-			if( std::abs(quotient_numerator) >= std::abs(quotient_denominator*etemp/2.0) ||
-				quotient_numerator <= quotient_denominator*(left-x) ||
-				quotient_numerator >= quotient_denominator*(right-x)
-			) {
-				x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x);
-				step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
-			} else {
-				step_offset = quotient_numerator/quotient_denominator;
-				parabolic_min = x+step_offset;
-				if( parabolic_min-left < twice_absolute_tolerance ||
-					right-parabolic_min < twice_absolute_tolerance
-				) {
-					step_offset = std::copysign( absolute_tolerance, left_right_midpoint-x );
-				}
-			}
-		} else {
-			x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x );
-			step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
-		}
-		parabolic_min = (std::abs(step_offset) >= absolute_tolerance ? x + step_offset : x + std::copysign(absolute_tolerance, step_offset) );
-		fxn_at_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+	bool converged(false);
+	brent_linesearch(
+		linefxn, linex, left, right, fxn_at_x, iter_counter, tolerance_, max_iters_, converged
+	);
 
-		if( fxn_at_parabolic_min <= fxn_at_x ) {
-			if( parabolic_min >= x ) {
-				left = x;
-			} else {
-				right = x;
-			}
-			previous_secondleast = current_secondleast;
-			fxn_at_previous_secondleast = fxn_at_current_secondleast;
-			current_secondleast = x;
-			fxn_at_current_secondleast = fxn_at_x;
-			x = parabolic_min;
-			fxn_at_x = fxn_at_parabolic_min;
+	if( (!converged) && iter_counter == max_iters_) {
+		if( throw_if_iterations_exceeded_ ) {
+			MASALA_THROW( class_namespace_and_name(), "run_line_optimizer", "Iterations exceeded and function not converged!" );
 		} else {
-			if( parabolic_min < x ) {
-				left = parabolic_min;
-			} else {
-				right = parabolic_min;
-			}
-			if( fxn_at_parabolic_min <= fxn_at_current_secondleast || current_secondleast == x ) {
-				previous_secondleast = current_secondleast;
-				current_secondleast = parabolic_min;
-				fxn_at_previous_secondleast = fxn_at_current_secondleast;
-				fxn_at_current_secondleast = fxn_at_parabolic_min;
-			} else if( fxn_at_parabolic_min <= fxn_at_previous_secondleast || previous_secondleast == x || previous_secondleast == current_secondleast ) {
-				previous_secondleast = parabolic_min;
-				fxn_at_previous_secondleast = fxn_at_parabolic_min;
-			}
+			write_to_tracer( "Warning: After " + std::to_string( iter_counter ) + " iterations, the function has not converged!" );
 		}
 	}
 
-	if( throw_if_iterations_exceeded_ ) {
-		MASALA_THROW( class_namespace_and_name(), "run_line_optimizer", "Iterations exceeded and function not converged!" );
- 	} else {
-		write_to_tracer( "Warning: After " + std::to_string( iter_counter ) + " iterations, the function has not converged!" );
-	}
-
+	x = x0 + x * search_dir;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -33,6 +33,9 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
 
+// External headers:
+#include <external/eigen/Eigen/Core>
+
 // STL headers
 #include <cmath>
 #include <functional>
@@ -65,6 +68,21 @@ test_function_1(
 	// For plotting using Desmos:
 	// -1.0\cdot\exp\left(-\left(\frac{\left(x-3\right)}{0.5}\right)^{2}\right)-2.0\cdot\exp\left(-\left(\frac{\left(x-2\right)}{0.25}\right)^{2}\right)+0.5\cdot\exp\left(-\left(\frac{\left(x-3.25\right)}{0.1}\right)^{2}\right)
 	return ( invert ? -1.0 : 1.0 ) * ( test_gaussian( x, -1.0, 3.0, 0.5 ) + test_gaussian( x, -2.0, 2.0, 0.25 ) + test_gaussian( x, 0.5, 3.25, 0.1 ) );
+}
+
+/// @brief See util_test_fxn_1.png to see this plotted.  This is an Eigen vector version of the above function.
+/// @details Has minima at (2.002, -2.018), (2.995, -0.999), and (3.397,-0.475).
+/// Has maxima at (2.440, -0.376) and (3.266,-0.266).  Can be multiplied by -1 by
+/// setting invert true.
+masala::base::Real
+test_function_1b(
+	Eigen::VectorXd const & x,
+	bool invert
+) {
+	// For plotting using Desmos:
+	// -1.0\cdot\exp\left(-\left(\frac{\left(x-3\right)}{0.5}\right)^{2}\right)-2.0\cdot\exp\left(-\left(\frac{\left(x-2\right)}{0.25}\right)^{2}\right)+0.5\cdot\exp\left(-\left(\frac{\left(x-3.25\right)}{0.1}\right)^{2}\right)
+	masala::base::Real const xval( x[0] );
+	return ( invert ? -1.0 : 1.0 ) * ( test_gaussian( xval, -1.0, 3.0, 0.5 ) + test_gaussian( xval, -2.0, 2.0, 0.25 ) + test_gaussian( xval, 0.5, 3.25, 0.1 ) );
 }
 
 TEST_CASE( "Find the bounds of a local minimization problem using parabolic extrapolation.", "[standard_masala_plugins::optimizers::gradient_based::bracket_minimum_with_parabolic_extrapolation][local_minimization][bounds]" ) {
@@ -127,30 +145,37 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
-	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
+	std::function< Real( Eigen::VectorXd ) > const fxn1b( std::bind( &test_function_1b, std::placeholders::_1, false ) );
 	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 3.6, 5.0 };
 
 	masala::base::Size counter(0);
 	for( Real const entry : initial_points ) {
 		++counter;
-		Real x( entry ), f_at_x( 0.0 );
-		REQUIRE_NOTHROW([&](){
+		Eigen::VectorXd x0, x, searchdir;
+		x0.resize(1);
+		x.resize(1);
+		searchdir.resize(1);
+		x0[0] = entry;
+		searchdir[0] = 1.0;
+		Real f_at_x0( fxn1b(x0) ), f_at_x( 0.0 );
+		//REQUIRE_NOTHROW([&](){
 			BrentAlgorithmLineOptimizer brent_optimizer;
 			//brent_optimizer.set_max_iters(0);
 			//brent_optimizer.set_tolerance(3.0e-8);
-			brent_optimizer.run_line_optimizer( fxn1, x, f_at_x );
-		}() );
+			brent_optimizer.run_line_optimizer( fxn1b, x0, f_at_x0, Eigen::VectorXd(), searchdir, x, f_at_x );
+		//}() );
 
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(x) + "\tf(x) = " + std::to_string(f_at_x)  );
+		Real const xval( x[0] );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(xval) + "\tf(x) = " + std::to_string(f_at_x)  );
 
 		if( counter <= 2 ) {
-			CHECK( std::abs(x - 2.002) < 2.0e-3 );
+			CHECK( std::abs(xval - 2.002) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
 		} else if( counter == 3 || counter == 5 ) {
-			CHECK( std::abs(x - 2.995) < 2.0e-3 );
+			CHECK( std::abs(xval - 2.995) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
 		} else if( counter == 4 ) {
-			CHECK( std::abs(x - 3.397) < 2.0e-3 );
+			CHECK( std::abs(xval - 3.397) < 2.0e-3 );
 			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
 		}
 	}

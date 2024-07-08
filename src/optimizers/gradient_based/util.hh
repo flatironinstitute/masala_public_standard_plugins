@@ -46,6 +46,140 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
+	/// @brief Given a function in R^N and a search direction, construct a function in R.
+	/// @details Returns f( x0 + x * direction ).
+	inline
+	masala::base::Real
+	line_function(
+		std::function< masala::base::Real( Eigen::VectorXd const & ) > const & R_N_fxn,
+		Eigen::VectorXd const & x0,
+		Eigen::VectorXd const & direction,
+		masala::base::Real const x
+	) {
+		return R_N_fxn( x0 + x * direction );
+	}
+
+
+	/// @brief Perform the algorithm of Richard P. Brent described in "Algorithms for Minimization
+	/// Without Derivatives" (1973) to find the local minimum of a function of one variable.
+	/// @param[in] fxn The function f(x) to locally minimize.
+	/// @param[inout] x The value of x that locally minimizes f(x).
+	/// @param[inout] left A lower bound for the value of x that locally minimizes f(x).  Updated by this function.
+	/// @param[inout] right An upper bound for the value of x that locally minimizes f(x).  Updated by this function.
+	/// @param[out] iter_counter The number of iterations actually taken.
+	/// @param[in] tolerance The fractional tolerance.  Should be sqrt(machine precision) at the smallest.
+	/// @param[in] max_iters The maximum number of iterations allowed.  If 0, then we loop until convergence.
+	/// @param[out] converged True if the minimizer converged, false otherwise.
+	inline
+	void
+	brent_linesearch(
+		std::function< masala::base::Real( masala::base::Real ) > const & fxn,
+		masala::base::Real & x,
+		masala::base::Real & left,
+		masala::base::Real & right,
+		masala::base::Real & fxn_at_x,
+		masala::base::Size & iter_counter,
+		masala::base::Real const tolerance,
+		masala::base::Size const max_iters,
+		bool & converged
+	) {
+		using masala::base::Size;
+		using masala::base::Real;
+
+		Real step_offset(0.0), etemp, fxn_at_parabolic_min, previous_secondleast,
+			current_secondleast, fxn_at_previous_secondleast, fxn_at_current_secondleast,
+			quotient_numerator, quotient_denominator, rrr, absolute_tolerance,
+			twice_absolute_tolerance, parabolic_min, left_right_midpoint,
+			x_dist_to_furthest_edge(0.0), x_minus_current_secondleast, x_minus_previous_secondleast;
+		Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
+
+		// Start with the best estimate for a lowish value between the
+		// extrema from the initial bracketing:
+		current_secondleast = previous_secondleast = x;
+		fxn_at_current_secondleast = fxn_at_previous_secondleast = fxn_at_x; // Avoid an unnecessary repeated function evaluation here.
+
+		// std::cout << std::setprecision(40);  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+		// std::cout << "Tol=" << tolerance_ << std::endl;
+
+		iter_counter = 0;
+		while( max_iters > 0 ? iter_counter < max_iters : true ) {
+			++iter_counter;
+			//std::cout << iter_counter << ": x=" << x << " f(x)=" << fxn_at_x << " right=" << right << " left=" << left << std::endl;  // COMMENT ME OUT -- FOR TEMPORARY DEBUGGING ONLY.
+			left_right_midpoint = (left+right)/2.0;
+			absolute_tolerance = tolerance * std::abs(x) + small_epsilon;
+			twice_absolute_tolerance = 2.0*(absolute_tolerance);
+			if( std::abs(x - left_right_midpoint) <= (twice_absolute_tolerance - 0.5 * (right-left) ) ) {
+				converged = true;
+				return;
+			}
+			if( std::abs(x_dist_to_furthest_edge) > absolute_tolerance ) {
+				x_minus_current_secondleast = x - current_secondleast;
+				x_minus_previous_secondleast = x - previous_secondleast;
+				rrr = x_minus_current_secondleast * (fxn_at_x - fxn_at_previous_secondleast );
+				quotient_denominator = x_minus_previous_secondleast * (fxn_at_x - fxn_at_current_secondleast );
+				quotient_numerator = x_minus_previous_secondleast * quotient_denominator - x_minus_current_secondleast * rrr;
+				quotient_denominator = 2.0 * (quotient_denominator - rrr);
+				if( quotient_denominator > 0.0 ) {
+					quotient_numerator *= -1;
+				} else {
+					quotient_denominator *= -1;
+				}
+				etemp = x_dist_to_furthest_edge;
+				x_dist_to_furthest_edge = step_offset;
+				if( std::abs(quotient_numerator) >= std::abs(quotient_denominator*etemp/2.0) ||
+					quotient_numerator <= quotient_denominator*(left-x) ||
+					quotient_numerator >= quotient_denominator*(right-x)
+				) {
+					x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x);
+					step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
+				} else {
+					step_offset = quotient_numerator/quotient_denominator;
+					parabolic_min = x+step_offset;
+					if( parabolic_min-left < twice_absolute_tolerance ||
+						right-parabolic_min < twice_absolute_tolerance
+					) {
+						step_offset = std::copysign( absolute_tolerance, left_right_midpoint-x );
+					}
+				}
+			} else {
+				x_dist_to_furthest_edge = (x >= left_right_midpoint ? left-x : right-x );
+				step_offset = MASALA_ONE_MINUS_INV_GOLDEN_RATIO * x_dist_to_furthest_edge;
+			}
+			parabolic_min = (std::abs(step_offset) >= absolute_tolerance ? x + step_offset : x + std::copysign(absolute_tolerance, step_offset) );
+			fxn_at_parabolic_min = fxn(parabolic_min); // FUNCTION EVALUATION.
+
+			if( fxn_at_parabolic_min <= fxn_at_x ) {
+				if( parabolic_min >= x ) {
+					left = x;
+				} else {
+					right = x;
+				}
+				previous_secondleast = current_secondleast;
+				fxn_at_previous_secondleast = fxn_at_current_secondleast;
+				current_secondleast = x;
+				fxn_at_current_secondleast = fxn_at_x;
+				x = parabolic_min;
+				fxn_at_x = fxn_at_parabolic_min;
+			} else {
+				if( parabolic_min < x ) {
+					left = parabolic_min;
+				} else {
+					right = parabolic_min;
+				}
+				if( fxn_at_parabolic_min <= fxn_at_current_secondleast || current_secondleast == x ) {
+					previous_secondleast = current_secondleast;
+					current_secondleast = parabolic_min;
+					fxn_at_previous_secondleast = fxn_at_current_secondleast;
+					fxn_at_current_secondleast = fxn_at_parabolic_min;
+				} else if( fxn_at_parabolic_min <= fxn_at_previous_secondleast || previous_secondleast == x || previous_secondleast == current_secondleast ) {
+					previous_secondleast = parabolic_min;
+					fxn_at_previous_secondleast = fxn_at_parabolic_min;
+				}
+			}
+		}
+		converged = false;
+	}
+
 	/// @brief Given a function f(x) (fxn), a starting point (x0), the gradient
 	/// at this point (grad_of_fxn_at_x0), a search direction (search_dir), and Armijo
 	/// parameters c (function decrease factor) and tau (stepsize decrease factor), find
