@@ -136,6 +136,14 @@ public:
 	/// @brief Get the intial step size, as a multiple of the gradient.  Defaults to 1.0
 	masala::base::Real initial_stepsize() const;
 
+	/// @brief Get the value of tau used when shrinking the step size (where alpha_{i+1} = alpha_i * tau).
+	/// Defaults to 0.5, the value used by Armijo in his initial publication.
+	masala::base::Real stepsize_decrease_factor() const;
+
+	/// @brief Get the value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to
+	/// 0.5, the value used by Armijo in his initial publication.
+	masala::base::Real function_decrease_factor() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +152,14 @@ public:
 
 	/// @brief Set the intial step size, as a multiple of the gradient.  Defaults to 1.0
 	void set_initial_stepsize( masala::base::Real const setting );
+
+	/// @brief Set the value of tau used when shrinking the step size (where alpha_{i+1} = alpha_i * tau).
+	/// Defaults to 0.5, the value used by Armijo in his initial publication.
+	void set_stepsize_decrease_factor( masala::base::Real const setting );
+
+	/// @brief Set the value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to
+	/// 0.5, the value used by Armijo in his initial publication.
+	void set_function_decrease_factor( masala::base::Real const setting );
 
 public:
 
@@ -217,6 +233,14 @@ private:
 
 	/// @brief Intial step size, as a multiple of the gradient.  Defaults to 1.0
 	masala::base::Real initial_stepsize_ = 1.0;
+
+	/// @brief The value of tau used when shrinking the step size (where alpha_{i+1} = alpha_i * tau).
+	/// Defaults to 0.5, the value used by Armijo in his initial publication.
+	masala::base::Real stepsize_decrease_factor_ = 0.5;
+
+	/// @brief The value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to
+	/// 0.5, the value used by Armijo in his initial publication.
+	masala::base::Real function_decrease_factor_ = 0.5;
 
 
 }; // class ArmijoInexactLineOptimizer

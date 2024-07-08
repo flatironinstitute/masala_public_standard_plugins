@@ -157,6 +157,22 @@ ArmijoInexactLineOptimizer::initial_stepsize() const {
 	return initial_stepsize_;
 }
 
+/// @brief Get the value of tau used when shrinking the step size (where alpha_{i+1} = alpha_i * tau).
+/// Defaults to 0.5, the value used by Armijo in his initial publication.
+masala::base::Real
+ArmijoInexactLineOptimizer::stepsize_decrease_factor() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return stepsize_decrease_factor_;
+}
+
+/// @brief Get the value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to
+/// 0.5, the value used by Armijo in his initial publication.
+masala::base::Real
+ArmijoInexactLineOptimizer::function_decrease_factor() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return function_decrease_factor_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,6 +190,32 @@ ArmijoInexactLineOptimizer::set_initial_stepsize(
 	);
 	std::lock_guard< std::mutex > lock( mutex() );
 	initial_stepsize_ = setting;
+}
+
+/// @brief Set the value of tau used when shrinking the step size (where alpha_{i+1} = alpha_i * tau).
+/// Defaults to 0.5, the value used by Armijo in his initial publication.
+void
+ArmijoInexactLineOptimizer::set_stepsize_decrease_factor(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( 0.0 < setting && setting < 1.0, "set_stepsize_decrease_factor",
+		"The step size decrease factor must be between 0 and 1.  Got " + std::to_string(setting) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	stepsize_decrease_factor_ = setting;
+}
+
+/// @brief Set the value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to
+/// 0.5, the value used by Armijo in his initial publication.
+void
+ArmijoInexactLineOptimizer::set_function_decrease_factor(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( 0.0 < setting, "set_function_decrease_factor",
+		"The function size decrease factor must be greater than 0.  Got " + std::to_string(setting) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	function_decrease_factor_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +263,27 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 				std::bind( &ArmijoInexactLineOptimizer::initial_stepsize, this )
 			)
 		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"stepsize_decrease_factor", "Get the value of tau used when shrinking the step "
+				"size (where alpha_{i+1} = alpha_i * tau).  Defaults to 0.5, the value used by "
+				"Armijo in his initial publication.",
+				"stepsize_decrease_factor", "The step size decrease factor used when updating alpha.",
+				false, false,
+				std::bind( &ArmijoInexactLineOptimizer::stepsize_decrease_factor, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"function_decrease_factor", "Get the value of c in the Armijo condition, "
+				"f(x0+alpha*dir) <= f(x0) + alpha*c*m.  Defaults to 0.5, the value used "
+				"by Armijo in his initial publication.",
+				"function_decrease_factor", "The function decrease factor used in evaluating "
+				"the Armijo condition.",
+				false, false,
+				std::bind( &ArmijoInexactLineOptimizer::function_decrease_factor, this )
+			)
+		);
 
 		// Setters:
 		api_def->add_setter(
@@ -230,6 +293,26 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 				"initial_stepsize_in", "The initial step size to set.",
 				false, false,
 				std::bind( &ArmijoInexactLineOptimizer::set_initial_stepsize, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_stepsize_decrease_factor", "Set the value of tau used when shrinking the step size "
+				"(where alpha_{i+1} = alpha_i * tau).  Defaults to 0.5, the value used by Armijo in his "
+				"initial publication.  Must be between 0 and 1.",
+				"stepsize_decrease_factor_in", "The step size decrease factor to set.",
+				false, false,
+				std::bind( &ArmijoInexactLineOptimizer::set_stepsize_decrease_factor, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_function_decrease_factor", "Set the value of c in the Armijo condition, f(x0+alpha*dir) <= f(x0) "
+				"+ alpha*c*m.  Defaults to 0.5, the value used by Armijo in his initial publication.  Must be greater "
+				"than 0.",
+				"function_decrease_factor_in", "The function decrease factor to set.",
+				false, false,
+				std::bind( &ArmijoInexactLineOptimizer::set_function_decrease_factor, this, std::placeholders::_1 )
 			)
 		);
 
@@ -279,13 +362,13 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 /// @param[out] fxn_at_x The output value of f(x) where x adequately reduces f(x).
 void
 ArmijoInexactLineOptimizer::run_line_optimizer(
-	std::function< masala::base::Real( Eigen::VectorXd const & ) > const & ,//fxn,
-	Eigen::VectorXd const & ,//x0,
-	masala::base::Real const & ,//fxn_at_x0,
-	Eigen::VectorXd const & ,//grad_of_fxn_at_x0,
-	Eigen::VectorXd const & ,//search_dir,
-	Eigen::VectorXd & ,//x,
-	masala::base::Real & //fxn_at_x
+	std::function< masala::base::Real( Eigen::VectorXd const & ) > const & fxn,
+	Eigen::VectorXd const & x0,
+	masala::base::Real const & fxn_at_x0,
+	Eigen::VectorXd const & grad_of_fxn_at_x0,
+	Eigen::VectorXd const & search_dir,
+	Eigen::VectorXd & x,
+	masala::base::Real & fxn_at_x
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -293,7 +376,7 @@ ArmijoInexactLineOptimizer::run_line_optimizer(
 	// Lock mutex.
 	std::lock_guard< std::mutex > lock( mutex() );
 
-	//TODO TODO TODO;
+	armijo_inexact_linesearch( fxn, x0, fxn_at_x0, grad_of_fxn_at_x0, search_dir, x, fxn_at_x, initial_stepsize_, function_decrease_factor_, stepsize_decrease_factor_ );
 
 }
 
