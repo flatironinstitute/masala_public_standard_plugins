@@ -33,6 +33,9 @@
 // Numeric API headers:
 #include <numeric_api/utility/constants/constants.hh>
 
+// External headers:
+#include <external/eigen/Eigen/Core>
+
 // STL headers:
 #include <functional>
 #include <algorithm>
@@ -42,6 +45,28 @@
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
+
+	/// @brief Given a function f(x) (fxn), a starting point (x0), the gradient
+	/// at this point (grad), a search direction (dir), and Armijo parameters c
+	/// (function decrease factor) and tau (stepsize decrease factor), find the
+	/// largest step that we can that satisfies the Armijo condition.
+	/// @details The Armijo condition is f(x0+alpha*dir) <= f(x0) + alpha*c*m, where
+	/// alpha is a step size multiplier, dir is a search direction, c is a constant
+	/// (1/2 is viable), and m is the slope of f in the direction dir at x0.
+	/// @returns The value of alpha, the largest value of the multiplier found that
+	/// satisfies the Armijo condition.  Also, updates x0 to be x = x0 + alpha * dir.
+	inline
+	masala::base::Real
+	armijo_linesearch(
+		Eigen::VectorXd & x,
+		std::function< masala::base::Real( Eigen::VectorXd const & ) > fxn,
+		Eigen::VectorXd const & dir,
+		Eigen::VectorXd const & grad,
+		masala::base::Real const c,
+		masala::base::Real const tau
+	) {
+		TODO TODO TODO;
+	}
 
 
 	/// @brief Given a function f(x) of one variable x, and two starting points (left and centre),
