@@ -67,6 +67,7 @@ namespace gradient_based {
 		Eigen::VectorXd const & search_dir,
 		Eigen::VectorXd & x,
 		masala::base::Real & fxn_at_x,
+		masala::base::Real const initial_stepsize = 1.0,
 		masala::base::Real const c = 0.5,
 		masala::base::Real const tau = 0.5
 	) {
@@ -90,7 +91,7 @@ namespace gradient_based {
 
 		Real const m( grad_of_fxn_at_x0.dot( search_dir ) );
 		Real const t = -c*m;
-		Real alpha(1.0);
+		Real alpha(initial_stepsize);
 
 		x = x0 + alpha * search_dir;
 		fxn_at_x = fxn( x );
