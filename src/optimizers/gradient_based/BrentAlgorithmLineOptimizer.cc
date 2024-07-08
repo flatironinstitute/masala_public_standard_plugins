@@ -497,6 +497,10 @@ BrentAlgorithmLineOptimizer::protected_assign(
 ) {
 	BrentAlgorithmLineOptimizer const * src_ptr_cast( dynamic_cast< BrentAlgorithmLineOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
+	tolerance_ = src_ptr_cast->tolerance_;
+	max_iters_ = src_ptr_cast->max_iters_;
+	initial_stepsize_ = src_ptr_cast->initial_stepsize_;
+	throw_if_iterations_exceeded_ = src_ptr_cast->throw_if_iterations_exceeded_;
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer::protected_assign( src );
 }
 
@@ -505,7 +509,7 @@ BrentAlgorithmLineOptimizer::protected_assign(
 /// @details Performs no mutex locking.
 void
 BrentAlgorithmLineOptimizer::protected_make_independent() {
-	// TODO
+	// Nothing to be done at the level of this derived class to make it independent.
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer::protected_make_independent();
 }
 
