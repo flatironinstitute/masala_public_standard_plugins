@@ -62,7 +62,7 @@ namespace gradient_based {
 	armijo_inexact_linesearch(
 		std::function< masala::base::Real( Eigen::VectorXd const & ) > const & fxn,
 		Eigen::VectorXd const & x0,
-		masala::base::Real const& fxn_at_x0,
+		masala::base::Real const & fxn_at_x0,
 		Eigen::VectorXd const & grad_of_fxn_at_x0,
 		Eigen::VectorXd const & search_dir,
 		Eigen::VectorXd & x,
