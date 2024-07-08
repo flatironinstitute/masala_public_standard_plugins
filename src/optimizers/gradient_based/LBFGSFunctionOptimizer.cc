@@ -198,7 +198,7 @@ LBFGSFunctionOptimizer::get_api_definition() {
 		MasalaObjectAPIDefinitionSP api_def(
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this,
-				"A gradient-descent function optimizer that uses the limited-memory Broyden–Fletcher–Goldfarb–Shanno "
+				"A gradient-descent function optimizer that uses the limited-memory Broyden-Fletcher-Goldfarb-Shanno "
 				"algorithm (L-BFGS), a quasi-Newtonian method that relies only on gradients to approximate the inverse "
 				"Hessian matrix, to carry out gradient descent for a differentiable function in R^N.",
 				false, false
