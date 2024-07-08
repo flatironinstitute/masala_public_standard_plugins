@@ -36,6 +36,8 @@
 #include <base/types.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -146,6 +148,32 @@ LBFGSFunctionOptimizer::class_namespace_static() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// SETTER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the maximum number of steps that we can take.
+/// @details A setting of 0 means loop until convergence.
+void
+LBFGSFunctionOptimizer::set_max_iterations(
+	masala::base::Size const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	max_iterations_ = setting;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// GETTER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the maximum number of steps that we can take
+/// @details A setting of 0 means loop until convergence.
+masala::base::Size
+LBFGSFunctionOptimizer::max_iterations() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return max_iterations_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // API DEFINITION FUNCTION
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -159,6 +187,10 @@ LBFGSFunctionOptimizer::class_namespace_static() {
 masala::base::api::MasalaObjectAPIDefinitionCWP
 LBFGSFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api;
+	using namespace masala::base::api::setter;
+	using namespace masala::base::api::getter;
+	using masala::base::Size;
+	using masala::base::Real;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
@@ -174,6 +206,24 @@ LBFGSFunctionOptimizer::get_api_definition() {
 		);
 		
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( LBFGSFunctionOptimizer, api_def );
+
+		// Setters:
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_max_iterations", "Set the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
+				"max_iterations_in", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
+				false, false, std::bind( &LBFGSFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
+			)
+		);
+
+		// Getters:
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
+				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
+				false, false, std::bind( &LBFGSFunctionOptimizer::max_iterations, this )
+			)
+		);
 
 		api_definition() = api_def;
 	}

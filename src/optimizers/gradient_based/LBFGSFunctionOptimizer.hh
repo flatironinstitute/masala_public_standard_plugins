@@ -29,6 +29,9 @@
 // Forward declarations:
 #include <optimizers/gradient_based/LBFGSFunctionOptimizer.fwd.hh>
 
+// Base headers:
+#include <base/types.hh>
+
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
@@ -126,6 +129,26 @@ public:
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
+// SETTER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the maximum number of steps that we can take.
+	/// @details A setting of 0 means loop until convergence.
+	void set_max_iterations( masala::base::Size const setting );
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
+// GETTER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the maximum number of steps that we can take
+	/// @details A setting of 0 means loop until convergence.
+	masala::base::Size max_iterations() const;
+
+public:
+
+////////////////////////////////////////////////////////////////////////////////
 // API DEFINITION FUNCTION
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -173,6 +196,16 @@ public:
 	run_real_valued_local_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 	) const override;
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE VARIABLES
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The maximum number of steps that we're allowed to take.
+	/// @details A setting of 0 means loop until convergence.
+	masala::base::Size max_iterations_ = 2000;
 
 }; // class LBFGSFunctionOptimizer
 
