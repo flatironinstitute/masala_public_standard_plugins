@@ -16,18 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric_api/base_classes/optimization/gradient_based/LBFGSFunctionOptimizer.hh
-/// @brief Headers for the LBFGSFunctionOptimizer.
-/// @details The LBFGSFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian limited-memory Broyden–Fletcher–Goldfarb–Shanno
+/// @file src/numeric_api/base_classes/optimization/gradient_based/BFGSFunctionOptimizer.hh
+/// @brief Headers for the BFGSFunctionOptimizer.
+/// @details The BFGSFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
+/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_LBFGSFunctionOptimizer_hh
-#define Standard_Masala_Plugins_src_optimizers_gradient_based_LBFGSFunctionOptimizer_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
+#define Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
 
 // Forward declarations:
-#include <optimizers/gradient_based/LBFGSFunctionOptimizer.fwd.hh>
+#include <optimizers/gradient_based/BFGSFunctionOptimizer.fwd.hh>
 
 // Base headers:
 #include <base/types.hh>
@@ -43,11 +43,11 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
-/// @brief The LBFGSFunctionOptimizer, which carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian limited-memory Broyden–Fletcher–Goldfarb–Shanno
+/// @brief The BFGSFunctionOptimizer, which carries out gradient-descent minimization of an arbitrary function
+/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class LBFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer {
+class BFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer {
 
 public:
 
@@ -56,13 +56,13 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	LBFGSFunctionOptimizer() = default;
+	BFGSFunctionOptimizer() = default;
 
 	/// @brief Copy constructor.
-	LBFGSFunctionOptimizer( LBFGSFunctionOptimizer const & ) = default;
+	BFGSFunctionOptimizer( BFGSFunctionOptimizer const & ) = default;
 
 	/// @brief Destructor.
-	~LBFGSFunctionOptimizer() override = default;
+	~BFGSFunctionOptimizer() override = default;
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
@@ -71,7 +71,7 @@ public:
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
 	/// copy, making sure that all contained objects are also copied.
-	LBFGSFunctionOptimizerSP
+	BFGSFunctionOptimizerSP
 	deep_clone() const;
 
 public:
@@ -82,7 +82,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "BFGSFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -106,12 +106,12 @@ public:
     /// a list of hierarchical categories, and the inner vector is the particular hierarchical
     /// category, from most general to most specific.  Also note that this function is pure
     /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "LBFGSFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "BFGSFunctionOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
 	/// @brief Every class can name itself.
-	/// @returns "LBFGSFunctionOptimizer".
+	/// @returns "BFGSFunctionOptimizer".
 	std::string class_name() const override;
 
 	/// @brief Every class can provide its own namespace.
@@ -119,7 +119,7 @@ public:
 	std::string class_namespace() const override;
 
 	/// @brief Every class can name itself.
-	/// @returns "LBFGSFunctionOptimizer".
+	/// @returns "BFGSFunctionOptimizer".
 	static std::string class_name_static();
 
 	/// @brief Every class can provide its own namespace.
@@ -190,7 +190,7 @@ public:
 
 	/// @brief Run the optimizer on a set of gradient-based loss function minimization problems, and produce a set of solutions.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
-	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (L-BFGS)
+	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (BFGS)
 	/// to carry out gradient-descent minimization.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
 	run_real_valued_local_optimizer(
@@ -207,10 +207,10 @@ private:
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations_ = 2000;
 
-}; // class LBFGSFunctionOptimizer
+}; // class BFGSFunctionOptimizer
 
 } // namespace gradient_based
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_LBFGSFunctionOptimizer_hh
+#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
