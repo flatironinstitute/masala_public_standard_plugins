@@ -360,7 +360,7 @@ BrentAlgorithmLineOptimizer::get_api_definition() {
 					void,
 					std::function< masala::base::Real( Eigen::VectorXd const & ) > const &,
 					Eigen::VectorXd const &,
-					masala::base::Real const &,
+					masala::base::Real const,
 					Eigen::VectorXd const &,
 					Eigen::VectorXd const &,
 					Eigen::VectorXd &,
@@ -413,7 +413,7 @@ void
 BrentAlgorithmLineOptimizer::run_line_optimizer(
 	std::function< masala::base::Real( Eigen::VectorXd const & ) > const & fxn,
 	Eigen::VectorXd const & x0,
-	masala::base::Real const & /*fxn_at_x0*/,
+	masala::base::Real const /*fxn_at_x0*/,
 	Eigen::VectorXd const & /*grad_of_fxn_at_x0*/,
 	Eigen::VectorXd const & search_dir,
 	Eigen::VectorXd & x,
