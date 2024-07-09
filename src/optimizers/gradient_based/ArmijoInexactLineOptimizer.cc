@@ -36,7 +36,7 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ThreeInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_SevenInput.tmpl.hh>
 
 // STL headers:
 #include <vector>
@@ -317,27 +317,39 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 		);
 
 		// Work functions:
-		// api_def->add_work_function(
-		// 	masala::make_shared<
-		// 		MasalaObjectAPIWorkFunctionDefinition_ThreeInput<
-		// 			void,
-		// 			std::function< Real( Real ) > const &,
-		// 			Real &,
-		// 			Real &
-		// 		>
-		// 	> (
-		// 		"run_line_optimizer", "Run the line optimizer on a single line optimization problem, and produce a single solution.  "
-		// 		"The solution is a pair of (x, f(x)) where x reduces (but doesn't necessarily minimize) f.  Note that this function locks "
-		// 		"the object mutex, so this object is intended to be used to minimize a single function at a time (unlike other optimizers "
-		// 		"that take a vector of minimization problems to carry out in parallel).",
-		// 		true, false, true, false,
-		// 		"fxn", "The function, f(x), to minimize.  This should be a std::function object that takes a Real and returns a Real.",
-		// 		"x", "The value of x that minimizes -- or, rather, adequately reduces -- f(x).  Set by this function.  (The input value is used as the starting point to find a local minimum.)",
-		// 		"fxn_at_x", "The value of the function f(x) at the value of x that adequately reduces f(x).  Set by this function.",
-		// 		"void", "This function produces no return value.  Instead, x and fxn_at_x are set by this function.",
-		// 		std::bind( &ArmijoInexactLineOptimizer::run_line_optimizer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
-		// 	)
-		// );
+		api_def->add_work_function(
+			masala::make_shared<
+				MasalaObjectAPIWorkFunctionDefinition_SevenInput<
+					void,
+					std::function< masala::base::Real( Eigen::VectorXd const & ) > const &,
+					Eigen::VectorXd const &,
+					masala::base::Real const &,
+					Eigen::VectorXd const &,
+					Eigen::VectorXd const &,
+					Eigen::VectorXd &,
+					masala::base::Real &
+				>
+			> (
+				"run_line_optimizer", "Run the line optimizer on a single line optimization problem, and produce a single solution.  "
+				"The solution is a pair of (x, f(x)) where x reduces (but doesn't necessarily minimize) f.  Note that this function locks "
+				"the object mutex, so this object is intended to be used to minimize a single function at a time (unlike other optimizers "
+				"that take a vector of minimization problems to carry out in parallel).",
+				true, false, true, false,
+				"fxn", "The function, f(x), to minimize.  This should be a std::function object that takes a real vector and returns a Real.",
+				"x0", "The starting point for the search.",
+				"fxn_at_x0", "The value of the function at the starting point for the search.",
+				"grad_of_fxn_at_x0", "The gradient of the function at the starting point for the search.",
+				"search_dir", "The search direction, which may or may not match the negative gradient of the starting point.",
+				"xmin", "The output value of x that adequately reduces f(x).  Set by this function.",
+				"fxn_at_xmin", "The value of the function f(x) at the value of x that adequately reduces f(x).  Set by this function.",
+				"void", "This function produces no return value.  Instead, x and fxn_at_x are set by this function.",
+				std::bind( &ArmijoInexactLineOptimizer::run_line_optimizer, this,
+					std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+					std::placeholders::_4, std::placeholders::_5, std::placeholders::_6,
+					std::placeholders::_7
+				)
+			)
+		);
 
 		api_definition() = api_def;
 	}
