@@ -237,6 +237,10 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
 	) const;
 
+	/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
+	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+	generate_brent_optimizer() const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -46,6 +46,9 @@
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
+// Optimizers headers:
+#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -371,6 +374,13 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 ) const {
 	TODO TODO TODO;
 }
+
+/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
+masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
+	return masala::make_shared< BrentAlgorithmLineOptimizer >();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
