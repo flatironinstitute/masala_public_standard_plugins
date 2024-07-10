@@ -32,6 +32,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
 #include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
 
 // Base headers:
@@ -314,7 +315,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec;
+
 	LineOptimizerCSP line_optimizer(
 		line_optimizer == nullptr ?
 		generate_brent_optimizer() :
@@ -324,8 +325,10 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 	MasalaThreadedWorkRequest work_vector( protected_threads_to_request() );
 	Size const nproblems( problems.n_problems() );
 	work_vector.reserve( nproblems );
-	outvec.resize( nproblems );
-	outvec.shrink_to_fit();
+
+	// Temporary storage of solutions, indexed by (problem, starting point):
+	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > solution_storage_temp( nproblems );
+
 	for( Size iproblem(0); iproblem < nproblems; ++iproblem ) {
 		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
 			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(iproblem) )
@@ -345,10 +348,11 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 		);
 
 		Size const n_starting_points( curproblem->starting_points().size() );
+		solution_storage_temp[iproblem].resize( n_starting_points );
 
-		for( Size i_starting_point(0); i_starting_point < n_starting_points; ++i_starting_point ) {
+		for( Size j_starting_point(0); j_starting_point < n_starting_points; ++j_starting_point ) {
 
-			TODO INITIALIZE SOLUTIONS CONTAINER TO HAVE ONE SOLUTION PER STARTING POINT;
+			solution_storage_temp[iproblem][j_starting_point] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >(); // Do all the heap-locking and allocation up front, before multi-threading.
 
 			LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
 			line_optimizer_copy->make_independent();
@@ -357,9 +361,9 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 					&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
 					this,
 					curproblem,
-					i_starting_point,
+					j_starting_point,
 					line_optimizer_copy,
-					std::ref( outvec[iproblem] )
+					std::ref( *solution_storage_temp[iproblem][j_starting_point] )
 				)
 			);
 		}
@@ -369,6 +373,17 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
 	);
 	work_summary.write_summary_to_tracer();
+
+	// Bundle all the solutions up into containers:
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( nproblems );
+	for( Size i(0); i<nproblems; ++i ) {
+		RealValuedFunctionLocalOptimizationSolutions_APISP cur_solutions( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
+		for( Size j(0); j<solution_storage_temp[i].size(); ++j ) {
+			cur_solutions->add_optimization_solution( solution_storage_temp[i][j] );
+		}
+		outvec[i] = cur_solutions; // Nonconst to const.
+	}
+	outvec.shrink_to_fit();
 
 	return outvec;
 }
@@ -382,14 +397,13 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 /// @param[in] problem The problem to solve.
 /// @param[in] starting_point_index The index of the starting point for the problem.
 /// @param[in] line_optimizer The line optimizer to use when solving this problem.
-/// @param[out] solutions The solutions container pointer.  This will be updated to point to a new
-/// solutions container object, containing a single solution.
+/// @param[out] solutions The solution container into which we will put the solution.
 void
 GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
 	masala::base::Size const starting_point_index,
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -413,8 +427,9 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_fxn_at_x
 		)
 		TODO CONVERGENCE CONDITION;
-		TODO TODO TODO;
 	}
+
+	TODO PACKAGE SOLUTION;
 }
 
 /// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
