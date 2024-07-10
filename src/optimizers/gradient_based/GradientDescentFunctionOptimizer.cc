@@ -401,8 +401,13 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	std::function< Real( std::vector< Real > const &, std::vector< Real > & ) > const & fxn_grad( prob.objective_function_gradient() );
 
 	TODO CONVERT BELOW TO EIGEN VECTORS;
-	std::vector< Real > x( prob.starting_points()[starting_point_index] );
-	std::vector< Real > grad_at_x( x.size() );
+
+	std::vector< Real > const & x0( prob.starting_points()[starting_point_index] );
+	Eigen::Vector< Real, Eigen::Dynamic > x;
+	x.resize( x0.size() );
+	for( Size i(0); i<x0.size(); ++i ) { x[i] = x0[i]; }
+	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x;
+	grad_at_x.resize( x0.size() );
 	Real f_at_x;
 
 	Size iter_counter(0);
