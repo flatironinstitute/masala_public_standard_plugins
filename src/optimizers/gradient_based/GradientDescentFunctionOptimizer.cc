@@ -348,7 +348,6 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 
 		for( Size i_starting_point(0); i_starting_point < n_starting_points; ++i_starting_point ) {
 
-			TODO SPLIT MULTIPLE STARTING POINTS OVER DIFFERENT WORK VECTOR JOBS;
 			TODO INITIALIZE SOLUTIONS CONTAINER TO HAVE ONE SOLUTION PER STARTING POINT;
 
 			LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
@@ -397,25 +396,21 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & prob( *problem );
 
-	std::function< Real( std::vector< Real > const & ) > const & fxn( prob.objective_function() );
-	std::function< Real( std::vector< Real > const &, std::vector< Real > & ) > const & fxn_grad( prob.objective_function_gradient() );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > const & fxn( prob.objective_function() );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > const & fxn_grad( prob.objective_function_gradient() );
 
-	TODO CONVERT BELOW TO EIGEN VECTORS;
-
-	std::vector< Real > const & x0( prob.starting_points()[starting_point_index] );
-	Eigen::Vector< Real, Eigen::Dynamic > x;
-	x.resize( x0.size() );
-	for( Size i(0); i<x0.size(); ++i ) { x[i] = x0[i]; }
-	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x;
-	grad_at_x.resize( x0.size() );
-	Real f_at_x;
+	Eigen::Vector< Real, Eigen::Dynamic > x( prob.starting_points()[starting_point_index] );
+	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, new_x;
+	new_x.resize( x.size() );
+	grad_at_x.resize( x.size() );
+	Real fxn_at_x, new_fxn_at_x;
 
 	Size iter_counter(0);
 	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
 		++iter_counter;
-		f_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
+		fxn_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
 		line_optimizer->run_line_optimizer(
-			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_f_at_x
+			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_fxn_at_x
 		)
 		TODO CONVERGENCE CONDITION;
 		TODO TODO TODO;
