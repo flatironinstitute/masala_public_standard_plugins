@@ -306,11 +306,17 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 	using masala::base::Size;
 	using masala::base::Real;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using namespace masala::base::managers::threads;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec;
+	LineOptimizerCSP line_optimizer(
+		line_optimizer == nullptr ?
+		generate_brent_optimizer() :
+		line_optimizer_
+	);
 
 	MasalaThreadedWorkRequest work_vector;
 	Size const nproblems( problems.n_problems() );
@@ -326,11 +332,15 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 			+ " as a RealValuedFunctionLocalOptimizationProblem.  Problem type was "
 			+ problems.problem(iproblem)->inner_class_name() + "."
 		);
+		LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
+		line_optimizer_copy->make_independent();
 		work_vector.add_job(
 			std::bind(
 				&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
+				this,
 				curproblem,
-				std::ref( outvec[curproblem] )
+				line_optimizer_copy,
+				std::ref( outvec[iproblem] )
 			)
 		);
 	}
@@ -341,6 +351,25 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 	work_summary.write_summary_to_tracer();
 
 	return outvec;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
+/// in threads.  This function is called from a mutex-locked context.
+/// @param[in] problem The problem to solve.
+/// @param[in] line_optimizer The line optimizer to use when solving this problem.
+/// @param[out] solutions The solutions container pointer.  This will be updated to point to a new
+/// solutions container object, containing a single solution.
+void
+GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
+) const {
+	TODO TODO TODO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

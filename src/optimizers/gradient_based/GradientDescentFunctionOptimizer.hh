@@ -35,6 +35,7 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 #include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.fwd.hh>
 
@@ -216,6 +217,25 @@ public:
 	run_real_valued_local_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 	) const override;
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
+	/// in threads.  This function is called from a mutex-locked context.
+	/// @param[in] problem The problem to solve.
+	/// @param[in] line_optimizer The line optimizer to use when solving this problem.
+	/// @param[out] solutions The solutions container pointer.  This will be updated to point to a new
+	/// solutions container object, containing a single solution.
+	void
+	run_real_valued_local_optimizer_on_one_problem(
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+		masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
+	) const;
 
 private:
 
