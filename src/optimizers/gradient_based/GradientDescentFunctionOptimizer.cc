@@ -346,20 +346,24 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 
 		Size const n_starting_points( curproblem->starting_points().size() );
 
-		TODO SPLIT MULTIPLE STARTING POINTS OVER DIFFERENT WORK VECTOR JOBS;
-		TODO INITIALIZE SOLUTIONS CONTAINER TO HAVE ONE SOLUTION PER STARTING POINT;
+		for( Size i_starting_point(0); i_starting_point < n_starting_points; ++i_starting_point ) {
 
-		LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
-		line_optimizer_copy->make_independent();
-		work_vector.add_job(
-			std::bind(
-				&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
-				this,
-				curproblem,
-				line_optimizer_copy,
-				std::ref( outvec[iproblem] )
-			)
-		);
+			TODO SPLIT MULTIPLE STARTING POINTS OVER DIFFERENT WORK VECTOR JOBS;
+			TODO INITIALIZE SOLUTIONS CONTAINER TO HAVE ONE SOLUTION PER STARTING POINT;
+
+			LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
+			line_optimizer_copy->make_independent();
+			work_vector.add_job(
+				std::bind(
+					&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
+					this,
+					curproblem,
+					i_starting_point,
+					line_optimizer_copy,
+					std::ref( outvec[iproblem] )
+				)
+			);
+		}
 	}
 
 	MasalaThreadedWorkExecutionSummary const work_summary(
@@ -377,24 +381,38 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 /// @brief Run a single local optimization problem in a thread.  This function runs in parallel
 /// in threads.  This function is called from a mutex-locked context.
 /// @param[in] problem The problem to solve.
+/// @param[in] starting_point_index The index of the starting point for the problem.
 /// @param[in] line_optimizer The line optimizer to use when solving this problem.
 /// @param[out] solutions The solutions container pointer.  This will be updated to point to a new
 /// solutions container object, containing a single solution.
 void
 GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+	masala::base::Size const starting_point_index,
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
 
-	std::function< Real( std::vector< Real > const & ) > const & fxn( problem->objective_function() );
-	std::function< Real( std::vector< Real > const &, std::vector< Real > & ) > const & fxn_grad( problem->objective_function_gradient() );
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & prob( *problem );
+
+	std::function< Real( std::vector< Real > const & ) > const & fxn( prob.objective_function() );
+	std::function< Real( std::vector< Real > const &, std::vector< Real > & ) > const & fxn_grad( prob.objective_function_gradient() );
+
+	TODO CONVERT BELOW TO EIGEN VECTORS;
+	std::vector< Real > x( prob.starting_points()[starting_point_index] );
+	std::vector< Real > grad_at_x( x.size() );
+	Real f_at_x;
 
 	Size iter_counter(0);
 	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
 		++iter_counter;
+		f_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
+		line_optimizer->run_line_optimizer(
+			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_f_at_x
+		)
+		TODO CONVERGENCE CONDITION;
 		TODO TODO TODO;
 	}
 }
