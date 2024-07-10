@@ -31,6 +31,7 @@
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -38,6 +39,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 // STL headers:
@@ -209,7 +211,9 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 GradientDescentFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::setter;
+	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using masala::base::Size;
 	using masala::base::Real;
 
@@ -236,6 +240,30 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				false, false, std::bind( &GradientDescentFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
 			)
 		);
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< LineOptimizerCSP const & > set_line_optimizer_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< LineOptimizerCSP const & > >(
+					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
+					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
+					"is used by default.",
+					"line_optimizer_in", "The line optimizer to use when performing gradient-descent minimization.",
+					false, false, std::bind( &GradientDescentFunctionOptimizer::set_line_optimizer, this, std::placeholders::_1 )
+				)
+			);
+			OwnedSingleObjectSetterAnnotationSP set_line_optimizer_setter_annotation( masala::make_shared< OwnedSingleObjectSetterAnnotation >() );
+			set_line_optimizer_setter_annotation->set_plugin_manager_info(
+				std::vector< std::string >{ "LineOptimizer" },
+				std::vector< std::string >{ "line_optimizer" },
+				true
+			);
+			set_line_optimizer_setter_annotation->set_engine_manager_info(
+				std::vector< std::string >{ "LineOptimizer" },
+				std::vector< std::string >{ "line_optimizer" },
+				true
+			);
+			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
+			api_def->add_setter( set_line_optimizer_setter );
+		}
 
 		// Getters:
 		api_def->add_getter(
@@ -243,6 +271,14 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &GradientDescentFunctionOptimizer::max_iterations, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< LineOptimizerCSP > >(
+				"line_optimizer", "Get the line optimizer to use for the line searches.  If this is nullptr, then a BrentAlgorithmLineOptimizer "
+				"is used by default.",
+				"line_optimizer", "The line optimizer to use for the line searches.",
+				false, false, std::bind( &GradientDescentFunctionOptimizer::line_optimizer, this )
 			)
 		);
 
@@ -283,6 +319,10 @@ GradientDescentFunctionOptimizer::protected_assign(
 ) {
 	GradientDescentFunctionOptimizer const * src_ptr_cast( dynamic_cast< GradientDescentFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
+
+	max_iterations_ = src_ptr_cast->max_iterations_;
+	line_optimizer_ = src_ptr_cast->line_optimizer_;
+
 	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
@@ -291,7 +331,12 @@ GradientDescentFunctionOptimizer::protected_assign(
 /// @details Performs no mutex locking.
 void
 GradientDescentFunctionOptimizer::protected_make_independent() {
-	// TODO
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	if( line_optimizer_ != nullptr ) {
+		LineOptimizerSP line_optimizer_copy( line_optimizer_->clone() );
+		line_optimizer_copy->make_independent();
+		line_optimizer_ = line_optimizer_copy;
+	}
 	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
