@@ -30,6 +30,7 @@
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 #include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
 
@@ -41,6 +42,9 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
+#include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
 // STL headers:
 #include <vector>
@@ -297,12 +301,45 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 /// the problem with the same index.
 std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
 GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & //problems
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 ) const {
+	using masala::base::Size;
+	using masala::base::Real;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace masala::base::managers::threads;
+
+	std::lock_guard< std::mutex > lock( mutex() );
 
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec;
-	//TODO TODO TODO;
+
+	MasalaThreadedWorkRequest work_vector;
+	Size const nproblems( problems.n_problems() );
+	work_vector.reserve( nproblems );
+	outvec.resize( nproblems );
+	outvec.shrink_to_fit();
+	for( Size iproblem(0); iproblem < nproblems; ++iproblem ) {
+		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
+			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(iproblem) )
+		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem != nullptr, "run_real_valued_local_optimizer",
+			"Could not interpret problem " + std::to_string( iproblem + 1 )
+			+ " as a RealValuedFunctionLocalOptimizationProblem.  Problem type was "
+			+ problems.problem(iproblem)->inner_class_name() + "."
+		);
+		work_vector.add_job(
+			std::bind(
+				&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
+				curproblem,
+				std::ref( outvec[curproblem] )
+			)
+		);
+	}
+
+	MasalaThreadedWorkExecutionSummary const work_summary(
+		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
+	);
+	work_summary.write_summary_to_tracer();
+
 	return outvec;
 }
 
