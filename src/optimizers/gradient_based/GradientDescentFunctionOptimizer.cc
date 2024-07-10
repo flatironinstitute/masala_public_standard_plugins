@@ -321,7 +321,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 		line_optimizer_
 	);
 
-	MasalaThreadedWorkRequest work_vector;
+	MasalaThreadedWorkRequest work_vector( protected_threads_to_request() );
 	Size const nproblems( problems.n_problems() );
 	work_vector.reserve( nproblems );
 	outvec.resize( nproblems );
@@ -335,6 +335,20 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 			+ " as a RealValuedFunctionLocalOptimizationProblem.  Problem type was "
 			+ problems.problem(iproblem)->inner_class_name() + "."
 		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function(), "run_real_valued_local_optimizer",
+			"The " + class_name() + " requires that every problem have an objective function defined.  No "
+			"real-valued objective function was found for problem " + std::to_string(iproblem + 1) + "."
+		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function_gradient(), "run_real_valued_local_optimizer",
+			"The " + class_name() + " requires that every problem have an objective function gradient defined.  No "
+			"gradient function was found for problem " + std::to_string(iproblem + 1) + "."
+		);
+
+		Size const n_starting_points( curproblem->starting_points().size() );
+
+		TODO SPLIT MULTIPLE STARTING POINTS OVER DIFFERENT WORK VECTOR JOBS;
+		TODO INITIALIZE SOLUTIONS CONTAINER TO HAVE ONE SOLUTION PER STARTING POINT;
+
 		LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
 		line_optimizer_copy->make_independent();
 		work_vector.add_job(
@@ -372,7 +386,17 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solutions
 ) const {
-	TODO TODO TODO;
+	using masala::base::Size;
+	using masala::base::Real;
+
+	std::function< Real( std::vector< Real > const & ) > const & fxn( problem->objective_function() );
+	std::function< Real( std::vector< Real > const &, std::vector< Real > & ) > const & fxn_grad( problem->objective_function_gradient() );
+
+	Size iter_counter(0);
+	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
+		++iter_counter;
+		TODO TODO TODO;
+	}
 }
 
 /// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
