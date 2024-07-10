@@ -46,6 +46,7 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
+#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
 
 // Optimizers headers:
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
@@ -53,6 +54,7 @@
 // STL headers:
 #include <vector>
 #include <string>
+#include <iostream> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -443,6 +445,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 		for( Size j_starting_point(0); j_starting_point < n_starting_points; ++j_starting_point ) {
 
 			solution_storage_temp[iproblem][j_starting_point] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >(); // Do all the heap-locking and allocation up front, before multi-threading.
+			solution_storage_temp[iproblem][j_starting_point]->set_problem( curproblem );
 
 			LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
 			line_optimizer_copy->make_independent();
@@ -493,7 +496,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
 	masala::base::Size const starting_point_index,
 	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -506,9 +509,13 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > const & fxn_grad( prob.objective_function_gradient() );
 
 	Eigen::Vector< Real, Eigen::Dynamic > x( prob.starting_points()[starting_point_index] );
-	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, new_x;
-	new_x.resize( x.size() );
-	grad_at_x.resize( x.size() );
+	std::cout << "Iteration 0: x=[" << masala::base::utility::container::container_to_string( x, "," ) << "], f(x)=" << fxn(x) << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+
+	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, grad_test_vec, new_x;
+	Size const ndims( static_cast< Size >( x.size() ) ); // Number of dimensions
+	new_x.resize( static_cast< Eigen::Index >( ndims ) );
+	grad_at_x.resize( static_cast< Eigen::Index >( ndims ) );
+	grad_test_vec.resize( static_cast< Eigen::Index >( ndims ) );
 	Real fxn_at_x, new_fxn_at_x;
 
 	Size iter_counter(0);
@@ -518,22 +525,43 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 		fxn_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
 
 		// Test for zero gradient:
-		TODO TODO TODO:
-
-		line_optimizer->run_line_optimizer(
-			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_fxn_at_x
-		);
-
-		// Test whether the function has not been reduced:
-		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
+		for( Size i(0); i<ndims; ++i ) {
+			grad_test_vec[i] = std::abs( grad_at_x[i] ) * std::max( std::abs(x[i]), 1.0 );
+		}
+		if( grad_test_vec.maxCoeff() / std::max( fxn_at_x, 1.0 ) < gradient_tolerance_ ) {
 			converged = true;
 			break;
 		}
 
+		// Run the line optimizer along the (inverse) gradient direction:
+		line_optimizer->run_line_optimizer(
+			fxn, x, fxn_at_x, grad_at_x, -grad_at_x, new_x, new_fxn_at_x
+		);
+
+		std::cout << "Iteration " << iter_counter << ": x=[" << masala::base::utility::container::container_to_string( new_x, "," ) << "], f(x)=" << new_fxn_at_x << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+
+		// Test whether the function has not been reduced:
+		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
+			std::swap( x, new_x );
+			fxn_at_x = new_fxn_at_x;
+			converged = true;
+			break;
+		}
+
+		// Update the current point.
 		std::swap( x, new_x );
 	}
 
-	TODO PACKAGE SOLUTION;
+	// Common to all OptimizationSolution objects:
+	solution.set_solution_score( fxn_at_x );
+	solution.set_solution_score_data_representation_approximation( fxn_at_x );
+	solution.set_solution_score_solver_approximation( fxn_at_x );
+	solution.set_n_times_solution_was_produced( 1 );
+
+	// Specific to RealValuedFunctionLocalOptimizationSolution:
+	solution.set_solution_point( x );
+	solution.set_converged( converged );
+	solution.set_iterations( iter_counter );
 }
 
 /// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
