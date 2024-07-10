@@ -183,6 +183,22 @@ GradientDescentFunctionOptimizer::set_line_optimizer(
 	line_optimizer_ = line_optimizer_in;
 }
 
+/// @brief Set the tolerance for determining whether or not we've finished our search.
+/// @details The default is the square root of machine precision (the theoretical lower limit for
+/// any sensible value of tolerance).
+void
+GradientDescentFunctionOptimizer::set_tolerance(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
+		"set_tolerance", "The tolerance must be greater than or equal to the square root of machine precision ("
+		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ) )
+		+ ").  Got " + std::to_string( setting ) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	tolerance_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +218,15 @@ masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimize
 GradientDescentFunctionOptimizer::line_optimizer() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return line_optimizer_;
+}
+
+/// @brief Get the tolerance for determining whether or not we've finished our search.
+/// @details The default is the square root of machine precision (the theoretical lower limit for
+/// any sensible value of tolerance).
+masala::base::Real
+GradientDescentFunctionOptimizer::tolerance() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return tolerance_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -272,6 +297,16 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
 			api_def->add_setter( set_line_optimizer_setter );
 		}
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_tolerance", "Set the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance_in", "The tolerance to set.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::set_tolerance, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -287,6 +322,16 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"is used by default.",
 				"line_optimizer", "The line optimizer to use for the line searches.",
 				false, false, std::bind( &GradientDescentFunctionOptimizer::line_optimizer, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"tolerance", "Get the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance", "The tolerance for determining whether the search has converged.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::tolerance, this )
 			)
 		);
 
@@ -408,6 +453,8 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	using masala::base::Size;
 	using masala::base::Real;
 
+	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
+
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & prob( *problem );
 
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > const & fxn( prob.objective_function() );
@@ -420,13 +467,25 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	Real fxn_at_x, new_fxn_at_x;
 
 	Size iter_counter(0);
+	bool converged(false);
 	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
 		++iter_counter;
 		fxn_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
+
+		// Test for zero gradient:
+		TODO TODO TODO:
+
 		line_optimizer->run_line_optimizer(
 			fxn, x, fxn_at_x, grad_at_x, grad_at_x, new_x, new_fxn_at_x
-		)
-		TODO CONVERGENCE CONDITION;
+		);
+
+		// Test whether the function has not been reduced:
+		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
+			converged = true;
+			break;
+		}
+
+		std::swap( x, new_x );
 	}
 
 	TODO PACKAGE SOLUTION;
