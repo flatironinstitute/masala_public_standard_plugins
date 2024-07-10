@@ -559,6 +559,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	solution.set_n_times_solution_was_produced( 1 );
 
 	// Specific to RealValuedFunctionLocalOptimizationSolution:
+	solution.set_starting_point_and_index( prob.starting_points()[starting_point_index], starting_point_index );
 	solution.set_solution_point( x );
 	solution.set_converged( converged );
 	solution.set_iterations( iter_counter );
