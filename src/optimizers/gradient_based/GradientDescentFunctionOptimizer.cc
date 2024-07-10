@@ -552,6 +552,8 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 		std::swap( x, new_x );
 	}
 
+	TODO TODO TODO: WARNING OR ERROR ON NON-CONVERGENCE;
+
 	// Common to all OptimizationSolution objects:
 	solution.set_solution_score( fxn_at_x );
 	solution.set_solution_score_data_representation_approximation( fxn_at_x );
