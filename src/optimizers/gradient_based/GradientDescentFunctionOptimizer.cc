@@ -409,7 +409,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 
 
 	LineOptimizerCSP line_optimizer(
-		line_optimizer == nullptr ?
+		line_optimizer_ == nullptr ?
 		generate_brent_optimizer() :
 		line_optimizer_
 	);
