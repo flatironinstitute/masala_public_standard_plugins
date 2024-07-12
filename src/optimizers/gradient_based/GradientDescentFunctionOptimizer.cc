@@ -217,6 +217,16 @@ GradientDescentFunctionOptimizer::set_gradient_tolerance(
 	gradient_tolerance_ = setting;
 }
 
+/// @brief Set whether we should throw if iterations are exceeded (true), or just warn
+/// (false, the default).
+void
+GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded(
+	bool const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	throw_if_iterations_exceeded_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -254,6 +264,14 @@ masala::base::Real
 GradientDescentFunctionOptimizer::gradient_tolerance() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return gradient_tolerance_;
+}
+
+/// @brief Should we throw if iterations are exceeded (true), or just warn
+/// (false, the default)?
+bool
+GradientDescentFunctionOptimizer::throw_if_iterations_exceeded() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return throw_if_iterations_exceeded_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -344,6 +362,15 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				std::bind( &GradientDescentFunctionOptimizer::set_gradient_tolerance, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool > >(
+				"set_throw_if_iterations_exceeded", "Set whether we should throw if "
+				"iteration maximum is exceeded (true), or just warn (false, the default).",
+				"setting", "True if we want to throw if iteration maximum is exceeded, false otherwise.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -379,6 +406,16 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"gradient_tolerance", "The tolerance for determining whether the search has converged.",
 				false, false,
 				std::bind( &GradientDescentFunctionOptimizer::gradient_tolerance, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"throw_if_iterations_exceeded", "Get whether we throw if "
+				"iteration maximum is exceeded (true), or just warn (false, the default).",
+				"throw_if_iterations_exceeded", "True if we throw if iteration maximum is "
+				"exceeded, false otherwise.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::throw_if_iterations_exceeded, this )
 			)
 		);
 
@@ -552,7 +589,14 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 		std::swap( x, new_x );
 	}
 
-	TODO TODO TODO: WARNING OR ERROR ON NON-CONVERGENCE;
+	// Message or error on non-convergence:
+	if( throw_if_iterations_exceeded_ ) {
+		CHECK_OR_THROW_FOR_CLASS( converged, "run_real_valued_local_optimizer_on_one_problem", "After " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
+	} else {
+		if( !converged ) {
+			write_to_tracer( "Warning: after " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
+		}
+	}
 
 	// Common to all OptimizationSolution objects:
 	solution.set_solution_score( fxn_at_x );
