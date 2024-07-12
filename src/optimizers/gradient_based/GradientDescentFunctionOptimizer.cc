@@ -33,7 +33,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
-#include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -179,7 +179,7 @@ GradientDescentFunctionOptimizer::set_max_iterations(
 /// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 void
 GradientDescentFunctionOptimizer::set_line_optimizer(
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP const & line_optimizer_in
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
 ) {
 	std::lock_guard< std::mutex > lock( mutex() );
 	line_optimizer_ = line_optimizer_in;
@@ -242,7 +242,7 @@ GradientDescentFunctionOptimizer::max_iterations() const {
 /// @brief Get the line optimizer used for the line searches.
 /// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
 /// is used by default.
-masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
 GradientDescentFunctionOptimizer::line_optimizer() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return line_optimizer_;
@@ -319,8 +319,8 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			)
 		);
 		{
-			MasalaObjectAPISetterDefinition_OneInputSP< LineOptimizerCSP const & > set_line_optimizer_setter(
-				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< LineOptimizerCSP const & > >(
+			MasalaObjectAPISetterDefinition_OneInputSP< PluginLineOptimizerCSP const & > set_line_optimizer_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< PluginLineOptimizerCSP const & > >(
 					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
 					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
 					"is used by default.",
@@ -381,7 +381,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			)
 		);
 		api_def->add_getter(
-			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< LineOptimizerCSP > >(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< PluginLineOptimizerCSP > >(
 				"line_optimizer", "Get the line optimizer to use for the line searches.  If this is nullptr, then a BrentAlgorithmLineOptimizer "
 				"is used by default.",
 				"line_optimizer", "The line optimizer to use for the line searches.",
@@ -445,7 +445,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 	std::lock_guard< std::mutex > lock( mutex() );
 
 
-	LineOptimizerCSP line_optimizer(
+	PluginLineOptimizerCSP line_optimizer(
 		line_optimizer_ == nullptr ?
 		generate_brent_optimizer() :
 		line_optimizer_
@@ -484,7 +484,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 			solution_storage_temp[iproblem][j_starting_point] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >(); // Do all the heap-locking and allocation up front, before multi-threading.
 			solution_storage_temp[iproblem][j_starting_point]->set_problem( curproblem );
 
-			LineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
+			PluginLineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
 			line_optimizer_copy->make_independent();
 			work_vector.add_job(
 				std::bind(
@@ -532,7 +532,7 @@ void
 GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
 	masala::base::Size const starting_point_index,
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
 ) const {
 	using masala::base::Size;
@@ -612,7 +612,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 }
 
 /// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
 GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
 	return masala::make_shared< BrentAlgorithmLineOptimizer >();
 }
@@ -645,7 +645,7 @@ void
 GradientDescentFunctionOptimizer::protected_make_independent() {
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	if( line_optimizer_ != nullptr ) {
-		LineOptimizerSP line_optimizer_copy( line_optimizer_->clone() );
+		PluginLineOptimizerSP line_optimizer_copy( line_optimizer_->clone() );
 		line_optimizer_copy->make_independent();
 		line_optimizer_ = line_optimizer_copy;
 	}

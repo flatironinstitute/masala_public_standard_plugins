@@ -53,7 +53,7 @@ namespace gradient_based {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerSP
 BrentAlgorithmLineOptimizer::clone() const {
 	return masala::make_shared< BrentAlgorithmLineOptimizer >(*this);
 }
@@ -460,7 +460,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 /// @details Performs no mutex locking.
 void
 BrentAlgorithmLineOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer const & src
+	masala::numeric::optimization::real_valued_local::LineOptimizer const & src
 ) {
 	BrentAlgorithmLineOptimizer const * src_ptr_cast( dynamic_cast< BrentAlgorithmLineOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
@@ -468,7 +468,7 @@ BrentAlgorithmLineOptimizer::protected_assign(
 	max_iters_ = src_ptr_cast->max_iters_;
 	initial_stepsize_ = src_ptr_cast->initial_stepsize_;
 	throw_if_iterations_exceeded_ = src_ptr_cast->throw_if_iterations_exceeded_;
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -477,7 +477,7 @@ BrentAlgorithmLineOptimizer::protected_assign(
 void
 BrentAlgorithmLineOptimizer::protected_make_independent() {
 	// Nothing to be done at the level of this derived class to make it independent.
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based

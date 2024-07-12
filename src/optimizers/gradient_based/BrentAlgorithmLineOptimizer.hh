@@ -34,7 +34,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.hh>
 
 // STL headers:
 #include <cmath>
@@ -48,7 +48,7 @@ namespace gradient_based {
 /// along a line.  It uses the algorithm of Richard P. Brent described in "Algorithms for Minimization
 /// Without Derivatives" (1973).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class BrentAlgorithmLineOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer {
+class BrentAlgorithmLineOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizer {
 
 public:
 
@@ -67,7 +67,7 @@ public:
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerSP
 	clone() const override;
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
@@ -200,7 +200,7 @@ protected:
 	/// @details Performs no mutex locking.
 	void
 	protected_assign(
-		masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizer const & src
+		masala::numeric::optimization::real_valued_local::LineOptimizer const & src
 	) override;
 
 	/// @brief Make independent: must be implemented by derived classes, which must call the base

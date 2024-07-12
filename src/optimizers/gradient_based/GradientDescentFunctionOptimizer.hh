@@ -38,7 +38,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.fwd.hh>
-#include <numeric_api/base_classes/optimization/real_valued_local/LineOptimizer.fwd.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.fwd.hh>
 
 // Parent header:
 #include <numeric_api/base_classes/optimization/real_valued_local/RealValuedFunctionLocalOptimizer.hh>
@@ -153,7 +153,7 @@ public:
 	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 	void
 	set_line_optimizer(
-		masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP const & line_optimizer_in
+		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
 	);
 
 	/// @brief Set the tolerance for determining whether or not we've finished our search.
@@ -183,7 +183,7 @@ public:
 	/// @brief Get the line optimizer used for the line searches.
 	/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
 	/// is used by default.
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
 	line_optimizer() const;
 
 	/// @brief Get the tolerance for determining whether or not we've finished our search.
@@ -267,12 +267,12 @@ private:
 	run_real_valued_local_optimizer_on_one_problem(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
 		masala::base::Size const starting_point_index,
-		masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer,
+		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
 	) const;
 
 	/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
 	generate_brent_optimizer() const;
 
 private:
@@ -287,7 +287,7 @@ private:
 
 	/// @brief A line optimizer used for the line searches.
 	/// @details If none is provided, a BrentAlgorithmLineOptimizer is used.
-	masala::numeric_api::base_classes::optimization::real_valued_local::LineOptimizerCSP line_optimizer_;
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer_;
 
 	/// @brief The tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
