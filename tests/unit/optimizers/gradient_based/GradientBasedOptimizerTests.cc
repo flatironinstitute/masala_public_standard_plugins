@@ -27,11 +27,18 @@
 // Unit headers:
 #include <optimizers/gradient_based/util.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
+#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
 
 // Masala base headers:
 #include <base/types.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
+
+// Masala numeric API headers:
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
 
 // External headers:
 #include <external/eigen/Eigen/Core>
@@ -83,6 +90,26 @@ test_function_1b(
 	// -1.0\cdot\exp\left(-\left(\frac{\left(x-3\right)}{0.5}\right)^{2}\right)-2.0\cdot\exp\left(-\left(\frac{\left(x-2\right)}{0.25}\right)^{2}\right)+0.5\cdot\exp\left(-\left(\frac{\left(x-3.25\right)}{0.1}\right)^{2}\right)
 	masala::base::Real const xval( x[0] );
 	return ( invert ? -1.0 : 1.0 ) * ( test_gaussian( xval, -1.0, 3.0, 0.5 ) + test_gaussian( xval, -2.0, 2.0, 0.25 ) + test_gaussian( xval, 0.5, 3.25, 0.1 ) );
+}
+
+/// @brief A function of two variables for testing.
+/// @details Has minima somewhere near (-1, 0), (1, 0), and (0, 2), with values
+/// somewhere around -1.0, -2.0, and -2.5, respectively.
+masala::base::Real
+test_function_2(
+	Eigen::VectorXd const & x,
+	bool invert
+) {
+	// For plotting using Desmos:
+	// -1.0\cdot\exp\left(\frac{-\left(x-1\right)^{2}}{.25}\right)\exp\left(\frac{-y^{2}}{1}\right)-2.0\cdot\exp\left(\frac{-\left(x+1\right)^{2}}{1}\right)\exp\left(\frac{-y^{2}}{0.25}\right)-2.5\cdot\exp\left(\frac{-x^{2}}{1}\right)\exp\left(\frac{-\left(y-2\right)^{2}}{1.5}\right)
+	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_based", "test_function_2", "Expected a function of two variables." );
+	masala::base::Real const xval(x[0]);
+	masala::base::Real const yval(x[1]);
+	return ( invert ? -1.0 : 1.0 ) * (
+		test_gaussian( xval, -1.0, 1.0, 0.5 ) * test_gaussian( yval, 1.0, 0, 1.0 ) +
+		test_gaussian( xval, -2.0, -1.0, 1.0 ) * test_gaussian( yval, 1.0, 0, 0.5 ) +
+		test_gaussian( xval, -2.5, 0.0, 1.0 ) * test_gaussian( yval, 1.0, 2.0, std::sqrt(1.5) )
+	);
 }
 
 TEST_CASE( "Find the bounds of a local minimization problem using parabolic extrapolation.", "[standard_masala_plugins::optimizers::gradient_based::bracket_minimum_with_parabolic_extrapolation][local_minimization][bounds]" ) {
@@ -145,7 +172,7 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
-	std::function< Real( Eigen::VectorXd ) > const fxn1b( std::bind( &test_function_1b, std::placeholders::_1, false ) );
+	std::function< Real( Eigen::VectorXd const & ) > const fxn1b( std::bind( &test_function_1b, std::placeholders::_1, false ) );
 	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 3.6, 5.0 };
 
 	masala::base::Size counter(0);
@@ -158,11 +185,67 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 		x0[0] = entry;
 		searchdir[0] = 1.0;
 		Real f_at_x0( fxn1b(x0) ), f_at_x( 0.0 );
-		//REQUIRE_NOTHROW([&](){
+		REQUIRE_NOTHROW([&](){
 			BrentAlgorithmLineOptimizer brent_optimizer;
 			//brent_optimizer.set_max_iters(0);
 			//brent_optimizer.set_tolerance(3.0e-8);
 			brent_optimizer.run_line_optimizer( fxn1b, x0, f_at_x0, Eigen::VectorXd(), searchdir, x, f_at_x );
+		}() );
+
+		Real const xval( x[0] );
+		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(xval) + "\tf(x) = " + std::to_string(f_at_x)  );
+
+		if( counter <= 2 ) {
+			CHECK( std::abs(xval - 2.002) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
+		} else if( counter == 3 || counter == 5 ) {
+			CHECK( std::abs(xval - 2.995) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
+		} else if( counter == 4 ) {
+			CHECK( std::abs(xval - 3.397) < 2.0e-3 );
+			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
+		}
+	}
+}
+
+TEST_CASE( "Find the local minimum of a two-dimensional function using the GradientDescentFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::GradientDescientFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][brent_algorithm][line_optimizer]" ) {
+	using masala::base::Real;
+	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using masala::base::managers::tracer::MasalaTracerManager;
+	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+
+	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+
+	std::function< Real( Eigen::VectorXd const & ) > const fxn2( std::bind( &test_function_2, std::placeholders::_1, false ) );
+	std::vector< std::vector< Real > > const initial_points {
+		{ -1.5, 0.1 },
+		{ -0.9, -0.1 },
+		{ 0.9, -0.1 },
+		{ 2.0, 0.1 },
+		{ 0.1, 3.0 },
+		{ -0.1, 1.8 },
+	};
+
+	masala::base::Size counter(0);
+	for( std::vector< Real > const & entry : initial_points ) {
+		++counter;
+		Eigen::VectorXd x0, x;
+		x0.resize(2);
+		x.resize(2);
+		x0[0] = entry[0];
+		x0[1] = entry[1];
+		x = x0;
+		Real f_at_x0( fxn2(x0) ), f_at_x( 0.0 );
+		//REQUIRE_NOTHROW([&](){
+			RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
+			TODO TODO CONTINUE HERE;
+
+
+			GradientDescentFunctionOptimizer gradopt;
+			gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer >() );
+			gradopt.set_throw_if_iterations_exceeded(true);
+			std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( curproblems ) );
 		//}() );
 
 		Real const xval( x[0] );
