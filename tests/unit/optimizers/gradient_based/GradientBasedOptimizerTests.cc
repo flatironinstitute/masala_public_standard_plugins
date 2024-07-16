@@ -32,12 +32,16 @@
 // Registraton headers:
 #include <registration_api/register_library.hh>
 
+// Masala core headers:
+#include <core_api/auto_generated_api/registration/register_core.hh>
+
 // Masala base headers:
 #include <base/types.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
 
 // Masala numeric API headers:
+#include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
@@ -261,9 +265,10 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	using masala::base::managers::tracer::MasalaTracerManager;
 	using masala::base::managers::tracer::MasalaTracerManagerHandle;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
-	using namespace standard_masala_plugins::registration_api;
 
-	register_library();
+	masala::core_api::auto_generated_api::registration::register_core();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+	standard_masala_plugins::registration_api::register_library();
 
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
@@ -293,6 +298,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			curproblem->add_starting_point( x0 );
 			curproblem->set_objective_function( fxn2 );
 			curproblem->set_objective_function_gradient( fxn2_grad );
+			curproblem->finalize();
 			curproblems->add_optimization_problem( curproblem );
 		}
 
@@ -329,7 +335,9 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 		}
 	//}() );
 
-	unregister_library();
+	standard_masala_plugins::registration_api::unregister_library();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	masala::core_api::auto_generated_api::registration::unregister_core();
 }
 
 } // namespace cost_function_network
