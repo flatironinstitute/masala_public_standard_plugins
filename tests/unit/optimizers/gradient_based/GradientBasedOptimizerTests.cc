@@ -77,7 +77,7 @@ d_test_gaussian_dx(
 	masala::base::Real const offset,
 	masala::base::Real const stddev
 ) {
-	return -2.0 * x * coeff / ( stddev * stddev ) * std::exp( -1.0 * std::pow( ( x - offset ) / stddev , 2.0 ) );
+	return -2.0 * ( x - offset ) * coeff / ( stddev * stddev ) * std::exp( -1.0 * std::pow( ( x - offset ) / stddev , 2.0 ) );
 }
 
 /// @brief See util_test_fxn_1.png to see this plotted.
