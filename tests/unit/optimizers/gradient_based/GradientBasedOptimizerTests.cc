@@ -264,6 +264,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	using namespace standard_masala_plugins::optimizers::gradient_based;
 	using masala::base::managers::tracer::MasalaTracerManager;
 	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+	using masala::base::managers::threads::MasalaThreadManager;
+	using masala::base::managers::threads::MasalaThreadManagerHandle;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 
 	masala::core_api::auto_generated_api::registration::register_core();
@@ -271,6 +273,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	standard_masala_plugins::registration_api::register_library();
 
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+	MasalaThreadManagerHandle threadman( MasalaThreadManager::get_instance() );
+	threadman->set_total_threads(3);
 
 	std::function< Real( Eigen::VectorXd const & ) > const fxn2( std::bind( &test_function_2, std::placeholders::_1, false ) );
 	std::function< Real( Eigen::VectorXd const &, Eigen::VectorXd & ) > const fxn2_grad( std::bind( &grad_test_function_2, std::placeholders::_1, std::placeholders::_2, false ) );
@@ -303,6 +307,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 		GradientDescentFunctionOptimizer gradopt;
 		gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer >() );
 		gradopt.set_throw_if_iterations_exceeded(true);
+		gradopt.set_threads_to_request(3);
 		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( *curproblems ) );
 
 		CHECK( cursolutions_vec.size() == initial_points.size() );
@@ -335,6 +340,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			}
 		}
 	}() );
+
+	threadman->set_total_threads(1);
 
 	standard_masala_plugins::registration_api::unregister_library();
 	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
