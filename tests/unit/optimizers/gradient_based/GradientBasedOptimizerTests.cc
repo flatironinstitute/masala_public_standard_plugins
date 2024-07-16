@@ -29,6 +29,9 @@
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
 
+// Registraton headers:
+#include <registration_api/register_library.hh>
+
 // Masala base headers:
 #include <base/types.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
@@ -61,6 +64,16 @@ test_gaussian(
 	masala::base::Real const stddev
 ) {
 	return coeff * std::exp( -1.0 * std::pow( ( x - offset ) / stddev , 2.0 ) );
+}
+
+masala::base::Real
+d_test_gaussian_dx(
+	masala::base::Real const x,
+	masala::base::Real const coeff,
+	masala::base::Real const offset,
+	masala::base::Real const stddev
+) {
+	return -2.0 * x * coeff / ( stddev * stddev ) * std::exp( -1.0 * std::pow( ( x - offset ) / stddev , 2.0 ) );
 }
 
 /// @brief See util_test_fxn_1.png to see this plotted.
@@ -105,6 +118,40 @@ test_function_2(
 	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_based", "test_function_2", "Expected a function of two variables." );
 	masala::base::Real const xval(x[0]);
 	masala::base::Real const yval(x[1]);
+	return ( invert ? -1.0 : 1.0 ) * (
+		test_gaussian( xval, -1.0, 1.0, 0.5 ) * test_gaussian( yval, 1.0, 0, 1.0 ) +
+		test_gaussian( xval, -2.0, -1.0, 1.0 ) * test_gaussian( yval, 1.0, 0, 0.5 ) +
+		test_gaussian( xval, -2.5, 0.0, 1.0 ) * test_gaussian( yval, 1.0, 2.0, std::sqrt(1.5) )
+	);
+}
+
+/// @brief A function of two variables for testing.
+/// @details Has minima somewhere near (-1, 0), (1, 0), and (0, 2), with values
+/// somewhere around -1.0, -2.0, and -2.5, respectively.
+masala::base::Real
+grad_test_function_2(
+	Eigen::VectorXd const & x,
+	Eigen::VectorXd & grad_f_at_x,
+	bool invert
+) {
+	// For plotting using Desmos:
+	// -1.0\cdot\exp\left(\frac{-\left(x-1\right)^{2}}{.25}\right)\exp\left(\frac{-y^{2}}{1}\right)-2.0\cdot\exp\left(\frac{-\left(x+1\right)^{2}}{1}\right)\exp\left(\frac{-y^{2}}{0.25}\right)-2.5\cdot\exp\left(\frac{-x^{2}}{1}\right)\exp\left(\frac{-\left(y-2\right)^{2}}{1.5}\right)
+	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_based", "grad_test_function_2", "Expected a function of two variables." );
+	masala::base::Real const xval(x[0]);
+	masala::base::Real const yval(x[1]);
+
+	grad_f_at_x.resize( 2 );
+	grad_f_at_x[0] = ( invert ? -1.0 : 1.0 ) * (
+		d_test_gaussian_dx( xval, -1.0, 1.0, 0.5 ) * test_gaussian( yval, 1.0, 0, 1.0 ) +
+		d_test_gaussian_dx( xval, -2.0, -1.0, 1.0 ) * test_gaussian( yval, 1.0, 0, 0.5 ) +
+		d_test_gaussian_dx( xval, -2.5, 0.0, 1.0 ) * test_gaussian( yval, 1.0, 2.0, std::sqrt(1.5) )
+	);
+	grad_f_at_x[1] = ( invert ? -1.0 : 1.0 ) * (
+		test_gaussian( xval, -1.0, 1.0, 0.5 ) * d_test_gaussian_dx( yval, 1.0, 0, 1.0 ) +
+		test_gaussian( xval, -2.0, -1.0, 1.0 ) * d_test_gaussian_dx( yval, 1.0, 0, 0.5 ) +
+		test_gaussian( xval, -2.5, 0.0, 1.0 ) * d_test_gaussian_dx( yval, 1.0, 2.0, std::sqrt(1.5) )
+	);
+
 	return ( invert ? -1.0 : 1.0 ) * (
 		test_gaussian( xval, -1.0, 1.0, 0.5 ) * test_gaussian( yval, 1.0, 0, 1.0 ) +
 		test_gaussian( xval, -2.0, -1.0, 1.0 ) * test_gaussian( yval, 1.0, 0, 0.5 ) +
@@ -214,10 +261,14 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	using masala::base::managers::tracer::MasalaTracerManager;
 	using masala::base::managers::tracer::MasalaTracerManagerHandle;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace standard_masala_plugins::registration_api;
+
+	register_library();
 
 	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
 
 	std::function< Real( Eigen::VectorXd const & ) > const fxn2( std::bind( &test_function_2, std::placeholders::_1, false ) );
+	std::function< Real( Eigen::VectorXd const &, Eigen::VectorXd & ) > const fxn2_grad( std::bind( &grad_test_function_2, std::placeholders::_1, std::placeholders::_2, false ) );
 	std::vector< std::vector< Real > > const initial_points {
 		{ -1.5, 0.1 },
 		{ -0.9, -0.1 },
@@ -228,40 +279,57 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	};
 
 	masala::base::Size counter(0);
-	for( std::vector< Real > const & entry : initial_points ) {
-		++counter;
-		Eigen::VectorXd x0, x;
-		x0.resize(2);
-		x.resize(2);
-		x0[0] = entry[0];
-		x0[1] = entry[1];
-		x = x0;
-		Real f_at_x0( fxn2(x0) ), f_at_x( 0.0 );
-		//REQUIRE_NOTHROW([&](){
-			RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
-			TODO TODO CONTINUE HERE;
+	RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
 
+	//REQUIRE_NOTHROW([&](){
+		for( std::vector< Real > const & entry : initial_points ) {
+			++counter;
+			Eigen::VectorXd x0;
+			x0.resize(2);
+			x0[0] = entry[0];
+			x0[1] = entry[1];
 
-			GradientDescentFunctionOptimizer gradopt;
-			gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer >() );
-			gradopt.set_throw_if_iterations_exceeded(true);
-			std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( curproblems ) );
-		//}() );
-
-		Real const xval( x[0] );
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(xval) + "\tf(x) = " + std::to_string(f_at_x)  );
-
-		if( counter <= 2 ) {
-			CHECK( std::abs(xval - 2.002) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
-		} else if( counter == 3 || counter == 5 ) {
-			CHECK( std::abs(xval - 2.995) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
-		} else if( counter == 4 ) {
-			CHECK( std::abs(xval - 3.397) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
+			RealValuedFunctionLocalOptimizationProblem_APISP curproblem( masala::make_shared< RealValuedFunctionLocalOptimizationProblem_API >() );
+			curproblem->add_starting_point( x0 );
+			curproblem->set_objective_function( fxn2 );
+			curproblem->set_objective_function_gradient( fxn2_grad );
+			curproblems->add_optimization_problem( curproblem );
 		}
-	}
+
+		GradientDescentFunctionOptimizer gradopt;
+		gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer >() );
+		gradopt.set_throw_if_iterations_exceeded(true);
+		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( *curproblems ) );
+
+		CHECK( cursolutions_vec.size() == initial_points.size() );
+
+		for( masala::base::Size i(0); i<cursolutions_vec.size(); ++i ) {
+			RealValuedFunctionLocalOptimizationSolutions_API const & cursolutions( *cursolutions_vec[i] );
+			CHECK( cursolutions.n_solutions() == 1 );
+			RealValuedFunctionLocalOptimizationSolution_APICSP cursolution( std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationSolution_API const >( cursolutions.solution(0) ) );
+			CHECK( cursolution != nullptr );
+			Eigen::VectorXd const solpt( cursolution->solution_point() );
+			CHECK( solpt.size() == 2 );
+
+			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
+				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
+				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
+				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
+
+			// if( counter <= 2 ) {
+			// 	CHECK( std::abs(xval - 2.002) < 2.0e-3 );
+			// 	CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
+			// } else if( counter == 3 || counter == 5 ) {
+			// 	CHECK( std::abs(xval - 2.995) < 2.0e-3 );
+			// 	CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
+			// } else if( counter == 4 ) {
+			// 	CHECK( std::abs(xval - 3.397) < 2.0e-3 );
+			// 	CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
+			// }
+		}
+	//}() );
+
+	unregister_library();
 }
 
 } // namespace cost_function_network
