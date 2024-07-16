@@ -283,12 +283,10 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 		{ -0.1, 1.8 },
 	};
 
-	masala::base::Size counter(0);
 	RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
 
-	//REQUIRE_NOTHROW([&](){
+	REQUIRE_NOTHROW([&](){
 		for( std::vector< Real > const & entry : initial_points ) {
-			++counter;
 			Eigen::VectorXd x0;
 			x0.resize(2);
 			x0[0] = entry[0];
@@ -322,18 +320,21 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
 				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
 
-			// if( counter <= 2 ) {
-			// 	CHECK( std::abs(xval - 2.002) < 2.0e-3 );
-			// 	CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
-			// } else if( counter == 3 || counter == 5 ) {
-			// 	CHECK( std::abs(xval - 2.995) < 2.0e-3 );
-			// 	CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
-			// } else if( counter == 4 ) {
-			// 	CHECK( std::abs(xval - 3.397) < 2.0e-3 );
-			// 	CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
-			// }
+			if( i < 2 ) {
+				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0116) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.067076) < 2.0e-5 );
+			} else if( i < 4 ) {
+				CHECK( std::abs(solpt[0] - 0.9573) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0989) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 1.114634) < 2.0e-5 );
+			} else {
+				CHECK( std::abs(solpt[0] - 0.0005) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 1.9996) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.5) < 2.0e-2 );
+			}
 		}
-	//}() );
+	}() );
 
 	standard_masala_plugins::registration_api::unregister_library();
 	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
