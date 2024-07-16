@@ -54,7 +54,7 @@
 // STL headers:
 #include <vector>
 #include <string>
-#include <iostream> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
+// #include <iostream> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -546,7 +546,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > const & fxn_grad( prob.objective_function_gradient() );
 
 	Eigen::Vector< Real, Eigen::Dynamic > x( prob.starting_points()[starting_point_index] );
-	std::cout << "Iteration 0: x=[" << masala::base::utility::container::container_to_string( x, "," ) << "], f(x)=" << fxn(x) << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+	// std::cout << "Iteration 0: x=[" << masala::base::utility::container::container_to_string( x, "," ) << "], f(x)=" << fxn(x) << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, grad_test_vec, new_x;
 	Size const ndims( static_cast< Size >( x.size() ) ); // Number of dimensions
@@ -575,7 +575,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 			fxn, x, fxn_at_x, grad_at_x, -grad_at_x, new_x, new_fxn_at_x
 		);
 
-		std::cout << "Iteration " << iter_counter << ": x=[" << masala::base::utility::container::container_to_string( new_x, "," ) << "], f(x)=" << new_fxn_at_x << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+		// std::cout << "Iteration " << iter_counter << ": x=[" << masala::base::utility::container::container_to_string( new_x, "," ) << "], f(x)=" << new_fxn_at_x << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 		// Test whether the function has not been reduced:
 		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
