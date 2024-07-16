@@ -432,7 +432,7 @@ BrentAlgorithmLineOptimizer::run_line_optimizer(
 	bracket_minimum_with_parabolic_extrapolation(
 		left, linex, right, fxn_at_left, fxn_at_x, fxn_at_right, linefxn
 	);
-	CHECK_OR_THROW_FOR_CLASS( left < right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
+	CHECK_OR_THROW_FOR_CLASS( left <= right, "run_line_optimizer", "Expected left to be less than right; got " + std::to_string(left) + " and " + std::to_string(right) + " for left and centre, respectively." );
 	
 	Size iter_counter(0);
 	bool converged(false);
