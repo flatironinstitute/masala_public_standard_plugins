@@ -710,7 +710,7 @@ ASCIICostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_fi
                 while (std::getline(ss, item, '\t')) {
                     parts.push_back(item);
                 }
-                problem->set_onebody_penalty( std::stoi( parts[0] ), std::stoi( parts[1] ), std::stof( parts[2] ) );
+                problem->set_onebody_penalty( std::stoi( parts[0] ), std::stoi( parts[1] ) - 1, std::stof( parts[2] ) );
         } else if( twobody_line == true && linestripped != "[END TWOBODY SEQPOS1/ROTINDEX1/SEQPOS2/ROTINDEX2/ENERGY]" ) {
                 std::stringstream ss( linestripped );
                 std::string item;
@@ -720,7 +720,7 @@ ASCIICostFunctionNetworkProblemRosettaFileInterpreter::cfn_problem_from_ascii_fi
                 }
                 problem->set_twobody_penalty(
                     std::pair( std::stoul( parts[0] ), std::stoul( parts[2] ) ), 
-                    std::pair( std::stoul( parts[1] ), std::stoul( parts[3] ) ), 
+                    std::pair( std::stoul( parts[1] ) - 1, std::stoul( parts[3] ) - 1 ), 
                     std::stof( parts[4] ) 
                 );
         }
