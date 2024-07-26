@@ -228,7 +228,7 @@ ChoiceFeature::n_connections_to_feature_from_node_and_choice(
         "n_connections_to_feature_from_node_and_choice",
         "This function must be called from a finalized object only!"
     );
-    auto const it( other_variable_node_choices_that_satisfy_this_.find( std::make_pair( variable_node_index, choice_index ) ) );
+    auto const it( other_variable_node_choices_that_satisfy_this_.find( std::make_pair( variable_node_index, choice_index ) ) ); // THIS is a big bottleneck, and needs to be changed.
     if( it == other_variable_node_choices_that_satisfy_this_.end() ) {
         return 0;
     }
