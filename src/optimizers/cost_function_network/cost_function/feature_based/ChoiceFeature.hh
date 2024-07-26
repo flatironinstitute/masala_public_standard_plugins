@@ -185,14 +185,15 @@ public:
 			"Mismatch in number of variables nodes in the solution vector (" + std::to_string( choice_indices_at_var_nodes.size() ) +
 			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
 		);
+		masala::base::Size sum(0);
 		for( masala::base::Size variable_node_index(0); variable_node_index < nvarnodes; ++variable_node_index ) {
 			masala::base::Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
 			std::vector< masala::base::Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
 			if( choice_index < connections_by_choice.size() ) {
-				return connections_by_choice[choice_index];
+				sum += connections_by_choice[choice_index];
 			}
 		}
-		return 0;
+		return sum;
 	}
 
 	/// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
