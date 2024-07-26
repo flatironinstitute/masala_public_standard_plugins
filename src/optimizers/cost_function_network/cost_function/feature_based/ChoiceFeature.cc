@@ -363,16 +363,15 @@ ChoiceFeature::get_api_definition() {
             )
         );
         apidef->add_getter(
-            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_TwoInput< Size, Size, Size > >(
-                "n_connections_to_feature_from_node_and_choice", "Get the number of connections that a "
-                "particular variable node choice makes to this feature.  Returns 0 by default, if the "
+            masala::make_shared< getter::MasalaObjectAPIGetterDefinition_OneInput< Size, std::vector< Size > const & > >(
+                "n_connections_to_feature_from_nodes_and_choices", "Get the number of connections that are made to this "
+                "feature given a particular vector of choices (one per variable node).  Returns 0 by default, if the "
                 "variable node and/or choice are not in the other_variable_node_choices_that_satisfy_this_ "
                 "map.  Assumes finalized.  Throws in debug mode if not finalized.  Performs no mutex locking.",
                 "n_connections", "The number of connections that a particular variable node and choice make to this feature.",
-                "variable_node_index", "The index of the variable node.",
-                "choice_index", "The index of the choice at the variable node.",
+                "choice_indices_at_var_nodes", "The index of the choice at each the variable node.",
                 false, false,
-                std::bind( &ChoiceFeature::n_connections_to_feature_from_node_and_choice, this, std::placeholders::_1, std::placeholders::_2 )
+                std::bind( &ChoiceFeature::n_connections_to_feature_from_nodes_and_choices, this, std::placeholders::_1 )
             )
         );
         apidef->add_getter(

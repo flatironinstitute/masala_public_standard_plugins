@@ -40,12 +40,14 @@
 #include <base/types.hh>
 #include <base/hash_types.hh>
 #include <base/error/ErrorHandling.hh>
+#include <base/utility/execution_policy/util.hh>
 
 // STL headers:
 #include <atomic>
 #include <mutex>
 #include <set>
 #include <unordered_map>
+#include <numeric>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -165,29 +167,40 @@ public:
 	/// @note Assumes finalized.  Throws in debug mode if not finalized.  Performs no mutex locking.
 	masala::base::Size offset() const;
 
-	/// @brief Get the number of connections that a particular variable node choice makes to this feature.
+	/// @brief Get the number of connections that are made to this feature given a particular vector of choices (one
+	/// per variable node).
 	/// @details Returns 0 by default, if the variable node and/or choice are not in the
 	/// other_variable_node_choices_that_satisfy_this_ map.  Assumes finalized.  Throws in debug mode if
 	/// not finalized.  Performs no mutex locking.  Inlined for speed.
 	inline
 	masala::base::Size
-	n_connections_to_feature_from_node_and_choice(
-		masala::base::Size const variable_node_index,
-		masala::base::Size const choice_index
+	n_connections_to_feature_from_nodes_and_choices(
+		std::vector< masala::base::Size > const & choice_indices_at_var_nodes
 	) const {
+		using masala::base::Size;
+
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
 			"n_connections_to_feature_from_node_and_choice",
 			"This function must be called from a finalized object only!"
 		);
-		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( variable_node_index < other_variable_node_choices_that_satisfy_this_.size(),
+		Size const nvarnodes( choice_indices_at_var_nodes.size() );
+		CHECK_OR_THROW_FOR_CLASS( nvarnodes == other_variable_node_choices_that_satisfy_this_.size(),
 			"n_connections_to_feature_from_node_and_choice",
-			"The variable node index " + std::to_string( variable_node_index ) + " is out of range."
+			"Mismatch in number of variables nodes in the solution vector (" + std::to_string( choice_indices_at_var_nodes.size() ) +
+			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
 		);
-		std::vector< masala::base::Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
-		if( choice_index < connections_by_choice.size() ) {
-			return connections_by_choice[choice_index];
-		}
-		return 0;
+
+		return std::transform_reduce(
+			MASALA_SEQ_EXECUTION_POLICY
+			choice_indices_at_var_nodes.cbegin(), choice_indices_at_var_nodes.cend(), other_variable_node_choices_that_satisfy_this_.cbegin(),
+			0, std::plus{},
+			[]( Size const choice_index, std::vector< Size > const & connections_by_choice ) {
+				if( choice_index < connections_by_choice.size() ) {
+					return connections_by_choice[choice_index];
+				}
+				return Size(0);
+			}
+		);
 	}
 
 	/// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
