@@ -40,14 +40,12 @@
 #include <base/types.hh>
 #include <base/hash_types.hh>
 #include <base/error/ErrorHandling.hh>
-#include <base/utility/execution_policy/util.hh>
 
 // STL headers:
 #include <atomic>
 #include <mutex>
 #include <set>
 #include <unordered_map>
-#include <numeric>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -177,43 +175,25 @@ public:
 	n_connections_to_feature_from_nodes_and_choices(
 		std::vector< masala::base::Size > const & choice_indices_at_var_nodes
 	) const {
-		using masala::base::Size;
-
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
 			"n_connections_to_feature_from_node_and_choice",
 			"This function must be called from a finalized object only!"
 		);
-		Size const nvarnodes( choice_indices_at_var_nodes.size() );
+		masala::base::Size const nvarnodes( choice_indices_at_var_nodes.size() );
 		CHECK_OR_THROW_FOR_CLASS( nvarnodes == other_variable_node_choices_that_satisfy_this_.size(),
 			"n_connections_to_feature_from_node_and_choice",
 			"Mismatch in number of variables nodes in the solution vector (" + std::to_string( choice_indices_at_var_nodes.size() ) +
 			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
 		);
-		// Size connection_sum(0);
-		// for( Size variable_node_index(0); variable_node_index < nvarnodes; ++variable_node_index ) {
-		// 	Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
-		// 	std::vector< Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
-		// 	if( choice_index < connections_by_choice.size() ) {
-		// 		connection_sum += connections_by_choice[choice_index];
-		// 	}
-		// }
-		//return connection_sum;
-		std::vector< Size > indices( nvarnodes );
-		for( Size i(0); i<nvarnodes; ++i ) { indices[i] = i; }
-
-		return std::transform_reduce(
-			MASALA_SEQ_EXECUTION_POLICY
-			indices.cbegin(), indices.cend(),
-			0, std::plus{},
-			[this, &choice_indices_at_var_nodes ]( Size const variable_node_index ) {
-				Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
-				std::vector< Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
-				if( choice_index < connections_by_choice.size() ) {
-					return connections_by_choice[choice_index];
-				}
-				return Size(0);
+		masala::base::Size sum(0);
+		for( masala::base::Size variable_node_index(0); variable_node_index < nvarnodes; ++variable_node_index ) {
+			masala::base::Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
+			std::vector< masala::base::Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
+			if( choice_index < connections_by_choice.size() ) {
+				sum += connections_by_choice[choice_index];
 			}
-		);
+		}
+		return sum;
 	}
 
 	/// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
