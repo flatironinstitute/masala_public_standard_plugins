@@ -1,5 +1,5 @@
 /*
-    Masala
+    Standard Masala Plugins
     Copyright (C) 2022 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify

@@ -47,47 +47,47 @@ namespace scoring_terms {
 namespace molecular_system {
 
 TEST_CASE( "Instantiate an ConstantScoringTerm", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][instantiation]" ) {
-    REQUIRE_NOTHROW([&](){
-        scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_APISP const_scoreterm(
-            masala::make_shared< scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API >()
-        );
-        const_scoreterm->write_to_tracer( "Instantiated an ConstantScoringTerm." );
-    }() );
+	REQUIRE_NOTHROW([&](){
+		scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_APISP const_scoreterm(
+			masala::make_shared< scoring_api::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API >()
+		);
+		const_scoreterm->write_to_tracer( "Instantiated an ConstantScoringTerm." );
+	}() );
 }
 
 TEST_CASE( "Score two empty molecular systems", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][score]" ) {
-    using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
-    using namespace masala::core_api::auto_generated_api::molecular_system;
+	using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
+	using namespace masala::core_api::auto_generated_api::molecular_system;
 
-    ConstantScoringTerm_APISP const_scoreterm;
-    std::vector< masala::base::Real > scores;
-    REQUIRE_NOTHROW([&](){
-        const_scoreterm = masala::make_shared< ConstantScoringTerm_API >();
-        const_scoreterm->set_constant_value( 0.25 );
-        MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
-        MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
-        std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
-        const_scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
-        scores = const_scoreterm->score( molsys_vec, nullptr, nullptr, nullptr );
-    }() );
-    REQUIRE( scores.size() == 2 );
-    CHECK( scores[0] == 0.25 );
-    CHECK( scores[1] == 0.25 );
-    const_scoreterm->write_to_tracer( "Score1: " + std::to_string(scores[0]) );
-    const_scoreterm->write_to_tracer( "Score2: " + std::to_string(scores[1]) );
+	ConstantScoringTerm_APISP const_scoreterm;
+	std::vector< masala::base::Real > scores;
+	REQUIRE_NOTHROW([&](){
+		const_scoreterm = masala::make_shared< ConstantScoringTerm_API >();
+		const_scoreterm->set_constant_value( 0.25 );
+		MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
+		MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
+		std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
+		const_scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
+		scores = const_scoreterm->score( molsys_vec, nullptr, nullptr, nullptr );
+	}() );
+	REQUIRE( scores.size() == 2 );
+	CHECK( scores[0] == 0.25 );
+	CHECK( scores[1] == 0.25 );
+	const_scoreterm->write_to_tracer( "Score1: " + std::to_string(scores[0]) );
+	const_scoreterm->write_to_tracer( "Score2: " + std::to_string(scores[1]) );
 }
 
 TEST_CASE( "Score two empty molecular systems, loading the score term from the plugin system", "[standard_masala_plugins::auto_generated_api::scoring_terms::molecular_system::ConstantScoringTerm_API][scoring][score]" ) {
-    using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
-    using namespace masala::core_api::auto_generated_api::molecular_system;
+	using namespace scoring_api::auto_generated_api::scoring_terms::molecular_system;
+	using namespace masala::core_api::auto_generated_api::molecular_system;
 	using namespace masala::base::api;
 	using namespace masala::base::managers::plugin_module;
 
 	standard_masala_plugins::registration_api::register_library();
 
 	MasalaPluginAPISP scoreterm;
-    std::vector< masala::base::Real > scores;
-    REQUIRE_NOTHROW([&](){
+	std::vector< masala::base::Real > scores;
+	REQUIRE_NOTHROW([&](){
 		scoreterm = MasalaPluginModuleManager::get_instance()->create_plugin_object_instance_by_short_name( { "ScoringTerm" }, "ConstantScoringTerm", true );
 		MasalaObjectAPIDefinitionCSP api_def( scoreterm->get_api_definition_for_inner_class() );
 		REQUIRE( api_def != nullptr );
@@ -113,18 +113,18 @@ TEST_CASE( "Score two empty molecular systems, loading the score term from the p
 			>( std::string( "score" ) )
 		);
 
-        MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
-        MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
-        std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
+		MolecularSystem_APISP molecular_system1( masala::make_shared< MolecularSystem_API >() );
+		MolecularSystem_APISP molecular_system2( masala::make_shared< MolecularSystem_API >() );
+		std::vector< MolecularSystem_APICSP > molsys_vec{ molecular_system1, molecular_system2 };
 
-        scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
-        scores = (*score_workfxn->function_raw_ptr())( molsys_vec, nullptr, nullptr, nullptr );
-    }() );
-    REQUIRE( scores.size() == 2 );
-    CHECK( scores[0] == 0.25 );
-    CHECK( scores[1] == 0.25 );
-    scoreterm->write_to_tracer( "Score1: " + std::to_string(scores[0]) );
-    scoreterm->write_to_tracer( "Score2: " + std::to_string(scores[1]) );
+		scoreterm->write_to_tracer( "Preparing to score two empty molecular systems." );
+		scores = (*score_workfxn->function_raw_ptr())( molsys_vec, nullptr, nullptr, nullptr );
+	}() );
+	REQUIRE( scores.size() == 2 );
+	CHECK( scores[0] == 0.25 );
+	CHECK( scores[1] == 0.25 );
+	scoreterm->write_to_tracer( "Score1: " + std::to_string(scores[0]) );
+	scoreterm->write_to_tracer( "Score2: " + std::to_string(scores[1]) );
 
 	standard_masala_plugins::registration_api::unregister_library();
 }

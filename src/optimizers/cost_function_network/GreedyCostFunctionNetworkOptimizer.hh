@@ -1,5 +1,5 @@
 /*
-    Masala
+    Standard Masala Plugins
     Copyright (C) 2022 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
@@ -147,6 +147,14 @@ public:
 	/// the number of random starting states to use.  Defaults to 1.
 	void set_n_random_starting_states( masala::base::Size const setting );
 
+	/// @brief By default, a single greedy optimization trajectory results in a solution being seen
+	/// once.  This option lets other code specify that it should be higher.  Useful when other code,
+	/// like the MonteCaroCostFunctionNetworkOptimizer, wants to use this for greedy refinement of
+	/// solutions that it has produced many times.
+	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
+	/// plugin sub-library.
+	void set_n_times_seen_multiplier( masala::base::Size const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,6 +168,14 @@ public:
 	/// @brief If starting states are not provided in the problem definition, get
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states() const;
+
+	/// @brief By default, a single greedy optimization trajectory results in a solution being seen
+	/// once.  This option lets other code specify that it should be higher.  Useful when other code,
+	/// like the MonteCaroCostFunctionNetworkOptimizer, wants to use this for greedy refinement of
+	/// solutions that it has produced many times.
+	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
+	/// plugin sub-library.
+	masala::base::Size n_times_seen_multiplier() const;
 
 public:
 
@@ -197,7 +213,8 @@ private:
 		std::vector< masala::base::Size > const & starting_state,
 		masala::base::Size const n_replicates,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP problem_ptr,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_API & solutions,
+		masala::base::Size const n_times_seen_multiplier
 	) const;
 
 private:
@@ -219,6 +236,14 @@ private:
 	/// @brief If starting states are not provided in the problem definition, indicate
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states_ = 1;
+
+	/// @brief By default, a single greedy optimization trajectory results in a solution being seen
+	/// once.  This option lets other code specify that it should be higher.  Useful when other code,
+	/// like the MonteCaroCostFunctionNetworkOptimizer, wants to use this for greedy refinement of
+	/// solutions that it has produced many times.
+	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
+	/// plugin sub-library.
+	masala::base::Size n_times_seen_multiplier_ = 1;
 
 }; // class GreedyCostFunctionNetworkOptimizer
 
