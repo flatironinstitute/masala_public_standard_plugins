@@ -32,11 +32,6 @@
 // STL headers:
 #include <vector>
 #include <string>
-#include <numeric>
-
-// Base headers:
-#include <base/utility/execution_policy/util.hh>
-#include <base/error/ErrorHandling.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -307,40 +302,6 @@ ChoicePenaltySumBasedCostFunction<T>::compute_cost_function_difference(
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-/// @brief Given a selection of choices at variable nodes, compute the cost function.
-/// @details This version just computes the sum of the penalties of the selected choices.
-/// @note No mutex-locking is performed!  Also note that this version does not multiply the
-/// result by the weight, since derived classes will likely do this after applying a nonlinear
-/// function.
-template< typename T >
-T
-ChoicePenaltySumBasedCostFunction<T>::protected_compute_cost_function_no_weight(
-    std::vector< masala::base::Size > const & candidate_solution
-) const {
-    using masala::base::Size;
-
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_cost_function", "The " + class_name()
-        + " must be finalized before this function is called!"
-    );
-    Size const nentries( candidate_solution.size() );
-    CHECK_OR_THROW_FOR_CLASS( nentries == n_variable_positions_, "compute_cost_function", "Expected "
-        "a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
-        + " variable positions, but got " + std::to_string( nentries ) + "!" 
-    );
-
-    return std::transform_reduce(
-        MASALA_SEQ_EXECUTION_POLICY
-        candidate_solution.cbegin(), candidate_solution.cend(), penalties_by_variable_node_and_choice_.cbegin(),
-        constant_offset_ + computed_constant_offset_, std::plus{},
-        []( Size const candsol, std::vector< T > const & vec ) {
-            if( candsol < vec.size() ) {
-                return vec[candsol];
-            }
-            return T(0);
-        }
-    );
-}
 
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices
