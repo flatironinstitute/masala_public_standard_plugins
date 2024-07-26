@@ -328,18 +328,14 @@ ChoicePenaltySumBasedCostFunction<T>::protected_compute_cost_function_no_weight(
         "a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
         + " variable positions, but got " + std::to_string( nentries ) + "!" 
     );
-    std::vector< Size > indices( nentries );
-    for( Size i(0); i<nentries; ++i ) { indices[i] = i; }
+
     return std::transform_reduce(
         MASALA_SEQ_EXECUTION_POLICY
-        indices.cbegin(), indices.cend(), constant_offset_ + computed_constant_offset_, std::plus{},
-        [this, &candidate_solution]( Size const i ) {
-            DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( i < penalties_by_variable_node_and_choice_.size(),
-                "protected_compute_cost_function_no_weight", "Program error: penalties_by_variable_node_and_choice_ too small!"
-            );
-            std::vector< T > const & vec( penalties_by_variable_node_and_choice_[i] );
-            if( candidate_solution[i] < vec.size() ) {
-                return vec[candidate_solution[i]];
+        candidate_solution.cbegin(), candidate_solution.cend(), penalties_by_variable_node_and_choice_.cbegin(),
+        constant_offset_ + computed_constant_offset_, std::plus{},
+        []( Size const candsol, std::vector< T > const & vec ) {
+            if( candsol < vec.size() ) {
+                return vec[candsol];
             }
             return T(0);
         }
