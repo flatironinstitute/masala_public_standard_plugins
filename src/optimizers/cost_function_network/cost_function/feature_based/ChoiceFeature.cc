@@ -33,7 +33,6 @@
 #include <string>
 
 // Base headers:
-#include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
@@ -213,30 +212,6 @@ masala::base::Size
 ChoiceFeature::offset() const {
     DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(), "offset", "This function must be called from a finalized object only!" );
     return offset_;
-}
-
-/// @brief Get the number of connections that a particular variable node choice makes to this feature.
-/// @details Returns 0 by default, if the variable node and/or choice are not in the
-/// other_variable_node_choices_that_satisfy_this_ map.  Assumes finalized.  Throws in debug mode if
-/// not finalized.  Performs no mutex locking.
-masala::base::Size
-ChoiceFeature::n_connections_to_feature_from_node_and_choice(
-    masala::base::Size const variable_node_index,
-    masala::base::Size const choice_index
-) const {
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
-        "n_connections_to_feature_from_node_and_choice",
-        "This function must be called from a finalized object only!"
-    );
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( variable_node_index < other_variable_node_choices_that_satisfy_this_.size(),
-        "n_connections_to_feature_from_node_and_choice",
-        "The variable node index " + std::to_string( variable_node_index ) + " is out of range."
-    );
-    std::vector< masala::base::Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
-    if( choice_index < connections_by_choice.size() ) {
-        return connections_by_choice[choice_index];
-    }
-    return 0;
 }
 
 /// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
