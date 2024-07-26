@@ -189,25 +189,12 @@ public:
 			"Mismatch in number of variables nodes in the solution vector (" + std::to_string( choice_indices_at_var_nodes.size() ) +
 			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
 		);
-		// Size connection_sum(0);
-		// for( Size variable_node_index(0); variable_node_index < nvarnodes; ++variable_node_index ) {
-		// 	Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
-		// 	std::vector< Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
-		// 	if( choice_index < connections_by_choice.size() ) {
-		// 		connection_sum += connections_by_choice[choice_index];
-		// 	}
-		// }
-		//return connection_sum;
-		std::vector< Size > indices( nvarnodes );
-		for( Size i(0); i<nvarnodes; ++i ) { indices[i] = i; }
 
 		return std::transform_reduce(
 			MASALA_SEQ_EXECUTION_POLICY
-			indices.cbegin(), indices.cend(),
+			choice_indices_at_var_nodes.cbegin(), choice_indices_at_var_nodes.cend(), other_variable_node_choices_that_satisfy_this_.cbegin(),
 			0, std::plus{},
-			[this, &choice_indices_at_var_nodes ]( Size const variable_node_index ) {
-				Size const choice_index( choice_indices_at_var_nodes[variable_node_index] );
-				std::vector< Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
+			[]( Size const choice_index, std::vector< Size > const & connections_by_choice ) {
 				if( choice_index < connections_by_choice.size() ) {
 					return connections_by_choice[choice_index];
 				}
