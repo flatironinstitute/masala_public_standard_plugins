@@ -302,10 +302,11 @@ private:
 	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_absolute_node_choices_that_satisfy_this_;
 
 	/// @brief Choices at other nodes that satisfy this feature, indexed
-	/// by variable node index, mapped to the number of connections that they
+	/// by variable node index and choice index, mapped to the number of connections that they
 	/// make to this feature.
-	/// @details Used run, after being produced by finalization step.
-	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
+	/// @details Used during run, after being produced by finalization step.
+	std::vector< std::vector< masala::base::Size > > other_variable_node_choices_that_satisfy_this_;
+	//std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
 
 }; // class ChoiceFeature
 
