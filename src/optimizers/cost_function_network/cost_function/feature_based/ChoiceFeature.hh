@@ -39,6 +39,7 @@
 // Base headers:
 #include <base/types.hh>
 #include <base/hash_types.hh>
+#include <base/error/ErrorHandling.hh>
 
 // STL headers:
 #include <atomic>
@@ -167,12 +168,27 @@ public:
 	/// @brief Get the number of connections that a particular variable node choice makes to this feature.
 	/// @details Returns 0 by default, if the variable node and/or choice are not in the
 	/// other_variable_node_choices_that_satisfy_this_ map.  Assumes finalized.  Throws in debug mode if
-	/// not finalized.  Performs no mutex locking.
+	/// not finalized.  Performs no mutex locking.  Inlined for speed.
+	inline
 	masala::base::Size
 	n_connections_to_feature_from_node_and_choice(
 		masala::base::Size const variable_node_index,
 		masala::base::Size const choice_index
-	) const;
+	) const {
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
+			"n_connections_to_feature_from_node_and_choice",
+			"This function must be called from a finalized object only!"
+		);
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( variable_node_index < other_variable_node_choices_that_satisfy_this_.size(),
+			"n_connections_to_feature_from_node_and_choice",
+			"The variable node index " + std::to_string( variable_node_index ) + " is out of range."
+		);
+		std::vector< masala::base::Size > const & connections_by_choice( other_variable_node_choices_that_satisfy_this_[variable_node_index] );
+		if( choice_index < connections_by_choice.size() ) {
+			return connections_by_choice[choice_index];
+		}
+		return 0;
+	}
 
 	/// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
 	/// and false if it is under- or over-satisfied.
@@ -302,10 +318,11 @@ private:
 	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_absolute_node_choices_that_satisfy_this_;
 
 	/// @brief Choices at other nodes that satisfy this feature, indexed
-	/// by variable node index, mapped to the number of connections that they
+	/// by variable node index and choice index, mapped to the number of connections that they
 	/// make to this feature.
-	/// @details Used run, after being produced by finalization step.
-	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
+	/// @details Used during run, after being produced by finalization step.
+	std::vector< std::vector< masala::base::Size > > other_variable_node_choices_that_satisfy_this_;
+	//std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
 
 }; // class ChoiceFeature
 

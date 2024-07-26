@@ -33,7 +33,6 @@
 #include <string>
 
 // Base headers:
-#include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
@@ -213,26 +212,6 @@ masala::base::Size
 ChoiceFeature::offset() const {
     DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(), "offset", "This function must be called from a finalized object only!" );
     return offset_;
-}
-
-/// @brief Get the number of connections that a particular variable node choice makes to this feature.
-/// @details Returns 0 by default, if the variable node and/or choice are not in the
-/// other_variable_node_choices_that_satisfy_this_ map.  Assumes finalized.  Throws in debug mode if
-/// not finalized.  Performs no mutex locking.
-masala::base::Size
-ChoiceFeature::n_connections_to_feature_from_node_and_choice(
-    masala::base::Size const variable_node_index,
-    masala::base::Size const choice_index
-) const {
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
-        "n_connections_to_feature_from_node_and_choice",
-        "This function must be called from a finalized object only!"
-    );
-    auto const it( other_variable_node_choices_that_satisfy_this_.find( std::make_pair( variable_node_index, choice_index ) ) );
-    if( it == other_variable_node_choices_that_satisfy_this_.end() ) {
-        return 0;
-    }
-    return it->second;
 }
 
 /// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
@@ -482,12 +461,19 @@ void
 ChoiceFeature::protected_finalize(
     std::unordered_map< masala::base::Size, masala::base::Size > const & variable_node_indices_by_absolute_node_index
 ) {
+    using masala::base::Size;
+
     CHECK_OR_THROW_FOR_CLASS( finalized_.load() == false, "protected_finalize",
         "This ChoiceFeature has already been finalized!"
     );
     finalized_.store(true);
     std::set< masala::base::Size > fixed_nodes;
     masala::base::Size fixed_node_connections( 0 );
+
+    // Initialize storage.
+    other_variable_node_choices_that_satisfy_this_.clear();
+    Size const n_variable_nodes( variable_node_indices_by_absolute_node_index.size() );
+    other_variable_node_choices_that_satisfy_this_.resize( n_variable_nodes );
 
     for( auto const & absnode_and_choice : other_absolute_node_choices_that_satisfy_this_ ) {
         masala::base::Size const absnode( absnode_and_choice.first.first );
@@ -505,14 +491,16 @@ ChoiceFeature::protected_finalize(
         } else {
             // This node index is variable.
             masala::base::Size const choice_index( absnode_and_choice.first.second );
-            std::pair< masala::base::Size, masala::base::Size > const key( it->second, choice_index );
-            CHECK_OR_THROW_FOR_CLASS(
-                other_variable_node_choices_that_satisfy_this_.count(key) == 0,
-                "protected_finalize",
-                "Node " + std::to_string( absnode ) + ", choice " + std::to_string( choice_index )
-                + " was specified multiple times!"
+            CHECK_OR_THROW_FOR_CLASS( it->second < n_variable_nodes, "protected_finalize", "Program error: variable node index out of range." );
+            std::vector< masala::base::Size > & connections_for_varnode_by_choice( other_variable_node_choices_that_satisfy_this_[it->second] );
+            if( connections_for_varnode_by_choice.size() <= choice_index ) {
+                connections_for_varnode_by_choice.resize( choice_index + 1, 0 );
+            }
+            CHECK_OR_THROW_FOR_CLASS( connections_for_varnode_by_choice[choice_index] == 0,
+                 "protected_finalize",
+                "Node " + std::to_string( absnode ) + ", choice " + std::to_string( choice_index ) + " was specified multiple times!"
             );
-            other_variable_node_choices_that_satisfy_this_[key] = n_connections;
+            connections_for_varnode_by_choice[choice_index] = n_connections;
         }
     }
 
