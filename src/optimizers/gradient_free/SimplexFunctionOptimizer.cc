@@ -186,22 +186,6 @@ SimplexFunctionOptimizer::set_tolerance(
 	tolerance_ = setting;
 }
 
-/// @brief Set the gradient tolerance for determining whether or not we've finished our search.
-/// @details The default is the square root of machine precision (the theoretical lower limit for
-/// any sensible value of gradient tolerance).
-void
-SimplexFunctionOptimizer::set_gradient_tolerance(
-	masala::base::Real const setting
-) {
-	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
-		"set_gradient_tolerance", "The gradient tolerance must be greater than or equal to the square root of machine precision ("
-		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ) )
-		+ ").  Got " + std::to_string( setting ) + "."
-	);
-	std::lock_guard< std::mutex > lock( mutex() );
-	gradient_tolerance_ = setting;
-}
-
 /// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 /// (false, the default).
 void
@@ -231,15 +215,6 @@ masala::base::Real
 SimplexFunctionOptimizer::tolerance() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return tolerance_;
-}
-
-/// @brief Get the gradient tolerance for determining whether or not we've finished our search.
-/// @details The default is the square root of machine precision (the theoretical lower limit for
-/// any sensible value of gradient tolerance).
-masala::base::Real
-SimplexFunctionOptimizer::gradient_tolerance() const {
-	std::lock_guard< std::mutex > lock( mutex() );
-	return gradient_tolerance_;
 }
 
 /// @brief Should we throw if iterations are exceeded (true), or just warn
@@ -305,16 +280,6 @@ SimplexFunctionOptimizer::get_api_definition() {
 			)
 		);
 		api_def->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
-				"set_gradient_tolerance", "Set the gradient tolerance for determining whether or not we've "
-				"finished our search.  The default is the square root of machine precision "
-				"(the theoretical lower limit for any sensible value of gradient tolerance).",
-				"gradient_tolerance_in", "The gradient tolerance to set.",
-				false, false,
-				std::bind( &SimplexFunctionOptimizer::set_gradient_tolerance, this, std::placeholders::_1 )
-			)
-		);
-		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool > >(
 				"set_throw_if_iterations_exceeded", "Set whether we should throw if "
 				"iteration maximum is exceeded (true), or just warn (false, the default).",
@@ -340,16 +305,6 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"tolerance", "The tolerance for determining whether the search has converged.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::tolerance, this )
-			)
-		);
-		api_def->add_getter(
-			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
-				"gradient_tolerance", "Get the gradient tolerance for determining whether or not we've "
-				"finished our search.  The default is the square root of machine precision "
-				"(the theoretical lower limit for any sensible value of gradient tolerance).",
-				"gradient_tolerance", "The tolerance for determining whether the search has converged.",
-				false, false,
-				std::bind( &SimplexFunctionOptimizer::gradient_tolerance, this )
 			)
 		);
 		api_def->add_getter(

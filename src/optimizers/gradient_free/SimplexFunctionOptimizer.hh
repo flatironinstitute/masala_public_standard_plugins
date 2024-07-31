@@ -152,11 +152,6 @@ public:
 	/// any sensible value of tolerance).
 	void set_tolerance( masala::base::Real const setting );
 
-	/// @brief Set the gradient tolerance for determining whether or not we've finished our search.
-	/// @details The default is the square root of machine precision (the theoretical lower limit for
-	/// any sensible value of gradient tolerance).
-	void set_gradient_tolerance( masala::base::Real const setting );
-
 	/// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 	/// (false, the default).
 	void set_throw_if_iterations_exceeded( bool const setting );
@@ -175,11 +170,6 @@ public:
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
 	/// any sensible value of tolerance).
 	masala::base::Real tolerance() const;
-
-	/// @brief Get the gradient tolerance for determining whether or not we've finished our search.
-	/// @details The default is the square root of machine precision (the theoretical lower limit for
-	/// any sensible value of gradient tolerance).
-	masala::base::Real gradient_tolerance() const;
 
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
@@ -256,11 +246,6 @@ private:
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
 	/// any sensible value of tolerance).
 	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() );
-
-	/// @brief The gradient tolerance for determining whether or not we've finished our search.
-	/// @details The default is the square root of machine precision (the theoretical lower limit for
-	/// any sensible value of tolerance).
-	masala::base::Real gradient_tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() );
 
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
