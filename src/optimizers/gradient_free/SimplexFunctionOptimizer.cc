@@ -435,15 +435,38 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
+	using namespace masala::numeric_api::auto_generated_api::optimization;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using namespace masala::base::managers::threads;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
-	TODO TODO TODO;
+	MasalaThreadedWorkRequest workvec( threads_to_request() );
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > solutions;
+	solutions.resize( problems.n_problems() );
 
-	return outvec;
+	for( Size i(0), imax(problems.n_problems()); i<imax; ++i ) {
+		RealValuedFunctionLocalOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) ) );
+		CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "run_real_valued_local_optimizer",
+			"Problem " + std::to_string(i) + " is of type " + problems.problem(i)->inner_class_name() +
+			", which could not be interpreted as a RealValuedFunctionLocalOptimizationProblem."
+		);
+		workvec.add_job(
+			std::bind(
+				&SimplexFunctionOptimizer::run_one_simplex_optimization,
+				this,
+				i,
+				problem,
+				std::ref( solutions[i] )
+			)
+		);
+	}
+
+	MasalaThreadedWorkExecutionSummary const thread_summary( MasalaThreadManager::get_instance()->do_work_in_threads( workvec ) );
+	thread_summary.write_summary_to_tracer();
+
+	return solutions;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
