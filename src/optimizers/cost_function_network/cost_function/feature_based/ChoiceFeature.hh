@@ -39,12 +39,15 @@
 // Base headers:
 #include <base/types.hh>
 #include <base/hash_types.hh>
+#include <base/error/ErrorHandling.hh>
+#include <base/utility/execution_policy/util.hh>
 
 // STL headers:
 #include <atomic>
 #include <mutex>
 #include <set>
 #include <unordered_map>
+#include <numeric>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -164,15 +167,41 @@ public:
 	/// @note Assumes finalized.  Throws in debug mode if not finalized.  Performs no mutex locking.
 	masala::base::Size offset() const;
 
-	/// @brief Get the number of connections that a particular variable node choice makes to this feature.
+	/// @brief Get the number of connections that are made to this feature given a particular vector of choices (one
+	/// per variable node).
 	/// @details Returns 0 by default, if the variable node and/or choice are not in the
 	/// other_variable_node_choices_that_satisfy_this_ map.  Assumes finalized.  Throws in debug mode if
-	/// not finalized.  Performs no mutex locking.
+	/// not finalized.  Performs no mutex locking.  Inlined for speed.
+	inline
 	masala::base::Size
-	n_connections_to_feature_from_node_and_choice(
-		masala::base::Size const variable_node_index,
-		masala::base::Size const choice_index
-	) const;
+	n_connections_to_feature_from_nodes_and_choices(
+		std::vector< masala::base::Size > const & choice_indices_at_var_nodes
+	) const {
+		using masala::base::Size;
+
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( finalized_.load(),
+			"n_connections_to_feature_from_node_and_choice",
+			"This function must be called from a finalized object only!"
+		);
+		Size const nvarnodes( choice_indices_at_var_nodes.size() );
+		CHECK_OR_THROW_FOR_CLASS( nvarnodes == other_variable_node_choices_that_satisfy_this_.size(),
+			"n_connections_to_feature_from_node_and_choice",
+			"Mismatch in number of variables nodes in the solution vector (" + std::to_string( choice_indices_at_var_nodes.size() ) +
+			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
+		);
+
+		return std::transform_reduce(
+			MASALA_SEQ_EXECUTION_POLICY
+			choice_indices_at_var_nodes.cbegin(), choice_indices_at_var_nodes.cend(), other_variable_node_choices_that_satisfy_this_.cbegin(),
+			0, std::plus{},
+			[]( Size const choice_index, std::vector< Size > const & connections_by_choice ) {
+				if( choice_index < connections_by_choice.size() ) {
+					return connections_by_choice[choice_index];
+				}
+				return Size(0);
+			}
+		);
+	}
 
 	/// @brief Given a particular count of connections to a feature, return true if this feature is satisfied
 	/// and false if it is under- or over-satisfied.
@@ -302,10 +331,11 @@ private:
 	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_absolute_node_choices_that_satisfy_this_;
 
 	/// @brief Choices at other nodes that satisfy this feature, indexed
-	/// by variable node index, mapped to the number of connections that they
+	/// by variable node index and choice index, mapped to the number of connections that they
 	/// make to this feature.
-	/// @details Used run, after being produced by finalization step.
-	std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
+	/// @details Used during run, after being produced by finalization step.
+	std::vector< std::vector< masala::base::Size > > other_variable_node_choices_that_satisfy_this_;
+	//std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > other_variable_node_choices_that_satisfy_this_;
 
 }; // class ChoiceFeature
 

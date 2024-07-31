@@ -479,10 +479,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_compute_cost_function_no_w
         // Loop over all choice features for position and choice:
         for( auto const choicefeature : (**it) ) {
             // Loop over all entries in the candidate solution.  Count the number of connections to this feature.
-            Size connection_count( choicefeature->offset() );
-            for( Size isol(0), isolmax(candidate_solution.size()); isol<isolmax; ++isol ) {
-                connection_count += choicefeature->n_connections_to_feature_from_node_and_choice( isol, candidate_solution[isol] );
-            }
+            Size const connection_count( choicefeature->offset() + choicefeature->n_connections_to_feature_from_nodes_and_choices( candidate_solution ) );
             if( !choicefeature->is_satisfied( connection_count ) ) {
                 ++unsatisfied_choice_features;
             }
