@@ -48,7 +48,6 @@
 #include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
 
 // Optimizers headers:
-#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
 // STL headers:
 #include <vector>
@@ -171,17 +170,6 @@ SimplexFunctionOptimizer::set_max_iterations(
 	max_iterations_ = setting;
 }
 
-/// @brief Set a line optimizer to use for the line searches.
-/// @details Used directly, not cloned.  If none is provided (or if this is set to
-/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
-void
-SimplexFunctionOptimizer::set_line_optimizer(
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
-) {
-	std::lock_guard< std::mutex > lock( mutex() );
-	line_optimizer_ = line_optimizer_in;
-}
-
 /// @brief Set the tolerance for determining whether or not we've finished our search.
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of tolerance).
@@ -234,15 +222,6 @@ masala::base::Size
 SimplexFunctionOptimizer::max_iterations() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return max_iterations_;
-}
-
-/// @brief Get the line optimizer used for the line searches.
-/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
-/// is used by default.
-masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-SimplexFunctionOptimizer::line_optimizer() const {
-	std::lock_guard< std::mutex > lock( mutex() );
-	return line_optimizer_;
 }
 
 /// @brief Get the tolerance for determining whether or not we've finished our search.
@@ -315,30 +294,6 @@ SimplexFunctionOptimizer::get_api_definition() {
 				false, false, std::bind( &SimplexFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
 			)
 		);
-		{
-			MasalaObjectAPISetterDefinition_OneInputSP< PluginLineOptimizerCSP const & > set_line_optimizer_setter(
-				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< PluginLineOptimizerCSP const & > >(
-					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
-					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
-					"is used by default.",
-					"line_optimizer_in", "The line optimizer to use when performing gradient-descent minimization.",
-					false, false, std::bind( &SimplexFunctionOptimizer::set_line_optimizer, this, std::placeholders::_1 )
-				)
-			);
-			OwnedSingleObjectSetterAnnotationSP set_line_optimizer_setter_annotation( masala::make_shared< OwnedSingleObjectSetterAnnotation >() );
-			set_line_optimizer_setter_annotation->set_plugin_manager_info(
-				std::vector< std::string >{ "LineOptimizer" },
-				std::vector< std::string >{ "line_optimizer" },
-				true
-			);
-			set_line_optimizer_setter_annotation->set_engine_manager_info(
-				std::vector< std::string >{ "LineOptimizer" },
-				std::vector< std::string >{ "line_optimizer" },
-				true
-			);
-			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
-			api_def->add_setter( set_line_optimizer_setter );
-		}
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_tolerance", "Set the tolerance for determining whether or not we've "
@@ -375,14 +330,6 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &SimplexFunctionOptimizer::max_iterations, this )
-			)
-		);
-		api_def->add_getter(
-			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< PluginLineOptimizerCSP > >(
-				"line_optimizer", "Get the line optimizer to use for the line searches.  If this is nullptr, then a BrentAlgorithmLineOptimizer "
-				"is used by default.",
-				"line_optimizer", "The line optimizer to use for the line searches.",
-				false, false, std::bind( &SimplexFunctionOptimizer::line_optimizer, this )
 			)
 		);
 		api_def->add_getter(
@@ -473,101 +420,6 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
-/// in threads.  This function is called from a mutex-locked context.
-/// @param[in] problem The problem to solve.
-/// @param[in] starting_point_index The index of the starting point for the problem.
-/// @param[in] line_optimizer The line optimizer to use when solving this problem.
-/// @param[out] solutions The solution container into which we will put the solution.
-void
-SimplexFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
-	masala::base::Size const starting_point_index,
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
-) const {
-	using masala::base::Size;
-	using masala::base::Real;
-
-	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
-
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & prob( *problem );
-
-	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > const & fxn( prob.objective_function() );
-	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > const & fxn_grad( prob.objective_function_gradient() );
-
-	Eigen::Vector< Real, Eigen::Dynamic > x( prob.starting_points()[starting_point_index] );
-	// std::cout << "Iteration 0: x=[" << masala::base::utility::container::container_to_string( x, "," ) << "], f(x)=" << fxn(x) << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
-
-	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, grad_test_vec, new_x;
-	Size const ndims( static_cast< Size >( x.size() ) ); // Number of dimensions
-	new_x.resize( static_cast< Eigen::Index >( ndims ) );
-	grad_at_x.resize( static_cast< Eigen::Index >( ndims ) );
-	grad_test_vec.resize( static_cast< Eigen::Index >( ndims ) );
-	Real fxn_at_x, new_fxn_at_x;
-
-	Size iter_counter(0);
-	bool converged(false);
-	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
-		++iter_counter;
-		fxn_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
-
-		// Test for zero gradient:
-		for( Size i(0); i<ndims; ++i ) {
-			grad_test_vec[i] = std::abs( grad_at_x[i] ) * std::max( std::abs(x[i]), 1.0 );
-		}
-		if( grad_test_vec.maxCoeff() / std::max( fxn_at_x, 1.0 ) < gradient_tolerance_ ) {
-			converged = true;
-			break;
-		}
-
-		// Run the line optimizer along the (inverse) gradient direction:
-		line_optimizer->run_line_optimizer(
-			fxn, x, fxn_at_x, grad_at_x, -grad_at_x, new_x, new_fxn_at_x
-		);
-
-		// std::cout << "Iteration " << iter_counter << ": x=[" << masala::base::utility::container::container_to_string( new_x, "," ) << "], f(x)=" << new_fxn_at_x << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
-
-		// Test whether the function has not been reduced:
-		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
-			std::swap( x, new_x );
-			fxn_at_x = new_fxn_at_x;
-			converged = true;
-			break;
-		}
-
-		// Update the current point.
-		std::swap( x, new_x );
-	}
-
-	// Message or error on non-convergence:
-	if( throw_if_iterations_exceeded_ ) {
-		CHECK_OR_THROW_FOR_CLASS( converged, "run_real_valued_local_optimizer_on_one_problem", "After " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
-	} else {
-		if( !converged ) {
-			write_to_tracer( "Warning: after " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
-		}
-	}
-
-	// Common to all OptimizationSolution objects:
-	solution.set_solution_score( fxn_at_x );
-	solution.set_solution_score_data_representation_approximation( fxn_at_x );
-	solution.set_solution_score_solver_approximation( fxn_at_x );
-	solution.set_n_times_solution_was_produced( 1 );
-
-	// Specific to RealValuedFunctionLocalOptimizationSolution:
-	solution.set_starting_point_and_index( prob.starting_points()[starting_point_index], starting_point_index );
-	solution.set_solution_point( x );
-	solution.set_converged( converged );
-	solution.set_iterations( iter_counter );
-}
-
-/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-SimplexFunctionOptimizer::generate_brent_optimizer() const {
-	return masala::make_shared< BrentAlgorithmLineOptimizer >();
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
@@ -584,7 +436,6 @@ SimplexFunctionOptimizer::protected_assign(
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
 
 	max_iterations_ = src_ptr_cast->max_iterations_;
-	line_optimizer_ = src_ptr_cast->line_optimizer_;
 
 	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
 }
@@ -595,11 +446,6 @@ SimplexFunctionOptimizer::protected_assign(
 void
 SimplexFunctionOptimizer::protected_make_independent() {
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
-	if( line_optimizer_ != nullptr ) {
-		PluginLineOptimizerSP line_optimizer_copy( line_optimizer_->clone() );
-		line_optimizer_copy->make_independent();
-		line_optimizer_ = line_optimizer_copy;
-	}
 	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 

@@ -147,14 +147,6 @@ public:
 		masala::base::Size const setting
 	);
 
-	/// @brief Set a line optimizer to use for the line searches.
-	/// @details Used directly, not cloned.  If none is provided (or if this is set to
-	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
-	void
-	set_line_optimizer(
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
-	);
-
 	/// @brief Set the tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
 	/// any sensible value of tolerance).
@@ -178,12 +170,6 @@ public:
 	/// @brief Get the maximum number of steps that we can take
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations() const;
-
-	/// @brief Get the line optimizer used for the line searches.
-	/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
-	/// is used by default.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-	line_optimizer() const;
 
 	/// @brief Get the tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
@@ -256,24 +242,6 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
-	/// in threads.  This function is called from a mutex-locked context.
-	/// @param[in] problem The problem to solve.
-	/// @param[in] starting_point_index The index of the starting point for the problem.
-	/// @param[in] line_optimizer The line optimizer to use when solving this problem.
-	/// @param[out] solutions The solution container into which we will put the solution.
-	void
-	run_real_valued_local_optimizer_on_one_problem(
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
-		masala::base::Size const starting_point_index,
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
-	) const;
-
-	/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-	generate_brent_optimizer() const;
-
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -283,10 +251,6 @@ private:
 	/// @brief The maximum number of steps that we're allowed to take.
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations_ = 2000;
-
-	/// @brief A line optimizer used for the line searches.
-	/// @details If none is provided, a BrentAlgorithmLineOptimizer is used.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer_;
 
 	/// @brief The tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for

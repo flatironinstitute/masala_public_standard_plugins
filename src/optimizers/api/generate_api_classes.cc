@@ -35,8 +35,8 @@
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 // #include <optimizers/gradient_based/BFGSFunctionOptimizer.hh>
-#include <optimizers/gradient_free/GradientDescentFunctionOptimizer.hh>
-#include <optimizers/gradient_based/SimplexFunctionOptimizer.hh>
+#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
