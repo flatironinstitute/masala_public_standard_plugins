@@ -29,6 +29,9 @@
 // Forward declarations:
 #include <optimizers/gradient_free/SimplexFunctionOptimizer.fwd.hh>
 
+// External headers:
+#include <external/eigen/Eigen/Core>
+
 // Base headers:
 #include <base/types.hh>
 
@@ -45,6 +48,7 @@
 // STL headers:
 #include <limits>
 #include <cmath>
+#include <functional>
 
 namespace standard_masala_plugins {
 namespace optimizers {

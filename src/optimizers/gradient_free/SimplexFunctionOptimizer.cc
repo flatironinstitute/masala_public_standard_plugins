@@ -460,8 +460,7 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 	std::lock_guard< std::mutex > lock( mutex() );
 
 	MasalaThreadedWorkRequest workvec( threads_to_request() );
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > solutions;
-	solutions.resize( problems.n_problems() );
+	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > solutions( problems.n_problems() );
 
 	for( Size i(0), imax(problems.n_problems()); i<imax; ++i ) {
 		RealValuedFunctionLocalOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) ) );
@@ -475,7 +474,9 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 		CHECK_OR_THROW_FOR_CLASS( problem->has_at_least_one_starting_point(), "run_real_valued_local_optimizer",
 			"No starting point was defined for problem " + std::to_string( i ) + "."
 		);
-		for( Size j(0), jmax( problem->starting_points().size() ); j<=jmax; ++j ) {
+		Size const nstartingpoints( problem->starting_points().size() );
+		solutions[i].resize( nstartingpoints, nullptr );
+		for( Size j(0); j<=nstartingpoints; ++j ) {
 			workvec.add_job(
 				std::bind(
 					&SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads,
@@ -484,7 +485,7 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 					j,
 					std::cref( problem->starting_points()[j] ),
 					std::cref( problem->objective_function() ),
-					std::ref( solutions[i] )
+					std::ref( solutions[i][j] )
 				)
 			);
 		}
@@ -496,7 +497,17 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 	);
 	thread_summary.write_summary_to_tracer();
 
-	return solutions;
+	// Repackage solutions:
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outsolsvec(problems.n_problems());
+	for( Size i(0); i<problems.n_problems(); ++i ) {
+		RealValuedFunctionLocalOptimizationSolutions_APISP sols( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
+		for( Size j(0); j<solutions[i].size(); ++j ) {
+			sols->add_optimization_solution(solutions[i][j]);
+		}
+		outsolsvec[i] = sols; // Nonconst to const.
+	}
+
+	return outsolsvec;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
