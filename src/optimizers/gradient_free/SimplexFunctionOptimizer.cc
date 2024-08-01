@@ -603,7 +603,7 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 		);
 		Size const nstartingpoints( problem->starting_points().size() );
 		solutions[i].resize( nstartingpoints );
-		for( Size j(0); j<=nstartingpoints; ++j ) {
+		for( Size j(0); j<nstartingpoints; ++j ) {
 			solutions[i][j] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >();
 			solutions[i][j]->set_problem(problem);
 			solutions[i][j]->set_starting_point_and_index( problem->starting_points()[j], j );
