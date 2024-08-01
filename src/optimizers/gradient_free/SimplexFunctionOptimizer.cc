@@ -570,8 +570,9 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	simplex.resize( ndim + 1, ndim );
 	Eigen::Vector< Real, Eigen::Dynamic > simplex_scores;
 	simplex_scores.resize( ndim + 1 );
-	Size worst_index, second_worst_index, best_index, old_worst_index;
-	Eigen::Vector< Real, Eigen::Dynamic > old_worst_point, other_centroid;
+	Size worst_index, second_worst_index, best_index, new_best_index, old_worst_index;
+	Eigen::Vector< Real, Eigen::Dynamic > trial_point, old_worst_point, other_centroid;
+	trial_point.resize( ndim );
 	old_worst_point.resize( ndim );
 	other_centroid.resize( ndim );
 	Real old_worst_score, trial_score;
@@ -652,11 +653,11 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// If now best, expand:
 			if( simplex_scores[old_worst_index] < simplex_scores[best_index] ) {
 				trial_score = simplex_scores[old_worst_index];
-				old_worst_point = simplex.row( old_worst_index );
+				trial_point = simplex.row( old_worst_index );
 				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, expansion_factor_ );
 				++iter_count;
 				if( simplex_scores[old_worst_index] >= trial_score ) {
-					simplex.row( old_worst_index ) = old_worst_point;
+					simplex.row( old_worst_index ) = trial_point;
 					simplex_scores[ old_worst_index ] = trial_score;
 				}
 				best_index = old_worst_index;
@@ -673,7 +674,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// If worse than second-worst but better than worst, contract on the
 			// outside; otherwise, if worse than worst, contract on inside:
 			trial_score = simplex_scores[old_worst_index];
-			old_worst_point = simplex.row( old_worst_index );
+			trial_point = simplex.row( old_worst_index );
 			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
 				( simplex_scores[old_worst_index] > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
 			);
@@ -682,14 +683,30 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				continue;
 			}
 			simplex.row( old_worst_index ) = old_worst_point;
-			simplex_scores[ old_worst_index ] = trial_score;
+			simplex_scores[ old_worst_index ] = old_worst_score;
 			if( iter_count > max_iterations_ ) {
 				converged = false;
 				break;
 			}
 
 			// If not better than old worst, reset and contract about best point:
-			TODO TODO TODO;
+			new_best_index = 0; worst_index = 0; second_worst_index = 0;
+			for( Size i(0); i<=ndim; ++i ) {
+				if( i == best_index ) { continue; }
+				simplex.row(i) = shrink_factor_ * (simplex.row(i) - simplex.row(best_index)) + simplex.row(best_index);
+				simplex_scores[i] = objective_function( simplex.row(i) );
+				++iter_count;
+				if( iter_count > max_iterations_ ) {
+					converged = false;
+					break;
+				}
+				if( i > 0 ) {
+					if( simplex_scores[i] < simplex_scores[new_best_index] ) { new_best_index = i; }
+					if( simplex_scores[i] > simplex_scores[worst_index] ) { worst_index = i; }
+					else if( i != worst_index && simplex_scores[i] > simplex_scores[second_worst_index] ) { second_worst_index = i; }
+				}
+			}
+			best_index = new_best_index;
 		}
 	}
 
