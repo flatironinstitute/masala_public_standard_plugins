@@ -582,77 +582,85 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			simplex[i,j] = starting_point[j] + ( i == j ? initial_simplex_size_ : 0.0 );
 		}
 	}
-	for( masala::base::Size i(0); i<=ndim; ++i ) {
-		simplex_scores[i] = objective_function( simplex.col(i) );
-	}
 
-	// Find best, worst, and second-worst indices:
+	// Storage for best, worst, and second-worst indices:
 	worst_index = 0; second_worst_index = 0; best_index = 0;
-	for( Size j(1); j<=ndim; ++j ) {
-		if( simplex_scores[j] < simplex_scores[best_index] ) {
-			best_index = j;
-		}
-		if( simplex_scores[j] > simplex_scores[worst_index] ) {
-			worst_index = j;
-		} else if( simplex_scores[j] > simplex_scores[second_worst_index] && j != worst_index ) {
-			second_worst_index = j;
-		}
-	}
 	
 	// Loop over iterations:
 	bool converged( false );
 	Size iter_count(0);
-	TODO OUTER ITERATIONS;
-	while( true ) {
-
-		// Compute relative tolerance and decide whether to exit:
-		TODO TODO TODO;
-
-		// Increment iteration count and decide whether to exit:
-		++iter_count;
-		if( iter_count > max_iterations_ ) {
-			converged = false;
-			break;
+	for( Size outer_iter( 0 ); outer_iter < outer_iterations_; ++outer_iter ) {
+		if( outer_iter > 0 ) {
+			for( Size i(0); i<=ndim; ++i ) {
+				if( i == best_index ) { continue; }
+				for( Size j(0); j<ndim; ++j ) {
+					simplex[i,j] = simplex[best_index,j] + ( i == j ? initial_simplex_size_ : 0.0 );
+				}
+			}
 		}
 
-		// Store old worst:
-		old_worst_index = worst_index;
-		old_worst_score = simplex_scores[worst_index];
-		old_worst_point = simplex.row( old_worst_index );
-
-		// Reflect worst across other points:
-		reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
-		if( simplex_scores[old_worst_index] < simplex_scores[second_worst_index] && simplex_scores[best_index] < simplex_scores[old_worst_index] ) {
-			worst_index = second_worst_index;
-			second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
-			continue;
+		// Find best, worst, and second-worst indices:
+		for( masala::base::Size i(0); i<=ndim; ++i ) {
+			if( outer_iter > 0 && i == best_index ) { continue; }
+			simplex_scores[i] = objective_function( simplex.row(i) );
+		}
+		for( Size j(1); j<=ndim; ++j ) {
+			if( simplex_scores[j] < simplex_scores[best_index] ) {
+				best_index = j;
+			}
+			if( simplex_scores[j] > simplex_scores[worst_index] ) {
+				worst_index = j;
+			} else if( simplex_scores[j] > simplex_scores[second_worst_index] && j != worst_index ) {
+				second_worst_index = j;
+			}
 		}
 
-		// If now best, expand:
-		if( simplex_scores[old_worst_index] < simplex_scores[best_index] ) {
+		while( true ) {
+
+			// Compute relative tolerance and decide whether to exit:
+			TODO TODO TODO;
+
+			// Increment iteration count and decide whether to exit:
 			++iter_count;
 			if( iter_count > max_iterations_ ) {
 				converged = false;
 				break;
 			}
-			trial_score = simplex_scores[old_worst_index];
+
+			// Store old worst:
+			old_worst_index = worst_index;
+			old_worst_score = simplex_scores[worst_index];
 			old_worst_point = simplex.row( old_worst_index );
-			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, 2.0 );
-			if( simplex_scores[old_worst_index] >= trial_score ) {
-				simplex.row( old_worst_index ) = old_worst_point;
-				simplex_scores[ old_worst_index ] = trial_score;
+
+			// Reflect worst across other points:
+			reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
+			if( simplex_scores[old_worst_index] < simplex_scores[second_worst_index] && simplex_scores[best_index] < simplex_scores[old_worst_index] ) {
+				worst_index = second_worst_index;
+				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
+				continue;
 			}
-			best_index = old_worst_index;
-			worst_index = second_worst_index;
-			second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
-			continue;
+
+			// If now best, expand:
+			if( simplex_scores[old_worst_index] < simplex_scores[best_index] ) {
+				trial_score = simplex_scores[old_worst_index];
+				old_worst_point = simplex.row( old_worst_index );
+				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, 2.0 );
+				if( simplex_scores[old_worst_index] >= trial_score ) {
+					simplex.row( old_worst_index ) = old_worst_point;
+					simplex_scores[ old_worst_index ] = trial_score;
+				}
+				best_index = old_worst_index;
+				worst_index = second_worst_index;
+				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
+				continue;
+			}
+
+			// If not better than second-worst, contract:
+			TODO TODO TODO;
+
+			// If not better than old worst, contract about best point:
+			TODO TODO TODO;
 		}
-
-		// If not better than second-worst, contract:
-		TODO TODO TODO;
-
-		// If not better than old worst, contract about best point:
-		TODO TODO TODO;
 	}
 
 	// Check for convergence:
