@@ -357,6 +357,26 @@ SimplexFunctionOptimizer::get_api_definition() {
 				std::bind( &SimplexFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_expansion_factor", "Set the amount by which to expand, "
+				"when expanding the simplex.",
+				"setting", "The amount by which to expand, when expanding the simplex.  "
+				"Must be greater than 1.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::set_expansion_factor, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_contraction_factor", "Set the amount by which to contract, "
+				"when contracting the simplex.",
+				"setting", "The amount by which to contract, when contracting the simplex.  "
+				"Must be between 0 and 1.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::set_contraction_factor, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -392,6 +412,24 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"exceeded, false otherwise.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::throw_if_iterations_exceeded, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"expansion_factor", "Get the amount by which to expand, "
+				"when expanding the simplex.",
+				"expansion_factor", "The amount by which to expand, when expanding the simplex.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::expansion_factor, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"contraction_factor", "Get the amount by which to contract, "
+				"when contracting the simplex.",
+				"setting", "The amount by which to contract, when contracting the simplex.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::contraction_factor, this )
 			)
 		);
 
