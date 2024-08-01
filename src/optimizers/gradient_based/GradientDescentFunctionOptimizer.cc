@@ -101,7 +101,7 @@ GradientDescentFunctionOptimizer::get_categories() const {
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
 std::vector< std::string >
 GradientDescentFunctionOptimizer::get_keywords() const {
 	return std::vector< std::string > {
