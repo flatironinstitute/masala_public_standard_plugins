@@ -443,7 +443,13 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	// Current simplex:
 	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > simplex;
 	Size const ndim( starting_point.size() );
+	CHECK_OR_THROW_FOR_CLASS( ndim > 0, "run_one_simplex_optimization_in_threads",
+		"The " + class_name() + " requires at least one entry in the starting point vector."
+	);
 	simplex.resize( ndim + 1, ndim );
+	Eigen::Vector< Real, Eigen::Dynamic > simplex_scores;
+	simplex_scores.resize( ndim + 1 );
+	Size worst_index, second_worst_index, best_index;
 
 	// Initialize the simplex:
 	for( Size i(0); i<=ndim; ++i ) {
@@ -451,13 +457,62 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			simplex[i,j] = starting_point[j] + ( i == j ? initial_simplex_size_ : 0.0 );
 		}
 	}
+	for( masala::base::Size i(0); i<=ndim; ++i ) {
+		simplex_scores[i] = objective_function( simplex.col(i) );
+	}
 	
 	// Loop over iterations:
 	bool converged( false );
-	TODO TODO TODO;
+	Size iter_count(0);
+	TODO OUTER ITERATIONS;
+	while( true ) {
+		// Find best, worst, and second-worst indices:
+		worst_index = 0; second_worst_index = 0; best_index = 0;
+		for( Size j(1); j<=ndim; ++j ) {
+			if( simplex_scores[j] < simplex_scores[best_index] ) {
+				best_index = j;
+			}
+			if( simplex_scores[j] > simplex_scores[worst_index] ) {
+				worst_index = j;
+			} else if( simplex_scores[j] > simplex_scores[second_worst_index] ) {
+				second_worst_index = j;
+			}
+		}
+
+		// Compute relative tolerance and decide whether to exit:
+		TODO TODO TODO;
+
+		// Increment iteration count and decide whether to exit:
+		++iter_count;
+		if( iter_count > max_iterations_ ) {
+			break;
+		}
+
+		// Reflect worst across other points:
+		TODO TODO TODO;
+
+		// If now best, expand:
+		TODO TODO TODO;
+
+		// If not better than second-worst, contract:
+		TODO TODO TODO;
+
+		// If not better than old worst, contract about best point:
+		TODO TODO TODO;
+	}
 
 	// Check for convergence:
-	TODO TODO TODO;
+	if( !converged ) {
+		if( throw_if_iterations_exceeded_ ) {
+			MASALA_THROW(
+				class_namespace_static() + "::" + class_name_static(),
+				"run_one_simplex_optimization_in_threads",
+				"Optimization iterations for the " + class_name_static() + " exceeded!"
+			);
+		} else {
+			write_to_tracer( "Warning: outer iterations for the " + class_name_static() + " exceeded!" );
+		}
+	}
 
 	// Package solution:
 	TODO TODO TODO;
