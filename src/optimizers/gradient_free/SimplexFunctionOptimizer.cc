@@ -596,8 +596,8 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 /// @details Should be called from a mutex-locked context.
 void
 SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
-	masala::base::Size const problem_index,
-	masala::base::Size const problem_starting_point_index,
+	masala::base::Size const /*problem_index*/,
+	masala::base::Size const /*problem_starting_point_index*/,
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & starting_point,
 	std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
@@ -626,7 +626,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	// Initialize the simplex:
 	for( Size i(0); i<=ndim; ++i ) {
 		for( Size j(0); j<ndim; ++j ) {
-			simplex[i,j] = starting_point[j] + ( i == j ? initial_simplex_size_ : 0.0 );
+			simplex(i,j) = starting_point(j) + ( i == j ? initial_simplex_size_ : 0.0 );
 		}
 	}
 
@@ -641,7 +641,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			for( Size i(0); i<=ndim; ++i ) {
 				if( i == best_index ) { continue; }
 				for( Size j(0); j<ndim; ++j ) {
-					simplex[i,j] = simplex[best_index,j] + ( i == j ? initial_simplex_size_ : 0.0 );
+					simplex(i,j) = simplex(best_index,j) + ( i == j ? initial_simplex_size_ : 0.0 );
 				}
 			}
 		}
@@ -654,15 +654,15 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				// Leave converged at last setting.
 				break;
 			}
-			simplex_scores[i] = objective_function( simplex.row(i) );
+			simplex_scores(i) = objective_function( simplex.row(i) );
 		}
 		for( Size j(1); j<=ndim; ++j ) {
-			if( simplex_scores[j] < simplex_scores[best_index] ) {
+			if( simplex_scores(j) < simplex_scores(best_index) ) {
 				best_index = j;
 			}
-			if( simplex_scores[j] > simplex_scores[worst_index] ) {
+			if( simplex_scores(j) > simplex_scores(worst_index) ) {
 				worst_index = j;
-			} else if( simplex_scores[j] > simplex_scores[second_worst_index] && j != worst_index ) {
+			} else if( simplex_scores(j) > simplex_scores(second_worst_index) && j != worst_index ) {
 				second_worst_index = j;
 			}
 		}
@@ -685,13 +685,13 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 			// Store old worst:
 			old_worst_index = worst_index;
-			old_worst_score = simplex_scores[worst_index];
+			old_worst_score = simplex_scores(worst_index);
 			old_worst_point = simplex.row( old_worst_index );
 
 			// Reflect worst across other points:
 			reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
 			++iter_count;
-			if( simplex_scores[old_worst_index] < simplex_scores[second_worst_index] && simplex_scores[best_index] < simplex_scores[old_worst_index] ) {
+			if( simplex_scores(old_worst_index) < simplex_scores(second_worst_index) && simplex_scores(best_index) < simplex_scores(old_worst_index) ) {
 				worst_index = second_worst_index;
 				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
 				continue;
@@ -702,14 +702,14 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			}
 
 			// If now best, expand:
-			if( simplex_scores[old_worst_index] < simplex_scores[best_index] ) {
-				trial_score = simplex_scores[old_worst_index];
+			if( simplex_scores(old_worst_index) < simplex_scores(best_index) ) {
+				trial_score = simplex_scores(old_worst_index);
 				trial_point = simplex.row( old_worst_index );
 				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, expansion_factor_ );
 				++iter_count;
-				if( simplex_scores[old_worst_index] >= trial_score ) {
+				if( simplex_scores(old_worst_index) >= trial_score ) {
 					simplex.row( old_worst_index ) = trial_point;
-					simplex_scores[ old_worst_index ] = trial_score;
+					simplex_scores(old_worst_index) = trial_score;
 				}
 				best_index = old_worst_index;
 				worst_index = second_worst_index;
@@ -724,17 +724,17 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// If we reach here, we know that the reflected point is worse than the second-worst.
 			// If worse than second-worst but better than worst, contract on the
 			// outside; otherwise, if worse than worst, contract on inside:
-			trial_score = simplex_scores[old_worst_index];
+			trial_score = simplex_scores(old_worst_index);
 			trial_point = simplex.row( old_worst_index );
 			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
-				( simplex_scores[old_worst_index] > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
+				( simplex_scores(old_worst_index) > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
 			);
 			++iter_count;
-			if( simplex_scores[old_worst_index] < trial_score ) {
+			if( simplex_scores(old_worst_index) < trial_score ) {
 				continue;
 			}
 			simplex.row( old_worst_index ) = old_worst_point;
-			simplex_scores[ old_worst_index ] = old_worst_score;
+			simplex_scores(old_worst_index) = old_worst_score;
 			if( iter_count > max_iterations_ ) {
 				converged = false;
 				break;
@@ -745,16 +745,16 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			for( Size i(0); i<=ndim; ++i ) {
 				if( i == best_index ) { continue; }
 				simplex.row(i) = shrink_factor_ * (simplex.row(i) - simplex.row(best_index)) + simplex.row(best_index);
-				simplex_scores[i] = objective_function( simplex.row(i) );
+				simplex_scores(i) = objective_function( simplex.row(i) );
 				++iter_count;
 				if( iter_count > max_iterations_ ) {
 					converged = false;
 					break;
 				}
 				if( i > 0 ) {
-					if( simplex_scores[i] < simplex_scores[new_best_index] ) { new_best_index = i; }
-					if( simplex_scores[i] > simplex_scores[worst_index] ) { worst_index = i; }
-					else if( i != worst_index && simplex_scores[i] > simplex_scores[second_worst_index] ) { second_worst_index = i; }
+					if( simplex_scores(i) < simplex_scores(new_best_index) ) { new_best_index = i; }
+					if( simplex_scores(i) > simplex_scores(worst_index) ) { worst_index = i; }
+					else if( i != worst_index && simplex_scores(i) > simplex_scores(second_worst_index) ) { second_worst_index = i; }
 				}
 			}
 			best_index = new_best_index;
@@ -779,9 +779,9 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	solution->set_iterations( iter_count );
 	solution->set_n_times_solution_was_produced(1);
 	solution->set_solution_point( simplex.row( best_index ) );
-	solution->set_solution_score( simplex_scores[best_index] );
-	solution->set_solution_score_data_representation_approximation( simplex_scores[best_index] );
-	solution->set_solution_score_solver_approximation( simplex_scores[best_index] );
+	solution->set_solution_score( simplex_scores(best_index) );
+	solution->set_solution_score_data_representation_approximation( simplex_scores(best_index) );
+	solution->set_solution_score_solver_approximation( simplex_scores(best_index) );
 }
 
 /// @brief Find the second-worst entry in a vector, given the positions of the best and worst.
@@ -795,13 +795,13 @@ SimplexFunctionOptimizer::find_second_worst_index(
 	using masala::base::Real;
 	using masala::base::Size;
 
-	Real worst_val_seen( simplex_scores[best_index] );
+	Real worst_val_seen( simplex_scores(best_index) );
 	Size worst_position_seen( best_index );
 
 	for( Size i(0), ndim(simplex_scores.size()); i<ndim; ++i ) {
 		if( i == best_index || i == worst_index ) continue;
-		if( simplex_scores[i] > worst_val_seen ) {
-			worst_val_seen = simplex_scores[i];
+		if( simplex_scores(i) > worst_val_seen ) {
+			worst_val_seen = simplex_scores(i);
 			worst_position_seen = i;
 		}
 	}
@@ -840,18 +840,18 @@ SimplexFunctionOptimizer::reflect_vertex(
 
 	// Update centroid of other vertices if needed:
 	if( other_centroid_needs_update ) {
-		for( Size i(0); i<other_centroid.size(); ++i ) { other_centroid[i] = 0.0; }
+		for( Size i(0); i<static_cast<Size>(other_centroid.size()); ++i ) { other_centroid(i) = 0.0; }
 		for( Size i(0); i<ndim+1; ++i ) {
 			if( i == simplex_vertex_index_to_move ) { continue; }
 			for( Size j(0); j<ndim; ++j ) {
-				other_centroid[i] += simplex[i,j];
+				other_centroid(i) += simplex(i,j);
 			}
 		}
 		other_centroid /= ndim;
 	}
 
 	simplex.row( simplex_vertex_index_to_move ) = rescale_factor * ( simplex.row( simplex_vertex_index_to_move ) - other_centroid ) + other_centroid;
-	vertex_scores[simplex_vertex_index_to_move] = objective_function( simplex.row( simplex_vertex_index_to_move ) );
+	vertex_scores( simplex_vertex_index_to_move ) = objective_function( simplex.row( simplex_vertex_index_to_move ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
