@@ -367,6 +367,16 @@ SimplexFunctionOptimizer::get_api_definition() {
 		// Setters:
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"setting", "The number of threads to request.  Different starting points of the same problem or "
+				"different starting points of different problems can be carried out simultaneously in threads.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::set_threads_to_request, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
 				"set_outer_iterations", "Set the number of times that we should restart the simplex search to avoid false convergence.  Defaults to 3.",
 				"n_outer_iterations_in", "The number of times that we should restart the simplex search to avoid false convergence.",
 				false, false, std::bind( &SimplexFunctionOptimizer::set_outer_iterations, this, std::placeholders::_1 )
@@ -438,6 +448,17 @@ SimplexFunctionOptimizer::get_api_definition() {
 		);
 
 		// Getters:
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"threads_to_request", "Get the number of threads requested by this optimizer.  Different starting "
+				"points of the same problem or different starting points of different problems can be carried out "
+				"simultaneously in threads.",
+				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::threads_to_request, this )
+			)
+		);
 		api_def->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
 				"outer_iterations", "Get the number of times that we should restart the simplex search to avoid false convergence.  Defaults to 3.",
