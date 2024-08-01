@@ -531,8 +531,8 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	// Current simplex:
 	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > simplex;
 	Size const ndim( starting_point.size() );
-	CHECK_OR_THROW_FOR_CLASS( ndim > 0, "run_one_simplex_optimization_in_threads",
-		"The " + class_name() + " requires at least one entry in the starting point vector."
+	CHECK_OR_THROW_FOR_CLASS( ndim > 1, "run_one_simplex_optimization_in_threads",
+		"The " + class_name() + " requires at least a 2-dimensional search space."
 	);
 	simplex.resize( ndim + 1, ndim );
 	Eigen::Vector< Real, Eigen::Dynamic > simplex_scores;
@@ -562,7 +562,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			}
 			if( simplex_scores[j] > simplex_scores[worst_index] ) {
 				worst_index = j;
-			} else if( simplex_scores[j] > simplex_scores[second_worst_index] ) {
+			} else if( simplex_scores[j] > simplex_scores[second_worst_index] && j != worst_index ) {
 				second_worst_index = j;
 			}
 		}
@@ -573,6 +573,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 		// Increment iteration count and decide whether to exit:
 		++iter_count;
 		if( iter_count > max_iterations_ ) {
+			converged = false;
 			break;
 		}
 
@@ -604,6 +605,51 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 	// Package solution:
 	TODO TODO TODO;
+}
+
+/// @brief Reflect one vertex across the centroid of the other vertices, scaling by a given factor.
+/// Re-evaluate the scoring function at the new position.
+/// @details Assumes that vertex scores is the same size as the number of rows in the simplex.  Updates
+/// other centroid only if it needs recomputation.  Rescale factor should be negative to flip about centroid,
+/// positive just to scale.
+/*static*/
+void
+SimplexFunctionOptimizer::reflect_vertex(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & other_centroid,
+	bool const other_centroid_needs_update,
+	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & simplex,
+	masala::base::Size const simplex_vertex_index_to_move,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & vertex_scores,
+	std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
+	masala::base::Real const rescale_factor
+) {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	Size const ndim( vertex_scores.size() - 1 );
+	DEBUG_MODE_CHECK_OR_THROW( static_cast< Size >( simplex.rows() ) == ndim + 1
+		&& static_cast< Size >( simplex.cols() ) == ndim,
+		class_namespace_static() + "::" + class_name_static(),
+		"reflect_vertex",
+		"Expected matrix to be " + std::to_string( ndim + 1 ) + " by " +
+		std::to_string( ndim ) + ", but got " + std::to_string( simplex.rows() ) + " by "
+		+ std::to_string( simplex.cols() ) + "."
+	);
+
+	// Update centroid of other vertices if needed:
+	if( other_centroid_needs_update ) {
+		for( Size i(0); i<other_centroid.size(); ++i ) { other_centroid[i] = 0.0; }
+		for( Size i(0); i<ndim+1; ++i ) {
+			if( i == simplex_vertex_index_to_move ) { continue; }
+			for( Size j(0); j<ndim; ++j ) {
+				other_centroid[i] += simplex[i,j];
+			}
+		}
+		other_centroid /= ndim;
+	}
+
+	simplex.row( simplex_vertex_index_to_move ) = rescale_factor * ( simplex.row( simplex_vertex_index_to_move ) - other_centroid ) + other_centroid;
+	vertex_scores[simplex_vertex_index_to_move] = objective_function( simplex.row( simplex_vertex_index_to_move ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

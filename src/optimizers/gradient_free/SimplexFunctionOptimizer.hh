@@ -271,6 +271,23 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
 	) const;
 
+	/// @brief Reflect one vertex across the centroid of the other vertices, scaling by a given factor.
+	/// Re-evaluate the scoring function at the new position.
+	/// @details Assumes that vertex scores is the same size as the number of rows in the simplex.  Updates
+	/// other centroid only if it needs recomputation.  Rescale factor should be negative to flip about centroid,
+	/// positive just to scale.
+	static
+	void
+	reflect_vertex(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & other_centroid,
+		bool const other_centroid_needs_update,
+		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & simplex,
+		masala::base::Size const simplex_vertex_index_to_move,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & vertex_scores,
+		std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
+		masala::base::Real const rescale_factor
+	);
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
