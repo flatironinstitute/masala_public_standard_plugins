@@ -550,8 +550,11 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 			"No starting point was defined for problem " + std::to_string( i ) + "."
 		);
 		Size const nstartingpoints( problem->starting_points().size() );
-		solutions[i].resize( nstartingpoints, nullptr );
+		solutions[i].resize( nstartingpoints );
 		for( Size j(0); j<=nstartingpoints; ++j ) {
+			solutions[i][j] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >();
+			solutions[i][j]->set_problem(problem);
+			solutions[i][j]->set_starting_point_and_index( problem->starting_points()[j], j );
 			workvec.add_job(
 				std::bind(
 					&SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads,
@@ -772,7 +775,13 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	}
 
 	// Package solution:
-	TODO TODO TODO;
+	solution->set_converged( converged );
+	solution->set_iterations( iter_count );
+	solution->set_n_times_solution_was_produced(1);
+	solution->set_solution_point( simplex.row( best_index ) );
+	solution->set_solution_score( simplex_scores[best_index] );
+	solution->set_solution_score_data_representation_approximation( simplex_scores[best_index] );
+	solution->set_solution_score_solver_approximation( simplex_scores[best_index] );
 }
 
 /// @brief Find the second-worst entry in a vector, given the positions of the best and worst.
