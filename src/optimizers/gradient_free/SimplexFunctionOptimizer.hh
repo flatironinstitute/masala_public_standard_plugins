@@ -181,6 +181,10 @@ public:
 	/// @brief Set the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
 	void set_contraction_factor( masala::base::Real const setting );
 
+	/// @brief Set the amount by which to shrink, when shrinking the simplex about the best vertex.  Must
+	/// be between 0 and 1.
+	void set_shrink_factor( masala::base::Real const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -215,6 +219,10 @@ public:
 
 	/// @brief Get the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
 	masala::base::Real contraction_factor() const;
+
+	/// @brief Get the amount by which to shrink, when shrinking the simplex about the best vertex.  Must
+	/// be between 0 and 1.
+	masala::base::Real shrink_factor() const;
 
 public:
 
@@ -341,6 +349,10 @@ private:
 
 	/// @brief The amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
 	masala::base::Real contraction_factor_ = 0.5;
+
+	/// @brief The amount by which to shrink, when contracting the simplex about the best vertex.  Must
+	/// be between 0 and 1.
+	masala::base::Real shrink_factor_ = 0.5;
 
 }; // class SimplexFunctionOptimizer
 

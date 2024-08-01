@@ -240,10 +240,25 @@ SimplexFunctionOptimizer::set_contraction_factor(
 ) {
 	std::lock_guard< std::mutex > lock( mutex() );
 	CHECK_OR_THROW_FOR_CLASS( setting > 0.0 && setting < 1.0,
-		"set_expansion_factor", "The contraction factor must be greater than 0 and less than 1.  "
+		"set_contraction_factor", "The contraction factor must be greater than 0 and less than 1.  "
 		"Got " + std::to_string(setting) + "."
 	);
 	contraction_factor_ = setting;
+}
+
+
+/// @brief Set the amount by which to shrink, when shrinking the simplex about the best vertex.  Must
+/// be between 0 and 1.
+void
+SimplexFunctionOptimizer::set_shrink_factor(
+	masala::base::Real const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	CHECK_OR_THROW_FOR_CLASS( setting > 0.0 && setting < 1.0,
+		"set_shrink_factor", "The shrink factor must be greater than 0 and less than 1.  "
+		"Got " + std::to_string(setting) + "."
+	);
+	shrink_factor_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +318,14 @@ masala::base::Real
 SimplexFunctionOptimizer::contraction_factor() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return contraction_factor_;
+}
+
+/// @brief Get the amount by which to shrink, when shrinking the simplex about the best vertex.  Must
+/// be between 0 and 1.
+masala::base::Real
+SimplexFunctionOptimizer::shrink_factor() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return shrink_factor_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -403,6 +426,16 @@ SimplexFunctionOptimizer::get_api_definition() {
 				std::bind( &SimplexFunctionOptimizer::set_contraction_factor, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_shrink_factor", "Set the amount by which to shrink, when shrinking the simplex about "
+				"the best vertex.  Must be between 0 and 1.",
+				"setting", "The amount by which to shrink, when contracting the simplex about the best vertex.  "
+				"Must be between 0 and 1.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::set_shrink_factor, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -463,6 +496,15 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"setting", "The amount by which to contract, when contracting the simplex.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::contraction_factor, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"shrink_factor", "Get the amount by which to shrink, "
+				"when shrinking the simplex about the best vertex.",
+				"setting", "The amount by which to shrink, when shrinking the simplex about the best vertex.",
+				false, false,
+				std::bind( &SimplexFunctionOptimizer::shrink_factor, this )
 			)
 		);
 
