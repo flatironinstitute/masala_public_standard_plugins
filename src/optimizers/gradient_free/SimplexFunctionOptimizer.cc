@@ -672,11 +672,21 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// If we reach here, we know that the reflected point is worse than the second-worst.
 			// If worse than second-worst but better than worst, contract on the
 			// outside; otherwise, if worse than worst, contract on inside:
+			trial_score = simplex_scores[old_worst_index];
+			old_worst_point = simplex.row( old_worst_index );
 			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
 				( simplex_scores[old_worst_index] > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
 			);
 			++iter_count;
-			TODO TODO TODO;
+			if( simplex_scores[old_worst_index] < trial_score ) {
+				continue;
+			}
+			simplex.row( old_worst_index ) = old_worst_point;
+			simplex_scores[ old_worst_index ] = trial_score;
+			if( iter_count > max_iterations_ ) {
+				converged = false;
+				break;
+			}
 
 			// If not better than old worst, reset and contract about best point:
 			TODO TODO TODO;
