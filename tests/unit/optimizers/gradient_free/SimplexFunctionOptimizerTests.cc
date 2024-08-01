@@ -191,7 +191,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Simpl
 
 	RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
 
-	//REQUIRE_NOTHROW([&](){
+	REQUIRE_NOTHROW([&](){
 		for( std::vector< Real > const & entry : initial_points ) {
 			Eigen::VectorXd x0;
 			x0.resize(2);
@@ -240,7 +240,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Simpl
 				CHECK( std::abs(cursolution->solution_score() + 2.5) < 2.0e-2 );
 			}
 		}
-	//}() );
+	}() );
 
 	threadman->set_total_threads(1);
 
