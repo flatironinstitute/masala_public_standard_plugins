@@ -193,6 +193,12 @@ public:
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded() const;
 
+	/// @brief Get the amount by which to expand, when expanding the simplex.  Must be greater than 1.
+	masala::base::Real expansion_factor() const;
+
+	/// @brief Get the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
+	masala::base::Real contraction_factor() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

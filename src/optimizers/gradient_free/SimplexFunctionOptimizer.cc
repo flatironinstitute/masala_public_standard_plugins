@@ -272,6 +272,20 @@ SimplexFunctionOptimizer::throw_if_iterations_exceeded() const {
 	return throw_if_iterations_exceeded_;
 }
 
+/// @brief Get the amount by which to expand, when expanding the simplex.  Must be greater than 1.
+masala::base::Real
+SimplexFunctionOptimizer::expansion_factor() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return expansion_factor_;
+}
+
+/// @brief Get the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
+masala::base::Real
+SimplexFunctionOptimizer::contraction_factor() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return contraction_factor_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // API DEFINITION FUNCTION
 ////////////////////////////////////////////////////////////////////////////////
