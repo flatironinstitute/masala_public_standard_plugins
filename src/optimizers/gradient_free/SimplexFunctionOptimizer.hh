@@ -144,6 +144,13 @@ public:
 // SETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Set the number of times that we should restart the simplex search to avoid
+	/// false convergence.  Defaults to 3.
+	void
+	set_outer_iterations(
+		masala::base::Size const n_outer_iterations_in
+	);
+
 	/// @brief Set the maximum number of steps that we can take.
 	/// @details A setting of 0 means loop until convergence.
 	void
@@ -178,6 +185,10 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the number of times that we should restart the simplex search to avoid
+	/// false convergence.  Defaults to 3.
+	masala::base::Size outer_iterations() const;
 
 	/// @brief Get the maximum number of steps that we can take
 	/// @details A setting of 0 means loop until convergence.
@@ -302,6 +313,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief How many times should we restart the simplex search to avoid false convergence?
+	masala::base::Size outer_iterations_ = 3;
 
 	/// @brief The maximum number of steps that we're allowed to take.
 	/// @details A setting of 0 means loop until convergence.

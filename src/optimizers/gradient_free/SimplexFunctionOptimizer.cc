@@ -160,6 +160,17 @@ SimplexFunctionOptimizer::class_namespace_static() {
 // SETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the number of times that we should restart the simplex search to avoid
+/// false convergence.  Defaults to 3.
+void
+SimplexFunctionOptimizer::set_outer_iterations(
+	masala::base::Size const n_outer_iterations_in
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	CHECK_OR_THROW_FOR_CLASS( n_outer_iterations_in > 0, "set_outer_iterations", "The number of outer iterations must be greater than 0." );
+	outer_iterations_ = n_outer_iterations_in;
+}
+
 /// @brief Set the maximum number of steps that we can take.
 /// @details A setting of 0 means loop until convergence.
 void
@@ -238,6 +249,14 @@ SimplexFunctionOptimizer::set_contraction_factor(
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the number of times that we should restart the simplex search to avoid
+/// false convergence.  Defaults to 3.
+masala::base::Size
+SimplexFunctionOptimizer::outer_iterations() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return outer_iterations_;
+}
 
 /// @brief Get the maximum number of steps that we can take
 /// @details A setting of 0 means loop until convergence.
@@ -325,6 +344,13 @@ SimplexFunctionOptimizer::get_api_definition() {
 		// Setters:
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_outer_iterations", "Set the number of times that we should restart the simplex search to avoid false convergence.  Defaults to 3.",
+				"n_outer_iterations_in", "The number of times that we should restart the simplex search to avoid false convergence.",
+				false, false, std::bind( &SimplexFunctionOptimizer::set_outer_iterations, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
 				"set_max_iterations", "Set the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations_in", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &SimplexFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
@@ -379,6 +405,13 @@ SimplexFunctionOptimizer::get_api_definition() {
 		);
 
 		// Getters:
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"outer_iterations", "Get the number of times that we should restart the simplex search to avoid false convergence.  Defaults to 3.",
+				"outer_iterations", "The number of times that we should restart the simplex search to avoid false convergence.",
+				false, false, std::bind( &SimplexFunctionOptimizer::outer_iterations, this )
+			)
+		);
 		api_def->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
