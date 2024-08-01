@@ -268,8 +268,7 @@ public:
 
 	/// @brief Run the optimizer on a set of gradient-based loss function minimization problems, and produce a set of solutions.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
-	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (BFGS)
-	/// to carry out gradient-descent minimization.
+	/// the problem with the same index.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
 	run_real_valued_local_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
