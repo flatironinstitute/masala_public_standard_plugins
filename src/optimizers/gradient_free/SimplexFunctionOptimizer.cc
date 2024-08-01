@@ -170,6 +170,20 @@ SimplexFunctionOptimizer::set_max_iterations(
 	max_iterations_ = setting;
 }
 
+/// @brief Set the initial size of the simplex.  The initial simplex points will be the starting
+/// point plus a small step in each of the cardinal directions.
+void
+SimplexFunctionOptimizer::set_initial_simplex_size(
+	masala::base::Real const size_in
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	CHECK_OR_THROW_FOR_CLASS( size_in >= std::numeric_limits< masala::base::Real >::epsilon(),
+		"set_initial_simplex_size", "The initial simplex size must be greater than "
+		+ std::to_string( std::numeric_limits< masala::base::Real >::epsilon() ) + "."
+	);
+	initial_simplex_size_ = size_in;
+}
+
 /// @brief Set the tolerance for determining whether or not we've finished our search.
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of tolerance).
@@ -206,6 +220,14 @@ masala::base::Size
 SimplexFunctionOptimizer::max_iterations() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return max_iterations_;
+}
+
+/// @brief Get the initial size of the simplex.  The initial simplex points will be the starting
+/// point plus a small step in each of the cardinal directions.
+masala::base::Real
+SimplexFunctionOptimizer::initial_simplex_size() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return initial_simplex_size_;
 }
 
 /// @brief Get the tolerance for determining whether or not we've finished our search.
@@ -271,6 +293,14 @@ SimplexFunctionOptimizer::get_api_definition() {
 		);
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_initial_simplex_size", "Set the initial size of the simplex.  The initial simplex points will be the starting "
+				"point plus a small step in each of the cardinal directions.",
+				"size_in", "The small offset to add to each of the coordinates of the initial point to get the initial simplex.",
+				false, false, std::bind( &SimplexFunctionOptimizer::set_initial_simplex_size, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_tolerance", "Set the tolerance for determining whether or not we've "
 				"finished our search.  The default is the square root of machine precision "
 				"(the theoretical lower limit for any sensible value of tolerance).",
@@ -295,6 +325,14 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &SimplexFunctionOptimizer::max_iterations, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"initial_simplex_size", "Get the initial size of the simplex.  The initial simplex points will be the starting "
+				"point plus a small step in each of the cardinal directions.",
+				"initial_simplex_size", "The small offset that is added to each of the coordinates of the initial point to get the initial simplex.",
+				false, false, std::bind( &SimplexFunctionOptimizer::initial_simplex_size, this )
 			)
 		);
 		api_def->add_getter(
