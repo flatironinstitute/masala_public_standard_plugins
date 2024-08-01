@@ -332,7 +332,7 @@ private:
 	masala::base::Size max_iterations_ = 10000;
 
 	/// @brief The initial size of the simplex:
-	masala::base::Real initial_simplex_size_ = 0.001;
+	masala::base::Real initial_simplex_size_ = 0.01;
 
 	/// @brief The tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
