@@ -706,7 +706,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				// Leave converged at last setting.
 				break;
 			}
-			simplex_scores(i) = objective_function( simplex.row(i) );
+			simplex_scores(i) = objective_function( simplex.row(i).transpose() );
 		}
 		for( Size j(1); j<=ndim; ++j ) {
 			if( simplex_scores(j) < simplex_scores(best_index) ) {
@@ -830,7 +830,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	solution->set_converged( converged );
 	solution->set_iterations( iter_count );
 	solution->set_n_times_solution_was_produced(1);
-	solution->set_solution_point( simplex.row( best_index ) );
+	solution->set_solution_point( simplex.row( best_index ).transpose() );
 	solution->set_solution_score( simplex_scores(best_index) );
 	solution->set_solution_score_data_representation_approximation( simplex_scores(best_index) );
 	solution->set_solution_score_solver_approximation( simplex_scores(best_index) );
@@ -896,14 +896,14 @@ SimplexFunctionOptimizer::reflect_vertex(
 		for( Size i(0); i<ndim+1; ++i ) {
 			if( i == simplex_vertex_index_to_move ) { continue; }
 			for( Size j(0); j<ndim; ++j ) {
-				other_centroid(i) += simplex(i,j);
+				other_centroid(j) += simplex(i,j);
 			}
 		}
 		other_centroid /= ndim;
 	}
 
-	simplex.row( simplex_vertex_index_to_move ) = rescale_factor * ( simplex.row( simplex_vertex_index_to_move ) - other_centroid ) + other_centroid;
-	vertex_scores( simplex_vertex_index_to_move ) = objective_function( simplex.row( simplex_vertex_index_to_move ) );
+	simplex.row( simplex_vertex_index_to_move ) = rescale_factor * ( simplex.row( simplex_vertex_index_to_move ) - other_centroid.transpose() ) + other_centroid.transpose();
+	vertex_scores( simplex_vertex_index_to_move ) = objective_function( simplex.row( simplex_vertex_index_to_move ).transpose() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
