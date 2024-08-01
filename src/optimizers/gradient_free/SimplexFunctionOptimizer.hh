@@ -147,6 +147,13 @@ public:
 		masala::base::Size const setting
 	);
 
+	/// @brief Set the initial size of the simplex.  The initial simplex points will be the starting
+	/// point plus a small step in each of the cardinal directions.
+	void
+	set_initial_simplex_size(
+		masala::base::Real const size_in
+	);
+
 	/// @brief Set the tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
 	/// any sensible value of tolerance).
@@ -165,6 +172,11 @@ public:
 	/// @brief Get the maximum number of steps that we can take
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations() const;
+
+	/// @brief Get the initial size of the simplex.  The initial simplex points will be the starting
+	/// point plus a small step in each of the cardinal directions.
+	masala::base::Real
+	initial_simplex_size() const;
 
 	/// @brief Get the tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
@@ -252,6 +264,9 @@ private:
 	/// @brief The maximum number of steps that we're allowed to take.
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations_ = 2000;
+
+	/// @brief The initial size of the simplex:
+	masala::base::Real initial_simplex_size_ = 0.001;
 
 	/// @brief The tolerance for determining whether or not we've finished our search.
 	/// @details The default is the square root of machine precision (the theoretical lower limit for
