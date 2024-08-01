@@ -232,6 +232,17 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Function that executes in threads to carry out one simplex optimization.
+	/// @details Should be called from a mutex-locked context.
+	void
+	run_one_simplex_optimization_in_threads(
+		masala::base::Size const problem_index,
+		masala::base::Size const problem_starting_point_index,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & starting_point,
+		std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
+	) const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -354,18 +354,31 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 			"Problem " + std::to_string(i) + " is of type " + problems.problem(i)->inner_class_name() +
 			", which could not be interpreted as a RealValuedFunctionLocalOptimizationProblem."
 		);
-		workvec.add_job(
-			std::bind(
-				&SimplexFunctionOptimizer::run_one_simplex_optimization,
-				this,
-				i,
-				problem,
-				std::ref( solutions[i] )
-			)
+		CHECK_OR_THROW_FOR_CLASS( problem->has_objective_function(), "run_real_valued_local_optimizer",
+			"No objective function was defined for problem " + std::to_string( i ) + "."
 		);
+		CHECK_OR_THROW_FOR_CLASS( problem->has_at_least_one_starting_point(), "run_real_valued_local_optimizer",
+			"No starting point was defined for problem " + std::to_string( i ) + "."
+		);
+		for( Size j(0), jmax( problem->starting_points().size() ); j<=jmax; ++j ) {
+			workvec.add_job(
+				std::bind(
+					&SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads,
+					this,
+					i,
+					j,
+					std::cref( problem->starting_points()[j] ),
+					std::cref( problem->objective_function() ),
+					std::ref( solutions[i] )
+				)
+			);
+		}
 	}
 
-	MasalaThreadedWorkExecutionSummary const thread_summary( MasalaThreadManager::get_instance()->do_work_in_threads( workvec ) );
+	// Do the work, in threads:
+	MasalaThreadedWorkExecutionSummary const thread_summary(
+		MasalaThreadManager::get_instance()->do_work_in_threads( workvec )
+	);
 	thread_summary.write_summary_to_tracer();
 
 	return solutions;
@@ -375,6 +388,38 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Function that executes in threads to carry out one simplex optimization.
+/// @details Should be called from a mutex-locked context.
+void
+SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
+	masala::base::Size const problem_index,
+	masala::base::Size const problem_starting_point_index,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & starting_point,
+	std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
+) const {
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using masala::base::Size;
+	using masala::base::Real;
+
+	// Current simplex:
+	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > simplex;
+	Size const ndim( starting_point.size() );
+	simplex.resize( ndim + 1, ndim );
+
+	// Initialize the simplex:
+	TODO TODO TODO;
+	
+	// Loop over iterations:
+	bool converged( false );
+	TODO TODO TODO;
+
+	// Check for convergence:
+	TODO TODO TODO;
+
+	// Package solution:
+	TODO TODO TODO;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
