@@ -210,6 +210,31 @@ SimplexFunctionOptimizer::set_throw_if_iterations_exceeded(
 	throw_if_iterations_exceeded_ = setting;
 }
 
+/// @brief Set the amount by which to expand, when expanding the simplex.  Must be greater than 1.
+void
+SimplexFunctionOptimizer::set_expansion_factor(
+	masala::base::Real const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	CHECK_OR_THROW_FOR_CLASS( setting > 1.0, "set_expansion_factor", "The expansion "
+		"factor must be greater than 1.  Got " + std::to_string(setting) + "."
+	);
+	expansion_factor_ = setting;
+}
+
+/// @brief Set the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
+void
+SimplexFunctionOptimizer::set_contraction_factor(
+	masala::base::Real const setting
+) {
+	std::lock_guard< std::mutex > lock( mutex() );
+	CHECK_OR_THROW_FOR_CLASS( setting > 0.0 && setting < 1.0,
+		"set_expansion_factor", "The contraction factor must be greater than 0 and less than 1.  "
+		"Got " + std::to_string(setting) + "."
+	);
+	contraction_factor_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

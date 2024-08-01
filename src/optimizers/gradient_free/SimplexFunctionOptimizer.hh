@@ -163,6 +163,12 @@ public:
 	/// (false, the default).
 	void set_throw_if_iterations_exceeded( bool const setting );
 
+	/// @brief Set the amount by which to expand, when expanding the simplex.  Must be greater than 1.
+	void set_expansion_factor( masala::base::Real const setting );
+
+	/// @brief Set the amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
+	void set_contraction_factor( masala::base::Real const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,6 +282,12 @@ private:
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded_ = false;
+
+	/// @brief The amount by which to expand, when expanding the simplex.  Must be greater than 1.
+	masala::base::Real expansion_factor_ = 2.0;
+
+	/// @brief The amount by which to contract, when contracting the simplex.  Must be between 0 and 1.
+	masala::base::Real contraction_factor_ = 0.5;
 
 }; // class SimplexFunctionOptimizer
 
