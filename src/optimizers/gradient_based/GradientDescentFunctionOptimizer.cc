@@ -371,6 +371,16 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				std::bind( &GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"setting", "The number of threads to request.  Different starting points of the same problem or "
+				"different starting points of different problems can be carried out simultaneously in threads.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::set_threads_to_request, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -416,6 +426,15 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"exceeded, false otherwise.",
 				false, false,
 				std::bind( &GradientDescentFunctionOptimizer::throw_if_iterations_exceeded, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"threads_to_request", "Get the number of threads requested by this optimizer.",
+				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::threads_to_request, this )
 			)
 		);
 
