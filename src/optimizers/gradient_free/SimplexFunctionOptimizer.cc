@@ -648,8 +648,8 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 /// @details Should be called from a mutex-locked context.
 void
 SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
-	masala::base::Size const /*problem_index*/,
-	masala::base::Size const /*problem_starting_point_index*/,
+	masala::base::Size const problem_index,
+	masala::base::Size const problem_starting_point_index,
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & starting_point,
 	std::function< masala::base::Real( Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ) > const & objective_function,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
@@ -819,10 +819,13 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			MASALA_THROW(
 				class_namespace_static() + "::" + class_name_static(),
 				"run_one_simplex_optimization_in_threads",
-				"Optimization iterations for the " + class_name_static() + " exceeded!"
+				"Optimization inner iterations for the " + class_name_static() + " exceeded for problem " +
+				std::to_string( problem_index ) + ", starting point " + std::to_string( problem_starting_point_index ) + "!"
 			);
 		} else {
-			write_to_tracer( "Warning: outer iterations for the " + class_name_static() + " exceeded!" );
+			write_to_tracer( "Warning: optimization inner iterations for the " + class_name_static() + " exceeded for problem " +
+				std::to_string( problem_index ) + ", starting point " + std::to_string( problem_starting_point_index ) + "!"
+			);
 		}
 	}
 

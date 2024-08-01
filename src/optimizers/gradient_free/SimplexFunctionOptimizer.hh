@@ -329,7 +329,7 @@ private:
 	/// @brief The maximum number of steps that we're allowed to take.  The number of inner iterations is actually
 	/// the number of function evaluations.
 	/// @details A setting of 0 means loop until convergence.
-	masala::base::Size max_iterations_ = 2000;
+	masala::base::Size max_iterations_ = 10000;
 
 	/// @brief The initial size of the simplex:
 	masala::base::Real initial_simplex_size_ = 0.001;
