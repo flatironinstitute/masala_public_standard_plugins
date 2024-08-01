@@ -271,6 +271,15 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
 	) const;
 
+	/// @brief Find the second-worst entry in a vector, given the positions of the best and worst.
+	static
+	masala::base::Real
+	find_second_worst_index(
+		masala::base::Size const best_index,
+		masala::base::Size const worst_index,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & simplex_scores
+	);
+
 	/// @brief Reflect one vertex across the centroid of the other vertices, scaling by a given factor.
 	/// Re-evaluate the scoring function at the new position.
 	/// @details Assumes that vertex scores is the same size as the number of rows in the simplex.  Updates

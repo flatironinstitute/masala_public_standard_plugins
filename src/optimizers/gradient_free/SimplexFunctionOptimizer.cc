@@ -591,7 +591,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 		reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
 		if( simplex_scores[old_worst_index] < simplex_scores[second_worst_index] && simplex_scores[best_index] < simplex_scores[old_worst_index] ) {
 			worst_index = second_worst_index;
-			second_worst_index = find_second_worst_index( simplex_scores );
+			second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
 			continue;
 		}
 
@@ -611,7 +611,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			}
 			best_index = old_worst_index;
 			worst_index = second_worst_index;
-			second_worst_index = find_second_worst_index( simplex_scores );
+			second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
 			continue;
 		}
 
@@ -637,6 +637,31 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 	// Package solution:
 	TODO TODO TODO;
+}
+
+/// @brief Find the second-worst entry in a vector, given the positions of the best and worst.
+/*static*/
+masala::base::Real
+SimplexFunctionOptimizer::find_second_worst_index(
+	masala::base::Size const best_index,
+	masala::base::Size const worst_index,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & simplex_scores
+) {
+	using masala::base::Real;
+	using masala::base::Size;
+
+	Real worst_val_seen( simplex_scores[best_index] );
+	Size worst_position_seen( best_index );
+
+	for( Size i(0), ndim(simplex_scores.size()); i<ndim; ++i ) {
+		if( i == best_index || i == worst_index ) continue;
+		if( simplex_scores[i] > worst_val_seen ) {
+			worst_val_seen = simplex_scores[i];
+			worst_position_seen = i;
+		}
+	}
+
+	return worst_position_seen; // Since we're skipping the worst, this will be second-worst.
 }
 
 /// @brief Reflect one vertex across the centroid of the other vertices, scaling by a given factor.
