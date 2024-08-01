@@ -617,7 +617,8 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	trial_point.resize( ndim );
 	old_worst_point.resize( ndim );
 	other_centroid.resize( ndim );
-	Real old_worst_score, trial_score;
+	Real old_worst_score, trial_score, maxscore, minscore;
+	Real const tinyval( std::numeric_limits< masala::base::Real >::epsilon() );
 
 	// Initialize the simplex:
 	for( Size i(0); i<=ndim; ++i ) {
@@ -666,7 +667,12 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 		while( true ) {
 
 			// Compute relative tolerance and decide whether to exit:
-			TODO TODO TODO;
+			maxscore = simplex_scores.maxCoeff();
+			minscore = simplex_scores.minCoeff();
+			if( 2.0*std::abs( maxscore - minscore ) / (std::abs( maxscore ) + std::abs( minscore ) + tinyval ) < tolerance_ ) {
+				converged = true;
+				break;
+			}
 
 			// Decide whether to exit due to max iterations:
 			if( iter_count > max_iterations_ ) {
