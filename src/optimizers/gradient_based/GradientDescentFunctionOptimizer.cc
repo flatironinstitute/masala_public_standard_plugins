@@ -291,7 +291,10 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
+	using namespace masala::base::api::work_function;
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace masala::numeric_api::auto_generated_api::optimization;
 	using masala::base::Size;
 	using masala::base::Real;
 
@@ -435,6 +438,34 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"may be smaller if there is less work to do, or if there are fewer threads available.",
 				false, false,
 				std::bind( &GradientDescentFunctionOptimizer::threads_to_request, this )
+			)
+		);
+
+		// Work functions
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP >, RealValuedFunctionLocalOptimizationProblems_API const & > >(
+				"run_real_valued_local_optimizer", "Run the optimizer on a set of loss function "
+				"local minimization problems, and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &GradientDescentFunctionOptimizer::run_real_valued_local_optimizer, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< OptimizationSolutions_APICSP >, OptimizationProblems_API const & > >(
+				"run_optimizer", "Run the optimizer on a set of loss function local minimization problems, "
+				"and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &GradientDescentFunctionOptimizer::run_optimizer, this, std::placeholders::_1 )
 			)
 		);
 
