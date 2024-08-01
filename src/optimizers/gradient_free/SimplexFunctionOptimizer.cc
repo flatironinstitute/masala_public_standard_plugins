@@ -586,7 +586,7 @@ SimplexFunctionOptimizer::run_real_valued_local_optimizer(
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
-	MasalaThreadedWorkRequest workvec( threads_to_request() );
+	MasalaThreadedWorkRequest workvec( protected_threads_to_request() );
 	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > solutions( problems.n_problems() );
 
 	for( Size i(0), imax(problems.n_problems()); i<imax; ++i ) {
