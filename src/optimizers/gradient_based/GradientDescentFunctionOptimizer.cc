@@ -109,9 +109,7 @@ GradientDescentFunctionOptimizer::get_keywords() const {
 		"real_valued",
 		"local_optimizer",
         "gradient_based",
-		"numeric",
-		"quasi-newtonian",
-		"l-bfgs"
+		"numeric"
 	};
 }
 
