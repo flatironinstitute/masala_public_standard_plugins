@@ -446,7 +446,11 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	simplex.resize( ndim + 1, ndim );
 
 	// Initialize the simplex:
-	TODO TODO TODO;
+	for( Size i(0); i<=ndim; ++i ) {
+		for( Size j(0); j<ndim; ++j ) {
+			simplex[i,j] = starting_point[j] + ( i == j ? initial_simplex_size_ : 0.0 );
+		}
+	}
 	
 	// Loop over iterations:
 	bool converged( false );
