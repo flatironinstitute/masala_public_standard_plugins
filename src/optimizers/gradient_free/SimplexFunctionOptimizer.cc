@@ -351,7 +351,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 		);
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
-				"set_max_iterations", "Set the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
+				"set_max_iterations", "Set the maximum number of inner steps that we can take (i.e. the maximum number of objective function evaluations).  A setting of 0 means loop until convergence.",
 				"max_iterations_in", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &SimplexFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
 			)
@@ -414,7 +414,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 		);
 		api_def->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
-				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
+				"max_iterations", "Get the maximum number of inner steps that we can take (i.e. the maximum number of objective function evaluations).  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &SimplexFunctionOptimizer::max_iterations, this )
 			)
@@ -602,6 +602,11 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 		// Find best, worst, and second-worst indices:
 		for( masala::base::Size i(0); i<=ndim; ++i ) {
 			if( outer_iter > 0 && i == best_index ) { continue; }
+			++iter_count;
+			if( iter_count > max_iterations_ ) {
+				// Leave converged at last setting.
+				break;
+			}
 			simplex_scores[i] = objective_function( simplex.row(i) );
 		}
 		for( Size j(1); j<=ndim; ++j ) {
@@ -620,8 +625,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// Compute relative tolerance and decide whether to exit:
 			TODO TODO TODO;
 
-			// Increment iteration count and decide whether to exit:
-			++iter_count;
+			// Decide whether to exit due to max iterations:
 			if( iter_count > max_iterations_ ) {
 				converged = false;
 				break;
@@ -634,10 +638,15 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 			// Reflect worst across other points:
 			reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
+			++iter_count;
 			if( simplex_scores[old_worst_index] < simplex_scores[second_worst_index] && simplex_scores[best_index] < simplex_scores[old_worst_index] ) {
 				worst_index = second_worst_index;
 				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
 				continue;
+			}
+			if( iter_count > max_iterations_ ) {
+				converged = false;
+				break;
 			}
 
 			// If now best, expand:
@@ -645,6 +654,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				trial_score = simplex_scores[old_worst_index];
 				old_worst_point = simplex.row( old_worst_index );
 				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, 2.0 );
+				++iter_count;
 				if( simplex_scores[old_worst_index] >= trial_score ) {
 					simplex.row( old_worst_index ) = old_worst_point;
 					simplex_scores[ old_worst_index ] = trial_score;
@@ -652,6 +662,10 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				best_index = old_worst_index;
 				worst_index = second_worst_index;
 				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
+				if( iter_count > max_iterations_ ) {
+					converged = false;
+					break;
+				}
 				continue;
 			}
 

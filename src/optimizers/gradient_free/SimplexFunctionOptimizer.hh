@@ -151,7 +151,8 @@ public:
 		masala::base::Size const n_outer_iterations_in
 	);
 
-	/// @brief Set the maximum number of steps that we can take.
+	/// @brief Set the maximum number of steps that we can take.  The number of inner iterations is actually
+	/// the number of function evaluations.
 	/// @details A setting of 0 means loop until convergence.
 	void
 	set_max_iterations(
@@ -190,7 +191,8 @@ public:
 	/// false convergence.  Defaults to 3.
 	masala::base::Size outer_iterations() const;
 
-	/// @brief Get the maximum number of steps that we can take
+	/// @brief Get the maximum number of steps that we can take.  The number of inner iterations is actually
+	/// the number of function evaluations.
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations() const;
 
@@ -317,7 +319,8 @@ private:
 	/// @brief How many times should we restart the simplex search to avoid false convergence?
 	masala::base::Size outer_iterations_ = 3;
 
-	/// @brief The maximum number of steps that we're allowed to take.
+	/// @brief The maximum number of steps that we're allowed to take.  The number of inner iterations is actually
+	/// the number of function evaluations.
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations_ = 2000;
 
