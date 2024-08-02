@@ -797,7 +797,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			for( Size i(0); i<=ndim; ++i ) {
 				if( i == best_index ) { continue; }
 				simplex.row(i) = shrink_factor_ * (simplex.row(i) - simplex.row(best_index)) + simplex.row(best_index);
-				simplex_scores(i) = objective_function( simplex.row(i) );
+				simplex_scores(i) = objective_function( simplex.row(i).transpose() );
 				++iter_count;
 				if( iter_count > max_iterations_ ) {
 					converged = false;
