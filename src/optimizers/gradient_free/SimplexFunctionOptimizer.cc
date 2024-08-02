@@ -688,7 +688,10 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	// Loop over iterations:
 	bool converged( false );
 	Size iter_count(0);
+	std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} ******** BEGIN ******** " << std::endl;
 	for( Size outer_iter( 0 ); outer_iter < outer_iterations_; ++outer_iter ) {
+		std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} START OUTER ITER " << outer_iter << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+
 		if( outer_iter > 0 ) {
 			for( Size i(0); i<=ndim; ++i ) {
 				if( i == best_index ) { continue; }
@@ -721,7 +724,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 		while( true ) {
 
-			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} START LOOP" << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} START LOOP AT INNER ITER " << iter_count << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 
