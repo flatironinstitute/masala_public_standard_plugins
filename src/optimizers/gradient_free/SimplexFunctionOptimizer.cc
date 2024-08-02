@@ -721,6 +721,10 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 		while( true ) {
 
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} START LOOP" << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
+
+
 			// Compute relative tolerance and decide whether to exit:
 			maxscore = simplex_scores.maxCoeff();
 			minscore = simplex_scores.minCoeff();
@@ -742,6 +746,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 			// Reflect worst across other points:
 			reflect_vertex( other_centroid, true, simplex, old_worst_index, simplex_scores, objective_function, -1.0 );
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} REFLECT " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 			++iter_count;
 			if( simplex_scores(old_worst_index) < simplex_scores(second_worst_index) && simplex_scores(best_index) < simplex_scores(old_worst_index) ) {
 				worst_index = second_worst_index;
@@ -758,6 +763,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				trial_score = simplex_scores(old_worst_index);
 				trial_point = simplex.row( old_worst_index );
 				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, expansion_factor_ );
+				std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} EXPAND " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 				++iter_count;
 				if( simplex_scores(old_worst_index) >= trial_score ) {
 					simplex.row( old_worst_index ) = trial_point;
@@ -781,6 +787,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
 				( simplex_scores(old_worst_index) > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
 			);
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} CONTRACT " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 			++iter_count;
 			if( simplex_scores(old_worst_index) < trial_score ) {
 				continue;
@@ -810,6 +817,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				}
 			}
 			best_index = new_best_index;
+			std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} SHRINK " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 		}
 	}
 
