@@ -46,7 +46,7 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
-#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
+#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 // Optimizers headers:
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
@@ -54,7 +54,7 @@
 // STL headers:
 #include <vector>
 #include <string>
-// #include <iostream> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
+// #include <iostream> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
