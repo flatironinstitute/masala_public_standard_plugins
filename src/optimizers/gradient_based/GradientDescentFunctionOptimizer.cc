@@ -46,7 +46,7 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
-#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
+#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 // Optimizers headers:
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
@@ -54,7 +54,7 @@
 // STL headers:
 #include <vector>
 #include <string>
-// #include <iostream> // COMMENT ME OUT.  FOR DEGBUGGING ONLY.
+// #include <iostream> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -101,7 +101,7 @@ GradientDescentFunctionOptimizer::get_categories() const {
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
 std::vector< std::string >
 GradientDescentFunctionOptimizer::get_keywords() const {
 	return std::vector< std::string > {
@@ -109,9 +109,7 @@ GradientDescentFunctionOptimizer::get_keywords() const {
 		"real_valued",
 		"local_optimizer",
         "gradient_based",
-		"numeric",
-		"quasi-newtonian",
-		"l-bfgs"
+		"numeric"
 	};
 }
 
@@ -291,7 +289,10 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
+	using namespace masala::base::api::work_function;
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace masala::numeric_api::auto_generated_api::optimization;
 	using masala::base::Size;
 	using masala::base::Real;
 
@@ -371,6 +372,16 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				std::bind( &GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"setting", "The number of threads to request.  Different starting points of the same problem or "
+				"different starting points of different problems can be carried out simultaneously in threads.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::set_threads_to_request, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -416,6 +427,43 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"exceeded, false otherwise.",
 				false, false,
 				std::bind( &GradientDescentFunctionOptimizer::throw_if_iterations_exceeded, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"threads_to_request", "Get the number of threads requested by this optimizer.",
+				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				false, false,
+				std::bind( &GradientDescentFunctionOptimizer::threads_to_request, this )
+			)
+		);
+
+		// Work functions
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP >, RealValuedFunctionLocalOptimizationProblems_API const & > >(
+				"run_real_valued_local_optimizer", "Run the optimizer on a set of loss function "
+				"local minimization problems, and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &GradientDescentFunctionOptimizer::run_real_valued_local_optimizer, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< OptimizationSolutions_APICSP >, OptimizationProblems_API const & > >(
+				"run_optimizer", "Run the optimizer on a set of loss function local minimization problems, "
+				"and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &GradientDescentFunctionOptimizer::run_optimizer, this, std::placeholders::_1 )
 			)
 		);
 
