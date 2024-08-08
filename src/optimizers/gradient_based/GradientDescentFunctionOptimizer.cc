@@ -181,6 +181,7 @@ GradientDescentFunctionOptimizer::set_line_optimizer(
 ) {
 	std::lock_guard< std::mutex > lock( mutex() );
 	line_optimizer_ = line_optimizer_in;
+	write_to_tracer( "Set line optimizer to " + line_optimizer_->class_name() + "." );
 }
 
 /// @brief Set the tolerance for determining whether or not we've finished our search.
