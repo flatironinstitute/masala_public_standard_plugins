@@ -516,12 +516,36 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
         );
         solutions_containers_by_problem.push_back( new_solutions_container );
 
-		// If this problem has starting states, use those:
 		Size n_replicates;
-		if( problem->has_candidate_starting_solutions() ) {
-			starting_states_by_problem.push_back( problem->candidate_starting_solutions() );
-			n_replicates = problem->candidate_starting_solutions().size();
-		} else {
+		bool has_starting_points( false );
+		
+		{
+			// Using predefined starting states:
+
+			// If this problem has starting states, use those:
+			std::vector< std::vector< Size > > starting_states_to_use;
+			if( problem->has_candidate_starting_solutions() ) {
+				// From problem.
+				starting_states_to_use = problem->candidate_starting_solutions();
+				n_replicates = problem->candidate_starting_solutions().size();
+				has_starting_points = true;
+			}
+
+			// If this optimizer has staring states, also use those:
+			if( !optimizer_starting_states_.empty() ) {
+				check_starting_states_against_problem( optimizer_starting_states_, *problem );
+				if( starting_states_to_use.empty() ) {
+					starting_states_to_use = optimizer_starting_states_;
+				} else {
+					starting_states_to_use.reserve( starting_states_to_use.size() + optimizer_starting_states_.size() );
+					for( auto const & state : optimizer_starting_states_ ) {
+						starting_states_to_use.push_back( state );
+					}
+				}
+			}
+		}
+		
+		if( !has_starting_points ) {
 			// Otherwise, use random starting states:
 			starting_states_by_problem.push_back(
 				generate_random_starting_states( *problem, rg, n_random_starting_states_ )
