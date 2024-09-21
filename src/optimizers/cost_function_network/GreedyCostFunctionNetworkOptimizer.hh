@@ -250,6 +250,14 @@ private:
 		masala::base::Size const n_times_seen_multiplier
 	) const;
 
+	/// @brief Check a candiate solution against a problemd definition, and throw if there's a mismatch in node count, or if the choice indices
+	/// are out of range of the problem.
+	void
+	check_starting_state_against_problem(
+		std::vector< masala::base::Size > const & starting_state,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+	) const;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

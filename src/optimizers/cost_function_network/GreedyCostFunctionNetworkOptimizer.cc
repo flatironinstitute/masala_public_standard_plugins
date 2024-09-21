@@ -533,7 +533,9 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 
 			// If this optimizer has staring states, also use those:
 			if( !optimizer_starting_states_.empty() ) {
-				check_starting_states_against_problem( optimizer_starting_states_, *problem );
+				for( auto const & state : optimizer_starting_states_ ) {
+					check_starting_state_against_problem( state, *problem );
+				}
 				if( starting_states_to_use.empty() ) {
 					starting_states_to_use = optimizer_starting_states_;
 				} else {
@@ -679,6 +681,29 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 		n_replicates,
 		problem_ptr
 	);
+}
+
+/// @brief Check a candiate solution against a problemd definition, and throw if there's a mismatch in node count, or if the choice indices
+/// are out of range of the problem.
+void
+GreedyCostFunctionNetworkOptimizer::check_starting_state_against_problem(
+	std::vector< masala::base::Size > const & starting_state,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+) const {
+	using masala::base::Size;
+
+	auto const choices_by_varnode( problem.n_choices_at_variable_nodes() );
+	CHECK_OR_THROW_FOR_CLASS( starting_state.size() == choices_by_varnode.size(), "check_starting_states_against_problem",
+		"The number of variable nodes in the problem is " + std::to_string( choices_by_varnode.size() ) + ", but the candidate "
+		"solution has " + std::to_string( starting_state.size() ) + " entries."
+	);
+
+	for( Size i(0), imax(choices_by_varnode.size()); i<imax; ++i ) {
+		CHECK_OR_THROW_FOR_CLASS( choices_by_varnode[i].second > starting_state[i], "check_starting_states_against_problem",
+			"Candidate solution proposes choice index " + std::to_string( starting_state[i] ) + " at variable node " +
+			std::to_string( i ) + ", but this node has only " + std::to_string( choices_by_varnode[i].second ) + " choices."
+		);
+	}
 }
 
 
