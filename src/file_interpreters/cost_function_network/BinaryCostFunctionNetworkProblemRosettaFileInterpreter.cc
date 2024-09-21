@@ -328,7 +328,20 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::get_api_definition() {
 				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from_object, this, std::placeholders::_1 )
 			)
 		);
-
+		api_description->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput<
+				void,
+				masala::base::MasalaObjectAPICSP const &,
+				std::string const &
+			> >(
+				"object_to_file", "Call ascii_file_contents_from_object() in order to write CFN solution string to file. Uses MasalaDiskManager.",
+				true, false, false, false,
+				"object", "The CFN solution to be written to a file.",
+				"filename", "The file that the CFN solution is to be written to.",
+				"void", "The output is written to a file.",
+				std::bind( &BinaryCostFunctionNetworkProblemRosettaFileInterpreter::object_to_file, this, std::placeholders::_1, std::placeholders::_2 )
+			)
+		);
 
 		// Convert nonconst to const:
 		api_description_ = api_description;
@@ -487,9 +500,18 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::ascii_file_contents_from
 	CHECK_OR_THROW_FOR_CLASS( object != nullptr, "ascii_file_contents_from_object", 
 		"The returned object could not be interpreted as a CostFunctionNetworkOptimizationSolution_API!"
 	);
+	// Retrieve problem corresponding to solution:
+	CostFunctionNetworkOptimizationProblem_APICSP solution_problem = 
+		std::dynamic_pointer_cast< const CostFunctionNetworkOptimizationProblem_API >( object->problem() );
+	// Retrieve node-number of choices map:
+	std::map< Size, Size > node_map = solution_problem->n_choices_at_all_nodes();
+	// Retrieve solution vector from solution object:
 	std::vector< Size > vector = object->solution_at_all_positions();
-	for( Size i( 0 ); i < vector.size(); ++i ) {
-		solution_as_ascii_string += std::to_string( i ) + "\t" + std::to_string( vector[i] ) + "\n";
+	// Append variable node, choice to string:
+	for ( auto it = node_map.begin(); it != node_map.end(); ++it ) {
+		if ( it->second != 0 ) {
+            solution_as_ascii_string += std::to_string( it->first ) + "\t" + std::to_string( vector[ it->first ] ) + "\n";
+        }
 	}
 	return solution_as_ascii_string;
 }
