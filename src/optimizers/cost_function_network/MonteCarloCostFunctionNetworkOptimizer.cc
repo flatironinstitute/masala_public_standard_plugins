@@ -1013,7 +1013,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
 				+ " was not a cost function network optimization solution."
 			);
-			problems_copies_inner[jsol]->add_const_optimization_problem( problem_cast );
+			problems_copies_inner[jsol]->add_optimization_problem( problem_cast );
 
 			// Prepare the vector of work to do in threads:
 			work_vector.add_job(
@@ -1250,7 +1250,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 		for( Size isol(0); isol<nsol; ++isol ) {
 			// Set up a problems container with one greedy refinement problem.
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
-			greedy_problems.add_const_optimization_problem( problem );
+			greedy_problems.add_optimization_problem( problem );
 			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol],  std::get<0>( local_solutions[isol] ), std::get<2>( local_solutions[isol] ) );
 		}
 
