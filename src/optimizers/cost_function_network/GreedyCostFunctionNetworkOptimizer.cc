@@ -225,6 +225,52 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 			)
 		);
 
+
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"set_optimizer_starting_states", "Set the starting points to use, as a vector of vectors of choice-by-node.  "
+				"These replace any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the optimizer "
+				"is applied.",
+				"starting_states_in", "The starting points to use, as a vector of vectors of choice-by-node.  These replace any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::set_optimizer_starting_states, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"add_optimizer_starting_states", "Add starting points to use, as a vector of vectors of choice-by-node.  These are "
+				"appended to any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the optimizer "
+				"is applied.",
+				"additional_starting_states", "The additional starting points to use, as a vector of vectors of choice-by-node.  These will "
+				"be appended to any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_states, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+				"add_optimizer_starting_state", "Add a starting point to use, as a vector of choice-by-node.  This is appended "
+				"to any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the "
+				"optimizer is applied.",
+				"additional_starting_state", "The additional starting point to use, as a vector of choice-by-node.  This will "
+				"be appended to any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_state, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput > (
+				"clear_optimizer_starting_states", "Clear the starting points to use.  By setting the starting points in the "
+				"optimizer rather than in the problem, an error will be thrown at apply time if the number of nodes or choices "
+				"doesn't match the problem to which the optimizer is applied.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::clear_optimizer_starting_states, this )
+			)
+		);
+
 		// Getters:
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
