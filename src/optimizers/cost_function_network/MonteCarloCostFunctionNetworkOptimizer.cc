@@ -1003,14 +1003,8 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 		problems_copies.emplace_back( nsols, nullptr );
 		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
-			// Make copies of the problems objects, and ensure that the MC solutions are the unique starting points
-			// for each new problem:
+			// Repackage the problems objects.  Note that we're not copying them; only their shared pointers.
 			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
-			);
-			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
-			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "carry_out_greedy_refinement", "Program error.  Could not get non-finalized problem description for problem " + std::to_string( iprob ) + "." );
 
 			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions_by_problem[iprob]->solution( jsol ) )
@@ -1019,10 +1013,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
 				+ " was not a cost function network optimization solution."
 			);
-			problem_copy->clear_candidate_solutions();
-			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
-			problem_copy->finalize();
-			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
+			problems_copies_inner[jsol]->add_const_optimization_problem( problem_cast );
 
 			// Prepare the vector of work to do in threads:
 			work_vector.add_job(
@@ -1031,6 +1022,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 					this,
 					std::cref(*problems_copies[iprob][jsol]),
 					std::ref(greedy_solutions[iprob][jsol]),
+                    mc_solution_cast->solution_at_variable_positions(),
 					mc_solution_cast->n_times_solution_was_produced()
 				)
 			);
@@ -1093,6 +1085,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+    std::vector< masala::base::Size > const & starting_point,
 	masala::base::Size const n_times_seen
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
@@ -1107,6 +1100,7 @@ MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
 	GreedyCostFunctionNetworkOptimizer greedyopt;
 	greedyopt.set_cpu_threads_to_request( 1 );
 	greedyopt.set_n_times_seen_multiplier( n_times_seen );
+    greedyopt.add_optimizer_starting_state( starting_point );
 	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > sols( greedyopt.run_cost_function_network_optimizer( greedy_problems ) );
 	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
 		"Expected exactly one solution."
@@ -1255,25 +1249,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
 		for( Size isol(0); isol<nsol; ++isol ) {
 			// Set up a problems container with one greedy refinement problem.
-#ifndef NDEBUG
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
-			);
-			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "run_mc_trajectory", "Program error.  Could not deep clone problem." );
-			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "run_mc_trajectory", "Program error.  Could not get non-finalized problem description for problem." );
-#else
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
-			);
-#endif
-
-			problem_copy->clear_candidate_solutions();
-			//write_to_tracer( "Adding candidate solution [" + masala::base::utility::container::container_to_string( std::get<0>( local_solutions[isol] ), "," ) + "]." );
-			problem_copy->add_candidate_solution( std::get<0>( local_solutions[isol] ) );
-			problem_copy->finalize();
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
-			greedy_problems.add_optimization_problem( problem_copy );
-			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol], std::get<2>( local_solutions[isol] ) );
+			greedy_problems.add_const_optimization_problem( problem );
+			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol],  std::get<0>( local_solutions[isol] ), std::get<2>( local_solutions[isol] ) );
 		}
 
 		{ // Mutex lock scope
