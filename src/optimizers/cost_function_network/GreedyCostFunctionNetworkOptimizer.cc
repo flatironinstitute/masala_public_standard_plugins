@@ -324,6 +324,51 @@ GreedyCostFunctionNetworkOptimizer::set_n_times_seen_multiplier(
 	n_times_seen_multiplier_ = setting;
 }
 
+/// @brief Set the starting points to use, as a vector of vectors of choice-by-node.  These replace any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::set_optimizer_starting_states(
+	std::vector< std::vector< masala::base::Size > > const & starting_states_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_ = starting_states_in;
+}
+
+/// @brief Add starting points to use, as a vector of vectors of choice-by-node.  These are appended to any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_states(
+	std::vector< std::vector< masala::base::Size > > const & starting_states_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.reserve( optimizer_starting_states_.size() + starting_states_in.size() );
+	for( auto const & state : starting_states_in ) {
+		optimizer_starting_states_.push_back( state );
+	}
+}
+
+/// @brief Add a starting point to use, as a vector of choice-by-node.  This is appended to any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_state(
+	std::vector< masala::base::Size > const & starting_state_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.push_back( starting_state_in );
+}
+
+/// @brief Clear the starting points to use.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::clear_optimizer_starting_states() {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.clear();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
