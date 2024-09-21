@@ -71,6 +71,7 @@ GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
 	n_random_starting_states_ = src.n_random_starting_states_;
 	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
+	optimizer_starting_states_ = src.optimizer_starting_states_;
 }
 
 /// @brief Assignment operator.
@@ -84,6 +85,7 @@ GreedyCostFunctionNetworkOptimizer::operator=( GreedyCostFunctionNetworkOptimize
     cpu_threads_to_request_ = src.cpu_threads_to_request_;
 	n_random_starting_states_ = src.n_random_starting_states_;
 	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
+	optimizer_starting_states_ = src.optimizer_starting_states_;
     return *this;
 }
 
@@ -214,8 +216,8 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
-				"set_n_random_starting_states", "If starting states are not provided in the problem definition, indicate "
-				"the number of random starting states to use.  Defaults to 1.",
+				"set_n_random_starting_states", "If starting states are not provided in the problem definition or in the "
+				"optimizer configuration, indicate the number of random starting states to use.  Defaults to 1.",
 				"n_random_starting_states_in", "The number of random starting states to use.  This number of greedy "
 				"descent trajectories will be carried out for all problems that do not provide starting states.",
 				false, false,
@@ -234,12 +236,24 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
-				"n_random_starting_states", "If starting states are not provided in the problem definition, get "
-				"the number of random starting states to use.  Defaults to 1.",
+				"n_random_starting_states", "If starting states are not provided in the problem definition or in the optimizer "
+				"configuration, get the number of random starting states to use.  Defaults to 1.",
 				"n_random_starting_states", "The number of random starting states to use.  This number of greedy "
 				"descent trajectories will be carried out for all problems that do not provide starting states.",
 				false, false,
 				std::bind( &GreedyCostFunctionNetworkOptimizer::n_random_starting_states, this )
+			)
+		);
+		// n_times_seen_multiplier() deliberately omitted from public interface.
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"optimizer_starting_states", "Access the list of starting states that the optimizer has been configured to try.  These "
+				"are provided by the user during optimizer configuration rather than by the problem.  At optimization time, these will "
+				"result in a throw if the size of the state vector doesn't match the number of nodes or choices in the problem.",
+				"optimizer_starting_states", "Starting points to use, provided by the user during optimizer configuration rather than "
+				"by the problem.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::optimizer_starting_states, this )
 			)
 		);
 
@@ -340,6 +354,13 @@ masala::base::Size
 GreedyCostFunctionNetworkOptimizer::n_times_seen_multiplier() const {
     std::lock_guard< std::mutex > lock( optimizer_mutex_ );
 	return n_times_seen_multiplier_;
+}
+
+/// @brief Access the list of starting states that the optimizer has been configured to try.
+std::vector< std::vector< masala::base::Size > > const &
+GreedyCostFunctionNetworkOptimizer::optimizer_starting_states() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return optimizer_starting_states_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

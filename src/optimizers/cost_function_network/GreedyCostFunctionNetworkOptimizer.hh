@@ -143,7 +143,7 @@ public:
 	/// @details The default setting of 0 means "request all available".
 	void set_cpu_threads_to_request( masala::base::Size const threads_in );
 
-	/// @brief If starting states are not provided in the problem definition, indicate
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, indicate
 	/// the number of random starting states to use.  Defaults to 1.
 	void set_n_random_starting_states( masala::base::Size const setting );
 
@@ -165,7 +165,7 @@ public:
 	/// @details The default setting of 0 means "request all available".
 	masala::base::Size cpu_threads_to_request() const;
 
-	/// @brief If starting states are not provided in the problem definition, get
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, get
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states() const;
 
@@ -176,6 +176,9 @@ public:
 	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
 	/// plugin sub-library.
 	masala::base::Size n_times_seen_multiplier() const;
+
+	/// @brief Access the list of starting states that the optimizer has been configured to try.
+	std::vector< std::vector< masala::base::Size > > const & optimizer_starting_states() const;
 
 public:
 
@@ -233,7 +236,7 @@ private:
 	/// @details The default of 0 means "all available".
 	masala::base::Size cpu_threads_to_request_ = 0;
 
-	/// @brief If starting states are not provided in the problem definition, indicate
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, indicate
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states_ = 1;
 
@@ -244,6 +247,11 @@ private:
 	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
 	/// plugin sub-library.
 	masala::base::Size n_times_seen_multiplier_ = 1;
+
+	/// @brief Starting points to use, provided by the user during optimizer configuration rather than by the problem.
+	/// @details At optimization time, these will result in a throw if the size of the state vector doesn't match the number of
+	/// nodes or choices in the problem.
+	std::vector< std::vector< masala::base::Size > > optimizer_starting_states_;
 
 }; // class GreedyCostFunctionNetworkOptimizer
 
