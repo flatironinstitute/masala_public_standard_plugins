@@ -544,15 +544,18 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 						starting_states_to_use.push_back( state );
 					}
 				}
+				has_starting_points = true;
 			}
-		}
-		
-		if( !has_starting_points ) {
-			// Otherwise, use random starting states:
-			starting_states_by_problem.push_back(
-				generate_random_starting_states( *problem, rg, n_random_starting_states_ )
-			);
-			n_replicates = n_random_starting_states_;
+
+			if( has_starting_points ) {
+				starting_states_by_problem.push_back( starting_states_to_use );
+			} else {
+				// Otherwise, use random starting states:
+				starting_states_by_problem.push_back(
+					generate_random_starting_states( *problem, rg, n_random_starting_states_ )
+				);
+				n_replicates = n_random_starting_states_;
+			}
 		}
 
 		// Make a vector of work to do:
