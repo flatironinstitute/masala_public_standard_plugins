@@ -250,7 +250,7 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 			)
 		);
 		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< masala::base::Size > const & > > (
 				"add_optimizer_starting_state", "Add a starting point to use, as a vector of choice-by-node.  This is appended "
 				"to any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
 				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the "
