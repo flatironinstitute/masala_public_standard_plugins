@@ -992,15 +992,9 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
 	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > > greedy_solutions; // Will ultimately have one solution per solutions object.
 
-    // Cast away constness.  NOTE: THIS IS NOTE NORMALLY SOMETHING TO DO.  IN THIS CASE, IT IS SAFE, SINCE WE ARE ONLY USING THIS TO
-    // ACCESS THE PROBLEM TO CONST-PASS IT TO THE GREEDY OPTIMIZER.
-    masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API & problems_cast(
-        const_cast< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API & >( problems )
-    );
-
 	for( Size iprob(0); iprob<nprob; ++iprob ) {
-		CostFunctionNetworkOptimizationProblem_APISP problem_cast(
-			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_cast.problem_nonconst(iprob) )
+		CostFunctionNetworkOptimizationProblem_APICSP problem_cast(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem( iprob ) )
 		);
 		CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "carry_out_greedy_refinement", "Optimization problem " + std::to_string(iprob) + " is not a cost function network optimization problem." );
 
@@ -1256,10 +1250,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 		for( Size isol(0); isol<nsol; ++isol ) {
 			// Set up a problems container with one greedy refinement problem.
 			CostFunctionNetworkOptimizationProblems_API greedy_problems;
-            // THE FOLLOWING IS ONLY SAFE BECAUSE WE'RE PACKAGING THE PROBLEM IN A NEW CONTAINER AND ONLY USING IT
-            // IN THE GREEDY OPTMIZER, WHICH ACCEPTS THE PROBLEM AS CONST.  THIS IS NOT A USUAL PATTERN TO EMULATE!
-            CostFunctionNetworkOptimizationProblem_APISP problem_cast( std::const_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem ) );
-			greedy_problems.add_optimization_problem( problem_cast );
+			greedy_problems.add_optimization_problem( problem );
 			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol],  std::get<0>( local_solutions[isol] ), std::get<2>( local_solutions[isol] ) );
 		}
 
