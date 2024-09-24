@@ -337,7 +337,7 @@ private:
 	/// @details This function runs in threads.
 	void
 	do_one_greedy_refinement_in_threads(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
     	std::vector< masala::base::Size > const & starting_point,
 		masala::base::Size const n_times_seen
