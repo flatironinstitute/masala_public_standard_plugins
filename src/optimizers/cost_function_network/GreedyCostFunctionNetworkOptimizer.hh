@@ -216,13 +216,19 @@ public:
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
+	/// @brief Run the optimizer on a vector of cost function network optimization problems, and produce a vector of solutions.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 	/// the problem with the same index.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
 	run_cost_function_network_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 	) const override;
+
+	/// @brief Run the optimizer on a cost function network optimization problem, and produce one or more solutions.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
+	run_cost_function_network_optimizer_on_one_problem(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
+	) const;
 
 private:
 
