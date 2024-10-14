@@ -140,7 +140,7 @@ LinearAnnealingSchedule::get_api_definition() {
     if( api_definition() == nullptr ) {
         MasalaObjectAPIDefinitionSP api_def(
             masala::make_shared< MasalaObjectAPIDefinition >(
-                *this, "An annealing schedule that does not vary with time.", false, false
+                *this, "An annealing schedule that ramps linearly with time.", false, false
             )
         );
 
@@ -263,10 +263,7 @@ LinearAnnealingSchedule::temperature(
 void
 LinearAnnealingSchedule::reset() {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_initial_ = 3.0;
-    temperature_final_ = 0.4;
-    call_count_final_ = 100000;
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
+    protected_reset();
 }
 
 /// @brief Set the initial temperature.
@@ -310,6 +307,21 @@ masala::base::Size
 LinearAnnealingSchedule::get_call_count() const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     return call_count();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Reset this object without locking mutex.  Should be called from a mutex-locked
+/// context.  Derived classes should override this function and call the base class version.
+/*virtual*/
+void
+LinearAnnealingSchedule::protected_reset() {
+    temperature_initial_ = 3.0;
+    temperature_final_ = 0.4;
+    call_count_final_ = 100000;
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
 }
 
 } // namespace annealing
