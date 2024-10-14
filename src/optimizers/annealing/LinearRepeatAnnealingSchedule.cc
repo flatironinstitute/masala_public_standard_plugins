@@ -271,11 +271,11 @@ LinearRepeatAnnealingSchedule::protected_reset() /*override*/ {
 /// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
 /// context.  Derived classes should override this function and call the base class version.
 void
-LinearAnnealingSchedule::protected_assign(
+LinearRepeatAnnealingSchedule::protected_assign(
     LinearAnnealingSchedule const & src
 ) /*override*/ {
 	LinearRepeatAnnealingSchedule const & src_cast( dynamic_cast< LinearRepeatAnnealingSchedule const & >(src) );
-	n_repeats_ = src_cast_.n_repeats_;
+	n_repeats_ = src_cast.n_repeats_;
     LinearAnnealingSchedule::protected_assign(src);
 }
 
