@@ -170,7 +170,7 @@ protected:
 	inline masala::base::Real protected_temperature_final() const { return temperature_final_; }
 
 	/// @brief Access the expected call count from a mutex-locked context.
-	inline masala::base::Real protected_call_count_final() const { return call_count_final_; }
+	inline masala::base::Size protected_call_count_final() const { return call_count_final_; }
 
 private:
 
