@@ -139,6 +139,8 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief The number of times to ramp.  Defaults to 3.
+	masala::base::Size const n_repeats_ = 3;
 
 }; // class LinearRepeatAnnealingSchedule
 

@@ -17,7 +17,7 @@
 */
 
 /// @file src/optimizers/annealing/LinearRepeatAnnealingSchedule.cc
-/// @brief Implementation of an annealing schedule that changes linearly with time.
+/// @brief Implementation of an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
@@ -49,26 +49,15 @@ namespace annealing {
 LinearRepeatAnnealingSchedule::LinearRepeatAnnealingSchedule(
     LinearRepeatAnnealingSchedule const & src
 ) :
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
-{
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_initial_ = src.temperature_initial_;
-    temperature_final_ = src.temperature_final_;
-    call_count_final_ = src.call_count_final_;
-}
+    LinearAnnealingSchedule( src ) // Locks mutex and calls protected_assign().
+{}
 
 /// @brief Assignment operator.
 LinearRepeatAnnealingSchedule &
 LinearRepeatAnnealingSchedule::operator=(
     LinearRepeatAnnealingSchedule const & src
 ) {
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=( src );
-    std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
-    temperature_initial_ = src.temperature_initial_;
-    temperature_final_ = src.temperature_final_;
-    call_count_final_ = src.call_count_final_;
+	LinearAnnealingSchedule::operator=( src );
     return *this;
 }
 
@@ -277,6 +266,17 @@ LinearRepeatAnnealingSchedule::temperature(
 void
 LinearRepeatAnnealingSchedule::protected_reset() /*override*/ {
     LinearAnnealingSchedule::protected_reset();
+}
+
+/// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
+/// context.  Derived classes should override this function and call the base class version.
+void
+LinearAnnealingSchedule::protected_assign(
+    LinearAnnealingSchedule const & src
+) /*override*/ {
+	LinearRepeatAnnealingSchedule const & src_cast( dynamic_cast< LinearRepeatAnnealingSchedule const & >(src) );
+	n_repeats_ = src_cast_.n_repeats_;
+    LinearAnnealingSchedule::protected_assign(src);
 }
 
 } // namespace annealing
