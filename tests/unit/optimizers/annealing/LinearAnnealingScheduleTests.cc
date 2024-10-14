@@ -62,7 +62,7 @@ TEST_CASE( "Instantiate the linear annealing schedule.", "[masala::numeric_api::
 
     REQUIRE_NOTHROW([&](){
         masala::base::managers::plugin_module::MasalaPluginAPISP plugin_object(
-            plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >("PluginAnnealingSchedule"), "LinearAnnealingSchedule", true )
+            plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{"AnnealingSchedule"}, "LinearAnnealingSchedule", true )
         );
         CHECK( plugin_object != nullptr );
         tracer->write_to_tracer( test_name, "Created an object of type " + plugin_object->inner_class_name() + "." );
@@ -90,12 +90,12 @@ TEST_CASE( "Test the samples of the linear annealing schedule.", "[masala::numer
     tracer->write_to_tracer( test_name, "Starting \"Test the samples of the linear annealing schedule.\"" );
 
     std::vector< Real > const expected_vals{ 50.0, 45.0, 40.0, 35.0, 30.0, 25.0, 20.0 };
-    std::vector< Real > actual_vals(6, 0.0);
-    std::vector< Real > actual_vals2(6, 0.0);
+    std::vector< Real > actual_vals(7, 0.0);
+    std::vector< Real > actual_vals2(7, 0.0);
 
     REQUIRE_NOTHROW([&](){
 		masala::base::managers::plugin_module::MasalaPluginAPISP plugin_object(
-			plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >("PluginAnnealingSchedule"), "LinearAnnealingSchedule", true )
+			plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{"AnnealingSchedule"}, "LinearAnnealingSchedule", true )
 		);
 		CHECK( plugin_object != nullptr );
 		tracer->write_to_tracer( test_name, "Created an object of type " + plugin_object->inner_class_name() + "." );
