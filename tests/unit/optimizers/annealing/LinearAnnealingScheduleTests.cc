@@ -114,7 +114,7 @@ TEST_CASE( "Test the samples of the linear annealing schedule.", "[masala::numer
 
 		anneal_sched->reset_call_count();
 		for( Size i(7); i>0; --i ) {
-			actual_vals2[i-1] = anneal_sched->temperature(i);
+			actual_vals2[i-1] = anneal_sched->temperature(i-1);
 		}
 
 		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals2, 1.0e-6 ) );
