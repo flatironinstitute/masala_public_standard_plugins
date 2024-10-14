@@ -252,11 +252,28 @@ LinearRepeatAnnealingSchedule::temperature(
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the number of times that we'll ramp the temperature.
+/// @details Must be positive.
+void
+LinearRepeatAnnealingSchedule::set_n_repeats(
+    masala::base::Size const setting
+) {
+    CHECK_OR_THROW_FOR_CLASS( setting > 0, "set_n_repeats", "The number of times that the temperature will be ramped must be greater than zero." );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    n_repeats_ = setting;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Get the number of times that we'll ramp the temperature.
+/// @details Must be positive.
+masala::base::Size
+LinearRepeatAnnealingSchedule::n_repeats() const {
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    return n_repeats_;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
