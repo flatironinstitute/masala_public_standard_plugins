@@ -234,6 +234,7 @@ LinearAnnealingSchedule::temperature() const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
     Size const callcount( call_count() );
+    if( callcount >= call_count_final_ ) { return temperature_final_; }
     Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( call_count_final_ - 1 ) );
     return f * temperature_final_ + (1.0 - f) * temperature_initial_;
 }
