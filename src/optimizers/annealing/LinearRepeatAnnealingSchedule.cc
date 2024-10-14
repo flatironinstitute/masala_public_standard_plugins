@@ -173,22 +173,37 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
                 false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
-        );        api_def->add_setter(
+        );
+		api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.4.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
                 false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
             )
         );
-
-        // Getters
-        api_def->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
-                "get_call_count", "Get the current call count.",
-                "call_count", "The number of times the temperature() function has been called.",
-                false, false, std::bind( &LinearRepeatAnnealingSchedule::get_call_count, this )
+		api_def->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size > >(
+                "set_n_repeats", "Set the number of times that we'll ramp the temperature.  Default is 3.",
+                "n_repeats_in", "The number of times that we'll ramp the temperature.  Must be positive; throws if zero.",
+                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_n_repeats, this, std::placeholders::_1 )
             )
         );
+
+        // Getters
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"get_call_count", "Get the current call count.",
+				"call_count", "The number of times the temperature() function has been called.",
+				false, false, std::bind( &LinearRepeatAnnealingSchedule::get_call_count, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"n_repeats", "Get the number of times that we'll ramp the temperature.",
+				"n_repeats", "The number of times that we'll ramp the temperature (a positive integer).",
+				false, false, std::bind( &LinearRepeatAnnealingSchedule::n_repeats, this )
+			)
+		);
 
         // Work functions
         api_def->add_work_function(
