@@ -104,7 +104,7 @@ TEST_CASE( "Test the samples of the linear annealing schedule.", "[masala::numer
 
 		anneal_sched->set_final_time_index(6);
 		anneal_sched->set_temperature_initial(50.0);
-		anneal_sched->set_temperature_initial(20.0);
+		anneal_sched->set_temperature_final(20.0);
 
 		for( Size i(0); i<=6; ++i ) {
 			actual_vals[i] = anneal_sched->temperature();
