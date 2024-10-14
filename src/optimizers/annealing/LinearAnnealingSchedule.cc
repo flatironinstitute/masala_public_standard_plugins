@@ -281,7 +281,7 @@ LinearAnnealingSchedule::set_temperature_final(
 ) {
     CHECK_OR_THROW_FOR_CLASS( temperature_in >= 0.0, "set_temperature_final", "The final temperature must be greater than or equal to zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_initial_ = temperature_in;
+    temperature_final_ = temperature_in;
 }
 
 /// @brief Set the index of the expected final timepoint.
