@@ -52,9 +52,7 @@ LinearAnnealingSchedule::LinearAnnealingSchedule(
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
 {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_initial_ = src.temperature_initial_;
-    temperature_final_ = src.temperature_final_;
-    call_count_final_ = src.call_count_final_;
+    protected_assign(src);
 }
 
 /// @brief Assignment operator.
@@ -66,9 +64,7 @@ LinearAnnealingSchedule::operator=(
     std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
-    temperature_initial_ = src.temperature_initial_;
-    temperature_final_ = src.temperature_final_;
-    call_count_final_ = src.call_count_final_;
+    protected_assign(src);
     return *this;
 }
 
@@ -322,6 +318,18 @@ LinearAnnealingSchedule::protected_reset() {
     temperature_final_ = 0.4;
     call_count_final_ = 100000;
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
+}
+
+/// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
+/// context.  Derived classes should override this function and call the base class version.
+/*virtual*/
+void
+LinearAnnealingSchedule::protected_assign(
+    LinearAnnealingSchedule const & src
+) {
+    temperature_initial_ = src.temperature_initial_;
+    temperature_final_ = src.temperature_final_;
+    call_count_final_ = src.call_count_final_;
 }
 
 } // namespace annealing

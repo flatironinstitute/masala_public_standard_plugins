@@ -159,6 +159,10 @@ protected:
 	/// context.  Derived classes should override this function and call the base class version.
 	virtual void protected_reset();
 
+	/// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
+	/// context.  Derived classes should override this function and call the base class version.
+	virtual void protected_assign( LinearAnnealingSchedule const & src );
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
