@@ -163,6 +163,15 @@ protected:
 	/// context.  Derived classes should override this function and call the base class version.
 	virtual void protected_assign( LinearAnnealingSchedule const & src );
 
+	/// @brief Access the initial temperature from a mutex-locked context.
+	inline masala::base::Real protected_temperature_initial() const { return temperature_initial_; }
+
+	/// @brief Access the final temperature from a mutex-locked context.
+	inline masala::base::Real protected_temperature_final() const { return temperature_final_; }
+
+	/// @brief Access the expected call count from a mutex-locked context.
+	inline masala::base::Real protected_call_count_final() const { return call_count_final_; }
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
