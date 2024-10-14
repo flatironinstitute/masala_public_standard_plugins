@@ -223,14 +223,15 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
 /// @brief Return temperature.
 masala::base::Real
 LinearRepeatAnnealingSchedule::temperature() const {
-	TODO TODO TODO;
-    // using masala::base::Size;
-    // using masala::base::Real;
-    // std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    // masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
-    // Size const callcount( call_count() );
-    // Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( call_count_final_ - 1 ) );
-    // return f * temperature_final_ + (1.0 - f) * temperature_initial_;
+    using masala::base::Size;
+    using masala::base::Real;
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
+    Size const callcount( call_count() );
+	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
+	Size const callcount_mod( static_cast<Size>(cyclelength_and_remainder.quot) - (protected_call_count_final() - call_count()) % n_repeats_ );
+    Real const f( static_cast< Real >( callcount_mod - 1 ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
+    return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
 /// @brief Return temperature for the Nth timepoint.
