@@ -200,6 +200,69 @@ TEST_CASE( "Test the samples of the linear repeat annealing schedule with three 
 	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
 }
 
+TEST_CASE( "Test the samples of the linear repeat annealing schedule with three repeats and irregualar total timepoints.", "[masala::numeric_api::auto_generated_api::optimization::annealing::LinearRepeatAnnealingSchedule_API][optimization]" ) {
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
+	using namespace masala::base::managers::tracer;
+	using namespace masala::base::managers::plugin_module;
+	using masala::base::Real;
+	using masala::base::Size;
+	
+	optimizers_api::auto_generated_api::registration::register_optimizers();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+
+	MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+	MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+
+	tracer->write_to_tracer( test_name, "Starting \"Test the samples of the linear repeat annealing schedule with three repeats and irregualar total timepoints.\"" );
+
+	std::vector< Real > const expected_vals{ 20.0, 10.0, 50.0, 40.0, 30.0, 20.0, 10.0, 50.0, 40.0, 30.0, 20.0, 10.0, 50.0, 40.0, 30.0, 20.0, 10.0 };
+	std::vector< Real > actual_vals(17, 0.0);
+	std::vector< Real > actual_vals2(17, 0.0);
+
+	REQUIRE_NOTHROW([&](){
+		masala::base::managers::plugin_module::MasalaPluginAPISP plugin_object(
+			plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{"AnnealingSchedule"}, "LinearRepeatAnnealingSchedule", true )
+		);
+		CHECK( plugin_object != nullptr );
+		tracer->write_to_tracer( test_name, "Created an object of type " + plugin_object->inner_class_name() + "." );
+		LinearRepeatAnnealingSchedule_APISP anneal_sched( std::dynamic_pointer_cast< LinearRepeatAnnealingSchedule_API >( plugin_object ) );
+		CHECK( anneal_sched != nullptr );
+
+		anneal_sched->set_final_time_index(17);
+		anneal_sched->set_temperature_initial(50.0);
+		anneal_sched->set_temperature_final(10.0);
+		anneal_sched->set_n_repeats(3);
+
+		for( Size i(0); i<=16; ++i ) {
+			actual_vals[i] = anneal_sched->temperature();
+		}
+
+		tracer->write_to_tracer( test_name, "Expected1:\t[ " + masala::base::utility::container::container_to_string( expected_vals, ", " ) + " ]" );
+		tracer->write_to_tracer( test_name, "Actual1:\t[ " + masala::base::utility::container::container_to_string( actual_vals, ", " ) + " ]" );
+
+		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals, 1.0e-6 ) );
+
+		anneal_sched->reset_call_count();
+		for( Size i(16); i>0; --i ) {
+			actual_vals2[i-1] = anneal_sched->temperature(i-1);
+		}
+
+
+		tracer->write_to_tracer( test_name, "Expected2:\t[ " + masala::base::utility::container::container_to_string( expected_vals, ", " ) + " ]" );
+		tracer->write_to_tracer( test_name, "Actual2:\t[ " + masala::base::utility::container::container_to_string( actual_vals2, ", " ) + " ]" );
+
+		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals2, 1.0e-6 ) );
+
+		CHECK( anneal_sched->temperature(17) == expected_vals[16] );
+		CHECK( anneal_sched->temperature(18) == expected_vals[16] );
+		CHECK( anneal_sched->temperature(512) == expected_vals[16] );
+
+	}() );
+
+	optimizers_api::auto_generated_api::registration::unregister_optimizers();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+}
+
 } // namespace annealing
 } // namespace optimizers
 } // namespace unit
