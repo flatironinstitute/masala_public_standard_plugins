@@ -36,6 +36,7 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
 // STL headers
+#include <iostream> // COMMENT ME OUT -- FOR DEBUGGING ONLY
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -258,12 +259,18 @@ LinearRepeatAnnealingSchedule::temperature(
     using masala::base::Size;
     using masala::base::Real;
 	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    std::cout << "time_index: " << time_index << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
 	if( time_index > protected_call_count_final() ) {
 		return protected_temperature_final();
 	}
 	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
+    std::cout << "cyclelength_and_remainder.quot: " << cyclelength_and_remainder.quot << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    std::cout << "cyclelength_and_remainder.rem: " << cyclelength_and_remainder.rem << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
 	Size const callcount_mod( static_cast<Size>(cyclelength_and_remainder.quot) - ( (protected_call_count_final() - time_index) % n_repeats_ ) );
+    std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     Real const f( static_cast< Real >( callcount_mod - 1 ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
+    std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
