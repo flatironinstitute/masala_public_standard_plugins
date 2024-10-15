@@ -163,7 +163,8 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size > >(
                 "set_final_time_index", "Set the final time index in the annealing schedule.",
-                "final_time_index", "The index of the final timepoint in the annealing schedule.",
+                "final_time_index", "The index of the final timepoint in the annealing schedule.  Note that this is actually "
+                "the final zero-based index plus one, or equivalently the number of timepoints.",
                 false, true, std::bind( &LinearRepeatAnnealingSchedule::set_final_time_index, this, std::placeholders::_1 )
             )
         );
@@ -193,7 +194,8 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
 		api_def->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
 				"get_call_count", "Get the current call count.",
-				"call_count", "The number of times the temperature() function has been called.",
+                "call_count", "The number of times the temperature() function has been called.  Equivalently, the zero-based index "
+                "of the last call.",
 				false, false, std::bind( &LinearRepeatAnnealingSchedule::get_call_count, this )
 			)
 		);
@@ -217,7 +219,7 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
         api_def->add_work_function(
             masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< masala::base::Real, masala::base::Size > >(
                 "temperature", "Get the temperature at the given timepoint.  This does not increment the "
-                "timepoint counter.",
+                "timepoint counter.  Note that the timepoints are zero-indexed (i.e. the first timepoint is time 0).",
                 true, false, false, true,
                 "time_index", "The timepoint at which we are getting temperature.",
                 "temperature",
