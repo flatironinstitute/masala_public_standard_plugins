@@ -245,10 +245,10 @@ LinearAnnealingSchedule::temperature(
     masala::base::Size const time_index
 ) const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    if( time_index > call_count_final_ ) {
+    if( time_index >= call_count_final_ ) {
         return temperature_final_;
     }
-    masala::base::Real const f( static_cast< masala::base::Real >( time_index - 1 ) / static_cast< masala::base::Real >( call_count_final_ - 1 ) );
+    masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( call_count_final_ - 1 ) );
     return f * temperature_final_ + (1.0 - f) * temperature_initial_;
 }
 
