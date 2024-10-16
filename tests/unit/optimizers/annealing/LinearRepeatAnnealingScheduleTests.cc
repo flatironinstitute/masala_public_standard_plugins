@@ -243,7 +243,7 @@ TEST_CASE( "Test the samples of the linear repeat annealing schedule with three 
 		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals, 1.0e-6 ) );
 
 		anneal_sched->reset_call_count();
-		for( Size i(16); i>0; --i ) {
+		for( Size i(17); i>0; --i ) {
 			actual_vals2[i-1] = anneal_sched->temperature(i-1);
 		}
 
