@@ -248,7 +248,7 @@ LinearRepeatAnnealingSchedule::temperature() const {
 	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
     std::cout << "cyclelength_and_remainder.quot: " << cyclelength_and_remainder.quot << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     std::cout << "cyclelength_and_remainder.rem: " << cyclelength_and_remainder.rem << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
-	Size const callcount_mod(  (call_count() - cyclelength_and_remainder.rem -1) % cyclelength_and_remainder.quot );
+	Size const callcount_mod(  (call_count() + cyclelength_and_remainder.quot - cyclelength_and_remainder.rem -1) % cyclelength_and_remainder.quot );
     std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
     std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
@@ -271,7 +271,7 @@ LinearRepeatAnnealingSchedule::temperature(
 	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
     std::cout << "cyclelength_and_remainder.quot: " << cyclelength_and_remainder.quot << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     std::cout << "cyclelength_and_remainder.rem: " << cyclelength_and_remainder.rem << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
-	Size const callcount_mod(  (time_index - cyclelength_and_remainder.rem) % cyclelength_and_remainder.quot );
+	Size const callcount_mod(  (time_index + cyclelength_and_remainder.quot - cyclelength_and_remainder.rem) % cyclelength_and_remainder.quot );
     std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
     std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
