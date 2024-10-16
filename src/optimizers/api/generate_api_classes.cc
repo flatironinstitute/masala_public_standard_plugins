@@ -27,6 +27,7 @@
 // Optimizers headers
 #include <optimizers/annealing/ConstantAnnealingSchedule.hh>
 #include <optimizers/annealing/LinearAnnealingSchedule.hh>
+#include <optimizers/annealing/LinearRepeatAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
@@ -55,6 +56,7 @@ namespace api {
         // Add to this vector whenever a class is added with a defined API:
         outvec.emplace_back( masala::make_shared< annealing::ConstantAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LinearAnnealingSchedule >() );
+        outvec.emplace_back( masala::make_shared< annealing::LinearRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::GreedyCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );

@@ -16,13 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/annealing/LinearAnnealingSchedule.cc
-/// @brief Implementation of an annealing schedule that changes linearly with time.
+/// @file src/optimizers/annealing/LinearRepeatAnnealingSchedule.cc
+/// @brief Implementation of an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Class headers:
-#include <optimizers/annealing/LinearAnnealingSchedule.hh>
+#include <optimizers/annealing/LinearRepeatAnnealingSchedule.hh>
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
@@ -36,6 +36,7 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
 // STL headers
+// #include <iostream> // COMMENT ME OUT -- FOR DEBUGGING ONLY
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -46,45 +47,38 @@ namespace annealing {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Copy constructor.
-LinearAnnealingSchedule::LinearAnnealingSchedule(
-    LinearAnnealingSchedule const & src
+LinearRepeatAnnealingSchedule::LinearRepeatAnnealingSchedule(
+    LinearRepeatAnnealingSchedule const & src
 ) :
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
-{
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    protected_assign(src);
-}
+    LinearAnnealingSchedule( src ) // Locks mutex and calls protected_assign().
+{}
 
 /// @brief Assignment operator.
-LinearAnnealingSchedule &
-LinearAnnealingSchedule::operator=(
-    LinearAnnealingSchedule const & src
+LinearRepeatAnnealingSchedule &
+LinearRepeatAnnealingSchedule::operator=(
+    LinearRepeatAnnealingSchedule const & src
 ) {
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=( src );
-    std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
-    protected_assign(src);
+	LinearAnnealingSchedule::operator=( src );
     return *this;
 }
 
 /// @brief Make a copy of this object.
 masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
-LinearAnnealingSchedule::clone() const {
-    return masala::make_shared< LinearAnnealingSchedule >(*this);
+LinearRepeatAnnealingSchedule::clone() const {
+    return masala::make_shared< LinearRepeatAnnealingSchedule >(*this);
 }
 
 /// @brief Make this object wholly independent.
 /// @details Should be overridden for derived classes.
 void
-LinearAnnealingSchedule::make_independent() {
+LinearRepeatAnnealingSchedule::make_independent() {
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::make_independent();
 }
 
 /// @brief Make an independent copy of this object.
 masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
-LinearAnnealingSchedule::deep_clone() const {
-    LinearAnnealingScheduleSP object_copy( std::static_pointer_cast<LinearAnnealingSchedule>(clone()) );
+LinearRepeatAnnealingSchedule::deep_clone() const {
+    LinearRepeatAnnealingScheduleSP object_copy( std::static_pointer_cast<LinearRepeatAnnealingSchedule>(clone()) );
     object_copy->make_independent();
     return object_copy;
 }
@@ -96,35 +90,36 @@ LinearAnnealingSchedule::deep_clone() const {
 /// @brief Get the hierarchical categories for this plugin class.
 /// @details The base class implementation returns { { "AnnealingSchedule" } }
 std::vector< std::vector< std::string > >
-LinearAnnealingSchedule::get_categories() const {
+LinearRepeatAnnealingSchedule::get_categories() const {
     return masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::get_categories();
 }
 
 /// @brief Get the ahierarchical keywords for this plugin class.
-/// @details The base class implementation returns { "annealing_schedule", "linear", "time_dependent" }
+/// @details The base class implementation returns { "annealing_schedule", "linear", "repeat", "time_dependent" }
 std::vector< std::string >
-LinearAnnealingSchedule::get_keywords() const {
-    std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::get_keywords() );
-    outvec.push_back( "linear" );
-    outvec.push_back( "time_dependent" );
-    return outvec;
+LinearRepeatAnnealingSchedule::get_keywords() const {
+	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::get_keywords() );
+	outvec.push_back( "linear" );
+	outvec.push_back( "repeat" );
+	outvec.push_back( "time_dependent" );
+	return outvec;
 }
 
-/// @brief Get the class name ("LinearAnnealingSchedule").
+/// @brief Get the class name ("LinearRepeatAnnealingSchedule").
 std::string
-LinearAnnealingSchedule::class_name() const {
-    return "LinearAnnealingSchedule";
+LinearRepeatAnnealingSchedule::class_name() const {
+    return "LinearRepeatAnnealingSchedule";
 }
 
 /// @brief Get the class namespace ("standard_masala_plugins::optimizers::annealing").
 std::string
-LinearAnnealingSchedule::class_namespace() const {
+LinearRepeatAnnealingSchedule::class_namespace() const {
     return "standard_masala_plugins::optimizers::annealing";
 }
 
 /// @brief Get the API description.
 masala::base::api::MasalaObjectAPIDefinitionCWP
-LinearAnnealingSchedule::get_api_definition() {
+LinearRepeatAnnealingSchedule::get_api_definition() {
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
@@ -136,19 +131,19 @@ LinearAnnealingSchedule::get_api_definition() {
     if( api_definition() == nullptr ) {
         MasalaObjectAPIDefinitionSP api_def(
             masala::make_shared< MasalaObjectAPIDefinition >(
-                *this, "An annealing schedule that ramps linearly with time.", false, false
+                *this, "An annealing schedule that ramps linearly with time, then jumps back up sharply to ramp linearly with time again (a sawtooth pattern).", false, false
             )
         );
 
         // Constructors
         api_def->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< LinearAnnealingSchedule > >( 
-                "LinearAnnealingSchedule", "Construct a LinearAnnealingSchedule object, with temperature initialized to 0.62 kcal/mol."
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< LinearRepeatAnnealingSchedule > >( 
+                "LinearRepeatAnnealingSchedule", "Construct a LinearRepeatAnnealingSchedule object, with temperature initialized to 0.62 kcal/mol."
             )
         );
         api_def->add_constructor(
-            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< LinearAnnealingSchedule, LinearAnnealingSchedule const & > >( 
-                "LinearAnnealingSchedule", "Copy another LinearAnnealingSchedule object.",
+            masala::make_shared< MasalaObjectAPIConstructorDefinition_OneInput< LinearRepeatAnnealingSchedule, LinearRepeatAnnealingSchedule const & > >( 
+                "LinearRepeatAnnealingSchedule", "Copy another LinearRepeatAnnealingSchedule object.",
                 "src", "The object to copy, unaltered by this operation."
             )
         );
@@ -157,13 +152,13 @@ LinearAnnealingSchedule::get_api_definition() {
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
                 "reset", "Reset this object's call count, as well as setting temperature back to 0.62.",
-                false, false, std::bind( &LinearAnnealingSchedule::reset, this )
+                false, false, std::bind( &LinearRepeatAnnealingSchedule::reset, this )
             )
         );
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
                 "reset_call_count", "Reset this object's call count.",
-                false, true, std::bind( &LinearAnnealingSchedule::reset_call_count, this )
+                false, true, std::bind( &LinearRepeatAnnealingSchedule::reset_call_count, this )
             )
         );
         api_def->add_setter(
@@ -171,32 +166,47 @@ LinearAnnealingSchedule::get_api_definition() {
                 "set_final_time_index", "Set the final time index in the annealing schedule.",
                 "final_time_index", "The index of the final timepoint in the annealing schedule.  Note that this is actually "
                 "the final zero-based index plus one, or equivalently the number of timepoints.",
-                false, true, std::bind( &LinearAnnealingSchedule::set_final_time_index, this, std::placeholders::_1 )
+                false, true, std::bind( &LinearRepeatAnnealingSchedule::set_final_time_index, this, std::placeholders::_1 )
             )
         );
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 3.0.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
+                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
-        );        api_def->add_setter(
+        );
+		api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.4.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
+                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
+            )
+        );
+		api_def->add_setter(
+            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size > >(
+                "set_n_repeats", "Set the number of times that we'll ramp the temperature.  Default is 3.",
+                "n_repeats_in", "The number of times that we'll ramp the temperature.  Must be positive; throws if zero.",
+                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_n_repeats, this, std::placeholders::_1 )
             )
         );
 
         // Getters
-        api_def->add_getter(
-            masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
-                "get_call_count", "Get the current call count.",
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"get_call_count", "Get the current call count.",
                 "call_count", "The number of times the temperature() function has been called.  Equivalently, the zero-based index "
                 "of the last call.",
-                false, false, std::bind( &LinearAnnealingSchedule::get_call_count, this )
-            )
-        );
+				false, false, std::bind( &LinearRepeatAnnealingSchedule::get_call_count, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"n_repeats", "Get the number of times that we'll ramp the temperature.",
+				"n_repeats", "The number of times that we'll ramp the temperature (a positive integer).",
+				false, false, std::bind( &LinearRepeatAnnealingSchedule::n_repeats, this )
+			)
+		);
 
         // Work functions
         api_def->add_work_function(
@@ -204,7 +214,7 @@ LinearAnnealingSchedule::get_api_definition() {
                 "temperature", "Get the temperature at the current timepoint, and increment the timepoint counter.",
                 true, false, false, true, "temperature",
                 "The temperature at the current timepoint (which varies linearly with timepoint).",
-                std::bind( static_cast<masala::base::Real(LinearAnnealingSchedule::*)() const>( &LinearAnnealingSchedule::temperature ), this )
+                std::bind( static_cast<masala::base::Real(LinearRepeatAnnealingSchedule::*)() const>( &LinearRepeatAnnealingSchedule::temperature ), this )
             )
         );
         api_def->add_work_function(
@@ -215,7 +225,7 @@ LinearAnnealingSchedule::get_api_definition() {
                 "time_index", "The timepoint at which we are getting temperature.",
                 "temperature",
                 "The temperature at the current timepoint (which varies linearly with timepoint).",
-                std::bind( static_cast<masala::base::Real(LinearAnnealingSchedule::*)( masala::base::Size const ) const>( &LinearAnnealingSchedule::temperature ), this, std::placeholders::_1 )
+                std::bind( static_cast<masala::base::Real(LinearRepeatAnnealingSchedule::*)( masala::base::Size const ) const>( &LinearRepeatAnnealingSchedule::temperature ), this, std::placeholders::_1 )
             )
         );
 
@@ -230,82 +240,70 @@ LinearAnnealingSchedule::get_api_definition() {
 
 /// @brief Return temperature.
 masala::base::Real
-LinearAnnealingSchedule::temperature() const {
+LinearRepeatAnnealingSchedule::temperature() const {
     using masala::base::Size;
     using masala::base::Real;
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::increment_call_count();
-    Size const callcount( call_count() );
-    if( callcount >= call_count_final_ ) { return temperature_final_; }
-    Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( call_count_final_ - 1 ) );
-    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
+	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
+    // std::cout << "cyclelength_and_remainder.quot: " << cyclelength_and_remainder.quot << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    // std::cout << "cyclelength_and_remainder.rem: " << cyclelength_and_remainder.rem << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+	Size const callcount_mod(  (call_count() + cyclelength_and_remainder.quot - cyclelength_and_remainder.rem -1) % cyclelength_and_remainder.quot );
+    // std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
+    // std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    // std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
 /// @brief Return temperature for the Nth timepoint.
 masala::base::Real
-LinearAnnealingSchedule::temperature(
+LinearRepeatAnnealingSchedule::temperature(
     masala::base::Size const time_index
 ) const {
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    if( time_index >= call_count_final_ ) {
-        return temperature_final_;
-    }
-    masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( call_count_final_ - 1 ) );
-    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
+    using masala::base::Size;
+    using masala::base::Real;
+	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+    // std::cout << "time_index: " << time_index << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+	if( time_index >= protected_call_count_final() ) {
+		return protected_temperature_final();
+	}
+	ldiv_t const cyclelength_and_remainder( std::div( static_cast<signed long int>( protected_call_count_final() ), static_cast<signed long int>( n_repeats_ ) ) );
+    // std::cout << "cyclelength_and_remainder.quot: " << cyclelength_and_remainder.quot << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    // std::cout << "cyclelength_and_remainder.rem: " << cyclelength_and_remainder.rem << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+	Size const callcount_mod(  (time_index + cyclelength_and_remainder.quot - cyclelength_and_remainder.rem) % cyclelength_and_remainder.quot );
+    // std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
+    // std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    // std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Reset this object.
+/// @brief Set the number of times that we'll ramp the temperature.
+/// @details Must be positive.
 void
-LinearAnnealingSchedule::reset() {
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    protected_reset();
-}
-
-/// @brief Set the initial temperature.
-/// @details In kcal/mol.  Must be positive.
-void
-LinearAnnealingSchedule::set_temperature_initial(
-    masala::base::Real const temperature_in
+LinearRepeatAnnealingSchedule::set_n_repeats(
+    masala::base::Size const setting
 ) {
-    CHECK_OR_THROW_FOR_CLASS( temperature_in >= 0.0, "set_temperature_initial", "The initial temperature must be greater than or equal to zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
+    CHECK_OR_THROW_FOR_CLASS( setting > 0, "set_n_repeats", "The number of times that the temperature will be ramped must be greater than zero." );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_initial_ = temperature_in;
-}
-
-/// @brief Set the final temperature.
-/// @details In kcal/mol.  Must be positive.
-void
-LinearAnnealingSchedule::set_temperature_final(
-    masala::base::Real const temperature_in
-) {
-    CHECK_OR_THROW_FOR_CLASS( temperature_in >= 0.0, "set_temperature_final", "The final temperature must be greater than or equal to zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_final_ = temperature_in;
-}
-
-/// @brief Set the index of the expected final timepoint.
-void
-LinearAnnealingSchedule::set_final_time_index(
-    masala::base::Size const final_time_index_in
-) {
-    CHECK_OR_THROW_FOR_CLASS( final_time_index_in > 0, "set_final_time_index", "The final time index must be greater than 0." );
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    call_count_final_ = final_time_index_in;
+    n_repeats_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Get the call count.
+/// @brief Get the number of times that we'll ramp the temperature.
+/// @details Must be positive.
 masala::base::Size
-LinearAnnealingSchedule::get_call_count() const {
+LinearRepeatAnnealingSchedule::n_repeats() const {
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    return call_count();
+    return n_repeats_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -314,25 +312,20 @@ LinearAnnealingSchedule::get_call_count() const {
 
 /// @brief Reset this object without locking mutex.  Should be called from a mutex-locked
 /// context.  Derived classes should override this function and call the base class version.
-/*virtual*/
 void
-LinearAnnealingSchedule::protected_reset() {
-    temperature_initial_ = 3.0;
-    temperature_final_ = 0.4;
-    call_count_final_ = 100000;
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
+LinearRepeatAnnealingSchedule::protected_reset() /*override*/ {
+    LinearAnnealingSchedule::protected_reset();
 }
 
 /// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
 /// context.  Derived classes should override this function and call the base class version.
-/*virtual*/
 void
-LinearAnnealingSchedule::protected_assign(
+LinearRepeatAnnealingSchedule::protected_assign(
     LinearAnnealingSchedule const & src
-) {
-    temperature_initial_ = src.temperature_initial_;
-    temperature_final_ = src.temperature_final_;
-    call_count_final_ = src.call_count_final_;
+) /*override*/ {
+	LinearRepeatAnnealingSchedule const & src_cast( dynamic_cast< LinearRepeatAnnealingSchedule const & >(src) );
+	n_repeats_ = src_cast.n_repeats_;
+    LinearAnnealingSchedule::protected_assign(src);
 }
 
 } // namespace annealing

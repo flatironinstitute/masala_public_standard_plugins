@@ -16,19 +16,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/annealing/LinearAnnealingSchedule.hh
-/// @brief Headers for an annealing schedule that changes linearly with time.
+/// @file src/optimizers/annealing/LinearRepeatAnnealingSchedule.hh
+/// @brief Headers for an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
-#define StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
+#ifndef StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_hh
+#define StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_hh
 
 // Forward declarations:
-#include <optimizers/annealing/LinearAnnealingSchedule.fwd.hh>
+#include <optimizers/annealing/LinearRepeatAnnealingSchedule.fwd.hh>
 
 // Parent class:
-#include <numeric_api/base_classes/optimization/annealing/PluginAnnealingSchedule.hh>
+#include <optimizers/annealing/LinearAnnealingSchedule.hh>
 
 // STL headers
 #include <mutex>
@@ -37,10 +37,10 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace annealing {
 
-/// @brief An annealing schedule that changes linearly with time.
+/// @brief An annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class LinearAnnealingSchedule : public masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule {
+class LinearRepeatAnnealingSchedule : public standard_masala_plugins::optimizers::annealing::LinearAnnealingSchedule {
 
 public:
 
@@ -49,16 +49,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	LinearAnnealingSchedule() = default;
+	LinearRepeatAnnealingSchedule() = default;
 
 	/// @brief Copy constructor.
-	LinearAnnealingSchedule( LinearAnnealingSchedule const & );
+	LinearRepeatAnnealingSchedule( LinearRepeatAnnealingSchedule const & );
 
 	/// @brief Assignment operator.
-	LinearAnnealingSchedule & operator=( LinearAnnealingSchedule const & );
+	LinearRepeatAnnealingSchedule & operator=( LinearRepeatAnnealingSchedule const & );
 
 	/// @brief Virtual destructor.
-	virtual ~LinearAnnealingSchedule() = default;
+	virtual ~LinearRepeatAnnealingSchedule() = default;
 
 	/// @brief Make a copy of this object.
 	masala::numeric::optimization::annealing::AnnealingScheduleBaseSP
@@ -83,11 +83,11 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the ahierarchical keywords for this plugin class.
-	/// @details The base class implementation returns { "annealing_schedule", "linear", "time_dependent" }
+	/// @details The base class implementation returns { "annealing_schedule", "linear", "repeat", "time_dependent" }
 	std::vector< std::string >
 	get_keywords() const override;
 
-	/// @brief Get the class name ("LinearAnnealingSchedule").
+	/// @brief Get the class name ("LinearRepeatAnnealingSchedule").
 	std::string class_name() const override;
 
 	/// @brief Get the class namespace ("standard_masala_plugins::optimizers::annealing").
@@ -119,37 +119,17 @@ public:
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Reset this object.
-	void reset();
-
-	/// @brief Set the initial temperature.
-	/// @details In kcal/mol.  Must be non-negative.
-	void
-	set_temperature_initial(
-		masala::base::Real const temperature_in
-	);
-
-	/// @brief Set the final temperature.
-	/// @details In kcal/mol.  Must be non-negative.
-	void
-	set_temperature_final(
-		masala::base::Real const temperature_in
-	);
-
-	/// @brief Set the index of the expected final timepoint.
-	void
-	set_final_time_index(
-		masala::base::Size const final_time_index_in
-	) override;
+	/// @brief Set the number of times that we'll ramp the temperature.
+	/// @details Must be positive.
+	void set_n_repeats( masala::base::Size const setting );
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Get the call count.
-	masala::base::Size get_call_count() const;
-
-protected:
+	/// @brief Get the number of times that we'll ramp the temperature.
+	/// @details Must be positive.
+	masala::base::Size n_repeats() const;
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
@@ -157,20 +137,11 @@ protected:
 
 	/// @brief Reset this object without locking mutex.  Should be called from a mutex-locked
 	/// context.  Derived classes should override this function and call the base class version.
-	virtual void protected_reset();
+	void protected_reset() override;
 
 	/// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
 	/// context.  Derived classes should override this function and call the base class version.
-	virtual void protected_assign( LinearAnnealingSchedule const & src );
-
-	/// @brief Access the initial temperature from a mutex-locked context.
-	inline masala::base::Real protected_temperature_initial() const { return temperature_initial_; }
-
-	/// @brief Access the final temperature from a mutex-locked context.
-	inline masala::base::Real protected_temperature_final() const { return temperature_final_; }
-
-	/// @brief Access the expected call count from a mutex-locked context.
-	inline masala::base::Size protected_call_count_final() const { return call_count_final_; }
+	void protected_assign( LinearAnnealingSchedule const & src ) override;
 
 private:
 
@@ -178,22 +149,13 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief The initial temperature.
-	/// @details In units of kcal/mol.  Defaults to 3.0.
-	masala::base::Real temperature_initial_ = 3.0;
+	/// @brief The number of times to ramp.  Defaults to 3.
+	masala::base::Size n_repeats_ = 3;
 
-	/// @brief The final temperature.
-	/// @details In units of kcal/mol.  Defaults to 0.4.
-	masala::base::Real temperature_final_ = 0.4;
-
-	/// @brief The number of calls expected.
-	/// @details Defaults to 100,000, arbitrarily.
-	masala::base::Size call_count_final_ = 100000;
-
-}; // class LinearAnnealingSchedule
+}; // class LinearRepeatAnnealingSchedule
 
 } // namespace annealing
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //StandardMasalaPlugins_src_optimizers_annealing_LinearAnnealingSchedule_hh
+#endif //StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_hh
