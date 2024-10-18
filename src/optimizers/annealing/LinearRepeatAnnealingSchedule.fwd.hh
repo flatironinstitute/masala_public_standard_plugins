@@ -16,40 +16,40 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/file_interpreters/cost_function_network/BinaryCostFunctionNetworkProblemRosettaFileInterpreter.fwd.hh
-/// @brief Forward declarations for a file interpreter for reading and writing binary cost function network
-/// optimization problems.
+/// @file src/optimizers/annealing/LinearRepeatAnnealingSchedule.fwd.hh
+/// @brief Forward declarations for an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
+/// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_fwd_hh
-#define StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_fwd_hh
+#ifndef StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_fwd_hh
+#define StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_fwd_hh
 
 #include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
 namespace standard_masala_plugins {
-namespace file_interpreters {
-namespace cost_function_network {
+namespace optimizers {
+namespace annealing {
 
-	class BinaryCostFunctionNetworkProblemRosettaFileInterpreter;
+	class LinearRepeatAnnealingSchedule;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.
-	using BinaryCostFunctionNetworkProblemRosettaFileInterpreterSP = MASALA_SHARED_POINTER< BinaryCostFunctionNetworkProblemRosettaFileInterpreter >;
+	using LinearRepeatAnnealingScheduleSP = MASALA_SHARED_POINTER< LinearRepeatAnnealingSchedule >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a MASALA_SHARED_POINTER for const objects of that class.
-	using BinaryCostFunctionNetworkProblemRosettaFileInterpreterCSP = MASALA_SHARED_POINTER< BinaryCostFunctionNetworkProblemRosettaFileInterpreter const >;
+	using LinearRepeatAnnealingScheduleCSP = MASALA_SHARED_POINTER< LinearRepeatAnnealingSchedule const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a MASALA_WEAK_POINTER for objects of that class.
-	using BinaryCostFunctionNetworkProblemRosettaFileInterpreterWP = MASALA_WEAK_POINTER< BinaryCostFunctionNetworkProblemRosettaFileInterpreter >;
+	using LinearRepeatAnnealingScheduleWP = MASALA_WEAK_POINTER< LinearRepeatAnnealingSchedule >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
-	using BinaryCostFunctionNetworkProblemRosettaFileInterpreterCWP = MASALA_WEAK_POINTER< BinaryCostFunctionNetworkProblemRosettaFileInterpreter const >;
+	using LinearRepeatAnnealingScheduleCWP = MASALA_WEAK_POINTER< LinearRepeatAnnealingSchedule const >;
 
-} // namespace cost_function_network
-} // namespace file_interpreters
-} // namesapce standard_masala_plugins
+} // namespace annealing
+} // namespace optimizers
+} // namespace standard_masala_plugins
 
-#endif //StandardMaslaPlugins_src_file_interpreters_cost_function_network_BinaryCostFunctionNetworkProblemRosettaFileInterpreter_fwd_hh
+#endif //StandardMasalaPlugins_src_optimizers_annealing_LinearRepeatAnnealingSchedule_fwd_hh

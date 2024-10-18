@@ -105,6 +105,11 @@
 		"__verbose_abort": "cpp",
 		"charconv": "cpp",
 		"format": "cpp",
-		"execution": "cpp"
+		"execution": "cpp",
+		"cfenv": "cpp",
+		"strstream": "cpp",
+		"source_location": "cpp",
+		"alignedvector3": "cpp",
+		"print": "cpp"
 	}
 }

@@ -27,6 +27,7 @@
 // Optimizers headers
 #include <optimizers/annealing/ConstantAnnealingSchedule.hh>
 #include <optimizers/annealing/LinearAnnealingSchedule.hh>
+#include <optimizers/annealing/LinearRepeatAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
@@ -34,6 +35,10 @@
 #include <optimizers/cost_function_network/cost_function/SquareOfChoicePenaltySumCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
+// #include <optimizers/gradient_based/BFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
+#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -51,6 +56,7 @@ namespace api {
         // Add to this vector whenever a class is added with a defined API:
         outvec.emplace_back( masala::make_shared< annealing::ConstantAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LinearAnnealingSchedule >() );
+        outvec.emplace_back( masala::make_shared< annealing::LinearRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::GreedyCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );
@@ -58,6 +64,10 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::SquareOfChoicePenaltySumCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::ChoiceFeature >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
+        // outvec.emplace_back( masala::make_shared< gradient_based::BFGSFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::GradientDescentFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::BrentAlgorithmLineOptimizer >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;
