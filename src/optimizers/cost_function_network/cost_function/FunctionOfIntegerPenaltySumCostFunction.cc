@@ -786,9 +786,9 @@ FunctionOfIntegerPenaltySumCostFunction::fit_tail_function(
             b = 0;
             c = 0;
 
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
 
             break;
         }
@@ -813,9 +813,9 @@ FunctionOfIntegerPenaltySumCostFunction::fit_tail_function(
             b = (penalty_values[x1_index] - penalty_values[x2_index])/static_cast<Real>(x1 - x2);
             a = penalty_values[x1_index] - ( b * static_cast<Real>(x1) );
 
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
 
             break;
         }
@@ -848,9 +848,9 @@ FunctionOfIntegerPenaltySumCostFunction::fit_tail_function(
             b = -2 * x2;
             c = ( y1 - b * x1 - a ) / x1sq;
 
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!" );
-			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
 
             break;
         }
