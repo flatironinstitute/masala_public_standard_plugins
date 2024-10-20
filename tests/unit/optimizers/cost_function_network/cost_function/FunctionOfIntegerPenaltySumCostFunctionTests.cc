@@ -158,10 +158,10 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with linear penalti
 		costfxn->finalize( std::vector< masala::base::Size >{ 0, 1, 2, 3, 4 } );
 
 		std::vector< Real > cost_fxns( 11 );
-		std::vector< Real > const expected{ 38.0, 28.0, 18.0, 8.0, 2.0, 0, 2.0, 4.0, 6.0, 8.0, 10.0 };
-		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 19
-		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 14
-		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 9
+		std::vector< Real > const expected{ 26.0, 20.0, 14.0, 8.0, 2.0, 0, 2.0, 4.0, 6.0, 8.0, 10.0 };
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 13
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 10
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 7
 		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
 		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
 		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
