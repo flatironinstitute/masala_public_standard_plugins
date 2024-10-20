@@ -58,6 +58,130 @@ TEST_CASE( "Instantiate an FunctionOfIntegerPenaltySumCostFunction.", "[standard
 	}() );
 }
 
+TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with constant penalties.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::FunctionOfIntegerPenaltySumCostFunction_API][instantiation][setup][linear]" ) {
+	using namespace masala::base::managers::plugin_module;
+	using namespace masala::base::managers::tracer;
+	using masala::base::Real;
+	using masala::base::Size;
+	using namespace masala::base::utility::container;
+
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+
+	MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+	MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+
+	tracer->write_to_tracer( tracer_name, "Starting \"Set up a FunctionOfIntegerPenaltySumCostFunction with constant penalties.\"" );
+
+	REQUIRE_NOTHROW([&](){
+		MasalaPluginAPISP plugin( plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{ "CostFunction" }, "FunctionOfIntegerPenaltySumCostFunction", true ) );
+		CHECK( plugin != nullptr );
+		optimizers_api::auto_generated_api::cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction_APISP costfxn(
+			std::dynamic_pointer_cast< optimizers_api::auto_generated_api::cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction_API >(plugin)
+		);
+		CHECK( costfxn != nullptr );
+		tracer->write_to_tracer( tracer_name, "Instantiated a FunctionOfIntegerPenaltySumCostFunction." );
+
+		costfxn->set_penalty_range_start( -2 );
+		costfxn->set_penalty_function( std::vector< Real >{ 4.0, 1.0, 0.0, 1.0 } );
+		costfxn->set_penalty_function_behaviour_high_by_string( "constant" );
+		costfxn->set_penalty_function_behaviour_low_by_string( "constant" );
+		costfxn->set_penalties_for_all_choices_at_node( 0, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 1, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 2, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 3, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 4, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_weight( 2.0 );
+
+		costfxn->finalize( std::vector< masala::base::Size >{ 0, 1, 2, 3, 4 } );
+
+		std::vector< Real > cost_fxns( 11 );
+		std::vector< Real > const expected{ 8.0, 8.0, 8.0, 8.0, 2.0, 0, 2.0, 2.0, 2.0, 2.0, 2.0 };
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 4
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 4
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 4
+		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
+		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
+		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
+		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 } ); // 1
+		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 } ); // 1
+		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 } ); // 1
+		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 } ); // 1
+		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 } ); // 1
+
+		tracer->write_to_tracer( tracer_name, "Expected:\t[" + container_to_string( expected, "," ) + "]" );
+		tracer->write_to_tracer( tracer_name, "Actual:\t[" + container_to_string( cost_fxns, "," ) + "]" );
+
+		CHECK( equal_within_threshold( expected, cost_fxns, 1.0e-6 ) );
+
+	}() );
+
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::unregister_optimizers();
+}
+
+TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with linear penalties.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::FunctionOfIntegerPenaltySumCostFunction_API][instantiation][setup][linear]" ) {
+	using namespace masala::base::managers::plugin_module;
+	using namespace masala::base::managers::tracer;
+	using masala::base::Real;
+	using masala::base::Size;
+	using namespace masala::base::utility::container;
+
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+
+	MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
+	MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+
+	tracer->write_to_tracer( tracer_name, "Starting \"Set up a FunctionOfIntegerPenaltySumCostFunction with linear penalties.\"" );
+
+	REQUIRE_NOTHROW([&](){
+		MasalaPluginAPISP plugin( plugman->create_plugin_object_instance_by_short_name( std::vector< std::string >{ "CostFunction" }, "FunctionOfIntegerPenaltySumCostFunction", true ) );
+		CHECK( plugin != nullptr );
+		optimizers_api::auto_generated_api::cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction_APISP costfxn(
+			std::dynamic_pointer_cast< optimizers_api::auto_generated_api::cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction_API >(plugin)
+		);
+		CHECK( costfxn != nullptr );
+		tracer->write_to_tracer( tracer_name, "Instantiated a FunctionOfIntegerPenaltySumCostFunction." );
+
+		costfxn->set_penalty_range_start( -2 );
+		costfxn->set_penalty_function( std::vector< Real >{ 4.0, 1.0, 0.0, 1.0 } );
+		costfxn->set_penalty_function_behaviour_high_by_string( "linear" );
+		costfxn->set_penalty_function_behaviour_low_by_string( "linear" );
+		costfxn->set_penalties_for_all_choices_at_node( 0, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 1, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 2, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 3, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_penalties_for_all_choices_at_node( 4, std::vector< signed long >{ -1, 0, 1 } );
+		costfxn->set_weight( 2.0 );
+
+		costfxn->finalize( std::vector< masala::base::Size >{ 0, 1, 2, 3, 4 } );
+
+		std::vector< Real > cost_fxns( 11 );
+		std::vector< Real > const expected{ 38.0, 28.0, 18.0, 8.0, 2.0, 0, 2.0, 4.0, 6.0, 8.0, 10.0 };
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 19
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 14
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 9
+		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
+		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
+		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
+		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 } ); // 1
+		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 } ); // 2
+		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 } ); // 3
+		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 } ); // 4
+		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 } ); // 5
+
+		tracer->write_to_tracer( tracer_name, "Expected:\t[" + container_to_string( expected, "," ) + "]" );
+		tracer->write_to_tracer( tracer_name, "Actual:\t[" + container_to_string( cost_fxns, "," ) + "]" );
+
+		CHECK( equal_within_threshold( expected, cost_fxns, 1.0e-6 ) );
+
+	}() );
+
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::unregister_optimizers();
+}
+
 TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with quadratic penalties.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::FunctionOfIntegerPenaltySumCostFunction_API][instantiation][setup][quadratic]" ) {
 	using namespace masala::base::managers::plugin_module;
 	using namespace masala::base::managers::tracer;
