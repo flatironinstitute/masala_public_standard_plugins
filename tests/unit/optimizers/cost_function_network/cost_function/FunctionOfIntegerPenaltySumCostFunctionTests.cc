@@ -65,6 +65,9 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with quadratic pena
 	using masala::base::Size;
 	using namespace masala::base::utility::container;
 
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::register_optimizers();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+
 	MasalaTracerManagerHandle tracer( MasalaTracerManager::get_instance() );
 	MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
 
@@ -112,6 +115,9 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with quadratic pena
 		CHECK( equal_within_threshold( expected, cost_fxns, 1.0e-6 ) );
 
 	}() );
+
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	standard_masala_plugins::optimizers_api::auto_generated_api::registration::unregister_optimizers();
 }
 
 } // namespace cost_function
