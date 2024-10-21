@@ -785,6 +785,11 @@ FunctionOfIntegerPenaltySumCostFunction::fit_tail_function(
             a = ( high ? penalty_values[penalty_values.size() - 1] : penalty_values[0] );
             b = 0;
             c = 0;
+
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit constant penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+
             break;
         }
         case PenaltyFunctionBehaviourOutsideRange::LINEAR :
@@ -807,36 +812,52 @@ FunctionOfIntegerPenaltySumCostFunction::fit_tail_function(
             c = 0;
             b = (penalty_values[x1_index] - penalty_values[x2_index])/static_cast<Real>(x1 - x2);
             a = penalty_values[x1_index] - ( b * static_cast<Real>(x1) );
+
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit linear penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+
             break;
         }
         case PenaltyFunctionBehaviourOutsideRange::QUADRATIC :
         {
-            // We want a parabola with its vertex at (x2, y2) passing through (x1, y1).
-            // y = K(x-x2)^2 + y2 --> y2 = K(x2-x2)^2 + y2 (checks out; vertex is at (x2, y2), as desired).
-            // y = K( x^2 - 2 x x2 + x2^2 ) + y2
-            // y = K x^2 - 2 x2 x + x2^2 + y2
-            // y1 = K x1^2 - 2 x2 x1 + x2^2 + y2
-            // K = (y1 + 2 x2 x1 - x2^2 - y2) / x1^2
-            // Let c = K, b = - 2 x2, a = x2^2 + y2
+            // We want a parabola passing through (x1,y1), (x2,y2), and (x3,y3).
+            // y1 = a + b x1 + c x1^2
+            // y2 = a + b x2 + c x2^2
+            // y3 = a + b x3 + c x3^2
+            // y1 - y2 = ( b + c ( x1 + x2 ) ) ( x1 - x2 )
+            // ( y1 - y2 ) / ( x1 - x2 ) - c ( x1 + x2 ) = b
+            // Similarly ( y1 - y3 ) / ( x1 - x3 ) - c ( x1 + x3 ) = b
+            // Therefore, ( y1 - y2 ) / ( x1 - x2 ) - c ( x1 + x2 ) = ( y1 - y3 ) / ( x1 - x3 ) - c ( x1 + x3 )
+            // c ( x3 - x2 ) = ( y1 - y3 ) / ( x1 - x3 ) - ( y1 - y2 ) / ( x1 - x2 )
+            // c = ( ( y1 - y3 ) / ( x1 - x3 ) - ( y1 - y2 ) / ( x1 - x2 ) ) / ( x3 - x2 ) ****
+            // b = ( y1 - y2 ) / ( x1 - x2 ) - c ( x1 + x2 ) ****
+            // a = y1 - b x1 - c x1^2 ****
+
             DEBUG_MODE_CHECK_OR_THROW(
-                penalty_values.size() > 1,
+                penalty_values.size() > 2,
                 class_namespace_static() + "::" + class_name_static(),
                 "fit_tail_function",
-                "Expected at least two penalty values to be defined before this function is called "
+                "Expected at least three penalty values to be defined before this function is called "
                 "for quadratic fit!"
             );
             Size const x1_index( high ? penalty_values.size() - 1 : 0 );
             Size const x2_index( high ? x1_index - 1 : x1_index + 1 );
+            Size const x3_index( high ? x2_index - 1 : x2_index + 1 );
             Real const x1( static_cast<Real>( high ? start_x + static_cast< signed long int >(x1_index) : start_x ) );
             Real const x2( static_cast<Real>( high ? x1 - 1 : x1 + 1 ) );
-            Real const x1sq( static_cast<Real>( x1*x1 ) );
-            Real const x2sq( static_cast<Real>( x2*x2 ) );
+            Real const x3( static_cast<Real>( high ? x2 - 1 : x2 + 1 ) );
             Real const y1( penalty_values[x1_index] );
             Real const y2( penalty_values[x2_index] );
+            Real const y3( penalty_values[x3_index] );
 
-            a = x2sq + y2;
-            b = -2 * x2;
-            c = ( y1 - b * x1 - a ) / x1sq;
+            c = ( ( y1 - y3 ) / ( x1 - x3 ) - ( y1 - y2 ) / ( x1 - x2 ) ) / ( x3 - x2 );
+            b = ( y1 - y2 ) / ( x1 - x2 ) - c * ( x1 + x2 );
+            a = y1 - b * x1 - c * x1 * x1;
+
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(a), "fit_tail_function", "Error!  Variable a is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(b), "fit_tail_function", "Error!  Variable b is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
+			CHECK_OR_THROW_FOR_CLASS( !std::isinf(c), "fit_tail_function", "Error!  Variable c is infinity!  (Trying to fit quadratic penalty " + ( high ? std::string("above" ) : std::string("below") ) + " user-specified range.)" );
 
             break;
         }
