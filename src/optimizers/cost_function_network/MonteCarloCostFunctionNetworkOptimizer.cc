@@ -44,6 +44,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -370,26 +371,41 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem, this, std::placeholders::_1 )
 			)
 		);
-		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
-				"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
-				"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
-				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
-			)
-		);
-        std::string const available_annealing_schedules(
-            masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
-                std::vector< std::string >{ "AnnealingSchedule" }, true
-            )
-        );
-        api_description->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
-                "set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  The name need not include namespace unless "
-                "there is a name conflict.  Available annealing schedules include: "
-                + available_annealing_schedules + ".", "annealing_schedule_name", "The name of the annealing schedule.",
-                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
-            )
-        );
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< AnnealingScheduleBase_API const & > annealing_sched_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
+					"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
+					"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
+					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
+				)
+			);
+			setter_annotation::OwnedSingleObjectSetterAnnotationSP owned_annotation(
+				masala::make_shared< setter_annotation::OwnedSingleObjectSetterAnnotation >()
+			);
+			owned_annotation->set_plugin_manager_info(
+				std::vector< std::string >{ "AnnealingSchedule" },
+				std::vector< std::string >{ "annealing_schedule" }
+			);
+			annealing_sched_setter->add_setter_annotation( owned_annotation );
+			api_description->add_setter( annealing_sched_setter );
+		}
+		{
+			std::string const available_annealing_schedules(
+				masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
+					std::vector< std::string >{ "AnnealingSchedule" }, true
+				)
+			);
+			api_description->add_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+					"set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  Creates an annealing schedule and leaves it with "
+					"its default configuration (so the set_annealing_schedule() setter should be used instead if you wish to configure "
+					"the annealing schedule).  The name need not include namespace unless there is a name conflict.  Available annealing schedules include: "
+					+ available_annealing_schedules + ".",
+					"annealing_schedule_name", "The name of the annealing schedule.  Must be one of: " + available_annealing_schedules + ".",
+					false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
+				)
+			);
+		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_annealing_steps_per_attempt", "Sets the length of the Monte Carlo trajectory performed for each attempt of each problem.",
