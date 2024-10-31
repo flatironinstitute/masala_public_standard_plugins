@@ -44,6 +44,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -370,13 +371,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem, this, std::placeholders::_1 )
 			)
 		);
-		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
-				"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
-				"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
-				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
-			)
-		);
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< AnnealingScheduleBase_API const & > annealing_sched_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
+					"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
+					"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
+					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
+				)
+			);
+			annealing_sched_setter->add_setter_annotation(
+				masala::make_shared< setter_annotation::OwnedSingleObjectSetterAnnotation >()
+			);
+			api_description->add_setter( annealing_sched_setter );
+		}
         std::string const available_annealing_schedules(
             masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
                 std::vector< std::string >{ "AnnealingSchedule" }, true
