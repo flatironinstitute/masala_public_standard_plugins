@@ -379,9 +379,14 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
 				)
 			);
-			annealing_sched_setter->add_setter_annotation(
+			setter_annotation::OwnedSingleObjectSetterAnnotationSP owned_annotation(
 				masala::make_shared< setter_annotation::OwnedSingleObjectSetterAnnotation >()
 			);
+			owned_annotation->set_plugin_manager_info(
+				std::vector< std::string >{ "AnnealingSchedule" },
+				std::vector< std::string >{ "annealing_schedule" }
+			);
+			annealing_sched_setter->add_setter_annotation( owned_annotation );
 			api_description->add_setter( annealing_sched_setter );
 		}
         std::string const available_annealing_schedules(
