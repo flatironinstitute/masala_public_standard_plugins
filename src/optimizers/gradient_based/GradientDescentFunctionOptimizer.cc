@@ -343,6 +343,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			set_line_optimizer_setter_annotation->set_engine_manager_info(
 				std::vector< std::string >{ "LineOptimizer" },
 				std::vector< std::string >{ "line_optimizer" },
+				*set_line_optimizer_setter,
 				true
 			);
 			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
