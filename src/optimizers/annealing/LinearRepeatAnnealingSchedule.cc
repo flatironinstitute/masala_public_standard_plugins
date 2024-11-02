@@ -36,7 +36,7 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
 // STL headers
-#include <iostream> // COMMENT ME OUT -- FOR DEBUGGING ONLY
+//#include <iostream> // COMMENT ME OUT -- FOR DEBUGGING ONLY
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -252,7 +252,7 @@ LinearRepeatAnnealingSchedule::temperature() const {
     // std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
     // std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
-    std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    //std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
@@ -275,7 +275,7 @@ LinearRepeatAnnealingSchedule::temperature(
     // std::cout << "callcount_mod: " << callcount_mod << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     Real const f( static_cast< Real >( callcount_mod ) / static_cast< Real >( static_cast< Size >( cyclelength_and_remainder.quot ) - 1 ) );
     // std::cout << "f: " << f << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
-    std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
+    //std::cout << "retval: " << f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial() << std::endl; // COMMENT ME OUT -- FOR DEBUGGING ONLY
     return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
