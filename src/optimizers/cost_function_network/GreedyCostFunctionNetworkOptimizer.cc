@@ -124,7 +124,7 @@ GreedyCostFunctionNetworkOptimizer::get_categories() const {
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
 std::vector< std::string >
 GreedyCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
@@ -140,6 +140,13 @@ std::vector< std::vector< std::string > >
 GreedyCostFunctionNetworkOptimizer::get_engine_categories() const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
 	return CostFunctionNetworkOptimizer::get_engine_categories();
+}
+
+/// @brief Get the keywords that this MasalaEngine has.
+/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
+std::vector< std::string >
+GreedyCostFunctionNetworkOptimizer::get_engine_keywords() const {
+	return get_keywords();
 }
 
 /// @brief Get the class name.
