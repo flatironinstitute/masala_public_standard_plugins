@@ -51,8 +51,7 @@ ConstantAnnealingSchedule::ConstantAnnealingSchedule(
 ) :
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
 {
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    temperature_ = src.temperature_;
+    *this = src;
 }
 
 /// @brief Assignment operator.
