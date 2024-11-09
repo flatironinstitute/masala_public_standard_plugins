@@ -51,8 +51,7 @@ LinearAnnealingSchedule::LinearAnnealingSchedule(
 ) :
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
 {
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    protected_assign(src);
+    *this = src;
 }
 
 /// @brief Assignment operator.

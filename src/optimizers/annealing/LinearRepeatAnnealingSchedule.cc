@@ -51,7 +51,9 @@ LinearRepeatAnnealingSchedule::LinearRepeatAnnealingSchedule(
     LinearRepeatAnnealingSchedule const & src
 ) :
     LinearAnnealingSchedule( src ) // Locks mutex and calls protected_assign().
-{}
+{
+   *this = src;
+}
 
 /// @brief Assignment operator.
 LinearRepeatAnnealingSchedule &
