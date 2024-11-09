@@ -32,6 +32,7 @@
 
 // Base headers:
 #include <base/types.hh>
+#include <base/managers/engine/MasalaEngineAPI.fwd.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
@@ -153,7 +154,7 @@ public:
 	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 	void
 	set_line_optimizer(
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
+		masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
 	);
 
 	/// @brief Set the tolerance for determining whether or not we've finished our search.

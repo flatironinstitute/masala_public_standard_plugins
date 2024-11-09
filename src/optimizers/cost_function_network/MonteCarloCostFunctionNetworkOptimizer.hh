@@ -35,11 +35,12 @@
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
-#include <base/types.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 
 // Base headers:
+#include <base/types.hh>
+#include <base/managers/plugin_module/MasalaPluginAPI.fwd.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.fwd.hh>
 
 // STL headers:
@@ -207,8 +208,8 @@ public:
 	void set_n_solutions_to_store_per_problem( masala::base::Size const n_solutions_in );
 
 	/// @brief Set the annealing schedule to use for annealing.
-	/// @details Cloned on input.
-	void set_annealing_schedule( masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in );
+	/// @details Cloned on input.  Throws if the plugin module passed in is not an annealing schedule.
+	void set_annealing_schedule( masala::base::managers::plugin_module::MasalaPluginAPI const & schedule_in );
 
 	/// @brief Set the annealing schedule by name.
 	/// @details Namespace is not required unless the name is not unique.  Throws if

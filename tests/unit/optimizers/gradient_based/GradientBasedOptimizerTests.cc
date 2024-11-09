@@ -27,6 +27,7 @@
 // Unit headers:
 #include <optimizers/gradient_based/util.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
+#include <optimizers_api/auto_generated_api/gradient_based/BrentAlgorithmLineOptimizer_API.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
 
 // Registraton headers:
@@ -262,6 +263,7 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 TEST_CASE( "Find the local minimum of a two-dimensional function using the GradientDescentFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::GradientDescientFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][brent_algorithm][line_optimizer]" ) {
 	using masala::base::Real;
 	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_based;
 	using masala::base::managers::tracer::MasalaTracerManager;
 	using masala::base::managers::tracer::MasalaTracerManagerHandle;
 	using masala::base::managers::threads::MasalaThreadManager;
@@ -305,7 +307,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 		}
 
 		GradientDescentFunctionOptimizer gradopt;
-		gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer >() );
+		gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer_API >() );
 		gradopt.set_throw_if_iterations_exceeded(true);
 		gradopt.set_threads_to_request(3);
 		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( *curproblems ) );

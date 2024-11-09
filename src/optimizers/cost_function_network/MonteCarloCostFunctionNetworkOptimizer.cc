@@ -324,6 +324,7 @@ MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum_from_string(
 /// @brief Get the API definition for this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
 MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
+    using namespace masala::base::managers::plugin_module;
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
@@ -372,9 +373,16 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 			)
 		);
 		{
-			MasalaObjectAPISetterDefinition_OneInputSP< AnnealingScheduleBase_API const & > annealing_sched_setter(
-				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
-					"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
+            std::string const available_annealing_schedules(
+				masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
+					std::vector< std::string >{ "AnnealingSchedule" }, true
+				)
+			);
+
+			MasalaObjectAPISetterDefinition_OneInputSP< MasalaPluginAPI const & > annealing_sched_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< MasalaPluginAPI const & > > (
+					"set_annealing_schedule", "Sets the annealing schedule to use for the problem.  Available annealing schedule types include: "
+					+ available_annealing_schedules + ".",
 					"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
 					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
 				)
@@ -388,13 +396,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 			);
 			annealing_sched_setter->add_setter_annotation( owned_annotation );
 			api_description->add_setter( annealing_sched_setter );
-		}
-		{
-			std::string const available_annealing_schedules(
-				masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
-					std::vector< std::string >{ "AnnealingSchedule" }, true
-				)
-			);
+
 			api_description->add_setter(
 				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 					"set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  Creates an annealing schedule and leaves it with "
@@ -635,15 +637,18 @@ MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem(
 }
 
 /// @brief Set the annealing schedule to use for annealing.
-/// @details Cloned on input.
+/// @details Cloned on input.  Throws if the plugin module passed in is not an annealing schedule.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
-    masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in
+	masala::base::managers::plugin_module::MasalaPluginAPI const & schedule_in
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
-    annealing_schedule_ = schedule_in.deep_clone();
-    annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
-    annealing_schedule_->reset_call_count();
+	using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
+	AnnealingScheduleBase_API const * anneal_sched_ptr( dynamic_cast< AnnealingScheduleBase_API const * >( &schedule_in ) );
+	CHECK_OR_THROW_FOR_CLASS( anneal_sched_ptr != nullptr, "set_annealing_schedule", "The " + schedule_in.inner_class_name() + " object passed to this function was not an AnnealingScheduleBase-derived class." );
+	std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	annealing_schedule_ = anneal_sched_ptr->deep_clone();
+	annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+	annealing_schedule_->reset_call_count();
 }
 
 /// @brief Set the annealing schedule by name.
