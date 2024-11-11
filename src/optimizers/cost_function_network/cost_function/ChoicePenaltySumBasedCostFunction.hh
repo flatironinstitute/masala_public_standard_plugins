@@ -135,6 +135,11 @@ public:
 	std::vector< std::string >
 	get_keywords() const override;
 
+	/// @brief Get the keywords for this MasalaDataRepresentation.
+	/// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible" }
+	std::vector< std::string >
+	get_data_representation_keywords() const override;
+
 	/// @brief This class is pure virtual, and does not define the name function.
 	std::string class_name() const override = 0;
 

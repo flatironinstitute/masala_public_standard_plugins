@@ -133,6 +133,16 @@ SquareOfChoicePenaltySumCostFunction::get_data_representation_categories() const
     };
 }
 
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible", "quadratic", "squared" }
+std::vector< std::string >
+SquareOfChoicePenaltySumCostFunction::get_data_representation_keywords() const {
+	std::vector< std::string > outvec( ChoicePenaltySumBasedCostFunction< masala::base::Real >::get_data_representation_keywords() );
+    outvec.push_back( "quadratic" );
+    outvec.push_back( "squared" );
+    return outvec;
+}
+
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.

@@ -140,6 +140,17 @@ ChoicePenaltySumBasedCostFunction<T>::get_keywords() const {
     return outvec;
 }
 
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible" }
+template< typename T >
+std::vector< std::string >
+ChoicePenaltySumBasedCostFunction<T>::get_data_representation_keywords() const {
+	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_keywords() );
+    outvec.push_back( "choice_penalty_sum_based" );
+    outvec.push_back( "not_pairwise_decomposible" );
+    return outvec;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////

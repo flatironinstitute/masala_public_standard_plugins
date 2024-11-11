@@ -184,6 +184,16 @@ FunctionOfIntegerPenaltySumCostFunction::get_data_representation_categories() co
     return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoicePenaltySumBasedCostFunction", "IntegerPenaltySumBasedCostFunction", "FunctionOfIntegerPenaltySumCostFunction" } };
 }
 
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible", "function", "integer" }
+std::vector< std::string >
+FunctionOfIntegerPenaltySumCostFunction::get_data_representation_keywords() const {
+	std::vector< std::string > outvec( ChoicePenaltySumBasedCostFunction< signed long int >::get_data_representation_keywords() );
+    outvec.push_back( "function" );
+    outvec.push_back( "integer" );
+    return outvec;
+}
+
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.

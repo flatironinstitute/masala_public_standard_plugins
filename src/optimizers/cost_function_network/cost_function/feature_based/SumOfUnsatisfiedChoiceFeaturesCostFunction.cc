@@ -114,6 +114,16 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_categories()
     return std::vector< std::vector< std::string > >{ { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction" } };
 }
 
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "not_pairwise_decomposible", "unsatisfied_choice_feature_sum_based" }
+std::vector< std::string >
+SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_keywords() const {
+	std::vector< std::string > outvec( CostFunction::get_data_representation_keywords() );
+    outvec.push_back( "not_pairwise_decomposible" );
+    outvec.push_back( "unsatisfied_choice_feature_sum_based" );
+    return outvec;
+}
+
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
