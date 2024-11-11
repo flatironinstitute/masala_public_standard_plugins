@@ -115,6 +115,19 @@ ArmijoInexactLineOptimizer::get_engine_categories() const {
     return std::vector< std::vector < std::string > >{ { "LineOptimizer", "ArmijoInexactLineOptimizer" } };
 }
 
+/// @brief Keywords for engines.
+/// @returns { "line_optimizer", "lightweight", "numeric", "armijo", "inexact" }
+std::vector < std::string >
+ArmijoInexactLineOptimizer::get_engine_keywords() const {
+	return std::vector< std::string > {
+		"line_optimizer",
+		"lightweight",
+		"numeric",
+		"armijo",
+		"inexact"
+	};
+}
+
 /// @brief Every class can name itself.
 /// @returns "ArmijoInexactLineOptimizer".
 std::string
