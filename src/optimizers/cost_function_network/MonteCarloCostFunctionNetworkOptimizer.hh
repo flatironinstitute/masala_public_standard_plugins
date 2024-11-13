@@ -143,6 +143,11 @@ public:
 	std::vector< std::vector< std::string > >
 	get_engine_categories() const override;
 
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
+
 	/// @brief Get the class name.
 	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
 	std::string class_name() const override;

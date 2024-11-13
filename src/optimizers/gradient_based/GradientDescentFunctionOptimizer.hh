@@ -120,6 +120,11 @@ public:
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns  { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
+
 	/// @brief Every class can name itself.
 	/// @returns "GradientDescentFunctionOptimizer".
 	std::string class_name() const override;

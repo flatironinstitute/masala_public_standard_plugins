@@ -98,7 +98,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+	/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -106,6 +106,11 @@ public:
 	/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }
 	std::vector< std::vector< std::string > >
 	get_engine_categories() const override;
+
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
 
 	/// @brief Get the class name.
 	/// @returns "GreedyCostFunctionNetworkOptimizer".

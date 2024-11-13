@@ -142,6 +142,14 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_cate
     };
 }
 
+
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "not_pairwise_decomposible", "unsatisfied_choice_feature_sum_based" }
+std::vector< std::string >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_keywords() const {
+    return SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_keywords();
+}
+
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.

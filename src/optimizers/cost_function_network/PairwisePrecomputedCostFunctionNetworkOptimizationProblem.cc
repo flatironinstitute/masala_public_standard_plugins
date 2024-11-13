@@ -148,6 +148,17 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_data_representati
     return vector< vector< string > >{ { "OptimizationProblem", "CostFunctionNetworkOptimizationProblem", "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" } };
 }
 
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric" }
+std::vector< std::string >
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_data_representation_keywords() const {
+	return std::vector< std::string > {
+		"optimization_problem",
+		"cost_function_network_optimization_problem",
+		"numeric"
+	};
+}
+
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns { "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer" }

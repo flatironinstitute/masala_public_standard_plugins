@@ -224,6 +224,13 @@ MonteCarloCostFunctionNetworkOptimizer::get_engine_categories() const {
 	return CostFunctionNetworkOptimizer::get_engine_categories();
 }
 
+/// @brief Get the keywords that this MasalaEngine has.
+/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+std::vector< std::string >
+MonteCarloCostFunctionNetworkOptimizer::get_engine_keywords() const {
+    return get_keywords();
+}
+
 /// @brief Get the class name.
 /// @returns "MonteCarloCostFunctionNetworkOptimizer".
 std::string

@@ -114,6 +114,19 @@ BrentAlgorithmLineOptimizer::get_engine_categories() const {
     return std::vector< std::vector < std::string > >{ { "LineOptimizer", "BrentAlgorithmLineOptimizer" } };
 }
 
+/// @brief Keywords for engines.
+/// @returns { "line_optimizer", "lightweight", "numeric", "brent_algorithm" }
+std::vector < std::string >
+BrentAlgorithmLineOptimizer::get_engine_keywords() const {
+	return std::vector< std::string > {
+		"line_optimizer",
+		"lightweight",
+		"numeric",
+		"brent_algorithm"
+	};
+}
+
+
 /// @brief Every class can name itself.
 /// @returns "BrentAlgorithmLineOptimizer".
 std::string
