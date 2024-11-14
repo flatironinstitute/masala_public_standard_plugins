@@ -28,7 +28,7 @@
 #include <base/managers/version/MasalaVersionManager.hh>
 
 #define STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
-#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 5
+#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 6
 
 namespace standard_masala_plugins {
 namespace registration_api {
@@ -52,8 +52,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 5 ), // Min version
+        std::pair< Size, Size >( 0, 6 ), // Min version
         "",
+		"Prior to version 0.6, annotations for API functions indicating preferred data representations were not available."
 		"Prior to version 0.5, annotations for API functions were not available, and certain problems existed "
 		"with including Masala objects in API definitions."
 		"Prior to version 0.4, certain functions in the CostFunctionNetworkOptimizationProblem class (like "
