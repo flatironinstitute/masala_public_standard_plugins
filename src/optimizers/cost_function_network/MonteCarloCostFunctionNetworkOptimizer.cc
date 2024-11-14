@@ -349,7 +349,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				"function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
 				"representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
 				"get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
-				false, true,
+				true, false,
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
 			)
 		);
