@@ -290,6 +290,17 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 
 		// Getters:
 		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::managers::engine::MasalaDataRepresentationAPISP > >(
+				"get_template_preferred_cfn_data_representation_copy", "Get a template cost function network optimization problem data representation, configured "
+				"by the user but with no data entered.  If no template CFN problem has been passed in by calling set_template_preferred_cfn_data_representation(), this "
+				"function returns a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Otherwise, it deep-clones the object that was passed in.",
+				"template_preferred_cfn_data_representation_copy", "A deep clone of the configured but empty CFN problem representation that was passed in to "
+				"set_template_preferred_cfn_data_representation(), or a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem if no template was provided.",
+				true, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::get_template_preferred_cfn_data_representation_copy, this )
+			)
+		);
+		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
 				"cpu_threads_to_request", "Gets the number of threads to request when running problems in parallel.",
 				"cpu_threads_to_request", "The number of CPU threads to request.  This is a maximum; fewer are requested if there are fewer "
