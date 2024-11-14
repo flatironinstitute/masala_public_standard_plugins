@@ -54,17 +54,15 @@ register_library() {
         true,
         std::pair< Size, Size >( 0, 6 ), // Min version
         "",
-		"Prior to version 0.6, annotations for API functions indicating preferred data representations were not available."
+		"Prior to version 0.6, annotations for API functions indicating preferred data representations were not available.  "
 		"Prior to version 0.5, annotations for API functions were not available, and certain problems existed "
-		"with including Masala objects in API definitions."
+		"with including Masala objects in API definitions.  "
 		"Prior to version 0.4, certain functions in the CostFunctionNetworkOptimizationProblem class (like "
-		"make_independent()) were unnecessarily made virtual and overridable."
+		"make_independent()) were unnecessarily made virtual and overridable.  "
 		"Prior to version 0.3, certain accessor functions for setter descriptions in API definitions "
 		"returned the wrong type.  "
         "Prior to version 0.2, the Standard Masala Library's SquareOfChoicePenaltySumCostFunction "
-        "and FunctionOfIntegerPenaltySumCostFunction were in the core Masala library.  "
-		"Prior to version 0.4, certain functions in the CostFunctionNetworkOptimizationProblem class (like "
-		"make_independent()) were unnecessarily made virtual and overridable."
+        "and FunctionOfIntegerPenaltySumCostFunction were in the core Masala library."
     );
     MasalaVersionManager::get_instance()->add_library_information( module_version_info );
     standard_masala_plugins::registration::register_sub_libraries();
