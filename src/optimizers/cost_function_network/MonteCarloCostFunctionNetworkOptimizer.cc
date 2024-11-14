@@ -139,38 +139,26 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 ) :
     masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
 {
-    std::lock_guard< std::mutex > lock( src.cfn_solver_mutex() );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-    attempts_per_problem_ = src.attempts_per_problem_;
-    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
-    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
-    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
+	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex() );
+	cpu_threads_to_request_ = src.cpu_threads_to_request_;
+	attempts_per_problem_ = src.attempts_per_problem_;
+	n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
+	annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
+	annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
 
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_->reset_call_count();
-    }
+	if( annealing_schedule_ != nullptr ) {
+		annealing_schedule_->reset_call_count();
+	}
 
-    solution_storage_mode_ = src.solution_storage_mode_;
+	solution_storage_mode_ = src.solution_storage_mode_;
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
-    std::lock( cfn_solver_mutex(), src.cfn_solver_mutex() );
-    std::lock_guard< std::mutex > lock1( cfn_solver_mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.cfn_solver_mutex(), std::adopt_lock );
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-    attempts_per_problem_ = src.attempts_per_problem_;
-    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
-    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
-    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_->reset_call_count();
-    }
-    solution_storage_mode_ = src.solution_storage_mode_;
-    return *this;
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
+	return *this;
 }
 
 /// @brief Make a copy of this object that's wholly independent.
@@ -1446,6 +1434,28 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+void
+MonteCarloCostFunctionNetworkOptimizer::protected_assign(
+	CostFunctionNetworkOptimizer const & src
+) {
+	MonteCarloCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< MonteCarloCostFunctionNetworkOptimizer const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a MonteCarloCostFunctionNetworkOptimizer object." );
+
+	cpu_threads_to_request_ = src_cast_ptr->cpu_threads_to_request_;
+	attempts_per_problem_ = src_cast_ptr->attempts_per_problem_;
+	n_solutions_to_store_per_problem_ = src_cast_ptr->n_solutions_to_store_per_problem_;
+	annealing_steps_per_attempt_ = src_cast_ptr->annealing_steps_per_attempt_;
+	annealing_schedule_ = ( src_cast_ptr->annealing_schedule_ == nullptr ? nullptr : src_cast_ptr->annealing_schedule_->deep_clone() );
+
+	if( annealing_schedule_ != nullptr ) {
+		annealing_schedule_->reset_call_count();
+	}
+	
+	solution_storage_mode_ = src_cast_ptr->solution_storage_mode_;
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_assign( src );
+}
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 /// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
