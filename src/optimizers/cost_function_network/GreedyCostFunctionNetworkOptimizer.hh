@@ -269,6 +269,27 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
 	) const;
 
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+	/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+	/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+	/// This version just calls the base class version; there are no special checks here.
+	void
+	protected_set_template_preferred_cfn_data_representation(
+		masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+	) override;
+
+	/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+	/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+	masala::base::managers::engine::MasalaDataRepresentationAPISP
+	protected_get_default_template_preferred_cfn_data_representation() const override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -24,6 +24,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
+
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
@@ -43,6 +46,10 @@
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
+#include <base/managers/engine/data_representation_request/MasalaDataRepresentationNameRequirementCriterion.hh>
+#include <base/managers/engine/MasalaDataRepresentationRequest.hh>
+#include <base/managers/engine/MasalaDataRepresentationManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationCreator.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -829,6 +836,61 @@ GreedyCostFunctionNetworkOptimizer::check_starting_state_against_problem(
 			std::to_string( i ) + ", but this node has only " + std::to_string( choices_by_varnode[i].second ) + " choices."
 		);
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+/// This version is virtual to allow derived classes to override it, to add checks of their own.  If overridden, the override should call the
+/// base class to set the variable internally.
+void
+GreedyCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation(
+	masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+) {
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
+}
+
+/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+masala::base::managers::engine::MasalaDataRepresentationAPISP
+GreedyCostFunctionNetworkOptimizer::protected_get_default_template_preferred_cfn_data_representation() const {
+	using namespace masala::base::managers::engine;
+	using namespace masala::base::managers::engine::data_representation_request;
+	using masala::base::Size;
+
+	MasalaDataRepresentationNameRequirementCriterionSP name_criterion( masala::make_shared< MasalaDataRepresentationNameRequirementCriterion >( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
+	MasalaDataRepresentationRequest request;
+	request.add_data_representation_criterion( name_criterion );
+	std::vector< MasalaDataRepresentationCreatorCSP > creators( MasalaDataRepresentationManager::get_instance()->get_compatible_data_representation_creators( request ) );
+	CHECK_OR_THROW_FOR_CLASS( creators.size() >= 1, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+	bool found(false);
+	Size found_index(0);
+	for( auto const & creator : creators ) {
+		if( creator->get_plugin_object_namespace_and_name() == "standard_masala_plugins::optimizers::cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) {
+			found = true;
+			break;
+		}
+		++found_index;
+	}
+	CHECK_OR_THROW_FOR_CLASS( found, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+
+	MasalaDataRepresentationAPISP pairwise_cfn_api( creators[found_index]->create_data_representation() );
+	PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP pairwise_cfn( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( pairwise_cfn_api->get_inner_data_representation_object() ) );
+	CHECK_OR_THROW_FOR_CLASS( pairwise_cfn != nullptr, "protected_get_default_template_preferred_cfn_data_representation", "The created object "
+		"could not be interpreted as a PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  This is a program error.  Please consult a developer."
+	);
+
+	// Could configure the pairwise_cfn object here if needed.
+	return pairwise_cfn_api;
 }
 
 

@@ -1493,7 +1493,7 @@ MonteCarloCostFunctionNetworkOptimizer::protected_get_default_template_preferred
 	CHECK_OR_THROW_FOR_CLASS( pairwise_cfn != nullptr, "protected_get_default_template_preferred_cfn_data_representation", "The created object "
 		"could not be interpreted as a PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  This is a program error.  Please consult a developer."
 	);
-	
+
 	// Could configure the pairwise_cfn object here if needed.
 	return pairwise_cfn_api;
 }
