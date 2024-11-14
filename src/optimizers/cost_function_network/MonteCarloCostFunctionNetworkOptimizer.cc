@@ -343,6 +343,17 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 
         // Setters:
 		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > >(
+				"set_template_preferred_cfn_data_representation", "Set a template cost function network optimization problem data representation, "
+				"configured by the user but with no data entered.  This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() "
+				"function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
+				"representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
+				"get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
+				false, true,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
 				"threads_in", "The number of CPU threads to request.  This is a maximum; fewer are requested if there are fewer "
