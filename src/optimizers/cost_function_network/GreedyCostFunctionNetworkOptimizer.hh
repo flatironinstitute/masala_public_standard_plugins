@@ -275,6 +275,9 @@ protected:
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+	void protected_assign( CostFunctionNetworkOptimizer const & src ) override;
+
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
 	/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.

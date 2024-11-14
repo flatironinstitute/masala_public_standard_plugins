@@ -137,27 +137,19 @@ get_all_greedy_refinement_modes() {
 MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     MonteCarloCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
-	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex() );
-	cpu_threads_to_request_ = src.cpu_threads_to_request_;
-	attempts_per_problem_ = src.attempts_per_problem_;
-	n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
-	annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
-	annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
-
-	if( annealing_schedule_ != nullptr ) {
-		annealing_schedule_->reset_call_count();
-	}
-
-	solution_storage_mode_ = src.solution_storage_mode_;
+	std::lock( src.cfn_solver_mutex(), cfn_solver_mutex() );
+	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex(), std::adopt_lock );
+	std::lock_guard< std::mutex > lock2( cfn_solver_mutex(), std::adopt_lock );
+	protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src ); // Calls protected_assign().
 	return *this;
 }
 

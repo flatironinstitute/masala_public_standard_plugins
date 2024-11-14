@@ -70,30 +70,22 @@ namespace cost_function_network {
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
 GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
-    GreedyCostFunctionNetworkOptimizer const & src
+	GreedyCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
-    std::lock_guard< std::mutex > lock( src.optimizer_mutex_ );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-	n_random_starting_states_ = src.n_random_starting_states_;
-	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
-	optimizer_starting_states_ = src.optimizer_starting_states_;
+	std::lock( optimizer_mutex_, src.optimizer_mutex_ );
+	std::lock_guard< std::mutex > lock( optimizer_mutex_, std::adopt_lock );
+	std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
+	protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 GreedyCostFunctionNetworkOptimizer &
 GreedyCostFunctionNetworkOptimizer::operator=( GreedyCostFunctionNetworkOptimizer const & src ) {
-    std::lock( optimizer_mutex_, src.optimizer_mutex_ );
-    std::lock_guard< std::mutex > lock1( optimizer_mutex_, std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-	n_random_starting_states_ = src.n_random_starting_states_;
-	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
-	optimizer_starting_states_ = src.optimizer_starting_states_;
-    return *this;
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );  // Calls protected_assign().
+	return *this;
 }
 
 /// @brief Make a copy of this object that's wholly independent.
@@ -841,6 +833,22 @@ GreedyCostFunctionNetworkOptimizer::check_starting_state_against_problem(
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+void
+GreedyCostFunctionNetworkOptimizer::protected_assign(
+	CostFunctionNetworkOptimizer const & src
+) {
+	GreedyCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< GreedyCostFunctionNetworkOptimizer const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a GreedyCostFunctionNetworkOptimizer object." );
+
+	cpu_threads_to_request_ = src_cast_ptr->cpu_threads_to_request_;
+	n_random_starting_states_ = src_cast_ptr->n_random_starting_states_;
+	n_times_seen_multiplier_ = src_cast_ptr->n_times_seen_multiplier_;
+	optimizer_starting_states_ = src_cast_ptr->optimizer_starting_states_;
+	
+	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_assign( src );
+}
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 /// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
