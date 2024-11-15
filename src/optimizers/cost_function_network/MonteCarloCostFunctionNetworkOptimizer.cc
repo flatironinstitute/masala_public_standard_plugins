@@ -142,7 +142,7 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 	std::lock( src.cfn_solver_mutex(), cfn_solver_mutex() );
 	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex(), std::adopt_lock );
 	std::lock_guard< std::mutex > lock2( cfn_solver_mutex(), std::adopt_lock );
-	protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
+	MonteCarloCostFunctionNetworkOptimizer::protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.

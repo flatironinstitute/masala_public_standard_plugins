@@ -77,7 +77,7 @@ GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
 	std::lock( optimizer_mutex_, src.optimizer_mutex_ );
 	std::lock_guard< std::mutex > lock( optimizer_mutex_, std::adopt_lock );
 	std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
-	protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
+	GreedyCostFunctionNetworkOptimizer::protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.
