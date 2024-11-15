@@ -46,6 +46,7 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
+#include <base/api/setter/setter_annotation/PreferredTemplateDataRepresentationSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -342,17 +343,30 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
         ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( MonteCarloCostFunctionNetworkOptimizer, api_description );
 
         // Setters:
-		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > >(
-				"set_template_preferred_cfn_data_representation", "Set a template cost function network optimization problem data representation, "
-				"configured by the user but with no data entered.  This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() "
-				"function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
-				"representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
-				"get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
-				true, false,
-				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
-			)
-		);
+        {
+			MasalaObjectAPISetterDefinition_OneInputSP< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > template_setter(
+                masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > >(
+                    "set_template_preferred_cfn_data_representation", "Set a template cost function network optimization problem data representation, "
+                    "configured by the user but with no data entered.  This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() "
+                    "function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
+                    "representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
+                    "get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
+                    true, false,
+                    std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
+                )
+			);
+			setter_annotation::PreferredTemplateDataRepresentationSetterAnnotationSP annotation(
+				masala::make_shared< setter_annotation::PreferredTemplateDataRepresentationSetterAnnotation >()
+			);
+			annotation->set_data_representation_manager_info(
+				std::vector< std::string >{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" },
+				std::vector< std::string >{},
+				*template_setter,
+				true
+			);
+			template_setter->add_setter_annotation( annotation );
+			api_description->add_setter( template_setter );
+		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
