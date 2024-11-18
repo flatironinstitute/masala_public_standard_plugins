@@ -149,13 +149,14 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_data_representati
 }
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
-/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric" }
+/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric", "cpu" }
 std::vector< std::string >
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_data_representation_keywords() const {
 	return std::vector< std::string > {
 		"optimization_problem",
 		"cost_function_network_optimization_problem",
-		"numeric"
+		"numeric",
+        "cpu"
 	};
 }
 
@@ -168,10 +169,10 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_compatible_masala
 }
 
 /// @brief Get the properties of this MasalaDataRepresentation.
-/// @returns { "optimization_problem", "cost_function_network_optimization_problem" }.
+/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "cpu" }.
 std::vector< std::string >
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_present_data_representation_properties() const {
-    return std::vector< std::string >{ "optimization_problem", "cost_function_network_optimization_problem" };
+    return std::vector< std::string >{ "optimization_problem", "cost_function_network_optimization_problem", "cpu" };
 }
 
 /// @brief Get the properties of this MasalaDataRepresentation that might possibly be present.

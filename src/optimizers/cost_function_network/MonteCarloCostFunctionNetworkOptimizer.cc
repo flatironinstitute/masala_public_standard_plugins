@@ -360,7 +360,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 			);
 			annotation->set_data_representation_manager_info(
 				std::vector< std::string >{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" },
-				std::vector< std::string >{},
+				std::vector< std::string >{ "cpu" },
 				*template_setter,
 				true
 			);
