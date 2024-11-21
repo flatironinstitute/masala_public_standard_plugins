@@ -1188,6 +1188,26 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Real;
     using masala::base::Size;
 
+    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
+    {
+        // Some output:
+        std::ostringstream choicestream;
+        bool first(true);
+        for( auto const & choicepair : n_choices_per_variable_node ) {
+            if( first ) {
+                first = false;
+            } else {
+                choicestream << ",";
+            }
+            choicestream << choicepair.second;
+        }
+        
+        write_to_tracer( "Starting " + std::to_string( annealing_steps ) + " Monte Carlo trajectory for problem with " +
+            std::to_string( problem->total_variable_nodes() ) + " variable nodes, with the following choice counts at "
+            "variable nodes: [" + choicestream.str() + "]."
+        );
+    }
+
     // Compute lambda for the Poisson distribution for multiple moves.
     DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
         multimutation_probability_of_one_mutation > 0.0 && multimutation_probability_of_one_mutation <= 1.0,
@@ -1212,7 +1232,6 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     local_solutions.reserve( n_solutions_to_store );
 
     /// Selection for the solution:
-    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
     std::vector< std::pair< Size, Size > > n_choices_per_variable_node_using_variable_node_indices( n_variable_nodes );
     for( Size i(0); i<n_variable_nodes; ++i ) {
