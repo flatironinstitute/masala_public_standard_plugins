@@ -1202,7 +1202,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
             choicestream << choicepair.second;
         }
         
-        write_to_tracer( "Starting " + std::to_string( annealing_steps ) + " Monte Carlo trajectory for problem with " +
+        write_to_tracer( "Starting " + std::to_string( annealing_steps ) + "-step Monte Carlo trajectory for problem with " +
             std::to_string( problem->total_variable_nodes() ) + " variable nodes, with the following choice counts at "
             "variable nodes: [" + choicestream.str() + "]."
         );
