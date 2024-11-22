@@ -45,27 +45,27 @@ namespace cost_function {
 /// @brief Copy constructor.
 template< typename T >
 ChoicePenaltySumBasedCostFunction<T>::ChoicePenaltySumBasedCostFunction(
-    ChoicePenaltySumBasedCostFunction<T> const & src
+	ChoicePenaltySumBasedCostFunction<T> const & src
 ) :
-    Parent()
+	Parent()
 {
-    std::lock( src.data_representation_mutex(), data_representation_mutex() );
-    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
-    protected_assign( src );
+	std::lock( src.data_representation_mutex(), data_representation_mutex() );
+	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+	std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+	protected_assign( src );
 }
 
 // @brief Assignment operator.
 template< typename T >
 ChoicePenaltySumBasedCostFunction<T> &
 ChoicePenaltySumBasedCostFunction<T>::operator=(
-    ChoicePenaltySumBasedCostFunction<T> const & src
+	ChoicePenaltySumBasedCostFunction<T> const & src
 ) {
-    std::lock( src.data_representation_mutex(), data_representation_mutex() );
-    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
-    protected_assign( src );
-    return *this;
+	std::lock( src.data_representation_mutex(), data_representation_mutex() );
+	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+	std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+	protected_assign( src );
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ ChoicePenaltySumBasedCostFunction<T>::get_categories() const {
 template< typename T >
 std::vector< std::vector< std::string > >
 ChoicePenaltySumBasedCostFunction<T>::get_data_representation_categories() const {
-    return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoicePenaltySumBasedCostFunction" } };
+	return std::vector< std::vector< std::string > >{ { "CostFunction", "ChoicePenaltySumBasedCostFunction" } };
 }
 
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
@@ -100,9 +100,9 @@ ChoicePenaltySumBasedCostFunction<T>::get_data_representation_categories() const
 template< typename T >
 std::vector< std::string >
 ChoicePenaltySumBasedCostFunction<T>::get_compatible_masala_engines() const {
-    return std::vector< std::string >{
-        "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"
-    };
+	return std::vector< std::string >{
+		"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"
+	};
 }
 
 /// @brief Get the properties of this MasalaDataRepresentation.
@@ -110,11 +110,11 @@ ChoicePenaltySumBasedCostFunction<T>::get_compatible_masala_engines() const {
 template< typename T >
 std::vector< std::string >
 ChoicePenaltySumBasedCostFunction<T>::get_present_data_representation_properties() const {
-    return std::vector< std::string > {
-        "choice_penalty_sum_based",
-        "cost_function",
-        "not_pairwise_decomposible"
-    };
+	return std::vector< std::string > {
+		"choice_penalty_sum_based",
+		"cost_function",
+		"not_pairwise_decomposible"
+	};
 }
 
 /// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
@@ -123,9 +123,9 @@ ChoicePenaltySumBasedCostFunction<T>::get_present_data_representation_properties
 template< typename T >
 std::vector< std::string >
 ChoicePenaltySumBasedCostFunction<T>::get_absent_data_representation_properties() const {
-    return std::vector< std::string > {
-        "pairwise_decomposible"
-    };
+	return std::vector< std::string > {
+		"pairwise_decomposible"
+	};
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all
@@ -135,9 +135,9 @@ template< typename T >
 std::vector< std::string >
 ChoicePenaltySumBasedCostFunction<T>::get_keywords() const {
 	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_keywords() );
-    outvec.push_back( "choice_penalty_sum_based" );
-    outvec.push_back( "not_pairwise_decomposible" );
-    return outvec;
+	outvec.push_back( "choice_penalty_sum_based" );
+	outvec.push_back( "not_pairwise_decomposible" );
+	return outvec;
 }
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
@@ -146,9 +146,9 @@ template< typename T >
 std::vector< std::string >
 ChoicePenaltySumBasedCostFunction<T>::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_keywords() );
-    outvec.push_back( "choice_penalty_sum_based" );
-    outvec.push_back( "not_pairwise_decomposible" );
-    return outvec;
+	outvec.push_back( "choice_penalty_sum_based" );
+	outvec.push_back( "not_pairwise_decomposible" );
+	return outvec;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -167,35 +167,35 @@ ChoicePenaltySumBasedCostFunction<T>::get_data_representation_keywords() const {
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::set_penalties_for_all_choices_at_node(
-    masala::base::Size const absolute_node_index,
-    std::vector< T > const & penalties_by_choice_index
+	masala::base::Size const absolute_node_index,
+	std::vector< T > const & penalties_by_choice_index
 ) {
-    using masala::base::Size;
+	using masala::base::Size;
 
-    std::lock_guard< std::mutex > lock( data_representation_mutex() );
-    CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalties_for_all_choices_at_node",
-        "This function cannot be called after the " + class_name() + " has been finalized."
-    );
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalties_for_all_choices_at_node",
+		"This function cannot be called after the " + class_name() + " has been finalized."
+	);
 
-    Size const nchoices( penalties_by_choice_index.size() );
+	Size const nchoices( penalties_by_choice_index.size() );
 
 #ifndef NDEBUG
-    // Debug-mode checks:
-    for( Size i(0); i<nchoices; ++i ) {
-        DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
-            penalties_by_absolute_node_and_choice_.count( std::make_pair( absolute_node_index, i ) ) == 0,
-            "set_penalties_for_all_choices_at_node",
-            "Penalties for node " + std::to_string( absolute_node_index ) + ", choice " + std::to_string( i )
-            + " have already been set."
-        );
-    }
+	// Debug-mode checks:
+	for( Size i(0); i<nchoices; ++i ) {
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+			penalties_by_absolute_node_and_choice_.count( std::make_pair( absolute_node_index, i ) ) == 0,
+			"set_penalties_for_all_choices_at_node",
+			"Penalties for node " + std::to_string( absolute_node_index ) + ", choice " + std::to_string( i )
+			+ " have already been set."
+		);
+	}
 #endif
 
-    for( Size i(0); i<nchoices; ++i ) {
-        penalties_by_absolute_node_and_choice_[ std::make_pair( absolute_node_index, i ) ] = penalties_by_choice_index[i];
-        //write_to_tracer( "Set penalty for node " + std::to_string(absolute_node_index) + " choice " + std::to_string(i) + " to " + std::to_string(penalties_by_choice_index[i]) );
-    }
-    //write_to_tracer( "Set penalties for node " + std::to_string(absolute_node_index) + "'s " + std::to_string(penalties_by_choice_index.size()) + " choices." );
+	for( Size i(0); i<nchoices; ++i ) {
+		penalties_by_absolute_node_and_choice_[ std::make_pair( absolute_node_index, i ) ] = penalties_by_choice_index[i];
+		//write_to_tracer( "Set penalty for node " + std::to_string(absolute_node_index) + " choice " + std::to_string(i) + " to " + std::to_string(penalties_by_choice_index[i]) );
+	}
+	//write_to_tracer( "Set penalties for node " + std::to_string(absolute_node_index) + "'s " + std::to_string(penalties_by_choice_index.size()) + " choices." );
 }
 
 /// @brief Set the penalty for a choice at a node.
@@ -206,41 +206,41 @@ ChoicePenaltySumBasedCostFunction<T>::set_penalties_for_all_choices_at_node(
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::set_penalty_for_choice_at_node(
-    masala::base::Size const absolute_node_index,
-    masala::base::Size const choice_index,
-    T const penalty_value
+	masala::base::Size const absolute_node_index,
+	masala::base::Size const choice_index,
+	T const penalty_value
 ) {
-    using masala::base::Size;
-    std::lock_guard< std::mutex > lock( data_representation_mutex() );
-    CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalty_for_choice_at_node",
-        "This function cannot be called after the " + class_name() + " has been finalized."
-    );
+	using masala::base::Size;
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalty_for_choice_at_node",
+		"This function cannot be called after the " + class_name() + " has been finalized."
+	);
 
 #ifndef NDEBUG
-    // Debug-mode checks:
-    DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
-        penalties_by_absolute_node_and_choice_.count( std::make_pair( absolute_node_index, choice_index ) ) == 0,
-        "set_penalty_for_choice_at_node",
-        "The penalty for node " + std::to_string( absolute_node_index ) + ", choice "
-        + std::to_string( choice_index ) + " has already been set."
-    );
+	// Debug-mode checks:
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+		penalties_by_absolute_node_and_choice_.count( std::make_pair( absolute_node_index, choice_index ) ) == 0,
+		"set_penalty_for_choice_at_node",
+		"The penalty for node " + std::to_string( absolute_node_index ) + ", choice "
+		+ std::to_string( choice_index ) + " has already been set."
+	);
 #endif
 
-    penalties_by_absolute_node_and_choice_[ std::make_pair( absolute_node_index, choice_index ) ] = penalty_value;
+	penalties_by_absolute_node_and_choice_[ std::make_pair( absolute_node_index, choice_index ) ] = penalty_value;
 }
 
 /// @brief Set the constant offset.
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::set_constant_offset(
-    T const constant_offset
+	T const constant_offset
 ) {
-    std::lock_guard< std::mutex > lock( data_representation_mutex() );
-    CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_constant_offset",
-        "This function cannot be called after the " + class_name() + " has been finalized."
-    );
-    write_to_tracer( "Set constant offset to " + std::to_string( constant_offset ) + "." );
-    constant_offset_ = constant_offset;
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_constant_offset",
+		"This function cannot be called after the " + class_name() + " has been finalized."
+	);
+	write_to_tracer( "Set constant offset to " + std::to_string( constant_offset ) + "." );
+	constant_offset_ = constant_offset;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -253,9 +253,9 @@ ChoicePenaltySumBasedCostFunction<T>::set_constant_offset(
 template< typename T >
 masala::base::Real
 ChoicePenaltySumBasedCostFunction<T>::compute_cost_function(
-    std::vector< masala::base::Size > const & candidate_solution
+	std::vector< masala::base::Size > const & candidate_solution
 ) const {
-    return protected_weight() * static_cast< masala::base::Real >( protected_compute_cost_function_no_weight( candidate_solution ) );
+	return protected_weight() * static_cast< masala::base::Real >( protected_compute_cost_function_no_weight( candidate_solution ) );
 }
 
 /// @brief Given an old selection of choices at variable nodes and a new selection,
@@ -267,42 +267,42 @@ ChoicePenaltySumBasedCostFunction<T>::compute_cost_function(
 template< typename T >
 masala::base::Real
 ChoicePenaltySumBasedCostFunction<T>::compute_cost_function_difference(
-    std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new
+	std::vector< masala::base::Size > const & candidate_solution_old,
+	std::vector< masala::base::Size > const & candidate_solution_new
 ) const {
-    using masala::base::Size;
+	using masala::base::Size;
 
-    CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_cost_function_difference", "The " + class_name()
-        + " must be finalized before this function is called!"
-    );
-    Size const nentries_old( candidate_solution_old.size() );
-    Size const nentries_new( candidate_solution_new.size() );
-    CHECK_OR_THROW_FOR_CLASS( nentries_old == n_variable_positions_, "compute_cost_function", "Expected "
-        "a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
-        + " variable positions in the old candidate solution, but got " + std::to_string( nentries_old ) + "!" 
-    );
-    CHECK_OR_THROW_FOR_CLASS( nentries_new == n_variable_positions_, "compute_cost_function", "Expected "
-        "a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
-        + " variable positions in the new candidate solution, but got " + std::to_string( nentries_new ) + "!" 
-    );
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_cost_function_difference", "The " + class_name()
+		+ " must be finalized before this function is called!"
+	);
+	Size const nentries_old( candidate_solution_old.size() );
+	Size const nentries_new( candidate_solution_new.size() );
+	CHECK_OR_THROW_FOR_CLASS( nentries_old == n_variable_positions_, "compute_cost_function", "Expected "
+		"a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
+		+ " variable positions in the old candidate solution, but got " + std::to_string( nentries_old ) + "!" 
+	);
+	CHECK_OR_THROW_FOR_CLASS( nentries_new == n_variable_positions_, "compute_cost_function", "Expected "
+		"a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
+		+ " variable positions in the new candidate solution, but got " + std::to_string( nentries_new ) + "!" 
+	);
 
-    T sum_new( 0 ), sum_old( 0 ); // We ignore the constant offset, since it won't appear in the difference.
+	T sum_new( 0 ), sum_old( 0 ); // We ignore the constant offset, since it won't appear in the difference.
 
-    for( Size i(0); i<nentries_old; ++i ) {
-        DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( i < penalties_by_variable_node_and_choice_.size(),
-            "compute_cost_function_difference", "Program error in accumulating choice penalties."
-        );
-        if( candidate_solution_new[i] != candidate_solution_old[i] ) {
-            std::vector< T > const & vec( penalties_by_variable_node_and_choice_[i] );
-            if( candidate_solution_old[i] < vec.size() ) {
-                sum_old += vec[candidate_solution_old[i]];
-            }
-            if( candidate_solution_new[i] < vec.size() ) {
-                sum_new += vec[candidate_solution_new[i]];
-            }
-        }
-    }
-    return protected_weight() * ( static_cast< masala::base::Real >( sum_new ) - static_cast< masala::base::Real >( sum_old ) );
+	for( Size i(0); i<nentries_old; ++i ) {
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( i < penalties_by_variable_node_and_choice_.size(),
+			"compute_cost_function_difference", "Program error in accumulating choice penalties."
+		);
+		if( candidate_solution_new[i] != candidate_solution_old[i] ) {
+			std::vector< T > const & vec( penalties_by_variable_node_and_choice_[i] );
+			if( candidate_solution_old[i] < vec.size() ) {
+				sum_old += vec[candidate_solution_old[i]];
+			}
+			if( candidate_solution_new[i] < vec.size() ) {
+				sum_new += vec[candidate_solution_new[i]];
+			}
+		}
+	}
+	return protected_weight() * ( static_cast< masala::base::Real >( sum_new ) - static_cast< masala::base::Real >( sum_old ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,70 +322,70 @@ ChoicePenaltySumBasedCostFunction<T>::compute_cost_function_difference(
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
-    std::vector< masala::base::Size > const & variable_node_indices
+	std::vector< masala::base::Size > const & variable_node_indices
 ) {
-    using masala::base::Size;
+	using masala::base::Size;
 
 	penalties_by_variable_node_and_choice_.clear();
 	computed_constant_offset_ = 0.0;
 
-    std::unordered_map< Size, Size > absolute_to_variable_index;
-    for( Size i(0), imax(variable_node_indices.size()); i<imax; ++i ) {
-        DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
-            absolute_to_variable_index.count( variable_node_indices[i] ) == 0, "protected_finalize", "The absolute index " + std::to_string( variable_node_indices[i] ) + " appears more than once in the list of absolute node indices."
-        );
-        absolute_to_variable_index[variable_node_indices[i]] = i;
-    }
+	std::unordered_map< Size, Size > absolute_to_variable_index;
+	for( Size i(0), imax(variable_node_indices.size()); i<imax; ++i ) {
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+			absolute_to_variable_index.count( variable_node_indices[i] ) == 0, "protected_finalize", "The absolute index " + std::to_string( variable_node_indices[i] ) + " appears more than once in the list of absolute node indices."
+		);
+		absolute_to_variable_index[variable_node_indices[i]] = i;
+	}
 
-    n_variable_positions_ = variable_node_indices.size();
-    penalties_by_variable_node_and_choice_.resize( n_variable_positions_ );
+	n_variable_positions_ = variable_node_indices.size();
+	penalties_by_variable_node_and_choice_.resize( n_variable_positions_ );
 
-    for(
-        typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it( penalties_by_absolute_node_and_choice_.cbegin() );
-        it != penalties_by_absolute_node_and_choice_.cend();
-        ++it
-    ) {
-        Size const absindex( it->first.first );
-        Size const choiceindex( it->first.second );
-        T const penalty( it->second );
-        std::unordered_map< Size, Size >::const_iterator it2( absolute_to_variable_index.find( absindex ) );
-        if( it2 != absolute_to_variable_index.end() ) {
-            Size const varindex( it2->second );
-            DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
-                varindex < n_variable_positions_, "protected_finalize", "Program error: varindex out of range!"
-            );
-            std::vector< T > & vec( penalties_by_variable_node_and_choice_[varindex] );
-            if( vec.size() <= choiceindex ) {
-                vec.resize( choiceindex+1, T(0) );
-            }
-            vec[choiceindex] = penalty;
-            //write_to_tracer( "<" + std::to_string( varindex ) + "," + std::to_string( choiceindex ) + ">=" + std::to_string(penalty) ); //DELETE ME
-        } else {
+	for(
+		typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it( penalties_by_absolute_node_and_choice_.cbegin() );
+		it != penalties_by_absolute_node_and_choice_.cend();
+		++it
+	) {
+		Size const absindex( it->first.first );
+		Size const choiceindex( it->first.second );
+		T const penalty( it->second );
+		std::unordered_map< Size, Size >::const_iterator it2( absolute_to_variable_index.find( absindex ) );
+		if( it2 != absolute_to_variable_index.end() ) {
+			Size const varindex( it2->second );
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
+				varindex < n_variable_positions_, "protected_finalize", "Program error: varindex out of range!"
+			);
+			std::vector< T > & vec( penalties_by_variable_node_and_choice_[varindex] );
+			if( vec.size() <= choiceindex ) {
+				vec.resize( choiceindex+1, T(0) );
+			}
+			vec[choiceindex] = penalty;
+			//write_to_tracer( "<" + std::to_string( varindex ) + "," + std::to_string( choiceindex ) + ">=" + std::to_string(penalty) ); //DELETE ME
+		} else {
 #ifndef NDEBUG
-            //Check that we have only one choice at this node.
-            Size tempcounter(0);
-            for(
-                typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it3( penalties_by_absolute_node_and_choice_.cbegin() );
-                it3 != penalties_by_absolute_node_and_choice_.cend();
-                ++it3
-            ) {
-                if( it3->first.first == absindex ) {
-                    ++tempcounter;
-                }
-            }
-            DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( tempcounter == 1, "protected_finalize", "Expected exactly 1 choice "
-                "for node " + std::to_string( absindex ) + ", but got " + std::to_string( tempcounter ) + "!"
-            );
+			//Check that we have only one choice at this node.
+			Size tempcounter(0);
+			for(
+				typename std::unordered_map< std::pair< Size, Size >, T, masala::base::size_pair_hash >::const_iterator it3( penalties_by_absolute_node_and_choice_.cbegin() );
+				it3 != penalties_by_absolute_node_and_choice_.cend();
+				++it3
+			) {
+				if( it3->first.first == absindex ) {
+					++tempcounter;
+				}
+			}
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( tempcounter == 1, "protected_finalize", "Expected exactly 1 choice "
+				"for node " + std::to_string( absindex ) + ", but got " + std::to_string( tempcounter ) + "!"
+			);
 #endif
-            computed_constant_offset_ += penalty;
-            write_to_tracer( "Adjusting computed constant offset for penalty of " + std::to_string( penalty )
-                + " at constant node " + std::to_string( absindex ) + ".  Offset is now "
-                + std::to_string( computed_constant_offset_ ) + "."
-            );
-        }
-    }
+			computed_constant_offset_ += penalty;
+			write_to_tracer( "Adjusting computed constant offset for penalty of " + std::to_string( penalty )
+				+ " at constant node " + std::to_string( absindex ) + ".  Offset is now "
+				+ std::to_string( computed_constant_offset_ ) + "."
+			);
+		}
+	}
 
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
+	masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
 }
 
 /// @brief Is this data representation empty?
@@ -396,11 +396,11 @@ template< typename T >
 bool
 ChoicePenaltySumBasedCostFunction<T>::protected_empty() const {
 return penalties_by_absolute_node_and_choice_.empty() &&
-    penalties_by_variable_node_and_choice_.empty() &&
-    n_variable_positions_ == 0.0 &&
-    constant_offset_ == 0.0 &&
-    computed_constant_offset_ == 0.0 &&
-    Parent::protected_empty();
+	penalties_by_variable_node_and_choice_.empty() &&
+	n_variable_positions_ == 0.0 &&
+	constant_offset_ == 0.0 &&
+	computed_constant_offset_ == 0.0 &&
+	Parent::protected_empty();
 }
 
 /// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
@@ -408,12 +408,12 @@ return penalties_by_absolute_node_and_choice_.empty() &&
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::protected_clear() {
-penalties_by_absolute_node_and_choice_.clear();
-penalties_by_variable_node_and_choice_.clear();
-n_variable_positions = 0.0;
-constant_offset_ = 0.0;
-computed_constant_offset_ = 0.0;
-Parent::protected_clear();
+	penalties_by_absolute_node_and_choice_.clear();
+	penalties_by_variable_node_and_choice_.clear();
+	n_variable_positions_ = 0.0;
+	constant_offset_ = 0.0;
+	computed_constant_offset_ = 0.0;
+	Parent::protected_clear();
 }
 
 /// @brief Remove the data loaded in this object AND reset its configuration to defaults.
@@ -421,8 +421,8 @@ Parent::protected_clear();
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::protected_reset() {
-    protected_clear();
-    Parent::protected_reset();
+	protected_clear();
+	Parent::protected_reset();
 }
 
 /// @brief Override of protected_assign().  Calls parent function.
@@ -430,19 +430,19 @@ ChoicePenaltySumBasedCostFunction<T>::protected_reset() {
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::protected_assign(
-    masala::base::managers::engine::MasalaDataRepresentation const & src
+	masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
-    ChoicePenaltySumBasedCostFunction<T> const * const src_cast_ptr( dynamic_cast< ChoicePenaltySumBasedCostFunction<T> const * >( &src ) );
-    CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a ChoicePenaltySumBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
+	ChoicePenaltySumBasedCostFunction<T> const * const src_cast_ptr( dynamic_cast< ChoicePenaltySumBasedCostFunction<T> const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a ChoicePenaltySumBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
-    penalties_by_absolute_node_and_choice_ = src_cast_ptr->penalties_by_absolute_node_and_choice_;
-    penalties_by_variable_node_and_choice_ = src_cast_ptr->penalties_by_variable_node_and_choice_;
+	penalties_by_absolute_node_and_choice_ = src_cast_ptr->penalties_by_absolute_node_and_choice_;
+	penalties_by_variable_node_and_choice_ = src_cast_ptr->penalties_by_variable_node_and_choice_;
 	n_variable_positions_ = src_cast_ptr->n_variable_positions_;
 	constant_offset_ = src_cast_ptr->constant_offset_;
 	computed_constant_offset_ = src_cast_ptr->computed_constant_offset_;
-    // TODO OTHER ASSIGNMENT.
+	// TODO OTHER ASSIGNMENT.
 
-    Parent::protected_assign( src );
+	Parent::protected_assign( src );
 }
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
@@ -450,8 +450,8 @@ ChoicePenaltySumBasedCostFunction<T>::protected_assign(
 template< typename T >
 void
 ChoicePenaltySumBasedCostFunction<T>::protected_make_independent() {
-    // GNDN
-    Parent::protected_make_independent();
+	// GNDN
+	Parent::protected_make_independent();
 }
 
 template class ChoicePenaltySumBasedCostFunction< masala::base::Real >;

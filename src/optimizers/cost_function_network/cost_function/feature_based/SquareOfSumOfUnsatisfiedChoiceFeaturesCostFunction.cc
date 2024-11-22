@@ -128,7 +128,12 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_keywords() const {
 
 /// @brief Get the category for this MasalaDataRepresentation.
 /// @returns { { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction", "SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction" } }.
-std::vector< std::vector< std::string > >assign_mutex_locked
+std::vector< std::vector< std::string > >
+SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_categories() const {
+	return std::vector< std::vector< std::string > >{
+		{ "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction", "SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction" }
+	};
+}
 
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
