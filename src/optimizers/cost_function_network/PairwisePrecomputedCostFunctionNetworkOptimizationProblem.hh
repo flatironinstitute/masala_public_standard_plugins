@@ -125,7 +125,7 @@ public:
 	get_data_representation_categories() const override;
 
 	/// @brief Get the keywords for this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric" }
+	/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric", "cpu" }
 	std::vector< std::string >
 	get_data_representation_keywords() const override;
 
@@ -136,7 +136,7 @@ public:
 	get_compatible_masala_engines() const override;
 
 	/// @brief Get the properties of this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function_network_optimization_problem" }.
+	/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "cpu" }.
 	std::vector< std::string >
 	get_present_data_representation_properties() const override;
 
