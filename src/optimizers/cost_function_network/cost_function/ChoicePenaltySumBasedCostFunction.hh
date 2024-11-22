@@ -63,6 +63,10 @@ namespace cost_function {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 template< typename T >
 class ChoicePenaltySumBasedCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
+	
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction Parent;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionSP ParentSP;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionCSP ParentCSP;
 
 public:
 
@@ -87,9 +91,6 @@ public:
 
 	/// @brief This class is pure virtual, and does not define the clone function.
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override = 0;
-
-	/// @brief This class is pure virtual, and does not define the make independent function.
-	void make_independent() override = 0;
 
 public:
 
@@ -275,14 +276,31 @@ protected:
 	/// must be locked before calling this function.
 	inline masala::base::Size n_variable_positions() const { return n_variable_positions_; }
 
+	/// @brief Is this data representation empty?
+	/// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
+	/// @returns True if no data have been loaded into this data representation, false otherwise.
+	/// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+	bool
+	protected_empty() const override;
+
+	/// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
+	/// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+	void
+	protected_clear() override;
+
+	/// @brief Remove the data loaded in this object AND reset its configuration to defaults.
+	/// @details Must be implemented by derived classes, and should call parent class protected_reset().  Performs no mutex-locking.
+	void
+	protected_reset() override;
+
 	/// @brief Override of assign_mutex_locked().  Calls parent function.
 	/// @details Throws if src is not a ChoicePenaltySumBasedCostFunction.
-	void assign_mutex_locked( CostFunction const & src ) override;
+	void protected_assign( masala::base::managers::engine::MasalaDataRepresentation const & src ) override;
 
 	/// @brief Make this object fully independent.  Assumes mutex was already locked.
 	/// Should be called by overrides.
 	void
-	make_independent_mutex_locked() override;
+	protected_make_independent() override;
 
 private:
 

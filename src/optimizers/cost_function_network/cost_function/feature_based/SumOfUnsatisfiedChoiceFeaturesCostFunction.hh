@@ -97,9 +97,6 @@ public:
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 	clone() const override = 0;
 
-	/// @brief This class is pure virtual, and does not define the make independent function.
-	void make_independent() override = 0;
-
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

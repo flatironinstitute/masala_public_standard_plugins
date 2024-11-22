@@ -47,12 +47,12 @@ template< typename T >
 ChoicePenaltySumBasedCostFunction<T>::ChoicePenaltySumBasedCostFunction(
     ChoicePenaltySumBasedCostFunction<T> const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction( src )
+    Parent()
 {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    protected_assign( src );
 }
 
 // @brief Assignment operator.
@@ -61,10 +61,10 @@ ChoicePenaltySumBasedCostFunction<T> &
 ChoicePenaltySumBasedCostFunction<T>::operator=(
     ChoicePenaltySumBasedCostFunction<T> const & src
 ) {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    protected_assign( src );
     return *this;
 }
 
@@ -172,7 +172,7 @@ ChoicePenaltySumBasedCostFunction<T>::set_penalties_for_all_choices_at_node(
 ) {
     using masala::base::Size;
 
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalties_for_all_choices_at_node",
         "This function cannot be called after the " + class_name() + " has been finalized."
     );
@@ -211,7 +211,7 @@ ChoicePenaltySumBasedCostFunction<T>::set_penalty_for_choice_at_node(
     T const penalty_value
 ) {
     using masala::base::Size;
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_penalty_for_choice_at_node",
         "This function cannot be called after the " + class_name() + " has been finalized."
     );
@@ -235,7 +235,7 @@ void
 ChoicePenaltySumBasedCostFunction<T>::set_constant_offset(
     T const constant_offset
 ) {
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_constant_offset",
         "This function cannot be called after the " + class_name() + " has been finalized."
     );
@@ -388,15 +388,52 @@ ChoicePenaltySumBasedCostFunction<T>::protected_finalize(
     masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
 }
 
-/// @brief Override of assign_mutex_locked().  Calls parent function.
+/// @brief Is this data representation empty?
+/// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
+/// @returns True if no data have been loaded into this data representation, false otherwise.
+/// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+template< typename T >
+bool
+ChoicePenaltySumBasedCostFunction<T>::protected_empty() const {
+return penalties_by_absolute_node_and_choice_.empty() &&
+    penalties_by_variable_node_and_choice_.empty() &&
+    n_variable_positions_ == 0.0 &&
+    constant_offset_ == 0.0 &&
+    computed_constant_offset_ == 0.0 &&
+    Parent::protected_empty();
+}
+
+/// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
+/// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+template< typename T >
+void
+ChoicePenaltySumBasedCostFunction<T>::protected_clear() {
+penalties_by_absolute_node_and_choice_.clear();
+penalties_by_variable_node_and_choice_.clear();
+n_variable_positions = 0.0;
+constant_offset_ = 0.0;
+computed_constant_offset_ = 0.0;
+Parent::protected_clear();
+}
+
+/// @brief Remove the data loaded in this object AND reset its configuration to defaults.
+/// @details Must be implemented by derived classes, and should call parent class protected_reset().  Performs no mutex-locking.
+template< typename T >
+void
+ChoicePenaltySumBasedCostFunction<T>::protected_reset() {
+    protected_clear();
+    Parent::protected_reset();
+}
+
+/// @brief Override of protected_assign().  Calls parent function.
 /// @details Throws if src is not a ChoicePenaltySumBasedCostFunction.
 template< typename T >
 void
-ChoicePenaltySumBasedCostFunction<T>::assign_mutex_locked(
-    CostFunction const & src
+ChoicePenaltySumBasedCostFunction<T>::protected_assign(
+    masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
     ChoicePenaltySumBasedCostFunction<T> const * const src_cast_ptr( dynamic_cast< ChoicePenaltySumBasedCostFunction<T> const * >( &src ) );
-    CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "assign_mutex_locked", "Cannot assign a ChoicePenaltySumBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
+    CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a ChoicePenaltySumBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
     penalties_by_absolute_node_and_choice_ = src_cast_ptr->penalties_by_absolute_node_and_choice_;
     penalties_by_variable_node_and_choice_ = src_cast_ptr->penalties_by_variable_node_and_choice_;
@@ -405,16 +442,16 @@ ChoicePenaltySumBasedCostFunction<T>::assign_mutex_locked(
 	computed_constant_offset_ = src_cast_ptr->computed_constant_offset_;
     // TODO OTHER ASSIGNMENT.
 
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::assign_mutex_locked( src );
+    Parent::protected_assign( src );
 }
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
 /// Should be called by overrides.
 template< typename T >
 void
-ChoicePenaltySumBasedCostFunction<T>::make_independent_mutex_locked() {
+ChoicePenaltySumBasedCostFunction<T>::protected_make_independent() {
     // GNDN
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::make_independent_mutex_locked();
+    Parent::protected_make_independent();
 }
 
 template class ChoicePenaltySumBasedCostFunction< masala::base::Real >;
