@@ -68,6 +68,10 @@ namespace feature_based {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class SumOfUnsatisfiedChoiceFeaturesCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
 
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction Parent;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionSP ParentSP;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionCSP ParentCSP;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,9 +96,6 @@ public:
 	/// @brief This class is pure virtual, and does not define the clone function.
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 	clone() const override = 0;
-
-	/// @brief This class is pure virtual, and does not define the make independent function.
-	void make_independent() override = 0;
 
 public:
 
@@ -341,14 +342,13 @@ protected:
 		std::vector< masala::base::Size > const & variable_node_indices
 	) override;
 
-	/// @brief Override of assign_mutex_locked().  Calls parent function.
+	/// @brief Override of protected_assign().  Calls parent function.
 	/// @details Throws if src is not a SumOfUnsatisfiedChoiceFeaturesCostFunction.
-	void assign_mutex_locked( CostFunction const & src ) override;
+	void protected_assign( masala::base::managers::engine::MasalaDataRepresentation const & src ) override;
 
 	/// @brief Make this object fully independent.  Assumes mutex was already locked.
 	/// Should be called by overrides.
-	void
-	make_independent_mutex_locked() override;
+	void protected_make_independent() override;
 
 private:
 

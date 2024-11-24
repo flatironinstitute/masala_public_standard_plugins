@@ -62,6 +62,10 @@ namespace cost_function_network {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class PairwisePrecomputedCostFunctionNetworkOptimizationProblem : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem {
 
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem Parent;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemSP ParentSP;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemCSP ParentCSP;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,12 +78,12 @@ public:
 
 	/// @brief Copy constructor.
 	/// @details Needs to be explicit due to use of std::atomic.
-	PairwisePrecomputedCostFunctionNetworkOptimizationProblem( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & );
+	PairwisePrecomputedCostFunctionNetworkOptimizationProblem( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & src );
 
 	// @brief Assignment operator.
 	/// @details Needs to be explicit due to use of std::atomic.
 	PairwisePrecomputedCostFunctionNetworkOptimizationProblem &
-	operator=( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & );
+	operator=( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & src );
 
 	/// @brief Destructor.
 	~PairwisePrecomputedCostFunctionNetworkOptimizationProblem() override = default;
@@ -262,6 +266,31 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Is this data representation empty?
+	/// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
+	/// @returns True if no data have been loaded into this data representation, false otherwise.
+	/// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+	bool
+	protected_empty() const override;
+
+	/// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
+	/// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+	void
+	protected_clear() override;
+
+	/// @brief Make this object independent by deep-cloning all of its contained objects.  Must be implemented
+	/// by derived classses.  Performs no mutex-locking.
+	void
+	protected_make_independent() override;
+
+	/// @brief Called by the assignment operator and the copy constructor, this copies all data.  Must be implemented by
+	/// derived classes.  Performs no mutex locking.
+	/// @param src The object that we are copying from.
+	void
+	protected_assign(
+		masala::base::managers::engine::MasalaDataRepresentation const & src
+	) override;
 
 	/// @brief Reset this object.  Assumes mutex has been locked.
 	/// @details Calls parent protected_reset().

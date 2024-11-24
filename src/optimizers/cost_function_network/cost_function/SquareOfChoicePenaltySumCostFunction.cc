@@ -55,12 +55,12 @@ namespace cost_function {
 SquareOfChoicePenaltySumCostFunction::SquareOfChoicePenaltySumCostFunction(
     SquareOfChoicePenaltySumCostFunction const & src
 ) :
-    ChoicePenaltySumBasedCostFunction< masala::base::Real >( src )
+    Parent( src )
 {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    protected_assign( src );
 }
 
 // @brief Assignment operator.
@@ -68,10 +68,10 @@ SquareOfChoicePenaltySumCostFunction &
 SquareOfChoicePenaltySumCostFunction::operator=(
     SquareOfChoicePenaltySumCostFunction const & src
 ) {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    protected_assign( src );
     return *this;
 }
 
@@ -87,13 +87,6 @@ SquareOfChoicePenaltySumCostFunction::deep_clone() const {
     SquareOfChoicePenaltySumCostFunctionSP new_object( std::static_pointer_cast< SquareOfChoicePenaltySumCostFunction >( this->clone() ) );
     new_object->make_independent();
     return new_object;
-}
-
-/// @brief Ensure that all data are unique and not shared (i.e. everything is deep-cloned.)
-void
-SquareOfChoicePenaltySumCostFunction::make_independent() {
-    std::lock_guard< std::mutex > lock( mutex() );
-    make_independent_mutex_locked();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +111,7 @@ SquareOfChoicePenaltySumCostFunction::get_categories() const {
 /// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible", "quadratic", "squared" }
 std::vector< std::string >
 SquareOfChoicePenaltySumCostFunction::get_keywords() const {
-	std::vector< std::string > outvec( ChoicePenaltySumBasedCostFunction< masala::base::Real >::get_keywords() );
+	std::vector< std::string > outvec( Parent::get_keywords() );
     outvec.push_back( "quadratic" );
     outvec.push_back( "squared" );
     return outvec;
@@ -137,7 +130,7 @@ SquareOfChoicePenaltySumCostFunction::get_data_representation_categories() const
 /// @returns { "optimization_problem", "cost_function", "numeric", "choice_penalty_sum_based", "not_pairwise_decomposible", "quadratic", "squared" }
 std::vector< std::string >
 SquareOfChoicePenaltySumCostFunction::get_data_representation_keywords() const {
-	std::vector< std::string > outvec( ChoicePenaltySumBasedCostFunction< masala::base::Real >::get_data_representation_keywords() );
+	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
     outvec.push_back( "quadratic" );
     outvec.push_back( "squared" );
     return outvec;
@@ -201,7 +194,7 @@ masala::base::Real
 SquareOfChoicePenaltySumCostFunction::compute_cost_function(
     std::vector< masala::base::Size > const & candidate_solution
 ) const {
-    masala::base::Real const sum( ChoicePenaltySumBasedCostFunction< masala::base::Real >::protected_compute_cost_function_no_weight( candidate_solution ) );
+    masala::base::Real const sum( Parent::protected_compute_cost_function_no_weight( candidate_solution ) );
     return protected_weight()*sum*sum;
 }
 
@@ -216,8 +209,8 @@ SquareOfChoicePenaltySumCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
     std::vector< masala::base::Size > const & candidate_solution_new
 ) const {
-    masala::base::Real const oldsum( ChoicePenaltySumBasedCostFunction< masala::base::Real >::protected_compute_cost_function_no_weight( candidate_solution_old ) );
-    masala::base::Real const newsum( ChoicePenaltySumBasedCostFunction< masala::base::Real >::protected_compute_cost_function_no_weight( candidate_solution_new ) );
+    masala::base::Real const oldsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_old ) );
+    masala::base::Real const newsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_new ) );
     return protected_weight() * ( ( newsum * newsum ) - ( oldsum * oldsum ) );
 }
 
@@ -231,7 +224,7 @@ SquareOfChoicePenaltySumCostFunction::get_api_definition() {
     using masala::base::Size;
     using masala::base::Real;
     using namespace masala::base::api;
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     if( api_definition_mutex_locked() == nullptr ) {
         
         MasalaObjectAPIDefinitionSP api_def(
@@ -340,29 +333,54 @@ SquareOfChoicePenaltySumCostFunction::protected_finalize(
 
     //TODO do any finalization needed here.
 
-    ChoicePenaltySumBasedCostFunction< masala::base::Real >::protected_finalize( variable_node_indices );
+    Parent::protected_finalize( variable_node_indices );
 }
 
-/// @brief Override of assign_mutex_locked().  Calls parent function.
+/// @brief Is this data representation empty?
+/// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
+/// @returns True if no data have been loaded into this data representation, false otherwise.
+/// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+bool
+SquareOfChoicePenaltySumCostFunction::protected_empty() const {
+    return Parent::protected_empty();
+}
+
+/// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
+/// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+void
+SquareOfChoicePenaltySumCostFunction::protected_clear() {
+    return Parent::protected_clear();
+}
+
+/// @brief Remove the data loaded in this object AND reset its configuration to defaults.
+/// @details Must be implemented by derived classes, and should call parent class protected_reset().  Performs no mutex-locking.
+void
+SquareOfChoicePenaltySumCostFunction::protected_reset() {
+    return Parent::protected_reset();
+}
+
+/// @brief Override of protected_assign().  Calls parent function.
 /// @details Throws if src is not a SquareOfChoicePenaltySumCostFunction.
 void
-SquareOfChoicePenaltySumCostFunction::assign_mutex_locked(
-    CostFunction const & src
+SquareOfChoicePenaltySumCostFunction::protected_assign(
+    masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
     SquareOfChoicePenaltySumCostFunction const * const src_cast_ptr( dynamic_cast< SquareOfChoicePenaltySumCostFunction const * >( &src ) );
-    CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "assign_mutex_locked", "Cannot assign a SquareOfChoicePenaltySumCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
+    CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a SquareOfChoicePenaltySumCostFunction "
+        "given an input " + src.class_name() + " object!  Object types do not match."
+    );
 
     // TODO OTHER ASSIGNMENT.
 
-    ChoicePenaltySumBasedCostFunction< masala::base::Real >::assign_mutex_locked( src );
+    Parent::protected_assign( src );
 }
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
 /// Should be called by overrides.
 void
-SquareOfChoicePenaltySumCostFunction::make_independent_mutex_locked() {
+SquareOfChoicePenaltySumCostFunction::protected_make_independent() {
     // GNDN
-    ChoicePenaltySumBasedCostFunction< masala::base::Real >::make_independent_mutex_locked();
+    Parent::protected_make_independent();
 }
 
 } // namespace cost_function
