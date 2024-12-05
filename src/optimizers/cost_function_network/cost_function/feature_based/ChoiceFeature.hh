@@ -35,6 +35,7 @@
 #include <base/managers/plugin_module/MasalaPlugin.hh>
 
 // Numeric headers:
+#include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
 
 // Base headers:
 #include <base/types.hh>
@@ -47,7 +48,6 @@
 #include <mutex>
 #include <set>
 #include <unordered_map>
-#include <numeric>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -190,7 +190,7 @@ public:
 			") and in problem (" + std::to_string( other_variable_node_choices_that_satisfy_this_.size() ) + ")."
 		);
 
-		return std::transform_reduce(
+		return masala::numeric_api::utility::transform_reduce(
 			MASALA_SEQ_EXECUTION_POLICY
 			choice_indices_at_var_nodes.cbegin(), choice_indices_at_var_nodes.cend(), other_variable_node_choices_that_satisfy_this_.cbegin(),
 			0, std::plus{},

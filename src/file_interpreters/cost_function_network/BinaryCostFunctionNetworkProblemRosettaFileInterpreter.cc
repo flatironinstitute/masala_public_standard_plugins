@@ -31,6 +31,7 @@
 #include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+#include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -771,7 +772,7 @@ BinaryCostFunctionNetworkProblemRosettaFileInterpreter::decode_onebody_penalties
 		"not a PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Cannot store precomputed onebody penalties."
 	);
 
-	Size const total_choices( std::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
+	Size const total_choices( masala::numeric_api::utility::reduce( MASALA_UNSEQ_EXECUTION_POLICY choices_by_variable_node_expected.begin(), choices_by_variable_node_expected.end() ) );
 
 	Size const char_bytesize( static_cast< Size >( std::ceil(static_cast<Real>(onebody_penalty_bytesize_expected*total_choices) / 3.0) ) * 4 );
 	CHECK_OR_THROW_FOR_CLASS( line.size() == char_bytesize, "decode_onebody_penalties",

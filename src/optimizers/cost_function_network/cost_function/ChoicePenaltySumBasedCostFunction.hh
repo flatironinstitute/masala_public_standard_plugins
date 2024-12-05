@@ -36,6 +36,7 @@
 #include <numeric_api/base_classes/optimization/cost_function_network/cost_function/PluginCostFunction.hh>
 
 // Numeric headers:
+#include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
 
 // Base headers:
 #include <base/types.hh>
@@ -45,7 +46,6 @@
 
 // STL headers:
 #include <unordered_map>
-#include <numeric>
 #include <utility> //For std::pair.
 
 namespace standard_masala_plugins {
@@ -247,7 +247,7 @@ protected:
 			+ " variable positions, but got " + std::to_string( nentries ) + "!" 
 		);
 
-		return std::transform_reduce(
+		return masala::numeric_api::utility::transform_reduce(
 			MASALA_SEQ_EXECUTION_POLICY
 			candidate_solution.cbegin(), candidate_solution.cend(), penalties_by_variable_node_and_choice_.cbegin(),
 			constant_offset_ + computed_constant_offset_, std::plus{},
