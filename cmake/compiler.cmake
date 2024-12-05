@@ -1,5 +1,5 @@
 # Standard Masala Plugins
-# Copyright (C) 2022 Vikram K. Mulligan
+# Copyright (C) 2024 Vikram K. Mulligan
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -29,11 +29,17 @@ IF(APPLE)
 ELSEIF(UNIX)
     SET(COMPILER gcc)
 	ADD_DEFINITIONS(-DMASALA_UNIX)
+    SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lstdc++fs" )
+    SET( ADDITIONAL_MASALA_LIBS "stdc++fs" )
     IF( CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.5 )
-        MESSAGE( "GCC version " ${CMAKE_CXX_COMPILER_VERSION} " detected.  Adding definitions for STL parallel execution policies." )
+        MESSAGE( "GCC version " ${CMAKE_CXX_COMPILER_VERSION} " detected.  Adding definitions for STL parallel execution policies and for std::transform_reduce." )
         ADD_DEFINITIONS(-DMASALA_USE_STL_PARALLEL)
-    else()
-        MESSAGE( "GCC version " ${CMAKE_CXX_COMPILER_VERSION} " detected.  Skipping definitions for STL parallel execution policies." )
+        ADD_DEFINITIONS(-DMASALA_USE_TRANSFORM_REDUCE)
+    ELSEIF( CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0 )
+        MESSAGE( "GCC version " ${CMAKE_CXX_COMPILER_VERSION} " detected.  Adding definitions for std::transform_reduce, but skipping definitions for STL parallel execution policies." )
+        ADD_DEFINITIONS(-DMASALA_USE_TRANSFORM_REDUCE)
+    ELSE()
+        MESSAGE( "GCC version " ${CMAKE_CXX_COMPILER_VERSION} " detected.  Skipping definitions for STL parallel execution policies and for std::transform_reduce." )
     ENDIF()
     IF( ${MODE} STREQUAL "debug" )
 	    #ADD_DEFINITIONS(-D_GLIBCXX_DEBUG)
@@ -58,6 +64,7 @@ ENDIF()
 SET( CMAKE_CXX_STANDARD 17 )
 SET( CMAKE_CXX_STANDARD_REQUIRED True )
 SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -pipe -ftemplate-depth-512 -fPIC -I /usr/include -I src" )
+SET( ADDITIONAL_MASALA_LIBS "${ADDITIONAL_MASALA_LIBS}" )
 SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic -frtti" )
 SET( cxx -std=c++17 )
 #SET( compile -pipe -ftemplate-depth-512 -fPIC -I /usr/include -I src -Wl --no-as-needed )
