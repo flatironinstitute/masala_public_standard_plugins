@@ -53,6 +53,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <numeric>
 //#include <iostream> // DELETE ME; FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
