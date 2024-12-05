@@ -29,7 +29,6 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <numeric>
 
 // Base headers:
 #include <base/utility/execution_policy/util.hh>
@@ -43,6 +42,9 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_TwoInput.tmpl.hh>
 #include <base/utility/container/container_util.tmpl.hh>
+
+// Numeric headers:
+#include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -405,7 +407,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		ivals[i] = i;
 	}
 
-	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution ) + std::transform_reduce(
+	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution ) + masala::numeric_api::utility::transform_reduce(
 		MASALA_UNSEQ_EXECUTION_POLICY
 		ivals.cbegin(), ivals.cend(), 0.0, std::plus{},
 		[this, &old_solution, &new_solution]( Size const i ) {
@@ -420,7 +422,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 				}
 
 				// Sum twobody energy change:
-				accumulator += std::transform_reduce(
+				accumulator += masala::numeric_api::utility::transform_reduce(
 					MASALA_UNSEQ_EXECUTION_POLICY
 					interacting_variable_nodes_[i].cbegin(), interacting_variable_nodes_[i].cend(), 0.0, std::plus{},
 					// Note: In the following lines, I need the lambda to capture this if and only if
