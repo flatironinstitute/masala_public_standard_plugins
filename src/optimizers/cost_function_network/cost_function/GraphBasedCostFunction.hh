@@ -36,17 +36,14 @@
 #include <numeric_api/base_classes/optimization/cost_function_network/cost_function/PluginCostFunction.hh>
 
 // Numeric headers:
-#include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
 
 // Base headers:
 #include <base/types.hh>
-#include <base/hash_types.hh>
-#include <base/utility/execution_policy/util.hh>
-#include <base/error/ErrorHandling.hh>
+
+// External headers:
+#include <eigen/Eigen/Core>
 
 // STL headers:
-#include <unordered_map>
-#include <utility> //For std::pair.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -85,8 +82,8 @@ public:
 	GraphBasedCostFunction &
 	operator=( GraphBasedCostFunction const & src );
 
-	/// @brief Destructor.
-	~GraphBasedCostFunction() override = default;
+	/// @brief Destructor.  Not defaulted since we have to deallocate the matrices.
+	~GraphBasedCostFunction() override;
 
 	/// @brief This class is pure virtual, and does not define the clone function.
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP clone() const override = 0;
@@ -237,6 +234,17 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The full choice-choice interaction graph.  This is a matrix indexed by node pairs of
+	/// pointers to boolean matricies indexed by choice pairs.  If the other matrix has an entry that
+	/// is nullptr, it means that no choices at those two nodes have an interaction.
+	/// @note The inner matrices are held by raw pointer. The GraphBasedCostFunction class is responsible for
+	/// deallocating these on destruction.
+	Eigen::Matrix<
+		Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > *,
+		Eigen::Dynamic,
+		Eigen::Dynamic
+	> full_choice_choice_interaction_graph_;
 
 }; // class GraphBasedCostFunction
 

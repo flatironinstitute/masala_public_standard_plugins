@@ -29,6 +29,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/GraphBasedCostFunction.hh>
 
+// Base headers:
+#include <base/error/ErrorHandling.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -65,6 +68,12 @@ GraphBasedCostFunction::operator=(
 	protected_assign( src );
 	return *this;
 }
+
+/// @brief Destructor.  Not defaulted since we have to deallocate the matrices.
+GraphBasedCostFunction::~GraphBasedCostFunction() {
+	protected_clear();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
@@ -188,7 +197,8 @@ GraphBasedCostFunction::protected_finalize(
 /// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
 bool
 GraphBasedCostFunction::protected_empty() const {
-return //TODO TODO TODO &&
+return full_choice_choice_interaction_graph_.rows() == 0 &&
+	full_choice_choice_interaction_graph_.cols() == 0 &&
 	Parent::protected_empty();
 }
 
@@ -196,7 +206,19 @@ return //TODO TODO TODO &&
 /// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
 void
 GraphBasedCostFunction::protected_clear() {
-	// TODO TODO TODO
+	using masala::base::Size;
+
+	// Deallocate inner matrices:
+	for( Size i(0); i<full_choice_choice_interaction_graph_.rows(); ++i ) {
+		for( Size j(0); j<full_choice_choice_interaction_graph_.cols(); ++j ) {
+			if( full_choice_choice_interaction_graph_(i, j) != nullptr ) {
+				delete ( full_choice_choice_interaction_graph_(i, j) );
+				full_choice_choice_interaction_graph_(i, j) = nullptr;
+			}
+		}
+	}
+	full_choice_choice_interaction_graph_.resize(0, 0);
+
 	Parent::protected_clear();
 }
 
@@ -214,10 +236,23 @@ void
 GraphBasedCostFunction::protected_assign(
 	masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
+	using masala::base::Size;
+
 	GraphBasedCostFunction const * const src_cast_ptr( dynamic_cast< GraphBasedCostFunction const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a GraphBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
-	// TODO OTHER ASSIGNMENT.
+	protected_clear();
+
+	full_choice_choice_interaction_graph_.resize( src_cast_ptr->full_choice_choice_interaction_graph_.rows(), src_cast_ptr->full_choice_choice_interaction_graph_.cols() );
+	for( Size i(0); i<full_choice_choice_interaction_graph_.rows(); ++i ) {
+		for( Size j(0); j<full_choice_choice_interaction_graph_.cols(); ++j ) {
+			if( src_cast_ptr->full_choice_choice_interaction_graph_(i,j) == nullptr ) {
+				full_choice_choice_interaction_graph_(i,j) = nullptr;
+			} else {
+				full_choice_choice_interaction_graph_(i,j) = new Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic >( *(src_cast_ptr->full_choice_choice_interaction_graph_(i,j))  );
+			}
+		}
+	}
 
 	Parent::protected_assign( src );
 }
