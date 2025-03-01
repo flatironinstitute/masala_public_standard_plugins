@@ -201,7 +201,7 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 	Size const choice1( firstindex == abs_nodeindex_1 ? choiceindex_1 : choiceindex_2 );
 	Size const choice2( firstindex == abs_nodeindex_1 ? choiceindex_2 : choiceindex_1 );
 
-	if( secondindex > full_choice_choice_interaction_graph_.cols() ) {
+	if( secondindex > static_cast< Size >( full_choice_choice_interaction_graph_.cols() ) ) {
 		protected_set_absolute_node_count( abs_nodeindex_2 + 1 );
 	}
 
@@ -210,11 +210,11 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 	}
 
 	Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > * choicematrix( full_choice_choice_interaction_graph_(firstindex, secondindex) );
-	if( choicematrix->rows() <= choice1 || choicematrix->cols() <= choice2 ) {
+	if( static_cast< Size >( choicematrix->rows() ) <= choice1 || static_cast< Size >( choicematrix->cols() ) <= choice2 ) {
 		Size const oldrows( choicematrix->rows() );
 		Size const oldcols( choicematrix->cols() );
 		Size const newrows( std::max( oldrows, choice1+1 ) );
-		Size const newcols( std::max( newcols, choice2+1 ) );
+		Size const newcols( std::max( oldcols, choice2+1 ) );
 		choicematrix->conservativeResize( newrows, newcols );
 		if( newrows > oldrows ) {
 			for( Size i(oldrows); i<newrows; ++i ) {
@@ -263,7 +263,7 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 		"already been finalized.  This function can only be called on an object that has not yet been finalized."
 	);
 	Size const oldsize( full_choice_choice_interaction_graph_.rows() );
-	CHECK_OR_THROW_FOR_CLASS( oldsize == full_choice_choice_interaction_graph_.cols(),
+	CHECK_OR_THROW_FOR_CLASS( oldsize == static_cast< Size >( full_choice_choice_interaction_graph_.cols() ),
 		"protected_set_absolute_node_count", "The full choice-choice interaction graph is not square.  This is a program error."
 	);
 	if( absolute_node_count > oldsize ) {
