@@ -187,6 +187,7 @@ GraphBasedCostFunction::protected_finalize(
 	using masala::base::Size;
 
 	// TODO TODO TODO
+	// -- STORE ABS->VAR AND VAR->ABS.
 
 	masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
 }

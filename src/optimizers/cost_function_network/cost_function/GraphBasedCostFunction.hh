@@ -238,6 +238,8 @@ private:
 	/// @brief The full choice-choice interaction graph.  This is a matrix indexed by node pairs of
 	/// pointers to boolean matricies indexed by choice pairs.  If the other matrix has an entry that
 	/// is nullptr, it means that no choices at those two nodes have an interaction.
+	/// @details The outer matrix is indexed by ABSOLUTE node, not variable node.  Nodes with only one
+	/// choice are allowed (and produce single-column or single-row matrices for their interaction graph).
 	/// @note The inner matrices are held by raw pointer. The GraphBasedCostFunction class is responsible for
 	/// deallocating these on destruction.
 	Eigen::Matrix<
