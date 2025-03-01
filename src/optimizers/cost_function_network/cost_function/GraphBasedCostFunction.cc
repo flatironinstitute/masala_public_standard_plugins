@@ -160,6 +160,80 @@ GraphBasedCostFunction::get_data_representation_keywords() const {
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the total number of nodes.
+/// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
+/// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
+/// object has been finalized.
+void
+GraphBasedCostFunction::set_absolute_node_count(
+	masala::base::Size const absolute_node_count
+) {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	protected_set_absolute_node_count( absolute_node_count );
+}
+
+/// @brief Declare that two particular choices at two different absolute node indices interact.
+/// @details If the node pair has not yet been declared, this declares it.  If the size of the matrix at the two
+/// absolute residue indices is smaller than the choice indices, this resizes the matrix to the size of the choice
+/// indices.
+/// @param[in] abs_nodeindex_1 The absolute index of the first node (variable or not).
+/// @param[in] abs_nodeindex_2 The absolute index of the second node (variable or not).
+/// @param[in] choiceindex_1 The absolute index of the choice at the first node (or 0 for a non-variable node).
+/// @param[in] choiceindex_2 The absolute index of the choice at the second node (or 0 for a non-variable node).
+void
+GraphBasedCostFunction::declare_node_choice_pair_interaction(
+	masala::base::Size const abs_nodeindex_1,
+	masala::base::Size const abs_nodeindex_2,
+	masala::base::Size const choiceindex_1,
+	masala::base::Size const choiceindex_2
+) {
+	using masala::base::Size;
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "declare_node_choice_pair_interaction", "This function cannot be "
+		"called after the " + class_name() + " object has been finalized."
+	);
+	CHECK_OR_THROW_FOR_CLASS( abs_nodeindex_1 != abs_nodeindex_2, "declare_node_choice_pair_interaction", "Cannot have edges "	
+		"between two choices for the same node, but got interactions between node " + std::to_string( abs_nodeindex_1)
+		+ " and itself."
+	);
+	Size const firstindex( std::min( abs_nodeindex_1, abs_nodeindex_2 ) );
+	Size const secondindex( std::max( abs_nodeindex_1, abs_nodeindex_2 ) );
+	Size const choice1( firstindex == abs_nodeindex_1 ? choiceindex_1 : choiceindex_2 );
+	Size const choice2( firstindex == abs_nodeindex_1 ? choiceindex_2 : choiceindex_1 );
+
+	if( secondindex > full_choice_choice_interaction_graph_.cols() ) {
+		protected_set_absolute_node_count( abs_nodeindex_2 + 1 );
+	}
+
+	if( full_choice_choice_interaction_graph_(firstindex, secondindex) == nullptr ) {
+		full_choice_choice_interaction_graph_(firstindex, secondindex) = new Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic >();
+	}
+
+	Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > * choicematrix( full_choice_choice_interaction_graph_(firstindex, secondindex) );
+	if( choicematrix->rows() <= choice1 || choicematrix->cols() <= choice2 ) {
+		Size const oldrows( choicematrix->rows() );
+		Size const oldcols( choicematrix->cols() );
+		Size const newrows( std::max( oldrows, choice1+1 ) );
+		Size const newcols( std::max( newcols, choice2+1 ) );
+		choicematrix->conservativeResize( newrows, newcols );
+		if( newrows > oldrows ) {
+			for( Size i(oldrows); i<newrows; ++i ) {
+				for( Size j(0); j<newcols; ++j ) {
+					(*choicematrix)(i,j) = false;
+				}
+			}
+		}
+		if( newcols > oldcols ) {
+			for( Size i(0); i<newrows; ++i ) {
+				for( Size j(oldcols); j<newcols; ++j ) {
+					(*choicematrix)(i,j) = false;
+				}
+			}
+		}
+	}
+
+	(*choicematrix)(choice1, choice2) = true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // WORK FUNCTIONS
@@ -174,6 +248,56 @@ GraphBasedCostFunction::get_data_representation_keywords() const {
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the total number of nodes.  Protected version, which performs no mutex-locking.  Intended
+/// to be called from a mutex-locked context.
+/// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
+/// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
+/// object has been finalized.
+void
+GraphBasedCostFunction::protected_set_absolute_node_count(
+	masala::base::Size const absolute_node_count
+) {
+	using masala::base::Size;
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "protected_set_absolute_node_count", "The " + class_name() + " object has "
+		"already been finalized.  This function can only be called on an object that has not yet been finalized."
+	);
+	Size const oldsize( full_choice_choice_interaction_graph_.rows() );
+	CHECK_OR_THROW_FOR_CLASS( oldsize == full_choice_choice_interaction_graph_.cols(),
+		"protected_set_absolute_node_count", "The full choice-choice interaction graph is not square.  This is a program error."
+	);
+	if( absolute_node_count > oldsize ) {
+		full_choice_choice_interaction_graph_.conservativeResize( absolute_node_count, absolute_node_count );
+		for( Size i(oldsize); i<absolute_node_count; ++i ) {
+			for( Size j(0); j<absolute_node_count; ++j ) {
+				full_choice_choice_interaction_graph_(i,j) = nullptr;
+			}
+		}
+		for( Size i(0); i<oldsize; ++i ) {
+			for( Size j(oldsize); j<absolute_node_count; ++j ) {
+				full_choice_choice_interaction_graph_(i,j) = nullptr;
+			}
+		}
+	} else if( absolute_node_count < oldsize ) {
+		for( Size i(absolute_node_count); i<oldsize; ++i ) {
+			for( Size j(0); j<oldsize; ++j ) {
+				if( full_choice_choice_interaction_graph_(i,j) != nullptr ) {
+					delete ( full_choice_choice_interaction_graph_(i,j) );
+					full_choice_choice_interaction_graph_(i,j) = nullptr;
+				}
+			}
+			for( Size i(0); i<oldsize; ++i ) {
+				for( Size j(absolute_node_count); j<oldsize; ++j ) {
+					if( full_choice_choice_interaction_graph_(i,j) != nullptr ) {
+						delete ( full_choice_choice_interaction_graph_(i,j) );
+						full_choice_choice_interaction_graph_(i,j) = nullptr;
+					}
+				}
+			}
+		}
+		full_choice_choice_interaction_graph_.conservativeResize( absolute_node_count, absolute_node_count );
+	}
+}
 
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices

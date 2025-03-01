@@ -156,6 +156,30 @@ public:
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Set the total number of nodes.
+	/// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
+	/// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
+	/// object has been finalized.
+	void
+	set_absolute_node_count(
+		masala::base::Size const absolute_node_count
+	);
+
+	/// @brief Declare that two particular choices at two different absolute node indices interact.
+	/// @details If the node pair has not yet been declared, this declares it.  If the size of the matrix at the two
+	/// absolute residue indices is smaller than the choice indices, this resizes the matrix to the size of the choice
+	/// indices.
+	/// @param[in] abs_nodeindex_1 The absolute index of the first node (variable or not).
+	/// @param[in] abs_nodeindex_2 The absolute index of the second node (variable or not).
+	/// @param[in] choiceindex_1 The absolute index of the choice at the first node (or 0 for a non-variable node).
+	/// @param[in] choiceindex_2 The absolute index of the choice at the second node (or 0 for a non-variable node).
+	void
+	declare_node_choice_pair_interaction(
+		masala::base::Size const abs_nodeindex_1,
+		masala::base::Size const abs_nodeindex_2,
+		masala::base::Size const choiceindex_1,
+		masala::base::Size const choiceindex_2
+	);
 
 public:
 
@@ -192,6 +216,16 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the total number of nodes.  Protected version, which performs no mutex-locking.  Intended
+	/// to be called from a mutex-locked context.
+	/// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
+	/// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
+	/// object has been finalized.
+	void
+	protected_set_absolute_node_count(
+		masala::base::Size const absolute_node_count
+	);
 
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
