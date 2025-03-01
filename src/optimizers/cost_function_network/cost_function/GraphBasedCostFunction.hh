@@ -41,7 +41,7 @@
 #include <base/types.hh>
 
 // External headers:
-#include <eigen/Eigen/Core>
+#include <external/eigen/Eigen/Core>
 
 // STL headers:
 

@@ -209,8 +209,8 @@ GraphBasedCostFunction::protected_clear() {
 	using masala::base::Size;
 
 	// Deallocate inner matrices:
-	for( Size i(0); i<full_choice_choice_interaction_graph_.rows(); ++i ) {
-		for( Size j(0); j<full_choice_choice_interaction_graph_.cols(); ++j ) {
+	for( Size i(0); i<static_cast<Size>(full_choice_choice_interaction_graph_.rows()); ++i ) {
+		for( Size j(0); j<static_cast<Size>(full_choice_choice_interaction_graph_.cols()); ++j ) {
 			if( full_choice_choice_interaction_graph_(i, j) != nullptr ) {
 				delete ( full_choice_choice_interaction_graph_(i, j) );
 				full_choice_choice_interaction_graph_(i, j) = nullptr;
@@ -244,8 +244,8 @@ GraphBasedCostFunction::protected_assign(
 	protected_clear();
 
 	full_choice_choice_interaction_graph_.resize( src_cast_ptr->full_choice_choice_interaction_graph_.rows(), src_cast_ptr->full_choice_choice_interaction_graph_.cols() );
-	for( Size i(0); i<full_choice_choice_interaction_graph_.rows(); ++i ) {
-		for( Size j(0); j<full_choice_choice_interaction_graph_.cols(); ++j ) {
+	for( Size i(0); i<static_cast<Size>(full_choice_choice_interaction_graph_.rows()); ++i ) {
+		for( Size j(0); j<static_cast<Size>(full_choice_choice_interaction_graph_.cols()); ++j ) {
 			if( src_cast_ptr->full_choice_choice_interaction_graph_(i,j) == nullptr ) {
 				full_choice_choice_interaction_graph_(i,j) = nullptr;
 			} else {
