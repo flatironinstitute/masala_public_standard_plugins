@@ -193,7 +193,7 @@ public:
 	masala::base::Real
 	compute_cost_function(
 		std::vector< masala::base::Size > const & candidate_solution
-	) const = 0;
+	) const override = 0;
 
 	/// @brief Given an old selection of choices at variable nodes and a new selection,
 	/// compute the cost function difference.
@@ -203,7 +203,7 @@ public:
 	compute_cost_function_difference(
 		std::vector< masala::base::Size > const & candidate_solution_old,
 		std::vector< masala::base::Size > const & candidate_solution_new
-	) const = 0;
+	) const override = 0;
 
 public:
 
