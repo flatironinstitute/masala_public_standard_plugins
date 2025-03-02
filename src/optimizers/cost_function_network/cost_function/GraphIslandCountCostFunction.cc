@@ -76,80 +76,19 @@ GraphIslandCountCostFunction::operator=(
 	return *this;
 }
 
-/// @brief Make a copy of this object.
-masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
-GraphIslandCountCostFunction::clone() const {
-	return masala::make_shared< GraphIslandCountCostFunction >( *this );
-}
+// /// @brief Make a copy of this object.
+// masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
+// GraphIslandCountCostFunction::clone() const {
+// 	return masala::make_shared< GraphIslandCountCostFunction >( *this );
+// }
 
-/// @brief Make a copy of this object that is fully independent.
-GraphIslandCountCostFunctionSP
-GraphIslandCountCostFunction::deep_clone() const {
-	GraphIslandCountCostFunctionSP new_object( std::static_pointer_cast< GraphIslandCountCostFunction >( this->clone() ) );
-	new_object->make_independent();
-	return new_object;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// STATIC PUBLIC MEMBER FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
-
-/// @brief Given a penalty function behaviour enum, get the corresponding string.
-/*static*/
-std::string
-GraphIslandCountCostFunction::penalty_behaviour_string_from_enum(
-	PenaltyFunctionBehaviourOutsideRange const behaviour_enum
-) {
-	switch( behaviour_enum ) {
-		case PenaltyFunctionBehaviourOutsideRange::UNDEFINED_BEHAVIOUR :
-			return "undefined_behaviour";
-		case PenaltyFunctionBehaviourOutsideRange::CONSTANT :
-			return "constant";
-		case PenaltyFunctionBehaviourOutsideRange::LINEAR :
-			return "linear";
-		case PenaltyFunctionBehaviourOutsideRange::QUADRATIC :
-			return "quadratic";
-	}
-	MASALA_THROW( class_namespace_static() + "::" + class_name_static(),
-		"penalty_behaviour_string_from_enum",
-		"Invalid penalty function behaviour enum passed to this function!"
-	);
-	return ""; // Keep older compilers happy.
-}
-
-/// @brief Given a penalty function behaviour string, get the corresponding enum.
-/// @details Returns PenaltyFunctionBehaviourOutsideRange::UNDEFINED_BEHAVIOUR if the string is not recognized.
-/*static*/
-PenaltyFunctionBehaviourOutsideRange
-GraphIslandCountCostFunction::penalty_behaviour_enum_from_string(
-	std::string const & behaviour_string
-) {
-	using masala::base::Size;
-	for( Size i(1); i <= static_cast<Size>(PenaltyFunctionBehaviourOutsideRange::NUM_BEHAVIOURS); ++i ) {
-		if( behaviour_string == penalty_behaviour_string_from_enum( static_cast< PenaltyFunctionBehaviourOutsideRange >(i) ) ) {
-			return static_cast< PenaltyFunctionBehaviourOutsideRange >(i);
-		}
-	}
-	return PenaltyFunctionBehaviourOutsideRange::UNDEFINED_BEHAVIOUR;
-}
-
-/// @brief Get all allowed behaviours as a comma-separated list.
-/*static*/
-std::string
-GraphIslandCountCostFunction::list_penalty_behaviours() {
-	using masala::base::Size;
-	std::ostringstream ss;
-	for( Size i(1); i <= static_cast<Size>(PenaltyFunctionBehaviourOutsideRange::NUM_BEHAVIOURS); ++i ) {
-		if( i > 1 ) {
-			ss << ", ";
-			if( i > 2 && i == static_cast<Size>(PenaltyFunctionBehaviourOutsideRange::NUM_BEHAVIOURS) ) {
-				ss << " and ";
-			}
-			ss << penalty_behaviour_string_from_enum( static_cast< PenaltyFunctionBehaviourOutsideRange >(i) );
-		}
-	}
-	return ss.str();
-}
+// /// @brief Make a copy of this object that is fully independent.
+// GraphIslandCountCostFunctionSP
+// GraphIslandCountCostFunction::deep_clone() const {
+// 	GraphIslandCountCostFunctionSP new_object( std::static_pointer_cast< GraphIslandCountCostFunction >( this->clone() ) );
+// 	new_object->make_independent();
+// 	return new_object;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
