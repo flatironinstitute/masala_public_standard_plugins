@@ -149,12 +149,26 @@ public:
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Get whether nodes' absolute index is one-based (true) or zero-based (false, the default).
+	/// @note Variable node indexing is always zero-based.
+	bool one_based_absolute_node_indexing() const;
+
+	/// @brief Get the total number of nodes.
+	masala::base::Size absolute_node_count() const;
 
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set whether nodes' absolute index is one-based (true) or zero-based (false, the default).
+	/// @details Throws if node-choice pair interacitons have already been input.
+	/// @note Variable node indexing is always zero-based.
+	void
+	set_one_based_absolute_node_indexing(
+		bool const setting
+	);
 
 	/// @brief Set the total number of nodes.
 	/// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
@@ -272,6 +286,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Are we using zero-based absolute node indices (false, the default) or one-based (true)?
+	bool use_one_based_node_indexing_ = false;
 
 	/// @brief The full choice-choice interaction graph.  This is a matrix indexed by node pairs of
 	/// pointers to boolean matricies indexed by choice pairs.  If the other matrix has an entry that

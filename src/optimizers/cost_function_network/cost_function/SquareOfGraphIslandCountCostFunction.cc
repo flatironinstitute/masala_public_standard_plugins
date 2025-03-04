@@ -117,6 +117,31 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 
 		// Getters:
 		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"one_based_absolute_node_indexing",
+				"Get whether nodes' absolute index is one-based (true) or zero-based (false, the default).  Note that variable "
+				"node indexing is always zero-based.",
+				"one_based_absolute_node_indexing", "True if the absolute node index is one-based, false if it is zero-based (the default).",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::one_based_absolute_node_indexing,
+					this
+				)
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"absolute_node_count",
+				"Get the total number of nodes.",
+				"absolute_node_count", "The total number of nodes.",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::absolute_node_count,
+					this
+				)
+			)
+		);
+		api_def->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
 				"min_island_size",
 				"Get the minimum number of nodes in an island in order for that island to contribute to the penalty function "
@@ -142,6 +167,21 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 				false, false,
 				std::bind(
 					&SquareOfGraphIslandCountCostFunction::set_min_island_size,
+					this,
+					std::placeholders::_1
+				)
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool > >(
+				"set_one_based_absolute_node_indexing",
+				"Set whether nodes' absolute index is one-based (true) or zero-based (false, the default).  Note that variable "
+				"node indexing is always zero-based.  Throws if node-choice pair interacitons have already been input.",
+				"one_based_absolute_node_indexing_in", "The setting: true if the absolute node index is one-based, false if "
+				"it is zero-based (the default).",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::set_one_based_absolute_node_indexing,
 					this,
 					std::placeholders::_1
 				)

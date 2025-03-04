@@ -157,10 +157,47 @@ GraphBasedCostFunction::get_data_representation_keywords() const {
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Get whether nodes' absolute index is one-based (true) or zero-based (false, the default).
+/// @note Variable node indexing is always zero-based.
+bool
+GraphBasedCostFunction::one_based_absolute_node_indexing() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	return use_one_based_node_indexing_;
+}
+
+/// @brief Get the total number of nodes.
+masala::base::Size
+GraphBasedCostFunction::absolute_node_count() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == full_choice_choice_interaction_graph_.cols(),
+		"absolute_node_count", "The full choice interaction graph matrix was not square!  This is a program error that ought "
+		"not to happen, so please consult a developer."
+	);
+	if( full_choice_choice_interaction_graph_.rows() == 0 ) return 0;
+	return full_choice_choice_interaction_graph_.rows() - static_cast< masala::base::Size >( use_one_based_node_indexing_ );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set whether nodes' absolute index is one-based (true) or zero-based (false, the default).
+/// @details Throws if node-choice pair interacitons have already been input.
+/// @note Variable node indexing is always zero-based.
+void
+GraphBasedCostFunction::set_one_based_absolute_node_indexing(
+	bool const setting
+) {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_one_based_absolute_node_indexing", "This function cannot be "
+		"called after the " + class_name() + " object has been finalized."
+	);
+	CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == 0 && full_choice_choice_interaction_graph_.cols() == 0,
+		"set_one_based_absolute_node_indexing", "The set_one_based_absolute_node_indexing() function cannot be called after "
+		"the set_absolute_node_count() or declare_node_choice_pair_interaction() functions."
+	);
+	use_one_based_node_indexing_ = setting;
+}
 
 /// @brief Set the total number of nodes.
 /// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
