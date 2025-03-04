@@ -339,6 +339,8 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 }
 
 /// @brief Get the number of nodes, with no mutex-locking.
+/// @note This is the total number of rows of the full_choice_choice_interaction_graph_ matrix, which may have an extra row
+/// and column if we are using 1-based numbering.
 masala::base::Size
 GraphBasedCostFunction::protected_n_nodes_absolute() const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == full_choice_choice_interaction_graph_.cols(),
@@ -401,6 +403,7 @@ GraphBasedCostFunction::protected_clear() {
 void
 GraphBasedCostFunction::protected_reset() {
 	protected_clear();
+	use_one_based_node_indexing_ = false;
 	Parent::protected_reset();
 }
 
@@ -417,6 +420,8 @@ GraphBasedCostFunction::protected_assign(
 
 	protected_clear();
 
+	use_one_based_node_indexing_ = src_cast_ptr->use_one_based_node_indexing_;
+	
 	full_choice_choice_interaction_graph_.resize( src_cast_ptr->full_choice_choice_interaction_graph_.rows(), src_cast_ptr->full_choice_choice_interaction_graph_.cols() );
 	for( Size i(0); i<static_cast<Size>(full_choice_choice_interaction_graph_.rows()); ++i ) {
 		for( Size j(0); j<static_cast<Size>(full_choice_choice_interaction_graph_.cols()); ++j ) {

@@ -242,6 +242,8 @@ protected:
 	);
 
 	/// @brief Get the number of nodes, with no mutex-locking.
+	/// @note This is the total number of rows of the full_choice_choice_interaction_graph_ matrix, which may have an extra row
+	/// and column if we are using 1-based numbering.
 	masala::base::Size
 	protected_n_nodes_absolute() const;
 
