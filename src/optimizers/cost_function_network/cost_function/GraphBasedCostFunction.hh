@@ -227,6 +227,10 @@ protected:
 		masala::base::Size const absolute_node_count
 	);
 
+	/// @brief Get the number of nodes, with no mutex-locking.
+	masala::base::Size
+	protected_n_nodes_absolute() const;
+
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
 	/// for nodes that have more than one choice, indexed by variable node index.

@@ -299,6 +299,16 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 	}
 }
 
+/// @brief Get the number of nodes, with no mutex-locking.
+masala::base::Size
+GraphBasedCostFunction::protected_n_nodes_absolute() const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == full_choice_choice_interaction_graph_.cols(),
+		"protected_n_nodes_absolute", "The full choice interaction graph was not square.  This is a program error that ought not to "
+		"happen, so please consult a developer."
+	);
+	return full_choice_choice_interaction_graph_.rows();
+}
+
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices
 /// for nodes that have more than one choice, indexed by variable node index.
