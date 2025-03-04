@@ -182,6 +182,17 @@ protected:
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Compute a vector of island sizes.
+	/// @details Uses a depth-first algorithm.  Throws if object not finalized first.  Performs no mutex-locking.
+	/// @param[in] candidate_solution The current solution, as a vector of variable node choice indices.
+	/// @param[out] island_sizes A pointer to an already-allocated array, of size protected_n_nodes_absolute(), of Sizes.  This
+	/// will be filled with the size of islands (in random order), with 0 in any surplus entries.
+	void
+	protected_compute_island_sizes(
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::base::Size * island_sizes
+	) const;
+
 	/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
 	/// for the island to be counted.  This version performs no mutex-locking.
 	/// @details The default minimum size is 2 nodes.
