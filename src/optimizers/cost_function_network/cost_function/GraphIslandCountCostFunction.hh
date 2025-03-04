@@ -148,12 +148,21 @@ public:
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
+	/// for the island to be counted.
+	/// @details The default minimum size is 2 nodes.
+	masala::base::Size min_island_size() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Set the minimum number of nodes that must be in a connected island in the connection graph in order
+	/// for the island to be counted.
+	/// @details The default minimum size is 2 nodes.
+	void set_min_island_size( masala::base::Size const setting );
 
 public:
 
@@ -172,6 +181,11 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
+	/// for the island to be counted.  This version performs no mutex-locking.
+	/// @details The default minimum size is 2 nodes.
+	masala::base::Size protected_min_island_size() const;
 
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
@@ -222,6 +236,9 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief The minimum size an island must have to be counted.
+	/// @details Defaults to 2.
+	masala::base::Size min_island_size_ = 2;
 
 }; // class GraphIslandCountCostFunction
 

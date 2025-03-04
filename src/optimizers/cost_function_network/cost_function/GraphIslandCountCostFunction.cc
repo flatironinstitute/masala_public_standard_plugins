@@ -172,11 +172,32 @@ GraphIslandCountCostFunction::class_namespace() const {
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
+/// for the island to be counted.
+/// @details The default minimum size is 2 nodes.
+masala::base::Size
+GraphIslandCountCostFunction::min_island_size() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	return protected_min_island_size();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the minimum number of nodes that must be in a connected island in the connection graph in order
+/// for the island to be counted.
+/// @details The default minimum size is 2 nodes.
+void
+GraphIslandCountCostFunction::set_min_island_size(
+	masala::base::Size const setting
+) {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "set_min_island_size", "This function cannot be set after the " +
+		class_name() + " object has been finalized."
+	);
+	min_island_size_ = setting;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // WORK FUNCTIONS
@@ -191,6 +212,15 @@ GraphIslandCountCostFunction::class_namespace() const {
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+
+/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
+/// for the island to be counted.  This version performs no mutex-locking.
+/// @details The default minimum size is 2 nodes.
+masala::base::Size
+GraphIslandCountCostFunction::protected_min_island_size() const {
+	return min_island_size_;
+}
 
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices
@@ -215,6 +245,7 @@ GraphIslandCountCostFunction::protected_assign(
 	GraphIslandCountCostFunction const * const src_cast_ptr( dynamic_cast< GraphIslandCountCostFunction const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a GraphIslandCountCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
+	min_island_size_ = src_cast_ptr->min_island_size_;
 	// TODO COPY DATA HERE.
 
 	Parent::protected_assign( src );
@@ -251,6 +282,7 @@ GraphIslandCountCostFunction::protected_clear() {
 void
 GraphIslandCountCostFunction::protected_reset() {
 	protected_clear();
+	min_island_size_ = 2;
 	Parent::protected_reset();
 }
 

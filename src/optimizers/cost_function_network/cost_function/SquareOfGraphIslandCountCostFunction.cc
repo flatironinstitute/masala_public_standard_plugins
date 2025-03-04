@@ -100,6 +100,7 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 	using masala::base::Real;
 	using namespace masala::base::api;
 	using namespace masala::base::api::setter;
+	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
 
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
@@ -114,7 +115,38 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( SquareOfGraphIslandCountCostFunction, api_def );
 
+		// Getters:
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"min_island_size",
+				"Get the minimum number of nodes in an island in order for that island to contribute to the penalty function "
+				"value.  If the number of nodes is greater than or equal to this value, this value is subtracted from the count "
+				"and the result is squared.  The squares are summed and negated to compute the penalty value.",
+				"min_island_size", "The minimum island size.",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::min_island_size,
+					this
+				)
+			)
+		);
+
 		// Setters:
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_min_island_size",
+				"Set the minimum number of nodes in an island in order for that island to contribute to the penalty function "
+				"value.  If the number of nodes is greater than or equal to this value, this value is subtracted from the count "
+				"and the result is squared.  The squares are summed and negated to compute the penalty value.",
+				"min_island_size_in", "The minimum island size to set.",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::set_min_island_size,
+					this,
+					std::placeholders::_1
+				)
+			)
+		);
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
 				"set_absolute_node_count",
@@ -304,7 +336,7 @@ SquareOfGraphIslandCountCostFunction::compute_cost_function(
 	using masala::base::Real;
 	Size const n_nodes( protected_n_nodes_absolute() );
 	Size * island_sizes = static_cast<Size *>( alloca( sizeof(Size) * n_nodes ) );
-	compute_island_sizes( *island_sizes );
+	protected_compute_island_sizes( *island_sizes );
 	Size accumulator(0);
 	for( Size i(0); i<n_nodes; ++i ) {
 		if( (*island_sizes)[i] >= protected_min_island_size() ) {
