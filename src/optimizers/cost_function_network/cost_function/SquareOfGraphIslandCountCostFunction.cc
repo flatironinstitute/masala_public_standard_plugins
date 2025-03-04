@@ -35,9 +35,7 @@
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_TwoInput.tmpl.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_ThreeInput.tmpl.hh>
-#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_FourInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_TwoInput.tmpl.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
@@ -89,6 +87,73 @@ SquareOfGraphIslandCountCostFunction::deep_clone() const {
 	SquareOfGraphIslandCountCostFunctionSP new_object( std::static_pointer_cast< SquareOfGraphIslandCountCostFunction >( this->clone() ) );
 	new_object->make_independent();
 	return new_object;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC INTERFACE DEFINITION
+////////////////////////////////////////////////////////////////////////////////
+	
+/// @brief Get a description of the API of this object.
+masala::base::api::MasalaObjectAPIDefinitionCWP
+SquareOfGraphIslandCountCostFunction::get_api_definition() {
+	using masala::base::Size;
+	using masala::base::Real;
+	using namespace masala::base::api;
+	using namespace masala::base::api::setter;
+
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	if( api_definition_mutex_locked() == nullptr ) {
+		
+		MasalaObjectAPIDefinitionSP api_def(
+			masala::make_shared< MasalaObjectAPIDefinition >(
+				*this, "A cost function which sums the penalties of the individual choices that were selected for "
+				"a given solution, adds a constant, and squares the result.", false, false
+			)
+		);
+
+		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( SquareOfGraphIslandCountCostFunction, api_def );
+
+		// Setters:
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_absolute_node_count",
+				"Set the total number of nodes.  If the interaction graph is smaller than this count, it is "
+				"enlarged.  If it is larger, it is shrunk and any of the choice matrices that need to be "
+				"deallocated are deallocated.  Throws if object has been finalized.",
+				"absolute_node_count", "The total number of nodes to set.",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::set_absolute_node_count,
+					this,
+					std::placeholders::_1
+				)
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_FourInput< Size, Size, Size, Size > >(
+				"declare_node_choice_pair_interaction",
+				"Declare that two particular choices at two different absolute node indices interact. If the node pair "
+				"has not yet been declared, this declares it.  If the size of the matrix at the two absolute residue "
+				"indices is smaller than the choice indices, this resizes the matrix to the size of the choice indices.",
+				"abs_nodeindex_1", "The absolute index of the first node (variable or not).",
+				"abs_nodeindex_2", "The absolute index of the second node (variable or not).",
+				"choiceindex_1", "The absolute index of the choice at the first node (or 0 for a non-variable node).",
+				"choiceindex_2", "The absolute index of the choice at the second node (or 0 for a non-variable node).",
+				false, false,
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::declare_node_choice_pair_interaction,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2,
+					std::placeholders::_3,
+					std::placeholders::_4
+				)
+			)
+		);
+
+        api_definition_mutex_locked() = api_def;
+    }
+    return api_definition_mutex_locked();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
