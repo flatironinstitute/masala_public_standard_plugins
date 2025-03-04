@@ -88,7 +88,7 @@ GraphIslandCountCostFunction::operator=(
 
 /// @brief Get the category or categories for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { { "CostFunction" } }
+/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -96,7 +96,9 @@ GraphIslandCountCostFunction::operator=(
 /// the primary key.
 std::vector< std::vector< std::string > >
 GraphIslandCountCostFunction::get_categories() const {
-	return GraphBasedCostFunction::get_categories();
+	std::vector< std::vector< std::string > > outvec( GraphBasedCostFunction::get_categories() );
+	outvec[0].push_back("GraphIslandCountCostFunction");
+	return outvec;
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.

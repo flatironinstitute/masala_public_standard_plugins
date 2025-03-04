@@ -196,7 +196,7 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 
 /// @brief Get the category or categories for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { { "CostFunction" } }
+/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -204,30 +204,33 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 /// the primary key.
 std::vector< std::vector< std::string > >
 SquareOfGraphIslandCountCostFunction::get_categories() const {
-	return GraphIslandCountCostFunction::get_categories();
+	std::vector< std::vector< std::string > > outvec( Parent::get_categories() );
+	outvec[0].push_back( "SquareOfGraphIslandCountCostFunction" );
+	return outvec;
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.
-/// @returns { { "CostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }.
+/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }.
 std::vector< std::vector< std::string > >
 SquareOfGraphIslandCountCostFunction::get_data_representation_categories() const {
-	return std::vector< std::vector< std::string > >{ { "CostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } };
+	return std::vector< std::vector< std::string > >{ { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } };
 }
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
-/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based" }
+/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "squared" }
 std::vector< std::string >
 SquareOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
 	outvec.push_back( "graph_island_count_based" );
+	outvec.push_back( "squared" );
 	return outvec;
 }
 
 /// @brief Get the properties of this MasalaDataRepresentation.
-/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based" }.
+/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "squared" }.
 std::vector< std::string >
 SquareOfGraphIslandCountCostFunction::get_present_data_representation_properties() const {
-	return std::vector< std::string >{ "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based" };
+	return std::vector< std::string >{ "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "squared" };
 }
 
 /// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
@@ -240,11 +243,12 @@ SquareOfGraphIslandCountCostFunction::get_absent_data_representation_properties(
 
 /// @brief Get the keywords for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based" }
+/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "squared" }
 std::vector< std::string >
 SquareOfGraphIslandCountCostFunction::get_keywords() const {
 	std::vector< std::string > outvec( Parent::get_keywords() );
 	outvec.push_back( "graph_island_count_based" );
+	outvec.push_back( "squared" );
 	return outvec;
 }
 

@@ -96,7 +96,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all
 	/// cost functions; may be overridden by derived classes.
-	/// @returns { { "CostFunction" } }
+	/// @returns { { "CostFunction", "GraphBasedCostFunction" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one

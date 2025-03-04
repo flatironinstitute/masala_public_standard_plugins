@@ -105,7 +105,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all
 	/// cost functions; may be overridden by derived classes.
-	/// @returns { { "CostFunction" } }
+	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -115,17 +115,17 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the category for this MasalaDataRepresentation.
-	/// @returns { { "CostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }.
+	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }.
 	std::vector< std::vector< std::string > >
 	get_data_representation_categories() const override;
 
 	/// @brief Get the keywords for this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based" }
+	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "squared" }
 	std::vector< std::string >
 	get_data_representation_keywords() const override;
 
 	/// @brief Get the properties of this MasalaDataRepresentation.
-	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based" }.
+	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "squared" }.
 	std::vector< std::string >
 	get_present_data_representation_properties() const override;
 

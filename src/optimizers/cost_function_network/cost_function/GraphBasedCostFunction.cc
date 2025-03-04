@@ -81,7 +81,7 @@ GraphBasedCostFunction::~GraphBasedCostFunction() {
 
 /// @brief Get the category or categories for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { { "CostFunction" } }
+/// @returns { { "CostFunction", "GraphBasedCostFunction" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -89,7 +89,9 @@ GraphBasedCostFunction::~GraphBasedCostFunction() {
 /// the primary key.
 std::vector< std::vector< std::string > >
 GraphBasedCostFunction::get_categories() const {
-	return masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_categories();
+	std::vector< std::vector< std::string > > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_categories() );
+	outvec[0].push_back("GraphBasedCostFunction");
+	return outvec;
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.
