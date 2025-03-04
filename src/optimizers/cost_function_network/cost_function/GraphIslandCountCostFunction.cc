@@ -32,14 +32,6 @@
 #include <iostream>
 
 // Base headers:
-#include <base/api/MasalaObjectAPIDefinition.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_TwoInput.tmpl.hh>
-#include <base/api/setter/MasalaObjectAPISetterDefinition_ThreeInput.tmpl.hh>
-#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
-#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_TwoInput.tmpl.hh>
-#include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/error/ErrorHandling.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
