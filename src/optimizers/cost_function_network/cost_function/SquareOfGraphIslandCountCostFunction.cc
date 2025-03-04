@@ -289,6 +289,40 @@ SquareOfGraphIslandCountCostFunction::class_namespace() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/// @brief Given a selection of choices at variable nodes, compute the cost function.
+/// @details This must be implemented by derived classes.
+/// @note No mutex-locking is performed!
+masala::base::Real
+SquareOfGraphIslandCountCostFunction::compute_cost_function(
+	std::vector< masala::base::Size > const & candidate_solution
+) const {
+	using masala::base::Size;
+	using masala::base::Real;
+	Size const n_nodes( protected_n_nodes_absolute() )
+	Size * island_sizes = static_cast<Size *>( alloca( sizeof(Size) * n_nodes ) );
+	compute_island_sizes( *island_sizes );
+	Size accumulator(0);
+	for( Size i(0); i<n_nodes; ++i ) {
+		if( (*island_sizes)[i] >= protected_min_island_size() ) {
+			Size const cursize( (*island_sizes)[i] + 1 - protected_min_island_size() );
+			accumulator += cursize*cursize;
+		}
+	}
+	return -1.0*protected_weight()*static_cast<Real>(accumulator);
+}
+
+/// @brief Given an old selection of choices at variable nodes and a new selection,
+/// compute the cost function difference.
+/// @details This must be implemented by derived classes.
+/// @note No mutex-locking is performed!
+masala::base::Real
+SquareOfGraphIslandCountCostFunction::compute_cost_function_difference(
+	std::vector< masala::base::Size > const & candidate_solution_old,
+	std::vector< masala::base::Size > const & candidate_solution_new
+) const {
+	return compute_cost_function(candidate_solution_new) - compute_cost_function(candidate_solution_old);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC INTERFACE DEFINITION
 ////////////////////////////////////////////////////////////////////////////////

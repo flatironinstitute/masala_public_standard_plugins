@@ -173,6 +173,24 @@ public:
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Given a selection of choices at variable nodes, compute the cost function.
+	/// @details This must be implemented by derived classes.
+	/// @note No mutex-locking is performed!
+	masala::base::Real
+	compute_cost_function(
+		std::vector< masala::base::Size > const & candidate_solution
+	) const override;
+
+	/// @brief Given an old selection of choices at variable nodes and a new selection,
+	/// compute the cost function difference.
+	/// @details This must be implemented by derived classes.
+	/// @note No mutex-locking is performed!
+	masala::base::Real
+	compute_cost_function_difference(
+		std::vector< masala::base::Size > const & candidate_solution_old,
+		std::vector< masala::base::Size > const & candidate_solution_new
+	) const override;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
