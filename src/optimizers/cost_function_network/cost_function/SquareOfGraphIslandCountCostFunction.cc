@@ -100,6 +100,7 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 	using masala::base::Real;
 	using namespace masala::base::api;
 	using namespace masala::base::api::setter;
+	using namespace masala::base::api::work_function;
 
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	if( api_definition_mutex_locked() == nullptr ) {
@@ -147,6 +148,39 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 					std::placeholders::_2,
 					std::placeholders::_3,
 					std::placeholders::_4
+				)
+			)
+		);
+
+		// Work functions:
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput < Real, std::vector< Size > const & > >(
+				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
+				"threshold, square the sizes, sum them, and negate the result.  No mutex-locking is performed.",
+				true, false, false, true,
+				"cost_function_value", "The value of the cost function, computed for the current candidate solution.",
+				"candidate_solution", "The candidate solution, expressed as a vector of choices for the variable nodes only.",
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::compute_cost_function,
+					this,
+					std::placeholders::_1
+				)
+			)
+		);
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, std::vector< Size > const & > >(
+				"compute_cost_function_difference", "Compute the cost function difference: for each of two input vectors, find the size of each "
+				"island in the interaction graph over threshold, square the sizes, sum them, negate the result, and return the difference.  "
+				"No mutex-locking is performed.",
+				true, false, false, true,
+				"cost_function_difference", "The difference of the cost function, computed for the two candidate solutions.",
+				"candidate_solution_old", "The old candidate solution, expressed as a vector of choices for the variable nodes only.",
+				"candidate_solution_new", "The new candidate solution, expressed as a vector of choices for the variable nodes only.",
+				std::bind(
+					&SquareOfGraphIslandCountCostFunction::compute_cost_function_difference,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2
 				)
 			)
 		);
