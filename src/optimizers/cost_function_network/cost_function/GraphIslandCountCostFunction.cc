@@ -253,7 +253,13 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		while( stackend > 0 ) {
 			++island_sizes[i];
 			--stackend;
-			push_connected_undiscovered_nodes( stackend, node_sizearray, island_sizes );
+			// The following function:
+			// - Finds all the nodes that are connected to the node given by the second argment.
+			// - Skips those that have already been visited (i.e. are not equal to 1 in the island_sizes array).
+			// - Appends the rest to the node_sizearray, incrementing stackend.
+			// - Increments the ith element of island_sizes with the number of connected nodes appended.
+			// - Sets the connected nodes to 0 in island_sizes.
+			push_connected_undiscovered_nodes( i, node_sizearray[stackend + 1], stackend, node_sizearray, island_sizes, candidate_solution );
 		}
 	}
 }
