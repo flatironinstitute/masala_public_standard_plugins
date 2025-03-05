@@ -357,6 +357,8 @@ Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const *
 GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
 	masala::base::Size const node1, masala::base::Size const node2
 ) const {
+	using masala::base::Size;
+
 	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "protected_choice_choice_interaction_graph_for_nodepair", "This "
 		+ class_name() + " object must be finalized before this function is called."
 	);
@@ -366,12 +368,12 @@ GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( (!use_one_based_node_indexing_) || ( node1 > 0 && node2 > 0), "protected_choice_choice_interaction_graph_for_nodepair",
 		"Got a node index of zero, but absolute node indices are one-based."
 	);
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 < full_choice_choice_interaction_graph_.rows(), "protected_choice_choice_interaction_graph_for_nodepair",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 < static_cast< Size >( full_choice_choice_interaction_graph_.rows() ), "protected_choice_choice_interaction_graph_for_nodepair",
 		"Node index " + std::to_string(node1) + " is out of range.  The full choice-choice interaction graph matrix is " +
 		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
 		+ "."
 	);
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node2 < full_choice_choice_interaction_graph_.rows(), "protected_choice_choice_interaction_graph_for_nodepair",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node2 < static_cast< Size >( full_choice_choice_interaction_graph_.rows() ), "protected_choice_choice_interaction_graph_for_nodepair",
 		"Node index " + std::to_string(node2) + " is out of range.  The full choice-choice interaction graph matrix is " +
 		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
 		+ "."
