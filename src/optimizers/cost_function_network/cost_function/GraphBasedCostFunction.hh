@@ -251,6 +251,14 @@ protected:
 	/// @details Performs no mutex locking.
 	inline bool protected_use_one_based_node_indexing() const { return use_one_based_node_indexing_; }
 
+	/// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
+	/// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
+	/// interaction graph.  Indices can be in any order.  Does not lock mutex.
+	Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const *
+	protected_choice_choice_interaction_graph_for_nodepair(
+		masala::base::Size const node1, masala::base::Size const node2
+	) const;
+
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
 	/// for nodes that have more than one choice, indexed by variable node index.

@@ -350,6 +350,36 @@ GraphBasedCostFunction::protected_n_nodes_absolute() const {
 	return full_choice_choice_interaction_graph_.rows();
 }
 
+/// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
+/// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
+/// interaction graph.  Indices can be in any order.  Does not lock mutex.
+Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const *
+GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
+	masala::base::Size const node1, masala::base::Size const node2
+) const {
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "protected_choice_choice_interaction_graph_for_nodepair", "This "
+		+ class_name() + " object must be finalized before this function is called."
+	);
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 != node2, "protected_choice_choice_interaction_graph_for_nodepair", "Got " + std::to_string( node1 )
+		+ " for both node indices.  Node indices must be different."
+	);
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( (!use_one_based_node_indexing_) || ( node1 > 0 && node2 > 0), "protected_choice_choice_interaction_graph_for_nodepair",
+		"Got a node index of zero, but absolute node indices are one-based."
+	);
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 < full_choice_choice_interaction_graph_.rows(), "protected_choice_choice_interaction_graph_for_nodepair",
+		"Node index " + std::to_string(node1) + " is out of range.  The full choice-choice interaction graph matrix is " +
+		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
+		+ "."
+	);
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node2 < full_choice_choice_interaction_graph_.rows(), "protected_choice_choice_interaction_graph_for_nodepair",
+		"Node index " + std::to_string(node2) + " is out of range.  The full choice-choice interaction graph matrix is " +
+		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
+		+ "."
+	);
+
+	return full_choice_choice_interaction_graph_( std::min(node1, node2), std::max(node1, node2) );
+}
+
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices
 /// for nodes that have more than one choice, indexed by variable node index.
@@ -421,7 +451,7 @@ GraphBasedCostFunction::protected_assign(
 	protected_clear();
 
 	use_one_based_node_indexing_ = src_cast_ptr->use_one_based_node_indexing_;
-	
+
 	full_choice_choice_interaction_graph_.resize( src_cast_ptr->full_choice_choice_interaction_graph_.rows(), src_cast_ptr->full_choice_choice_interaction_graph_.cols() );
 	for( Size i(0); i<static_cast<Size>(full_choice_choice_interaction_graph_.rows()); ++i ) {
 		for( Size j(0); j<static_cast<Size>(full_choice_choice_interaction_graph_.cols()); ++j ) {
