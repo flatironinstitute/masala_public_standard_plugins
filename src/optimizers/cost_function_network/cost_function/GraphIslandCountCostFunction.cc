@@ -223,7 +223,39 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	std::vector< masala::base::Size > const & candidate_solution,
 	masala::base::Size * island_sizes
 ) const {
-	TODO TODO TODO;
+	using masala::base::Size;
+
+	Size const nnodes( protected_n_nodes_absolute() ); // Will include extra if zero-based.
+	bool const use_onebased( protected_use_one_based_node_indexing() );
+	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
+
+	// Initialize the island_sizes array to be all 1.  We change it to 0 when a node is incorporated into an island
+	// (unless it is the first node in the island, in which case its entry stores the number of connected components).
+	for( Size i(0); i<nnodes; ++i ) {
+		island_sizes[i] = 1;
+	}
+	if( use_onebased ) { island_sizes[0] = 0; }
+
+	// Scratch space used by this function:
+	// We use this to make a list of nodes to check in the depth-first search in order to avoid a recursive function.
+	// - node_sizearray is used to store indices of nodes to be checked.
+	// - stackend indicates the address in node_sizearray that's one past the end of the stack to be checked.
+	Size stackend(0);
+	Size * node_sizearray = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
+	
+	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing())); i<nnodes; ++i ) {
+		if( island_sizes[i] == 0 ) { continue; } // This position is already part of an island.
+		
+		node_sizearray[0] = i;
+		stackend = 1;
+		island_sizes[i] = 0;
+
+		while( stackend > 0 ) {
+			++island_sizes[i];
+			--stackend;
+			push_connected_undiscovered_nodes( stackend, node_sizearray, island_sizes );
+		}
+	}
 }
 
 /// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order

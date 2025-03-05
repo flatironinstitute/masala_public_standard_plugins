@@ -247,6 +247,10 @@ protected:
 	masala::base::Size
 	protected_n_nodes_absolute() const;
 
+	/// @brief Are we using one-based (true) or zero-based (false) node indexing?
+	/// @details Performs no mutex locking.
+	inline bool protected_use_one_based_node_indexing() const { return use_one_based_node_indexing_; }
+
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
 	/// for nodes that have more than one choice, indexed by variable node index.
