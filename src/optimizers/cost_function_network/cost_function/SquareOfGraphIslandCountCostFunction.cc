@@ -108,8 +108,9 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 		
 		MasalaObjectAPIDefinitionSP api_def(
 			masala::make_shared< MasalaObjectAPIDefinition >(
-				*this, "A cost function which sums the penalties of the individual choices that were selected for "
-				"a given solution, adds a constant, and squares the result.", false, false
+				*this, "A cost function which computes the sum of the sizes of islands "
+				"over a given size threshold and returns the negated sum of the squares.",
+				false, false
 			)
 		);
 
