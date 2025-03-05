@@ -283,8 +283,8 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		);
 		accumulator += island_sizes[i];
 	}
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( accumulator == nnodes, "protected_compute_island_sizes", "Expected the sum of all island "
-		"sizes to be " + std::to_string( nnodes ) +  " but it was " + std::to_string( accumulator) + ".  This is a program error "
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( accumulator + static_cast<Size>(use_onebased) == nnodes, "protected_compute_island_sizes", "Expected the sum of all island "
+		"sizes to be " + std::to_string( nnodes - static_cast<Size>(use_onebased) ) +  " but it was " + std::to_string( accumulator ) + ".  This is a program error "
 		"that ought not to happen.  Please consult a developer."
 	);
 #endif
