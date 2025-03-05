@@ -392,10 +392,12 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 				// If we have records of node-node interactions between iother and current_node...
 				std::pair< bool, Size > const varnode_index_lower( protected_varnode_from_absnode( std::min(iother, current_node) ) );
 				std::pair< bool, Size > const varnode_index_upper( protected_varnode_from_absnode( std::max(iother, current_node) ) );
-				if( (*choice_choice_matrix)(
-						(varnode_index_lower.first ? candidate_solution[ varnode_index_lower.second ] : 0),
-						(varnode_index_upper.first ? candidate_solution[ varnode_index_upper.second ] : 0)
-					)
+				Size const choice_index_lower(varnode_index_lower.first ? candidate_solution[ varnode_index_lower.second ] : 0);
+				Size const choice_index_upper(varnode_index_upper.first ? candidate_solution[ varnode_index_upper.second ] : 0);
+				if(
+					static_cast<Size>( choice_choice_matrix->rows() ) > choice_index_lower &&
+					static_cast<Size>( choice_choice_matrix->cols() ) > choice_index_upper &&
+					(*choice_choice_matrix)( choice_index_lower, choice_index_upper ) 
 				) {
 					// If the current choices at iother and current_node interact...
 					island_sizes[iother] = 0;
