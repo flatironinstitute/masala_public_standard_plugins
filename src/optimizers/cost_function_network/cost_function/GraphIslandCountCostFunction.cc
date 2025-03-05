@@ -267,7 +267,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			/// - Increments the ith element of island_sizes with the number of connected nodes appended.
 			/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
 			push_connected_undiscovered_nodes(
-				i, node_sizearray[stackend + 1], nnodes, stackend,
+				i, node_sizearray[stackend], nnodes, stackend,
 				node_sizearray, island_sizes, node_discovered, candidate_solution
 			);
 		}
