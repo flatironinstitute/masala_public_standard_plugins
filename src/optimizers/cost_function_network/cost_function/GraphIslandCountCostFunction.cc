@@ -229,12 +229,20 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
 
+	// Storage for whether we have discovered each node.  Automatically deallocated at function's end since
+	// this is stack-allocated with alloca().
+	bool * node_discovered = static_cast< bool * >( alloca( sizeof(bool) * nnodes ) );
+
 	// Initialize the island_sizes array to be all 1.  We change it to 0 when a node is incorporated into an island
 	// (unless it is the first node in the island, in which case its entry stores the number of connected components).
 	for( Size i(0); i<nnodes; ++i ) {
 		island_sizes[i] = 1;
+		node_discovered[i] = false;
 	}
-	if( use_onebased ) { island_sizes[0] = 0; }
+	if( use_onebased ) {
+		island_sizes[0] = 0;
+		node_discovered[0] = true;
+	}
 
 	// Scratch space used by this function:
 	// We use this to make a list of nodes to check in the depth-first search in order to avoid a recursive function.
@@ -247,21 +255,39 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		if( island_sizes[i] == 0 ) { continue; } // This position is already part of an island.
 		
 		node_sizearray[0] = i;
+		node_discovered[i] = true;
 		stackend = 1;
-		island_sizes[i] = 0;
 
 		while( stackend > 0 ) {
-			++island_sizes[i];
 			--stackend;
 			// The following function:
-			// - Finds all the nodes that are connected to the node given by the second argment.
-			// - Skips those that have already been visited (i.e. are not equal to 1 in the island_sizes array).
-			// - Appends the rest to the node_sizearray, incrementing stackend.
-			// - Increments the ith element of island_sizes with the number of connected nodes appended.
-			// - Sets the connected nodes to 0 in island_sizes.
-			push_connected_undiscovered_nodes( i, node_sizearray[stackend + 1], stackend, node_sizearray, island_sizes, candidate_solution );
+			/// - Finds all the nodes that are connected to the node given by the second argument.
+			/// - Skips those that have already been visited.
+			/// - Appends the rest to the node_sizearray, incrementing stackend.
+			/// - Increments the ith element of island_sizes with the number of connected nodes appended.
+			/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
+			push_connected_undiscovered_nodes(
+				i, node_sizearray[stackend + 1], nnodes, stackend,
+				node_sizearray, island_sizes, node_discovered, candidate_solution
+			);
 		}
 	}
+
+#ifndef NDEBUG
+	// Sanity check in debug mode: make sure all nodes were discovered, and that the sum of all island sizes is nnodes.
+	Size accumulator(0);
+	for( Size i(0); i<nnodes; ++i ) {
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node_discovered[i], "protected_compute_island_sizes", "Node " + std::to_string(i)
+			+ " was somehow not discovered by this function!  This is a program error that ought not to happen.  Please consult "
+			"a developer."
+		);
+		accumulator += island_sizes[i];
+	}
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( accumulator == nnodes, "protected_compute_island_sizes", "Expected the sum of all island "
+		"sizes to be " + std::to_string( nnodes ) +  " but it was " + std::to_string( accumulator) + ".  This is a program error "
+		"that ought not to happen.  Please consult a developer."
+	);
+#endif
 }
 
 /// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
@@ -340,6 +366,42 @@ GraphIslandCountCostFunction::protected_reset() {
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief This function:
+/// - Finds all the nodes that are connected to the node given by the second argument.
+/// - Skips those that have already been visited.
+/// - Appends the rest to the node_sizearray, incrementing stackend.
+/// - Increments the ith element of island_sizes with the number of connected nodes appended.
+/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
+void
+GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
+	masala::base::Size const root_of_current_island,
+	masala::base::Size const current_node,
+	masala::base::Size const nnodes,
+	masala::base::Size & stackend,
+	masala::base::Size * node_sizearray,
+	masala::base::Size * island_sizes,
+	bool * node_discovered,
+	std::vector< masala::base::Size > const & candidate_solution
+) const {
+	using masala::base::Size;
+
+	for( Size iother( static_cast<Size>(protected_use_one_based_node_indexing()) ); iother < nnodes; ++iother ) {
+		if( iother != current_node && node_discovered[iother] == false ) {
+			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * choice_choice_matrix( protected_choice_choice_interaction_graph_for_nodepair( iother, current_node ) );
+			if( choice_choice_matrix != nullptr ) {
+				// If we have records of node-node interactions between iother and current_node...
+				if( (*choice_choice_matrix)( candidate_solution[ std::min(iother, current_node) ], candidate_solution[ std::max(iother, current_node) ] ) ) {
+					// If the current choices at iother and current_node interact...
+					island_sizes[iother] = 0;
+					++(island_sizes[root_of_current_island]);
+					node_discovered[iother] = true;
+					++stackend;
+					node_sizearray[stackend] = iother;
+				}
+			}
+		}
+	}
+}
 
 } // namespace cost_function
 } // namespace cost_function_network

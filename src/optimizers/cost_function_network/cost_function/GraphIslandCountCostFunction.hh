@@ -240,6 +240,23 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief This function:
+	/// - Finds all the nodes that are connected to the node given by the second argument.
+	/// - Skips those that have already been visited.
+	/// - Appends the rest to the node_sizearray, incrementing stackend.
+	/// - Increments the ith element of island_sizes with the number of connected nodes appended.
+	/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
+	void
+	push_connected_undiscovered_nodes(
+		masala::base::Size const root_of_current_island,
+		masala::base::Size const current_node,
+		masala::base::Size const nnodes,
+		masala::base::Size & stackend,
+		masala::base::Size * node_sizearray,
+		masala::base::Size * island_sizes,
+		bool * node_discovered,
+		std::vector< masala::base::Size > const & candidate_solution
+	) const;
 
 private:
 
