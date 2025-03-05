@@ -407,8 +407,11 @@ GraphBasedCostFunction::protected_finalize(
 ) {
 	using masala::base::Size;
 
-	// TODO TODO TODO
-	// -- STORE ABS->VAR AND VAR->ABS.
+	varnodes_by_absnode_.resize( full_choice_choice_interaction_graph_.rows() );
+	std::fill( varnodes_by_absnode_.begin(), varnodes_by_absnode_.end(), std::make_pair(false, 0) );
+	for( Size i(0); i<variable_node_indices.size(); ++i ) {
+		varnodes_by_absnode_[ variable_node_indices[i] ] = std::make_pair( true, i );
+	}
 
 	masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
 }
@@ -440,6 +443,8 @@ GraphBasedCostFunction::protected_clear() {
 		}
 	}
 	full_choice_choice_interaction_graph_.resize(0, 0);
+
+	varnodes_by_absnode_.clear();
 
 	Parent::protected_clear();
 }
@@ -478,6 +483,8 @@ GraphBasedCostFunction::protected_assign(
 			}
 		}
 	}
+
+	varnodes_by_absnode_ = src_cast_ptr->varnodes_by_absnode_;
 
 	Parent::protected_assign( src );
 }

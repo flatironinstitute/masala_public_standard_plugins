@@ -325,6 +325,14 @@ private:
 		Eigen::Dynamic
 	> full_choice_choice_interaction_graph_;
 
+	// Computed by finalization function:
+
+	/// @brief A vector of variable node indices by absolute node index.
+	/// @details This is computed by the protected_finalize() function.  For every absolute node,
+	/// we store < true, varnode_index > if it is a variable node, and < false, 0 > if it is not.
+	/// If the indexing is 1-based, then the 0 entry also gets <true, varnode_index>.
+	std::vector< std::pair< bool, masala::base::Size > > varnodes_by_absnode_;
+
 }; // class GraphBasedCostFunction
 
 } // namespace cost_function
