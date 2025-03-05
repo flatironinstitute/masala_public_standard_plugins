@@ -382,6 +382,20 @@ GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
 	return full_choice_choice_interaction_graph_( std::min(node1, node2), std::max(node1, node2) );
 }
 
+/// @brief Given an absolute node index, get the variable node index.
+/// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
+/// <is variable node, variable node index if variable or 0 otherwise>.
+std::pair< bool, masala::base::Size >
+GraphBasedCostFunction::protected_varnode_from_absnode(
+	masala::base::Size const absnode_index
+) const {
+	using masala::base::Size;
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( absnode_index < protected_n_nodes_absolute(), "protected_varnode_from_absnode",
+		"Absolute node index " + std::to_string(absnode_index) + " is out of range."
+	);
+	return varnodes_by_absnode_[absnode_index];
+}
+
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 /// @param[in] variable_node_indices A list of all of the absolute node indices
 /// for nodes that have more than one choice, indexed by variable node index.

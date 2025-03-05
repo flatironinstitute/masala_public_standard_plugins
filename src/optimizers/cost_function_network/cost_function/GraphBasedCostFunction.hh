@@ -259,6 +259,14 @@ protected:
 		masala::base::Size const node1, masala::base::Size const node2
 	) const;
 
+	/// @brief Given an absolute node index, get the variable node index.
+	/// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
+	/// <is variable node, variable node index if variable or 0 otherwise>.
+	std::pair< bool, masala::base::Size >
+	protected_varnode_from_absnode(
+		masala::base::Size const absnode_index
+	) const;
+
 	/// @brief Indicate that all data input is complete.  Performs no mutex-locking.
 	/// @param[in] variable_node_indices A list of all of the absolute node indices
 	/// for nodes that have more than one choice, indexed by variable node index.
