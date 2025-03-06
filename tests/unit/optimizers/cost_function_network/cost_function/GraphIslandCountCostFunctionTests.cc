@@ -52,7 +52,7 @@ namespace cost_function {
 
 std::string const tracer_name( "standard_masala_plugins::tests::unit::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionTests" );
 
-TEST_CASE( "Instantiate an SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_API >()
@@ -61,7 +61,7 @@ TEST_CASE( "Instantiate an SquareOfGraphIslandCountCostFunction.", "[standard_ma
 	}() );
 }
 
-TEST_CASE( "Instantiate an LinearGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a LinearGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_API >()
@@ -70,7 +70,7 @@ TEST_CASE( "Instantiate an LinearGraphIslandCountCostFunction.", "[standard_masa
 	}() );
 }
 
-TEST_CASE( "Instantiate an SquareRootOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a SquareRootOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_API >()
@@ -79,7 +79,7 @@ TEST_CASE( "Instantiate an SquareRootOfGraphIslandCountCostFunction.", "[standar
 	}() );
 }
 
-TEST_CASE( "Instantiate an LogOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a LogOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::LogOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::LogOfGraphIslandCountCostFunction_API >()
