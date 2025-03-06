@@ -24,6 +24,7 @@
 #include <external/catch2/single_include/catch2/catch.hpp>
 
 // Unit headers:
+#include <optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.hh>
 #include <optimizers_api/auto_generated_api/cost_function_network/cost_function/SquareOfGraphIslandCountCostFunction_API.hh>
 #include <optimizers_api/auto_generated_api/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction_API.hh>
 #include <optimizers_api/auto_generated_api/cost_function_network/cost_function/LinearGraphIslandCountCostFunction_API.hh>
@@ -34,8 +35,11 @@
 #include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 
 // Masala base headers:
-#include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/api/MasalaObjectAPIDefinition.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_FourInput.tmpl.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
+#include <base/managers/engine/MasalaDataRepresentation.hh>
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
@@ -51,6 +55,39 @@ namespace cost_function_network {
 namespace cost_function {
 
 std::string const tracer_name( "standard_masala_plugins::tests::unit::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionTests" );
+
+/// @brief Utility function: set up a graph.
+void set_up_graph( masala::base::managers::engine::MasalaDataRepresentationAPI & costfxn ) {
+	using masala::base::Size;
+	using namespace standard_masala_plugins::optimizers::cost_function_network::cost_function;
+	using namespace masala::base::api;
+	using namespace masala::base::api::setter;
+
+	masala::base::managers::engine::MasalaDataRepresentationSP dr_ptr( costfxn.get_inner_data_representation_object() );
+	GraphIslandCountCostFunctionSP gicf_ptr( std::dynamic_pointer_cast< GraphIslandCountCostFunction >( dr_ptr ) );
+	CHECK_OR_THROW( gicf_ptr != nullptr, tracer_name, "set_up_graph", "The " + costfxn.inner_class_name() + " object could not be interpreted as a GraphIslandCountCostFunction." );
+	MasalaObjectAPIDefinitionCSP api_def( gicf_ptr->get_api_definition() );
+	CHECK_OR_THROW( api_def != nullptr, tracer_name, "set_up_graph", "The " + gicf_ptr->class_name() + " object's API definition could not be retrieved." );
+
+	// Get the needed setters:
+	MasalaObjectAPISetterDefinition_OneInputCSP<bool> onebased_setter( api_def->get_oneinput_setter_function<bool>("set_one_based_absolute_node_indexing") );
+	MasalaObjectAPISetterDefinition_OneInputCSP<Size> nodecount_setter( api_def->get_oneinput_setter_function<Size>("set_absolute_node_count") );
+	MasalaObjectAPISetterDefinition_FourInputCSP<Size,Size,Size,Size> pair_interaction_setter( api_def->get_fourinput_setter_function<Size,Size,Size,Size>("declare_node_choice_pair_interaction") );
+	CHECK_OR_THROW( onebased_setter != nullptr, tracer_name, "set_up_graph", "Could not get the \"set_one_based_absolute_node_indexing()\" function for the " + gicf_ptr->class_name() + " class." );
+	CHECK_OR_THROW( api_def != nullptr, tracer_name, "set_up_graph", "Could not get the \"set_absolute_node_count()\" function for the " + gicf_ptr->class_name() + " class." );
+	CHECK_OR_THROW( pair_interaction_setter != nullptr, tracer_name, "set_up_graph", "Could not get the \"declare_node_choice_pair_interaction()\" function for the " + gicf_ptr->class_name() + " class." );
+
+	// Set up an 8-node graph with 3 choices per node:
+	onebased_setter->function(true);
+	nodecount_setter->function(8);
+
+	pair_interaction_setter->function( 1, 2, 1, 1 );
+	pair_interaction_setter->function( 1, 3, 1, 1 );
+	pair_interaction_setter->function( 2, 3, 1, 1 );
+	pair_interaction_setter->function( 2, 4, 1, 1 );
+	pair_interaction_setter->function( 2, 6, 1, 1 );
+	pair_interaction_setter->function( 7, 8, 1, 1 );
+}
 
 TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
