@@ -34,6 +34,7 @@
 #include <optimizers/cost_function_network/cost_function/FunctionOfIntegerPenaltySumCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/SquareOfChoicePenaltySumCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/SquareOfGraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/LinearGraphIslandCountCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
@@ -65,6 +66,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::SquareOfChoicePenaltySumCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::LinearGraphIslandCountCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::ChoiceFeature >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
