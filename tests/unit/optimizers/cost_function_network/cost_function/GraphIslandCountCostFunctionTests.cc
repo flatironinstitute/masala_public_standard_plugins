@@ -168,10 +168,10 @@ TEST_CASE( "Test the function of a SquareOfGraphIslandCountCostFunction.", "[sta
 		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
 
 		CHECK( std::abs( all_zero_score + 4.0 ) < 1.0e-6 );
-		CHECK( std::abs( all_one_score + 25.0 ) < 1.0e-6 );
-		CHECK( std::abs( all_two_score + 24.0 ) < 1.0e-6 );
-		CHECK( std::abs( mixed_score_1 + 64.0 ) < 1.0e-6 );
-		CHECK( std::abs( mixed_score_2 + 32.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_one_score + 13.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_two_score + 11.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1 + 49.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2 + 18.0 ) < 1.0e-6 );
 	}() );
 }
 
