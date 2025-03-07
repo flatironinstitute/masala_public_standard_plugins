@@ -81,12 +81,30 @@ void set_up_graph( masala::base::managers::engine::MasalaDataRepresentationAPI &
 	onebased_setter->function(true);
 	nodecount_setter->function(8);
 
-	pair_interaction_setter->function( 1, 2, 1, 1 );
+	pair_interaction_setter->function( 1, 2, 0, 0 );
+	pair_interaction_setter->function( 2, 3, 0, 0 );
+
 	pair_interaction_setter->function( 1, 3, 1, 1 );
-	pair_interaction_setter->function( 2, 3, 1, 1 );
-	pair_interaction_setter->function( 2, 4, 1, 1 );
-	pair_interaction_setter->function( 2, 6, 1, 1 );
-	pair_interaction_setter->function( 7, 8, 1, 1 );
+	pair_interaction_setter->function( 1, 8, 1, 1 );
+	pair_interaction_setter->function( 4, 5, 1, 1 );
+	pair_interaction_setter->function( 4, 6, 1, 1 );
+
+	pair_interaction_setter->function( 1, 4, 2, 2 );
+	pair_interaction_setter->function( 2, 3, 2, 2 );
+	pair_interaction_setter->function( 4, 6, 2, 2 );
+	pair_interaction_setter->function( 5, 6, 2, 2 );
+	pair_interaction_setter->function( 7, 8, 2, 2 );
+
+	pair_interaction_setter->function( 3, 6, 0, 1 );
+	pair_interaction_setter->function( 6, 7, 1, 2 );
+
+	pair_interaction_setter->function( 1, 4, 0, 1 );
+	pair_interaction_setter->function( 3, 5, 1, 2 );
+	pair_interaction_setter->function( 5, 7, 2, 0 );
+	pair_interaction_setter->function( 6, 8, 1, 0 );
+
+	// Finalize the cost function:
+	gicf_ptr->finalize( std::vector< Size >{ 1, 2, 3, 4, 5, 6, 7, 8 } );
 }
 
 TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
