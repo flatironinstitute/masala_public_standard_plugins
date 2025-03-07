@@ -120,12 +120,12 @@ public:
 	get_data_representation_categories() const override;
 
 	/// @brief Get the keywords for this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "squared" }
+	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "square_root" }
 	std::vector< std::string >
 	get_data_representation_keywords() const override;
 
 	/// @brief Get the properties of this MasalaDataRepresentation.
-	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "squared" }.
+	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "square_roots" }.
 	std::vector< std::string >
 	get_present_data_representation_properties() const override;
 
