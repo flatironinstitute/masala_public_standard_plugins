@@ -86,6 +86,7 @@ void set_up_graph( masala::base::managers::engine::MasalaDataRepresentationAPI &
 
 	pair_interaction_setter->function( 1, 3, 1, 1 );
 	pair_interaction_setter->function( 1, 8, 1, 1 );
+	pair_interaction_setter->function( 2, 3, 1, 1 );
 	pair_interaction_setter->function( 4, 5, 1, 1 );
 	pair_interaction_setter->function( 4, 6, 1, 1 );
 
@@ -98,7 +99,7 @@ void set_up_graph( masala::base::managers::engine::MasalaDataRepresentationAPI &
 	pair_interaction_setter->function( 3, 6, 0, 1 );
 	pair_interaction_setter->function( 6, 7, 1, 2 );
 
-	pair_interaction_setter->function( 1, 4, 0, 1 );
+	pair_interaction_setter->function( 2, 4, 0, 1 );
 	pair_interaction_setter->function( 3, 5, 1, 2 );
 	pair_interaction_setter->function( 5, 7, 2, 0 );
 	pair_interaction_setter->function( 6, 8, 1, 0 );
