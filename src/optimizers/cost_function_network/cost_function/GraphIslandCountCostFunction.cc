@@ -36,7 +36,7 @@
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers
-#include <ostream> // DELETE ME -- FOR DEBUGGING ONLY
+//#include <ostream> // DELETE ME -- FOR DEBUGGING ONLY
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -255,7 +255,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	Size * node_sizearray = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
 	
 	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing())); i<nnodes; ++i ) {
-		std::cout << "NODE " << i << ": " << ( node_discovered[i] ? "DISCOVERED" : "UNDISCOVERED" ) << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
+		// std::cout << "NODE " << i << ": " << ( node_discovered[i] ? "DISCOVERED" : "UNDISCOVERED" ) << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
 		if( node_discovered[i] ) { continue; } // This position is already part of an island.
 		
 		node_sizearray[0] = i;
@@ -263,9 +263,9 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		stackend = 1;
 
 		while( stackend > 0 ) {
-			std::cout << "Stack array: "; // DELETE ME -- FOR DEBUGGING ONLY.
-			for( Size j(0); j<stackend; ++j ) { std::cout << node_sizearray[j] << " "; } // DELETE ME -- FOR DEBUGGING ONLY.
-			std::cout << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
+			// std::cout << "Stack array: "; // DELETE ME -- FOR DEBUGGING ONLY.
+			// for( Size j(0); j<stackend; ++j ) { std::cout << node_sizearray[j] << " "; } // DELETE ME -- FOR DEBUGGING ONLY.
+			// std::cout << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
 
 			--stackend;
 			// The following function:
@@ -408,7 +408,7 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 					static_cast<Size>( choice_choice_matrix->cols() ) > choice_index_upper &&
 					(*choice_choice_matrix)( choice_index_lower, choice_index_upper ) 
 				) {
-					std::cout << "\tFound that node " << current_node << " is connected to node " << iother << "." << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
+					// std::cout << "\tFound that node " << current_node << " is connected to node " << iother << "." << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
 
 					// If the current choices at iother and current_node interact...
 					island_sizes[iother] = 0;
