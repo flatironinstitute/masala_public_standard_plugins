@@ -176,6 +176,70 @@ TEST_CASE( "Test the function of a SquareOfGraphIslandCountCostFunction.", "[sta
 	}() );
 }
 
+TEST_CASE( "Test the function of a LinearGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::LinearGraphIslandCountCostFunction_API]" ) {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	REQUIRE_NOTHROW([&](){
+		optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_APISP costfxn(
+			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_API >()
+		);
+		costfxn->write_to_tracer( "Instantiated a LinearGraphIslandCountCostFunction." );
+
+		set_up_graph( *costfxn );
+
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+
+		CHECK( std::abs( all_zero_score + 2.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_one_score + 5.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_two_score + 5.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1 + 7.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2 + 6.0 ) < 1.0e-6 );
+	}() );
+}
+
+TEST_CASE( "Test the function of a SquareRootOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::SquareRootOfGraphIslandCountCostFunction_API]" ) {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	REQUIRE_NOTHROW([&](){
+		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_APISP costfxn(
+			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_API >()
+		);
+		costfxn->write_to_tracer( "Instantiated a SquareRootOfGraphIslandCountCostFunction." );
+
+		set_up_graph( *costfxn );
+
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+
+		CHECK( std::abs( all_zero_score + std::sqrt(2.0) ) < 1.0e-6 );
+		CHECK( std::abs( all_one_score + std::sqrt(3.0) + std::sqrt(2.0) ) < 1.0e-6 );
+		CHECK( std::abs( all_two_score + 2.0 + std::sqrt(3.0)) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1 + std::sqrt(7.0) ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2 + 2.0*std::sqrt(3.0) ) < 1.0e-6 );
+	}() );
+}
+
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
