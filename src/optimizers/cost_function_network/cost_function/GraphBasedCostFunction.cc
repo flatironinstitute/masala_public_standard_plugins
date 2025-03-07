@@ -240,8 +240,8 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 	Size const choice1( firstindex == abs_nodeindex_1 ? choiceindex_1 : choiceindex_2 );
 	Size const choice2( firstindex == abs_nodeindex_1 ? choiceindex_2 : choiceindex_1 );
 
-	if( secondindex > static_cast< Size >( full_choice_choice_interaction_graph_.cols() ) ) {
-		protected_set_absolute_node_count( abs_nodeindex_2 + 1 );
+	if( secondindex >= static_cast< Size >( full_choice_choice_interaction_graph_.cols() ) ) {
+		protected_set_absolute_node_count( abs_nodeindex_2 );
 	}
 
 	if( full_choice_choice_interaction_graph_(firstindex, secondindex) == nullptr ) {
@@ -302,23 +302,24 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 		"already been finalized.  This function can only be called on an object that has not yet been finalized."
 	);
 	Size const oldsize( full_choice_choice_interaction_graph_.rows() );
+	Size const absolute_row_count( absolute_node_count + static_cast< Size >( use_one_based_node_indexing_ ) );
 	CHECK_OR_THROW_FOR_CLASS( oldsize == static_cast< Size >( full_choice_choice_interaction_graph_.cols() ),
 		"protected_set_absolute_node_count", "The full choice-choice interaction graph is not square.  This is a program error."
 	);
-	if( absolute_node_count > oldsize ) {
-		full_choice_choice_interaction_graph_.conservativeResize( absolute_node_count, absolute_node_count );
-		for( Size i(oldsize); i<absolute_node_count; ++i ) {
-			for( Size j(0); j<absolute_node_count; ++j ) {
+	if( absolute_row_count > oldsize ) {
+		full_choice_choice_interaction_graph_.conservativeResize( absolute_row_count, absolute_row_count );
+		for( Size i(oldsize); i<absolute_row_count; ++i ) {
+			for( Size j(0); j<absolute_row_count; ++j ) {
 				full_choice_choice_interaction_graph_(i,j) = nullptr;
 			}
 		}
 		for( Size i(0); i<oldsize; ++i ) {
-			for( Size j(oldsize); j<absolute_node_count; ++j ) {
+			for( Size j(oldsize); j<absolute_row_count; ++j ) {
 				full_choice_choice_interaction_graph_(i,j) = nullptr;
 			}
 		}
-	} else if( absolute_node_count < oldsize ) {
-		for( Size i(absolute_node_count); i<oldsize; ++i ) {
+	} else if( absolute_row_count < oldsize ) {
+		for( Size i(absolute_row_count); i<oldsize; ++i ) {
 			for( Size j(0); j<oldsize; ++j ) {
 				if( full_choice_choice_interaction_graph_(i,j) != nullptr ) {
 					delete ( full_choice_choice_interaction_graph_(i,j) );
@@ -326,7 +327,7 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 				}
 			}
 			for( Size i(0); i<oldsize; ++i ) {
-				for( Size j(absolute_node_count); j<oldsize; ++j ) {
+				for( Size j(absolute_row_count); j<oldsize; ++j ) {
 					if( full_choice_choice_interaction_graph_(i,j) != nullptr ) {
 						delete ( full_choice_choice_interaction_graph_(i,j) );
 						full_choice_choice_interaction_graph_(i,j) = nullptr;
@@ -334,7 +335,7 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 				}
 			}
 		}
-		full_choice_choice_interaction_graph_.conservativeResize( absolute_node_count, absolute_node_count );
+		full_choice_choice_interaction_graph_.conservativeResize( absolute_row_count, absolute_row_count );
 	}
 }
 

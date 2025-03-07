@@ -81,15 +81,33 @@ void set_up_graph( masala::base::managers::engine::MasalaDataRepresentationAPI &
 	onebased_setter->function(true);
 	nodecount_setter->function(8);
 
-	pair_interaction_setter->function( 1, 2, 1, 1 );
+	pair_interaction_setter->function( 1, 2, 0, 0 );
+	pair_interaction_setter->function( 2, 3, 0, 0 );
+
 	pair_interaction_setter->function( 1, 3, 1, 1 );
-	pair_interaction_setter->function( 2, 3, 1, 1 );
-	pair_interaction_setter->function( 2, 4, 1, 1 );
-	pair_interaction_setter->function( 2, 6, 1, 1 );
-	pair_interaction_setter->function( 7, 8, 1, 1 );
+	pair_interaction_setter->function( 1, 8, 1, 1 );
+	pair_interaction_setter->function( 4, 5, 1, 1 );
+	pair_interaction_setter->function( 4, 6, 1, 1 );
+
+	pair_interaction_setter->function( 1, 4, 2, 2 );
+	pair_interaction_setter->function( 2, 3, 2, 2 );
+	pair_interaction_setter->function( 4, 6, 2, 2 );
+	pair_interaction_setter->function( 5, 6, 2, 2 );
+	pair_interaction_setter->function( 7, 8, 2, 2 );
+
+	pair_interaction_setter->function( 3, 6, 0, 1 );
+	pair_interaction_setter->function( 6, 7, 1, 2 );
+
+	pair_interaction_setter->function( 1, 4, 0, 1 );
+	pair_interaction_setter->function( 3, 5, 1, 2 );
+	pair_interaction_setter->function( 5, 7, 2, 0 );
+	pair_interaction_setter->function( 6, 8, 1, 0 );
+
+	// Finalize the cost function:
+	gicf_ptr->finalize( std::vector< Size >{ 1, 2, 3, 4, 5, 6, 7, 8 } );
 }
 
-TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::SquareOfGraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_API >()
@@ -98,7 +116,7 @@ TEST_CASE( "Instantiate a SquareOfGraphIslandCountCostFunction.", "[standard_mas
 	}() );
 }
 
-TEST_CASE( "Instantiate a LinearGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a LinearGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::LinearGraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::LinearGraphIslandCountCostFunction_API >()
@@ -107,7 +125,7 @@ TEST_CASE( "Instantiate a LinearGraphIslandCountCostFunction.", "[standard_masal
 	}() );
 }
 
-TEST_CASE( "Instantiate a SquareRootOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a SquareRootOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::SquareRootOfGraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareRootOfGraphIslandCountCostFunction_API >()
@@ -116,12 +134,44 @@ TEST_CASE( "Instantiate a SquareRootOfGraphIslandCountCostFunction.", "[standard
 	}() );
 }
 
-TEST_CASE( "Instantiate a LogOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GraphIslandCountCostFunction_API][instantiation]" ) {
+TEST_CASE( "Instantiate a LogOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::LogOfGraphIslandCountCostFunction_API][instantiation]" ) {
 	REQUIRE_NOTHROW([&](){
 		optimizers_api::auto_generated_api::cost_function_network::cost_function::LogOfGraphIslandCountCostFunction_APISP costfxn(
 			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::LogOfGraphIslandCountCostFunction_API >()
 		);
 		costfxn->write_to_tracer( "Instantiated a LogOfGraphIslandCountCostFunction." );
+	}() );
+}
+
+TEST_CASE( "Test the function of a SquareOfGraphIslandCountCostFunction.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::SquareOfGraphIslandCountCostFunction_API]" ) {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	REQUIRE_NOTHROW([&](){
+		optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_APISP costfxn(
+			masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::cost_function::SquareOfGraphIslandCountCostFunction_API >()
+		);
+		costfxn->write_to_tracer( "Instantiated a SquareOfGraphIslandCountCostFunction." );
+
+		set_up_graph( *costfxn );
+
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+
+		CHECK( std::abs( all_zero_score + 4.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_one_score + 25.0 ) < 1.0e-6 );
+		CHECK( std::abs( all_two_score + 24.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1 + 64.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2 + 32.0 ) < 1.0e-6 );
 	}() );
 }
 
