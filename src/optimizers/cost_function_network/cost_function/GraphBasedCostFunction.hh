@@ -24,6 +24,9 @@
 /// - Derived classes compute something from this graph.  (The initial application is to compute the size of islands, and then
 /// to sum some function of each island's size; this is used to promote mutually-connected structures like hydrogen bond networks
 /// when designing peptides and proteins, and is analogous to Rosetta's hbnet scoring term.)
+/// @note This class has been updated to be a template class.  Originally, it stored a boolean graph, but it makes
+/// sense to allow other types of values to occupy edges (for instance, to support Rosetta's interdigitation_bonus
+/// scoring term).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphBasedCostFunction_hh
@@ -57,6 +60,9 @@ namespace cost_function {
 /// - Derived classes compute something from this graph.  (The initial application is to compute the size of islands, and then
 /// to sum some function of each island's size; this is used to promote mutually-connected structures like hydrogen bond networks
 /// when designing peptides and proteins, and is analogous to Rosetta's hbnet scoring term.)
+/// @note This class has been updated to be a template class.  Originally, it stored a boolean graph, but it makes
+/// sense to allow other types of values to occupy edges (for instance, to support Rosetta's interdigitation_bonus
+/// scoring term).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class GraphBasedCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
 	
