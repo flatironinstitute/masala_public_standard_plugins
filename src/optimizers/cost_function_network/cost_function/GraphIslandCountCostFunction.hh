@@ -50,7 +50,7 @@ namespace cost_function {
 /// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction<bool> {
+class GraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction < bool > {
 
 	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction<bool> Parent;
 	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunctionSP<bool> ParentSP;
