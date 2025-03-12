@@ -39,23 +39,28 @@ namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 
+	template< typename T >
 	class GraphBasedCostFunction;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.
-	using GraphBasedCostFunctionSP = MASALA_SHARED_POINTER< GraphBasedCostFunction >;
+	template< typename T >
+	using GraphBasedCostFunctionSP = MASALA_SHARED_POINTER< GraphBasedCostFunction<T> >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a MASALA_SHARED_POINTER for const objects of that class.
-	using GraphBasedCostFunctionCSP = MASALA_SHARED_POINTER< GraphBasedCostFunction const >;
+	template< typename T >
+	using GraphBasedCostFunctionCSP = MASALA_SHARED_POINTER< GraphBasedCostFunction<T> const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a MASALA_WEAK_POINTER for objects of that class.
-	using GraphBasedCostFunctionWP = MASALA_WEAK_POINTER< GraphBasedCostFunction >;
+	template< typename T >
+	using GraphBasedCostFunctionWP = MASALA_WEAK_POINTER< GraphBasedCostFunction<T> >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
-	using GraphBasedCostFunctionCWP = MASALA_WEAK_POINTER< GraphBasedCostFunction const >;
+	template< typename T >
+	using GraphBasedCostFunctionCWP = MASALA_WEAK_POINTER< GraphBasedCostFunction<T> const >;
 
 } // namespace cost_function
 } // namespace cost_function_network

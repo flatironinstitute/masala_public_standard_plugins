@@ -49,8 +49,9 @@ namespace cost_function {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Copy constructor.
-GraphBasedCostFunction::GraphBasedCostFunction(
-	GraphBasedCostFunction const & src
+template< typename T >
+GraphBasedCostFunction<T>::GraphBasedCostFunction(
+	GraphBasedCostFunction<T> const & src
 ) :
 	Parent()
 {
@@ -61,9 +62,10 @@ GraphBasedCostFunction::GraphBasedCostFunction(
 }
 
 // @brief Assignment operator.
-GraphBasedCostFunction &
-GraphBasedCostFunction::operator=(
-	GraphBasedCostFunction const & src
+template< typename T >
+GraphBasedCostFunction<T> &
+GraphBasedCostFunction<T>::operator=(
+	GraphBasedCostFunction<T> const & src
 ) {
 	std::lock( src.data_representation_mutex(), data_representation_mutex() );
 	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
@@ -73,7 +75,8 @@ GraphBasedCostFunction::operator=(
 }
 
 /// @brief Destructor.  Not defaulted since we have to deallocate the matrices.
-GraphBasedCostFunction::~GraphBasedCostFunction() {
+template< typename T >
+GraphBasedCostFunction<T>::~GraphBasedCostFunction() {
 	protected_clear();
 }
 
@@ -90,8 +93,9 @@ GraphBasedCostFunction::~GraphBasedCostFunction() {
 /// in more than one hierarchical category (in which case there would be more than one
 /// entry in the outer vector), but must be in at least one.  The first one is used as
 /// the primary key.
+template< typename T >
 std::vector< std::vector< std::string > >
-GraphBasedCostFunction::get_categories() const {
+GraphBasedCostFunction<T>::get_categories() const {
 	std::vector< std::vector< std::string > > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_categories() );
 	outvec[0].push_back("GraphBasedCostFunction");
 	return outvec;
@@ -99,16 +103,18 @@ GraphBasedCostFunction::get_categories() const {
 
 /// @brief Get the category for this MasalaDataRepresentation.
 /// @returns { { "CostFunction", "GraphBasedCostFunction" } }.
+template< typename T >
 std::vector< std::vector< std::string > >
-GraphBasedCostFunction::get_data_representation_categories() const {
+GraphBasedCostFunction<T>::get_data_representation_categories() const {
 	return std::vector< std::vector< std::string > >{ { "CostFunction", "GraphBasedCostFunction" } };
 }
 
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 /// is compatible.
 /// @returns {"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"}.
+template< typename T >
 std::vector< std::string >
-GraphBasedCostFunction::get_compatible_masala_engines() const {
+GraphBasedCostFunction<T>::get_compatible_masala_engines() const {
 	return std::vector< std::string >{
 		"standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer"
 	};
@@ -116,8 +122,9 @@ GraphBasedCostFunction::get_compatible_masala_engines() const {
 
 /// @brief Get the properties of this MasalaDataRepresentation.
 /// @returns { "graph_based", "cost_function", "not_pairwise_decomposible" }.
+template< typename T >
 std::vector< std::string >
-GraphBasedCostFunction::get_present_data_representation_properties() const {
+GraphBasedCostFunction<T>::get_present_data_representation_properties() const {
 	return std::vector< std::string > {
 		"graph_based",
 		"cost_function",
@@ -128,8 +135,9 @@ GraphBasedCostFunction::get_present_data_representation_properties() const {
 /// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
 /// non-exhaustive list.
 /// @returns { "pairwise_decomposible" }.
+template< typename T >
 std::vector< std::string >
-GraphBasedCostFunction::get_absent_data_representation_properties() const {
+GraphBasedCostFunction<T>::get_absent_data_representation_properties() const {
 	return std::vector< std::string > {
 		"pairwise_decomposible"
 	};
@@ -138,8 +146,9 @@ GraphBasedCostFunction::get_absent_data_representation_properties() const {
 /// @brief Get the keywords for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
 /// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible" }
+template< typename T >
 std::vector< std::string >
-GraphBasedCostFunction::get_keywords() const {
+GraphBasedCostFunction<T>::get_keywords() const {
 	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_keywords() );
 	outvec.push_back( "graph_based" );
 	outvec.push_back( "not_pairwise_decomposible" );
@@ -148,8 +157,9 @@ GraphBasedCostFunction::get_keywords() const {
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
 /// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible" }
+template< typename T >
 std::vector< std::string >
-GraphBasedCostFunction::get_data_representation_keywords() const {
+GraphBasedCostFunction<T>::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::get_keywords() );
 	outvec.push_back( "graph_based" );
 	outvec.push_back( "not_pairwise_decomposible" );
@@ -162,15 +172,17 @@ GraphBasedCostFunction::get_data_representation_keywords() const {
 
 /// @brief Get whether nodes' absolute index is one-based (true) or zero-based (false, the default).
 /// @note Variable node indexing is always zero-based.
+template< typename T >
 bool
-GraphBasedCostFunction::one_based_absolute_node_indexing() const {
+GraphBasedCostFunction<T>::one_based_absolute_node_indexing() const {
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	return use_one_based_node_indexing_;
 }
 
 /// @brief Get the total number of nodes.
+template< typename T >
 masala::base::Size
-GraphBasedCostFunction::absolute_node_count() const {
+GraphBasedCostFunction<T>::absolute_node_count() const {
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == full_choice_choice_interaction_graph_.cols(),
 		"absolute_node_count", "The full choice interaction graph matrix was not square!  This is a program error that ought "
@@ -187,8 +199,9 @@ GraphBasedCostFunction::absolute_node_count() const {
 /// @brief Set whether nodes' absolute index is one-based (true) or zero-based (false, the default).
 /// @details Throws if node-choice pair interacitons have already been input.
 /// @note Variable node indexing is always zero-based.
+template< typename T >
 void
-GraphBasedCostFunction::set_one_based_absolute_node_indexing(
+GraphBasedCostFunction<T>::set_one_based_absolute_node_indexing(
 	bool const setting
 ) {
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
@@ -206,15 +219,17 @@ GraphBasedCostFunction::set_one_based_absolute_node_indexing(
 /// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
 /// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
 /// object has been finalized.
+template< typename T >
 void
-GraphBasedCostFunction::set_absolute_node_count(
+GraphBasedCostFunction<T>::set_absolute_node_count(
 	masala::base::Size const absolute_node_count
 ) {
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	protected_set_absolute_node_count( absolute_node_count );
 }
 
-/// @brief Declare that two particular choices at two different absolute node indices interact.
+/// @brief Declare that two particular choices at two different absolute node indices interact, and set a value
+/// for the edge.
 /// @details If the node pair has not yet been declared, this declares it.  If the size of the matrix at the two
 /// absolute residue indices is smaller than the choice indices, this resizes the matrix to the size of the choice
 /// indices.
@@ -222,12 +237,15 @@ GraphBasedCostFunction::set_absolute_node_count(
 /// @param[in] abs_nodeindex_2 The absolute index of the second node (variable or not).
 /// @param[in] choiceindex_1 The absolute index of the choice at the first node (or 0 for a non-variable node).
 /// @param[in] choiceindex_2 The absolute index of the choice at the second node (or 0 for a non-variable node).
+/// @param[in] edge_value The value for this edge.
+template< typename T >
 void
-GraphBasedCostFunction::declare_node_choice_pair_interaction(
+GraphBasedCostFunction<T>::declare_node_choice_pair_interaction(
 	masala::base::Size const abs_nodeindex_1,
 	masala::base::Size const abs_nodeindex_2,
 	masala::base::Size const choiceindex_1,
-	masala::base::Size const choiceindex_2
+	masala::base::Size const choiceindex_2,
+	T const edge_value
 ) {
 	using masala::base::Size;
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
@@ -248,10 +266,10 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 	}
 
 	if( full_choice_choice_interaction_graph_(firstindex, secondindex) == nullptr ) {
-		full_choice_choice_interaction_graph_(firstindex, secondindex) = new Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic >();
+		full_choice_choice_interaction_graph_(firstindex, secondindex) = new Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic >();
 	}
 
-	Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > * choicematrix( full_choice_choice_interaction_graph_(firstindex, secondindex) );
+	Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > * choicematrix( full_choice_choice_interaction_graph_(firstindex, secondindex) );
 	if( static_cast< Size >( choicematrix->rows() ) <= choice1 || static_cast< Size >( choicematrix->cols() ) <= choice2 ) {
 		Size const oldrows( choicematrix->rows() );
 		Size const oldcols( choicematrix->cols() );
@@ -261,20 +279,20 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 		if( newrows > oldrows ) {
 			for( Size i(oldrows); i<newrows; ++i ) {
 				for( Size j(0); j<newcols; ++j ) {
-					(*choicematrix)(i,j) = false;
+					(*choicematrix)(i,j) = T(0);
 				}
 			}
 		}
 		if( newcols > oldcols ) {
 			for( Size i(0); i<newrows; ++i ) {
 				for( Size j(oldcols); j<newcols; ++j ) {
-					(*choicematrix)(i,j) = false;
+					(*choicematrix)(i,j) = T(0);
 				}
 			}
 		}
 	}
 
-	(*choicematrix)(choice1, choice2) = true;
+	(*choicematrix)(choice1, choice2) = edge_value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -296,8 +314,9 @@ GraphBasedCostFunction::declare_node_choice_pair_interaction(
 /// @details If the interaction graph is smaller than this count, it is enlarged.  If it is larger,
 /// it is shrunk and any of the choice matrices that need to be deallocated are deallocated.  Throws if
 /// object has been finalized.
+template< typename T >
 void
-GraphBasedCostFunction::protected_set_absolute_node_count(
+GraphBasedCostFunction<T>::protected_set_absolute_node_count(
 	masala::base::Size const absolute_node_count
 ) {
 	using masala::base::Size;
@@ -345,8 +364,9 @@ GraphBasedCostFunction::protected_set_absolute_node_count(
 /// @brief Get the number of nodes, with no mutex-locking.
 /// @note This is the total number of rows of the full_choice_choice_interaction_graph_ matrix, which may have an extra row
 /// and column if we are using 1-based numbering.
+template< typename T >
 masala::base::Size
-GraphBasedCostFunction::protected_n_nodes_absolute() const {
+GraphBasedCostFunction<T>::protected_n_nodes_absolute() const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( full_choice_choice_interaction_graph_.rows() == full_choice_choice_interaction_graph_.cols(),
 		"protected_n_nodes_absolute", "The full choice interaction graph was not square.  This is a program error that ought not to "
 		"happen, so please consult a developer."
@@ -357,8 +377,9 @@ GraphBasedCostFunction::protected_n_nodes_absolute() const {
 /// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
 /// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
 /// interaction graph.  Indices can be in any order.  Does not lock mutex.
-Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const *
-GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
+template< typename T >
+Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > const *
+GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepair(
 	masala::base::Size const node1, masala::base::Size const node2
 ) const {
 	using masala::base::Size;
@@ -389,8 +410,9 @@ GraphBasedCostFunction::protected_choice_choice_interaction_graph_for_nodepair(
 /// @brief Given an absolute node index, get the variable node index.
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
+template< typename T >
 std::pair< bool, masala::base::Size >
-GraphBasedCostFunction::protected_varnode_from_absnode(
+GraphBasedCostFunction<T>::protected_varnode_from_absnode(
 	masala::base::Size const absnode_index
 ) const {
 	using masala::base::Size;
@@ -405,8 +427,9 @@ GraphBasedCostFunction::protected_varnode_from_absnode(
 /// for nodes that have more than one choice, indexed by variable node index.
 /// @details The base class function simply marks this object as finalized.  Should
 /// be overridden, and overrides should call parent class protected_finalize().
+template< typename T >
 void
-GraphBasedCostFunction::protected_finalize(
+GraphBasedCostFunction<T>::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
 	using masala::base::Size;
@@ -424,8 +447,9 @@ GraphBasedCostFunction::protected_finalize(
 /// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
 /// @returns True if no data have been loaded into this data representation, false otherwise.
 /// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+template< typename T >
 bool
-GraphBasedCostFunction::protected_empty() const {
+GraphBasedCostFunction<T>::protected_empty() const {
 return full_choice_choice_interaction_graph_.rows() == 0 &&
 	full_choice_choice_interaction_graph_.cols() == 0 &&
 	Parent::protected_empty();
@@ -433,8 +457,9 @@ return full_choice_choice_interaction_graph_.rows() == 0 &&
 
 /// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
 /// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+template< typename T >
 void
-GraphBasedCostFunction::protected_clear() {
+GraphBasedCostFunction<T>::protected_clear() {
 	using masala::base::Size;
 
 	// Deallocate inner matrices:
@@ -455,8 +480,9 @@ GraphBasedCostFunction::protected_clear() {
 
 /// @brief Remove the data loaded in this object AND reset its configuration to defaults.
 /// @details Must be implemented by derived classes, and should call parent class protected_reset().  Performs no mutex-locking.
+template< typename T >
 void
-GraphBasedCostFunction::protected_reset() {
+GraphBasedCostFunction<T>::protected_reset() {
 	protected_clear();
 	use_one_based_node_indexing_ = false;
 	Parent::protected_reset();
@@ -464,13 +490,14 @@ GraphBasedCostFunction::protected_reset() {
 
 /// @brief Override of protected_assign().  Calls parent function.
 /// @details Throws if src is not a GraphBasedCostFunction.
+template< typename T >
 void
-GraphBasedCostFunction::protected_assign(
+GraphBasedCostFunction<T>::protected_assign(
 	masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
 	using masala::base::Size;
 
-	GraphBasedCostFunction const * const src_cast_ptr( dynamic_cast< GraphBasedCostFunction const * >( &src ) );
+	GraphBasedCostFunction<T> const * const src_cast_ptr( dynamic_cast< GraphBasedCostFunction<T> const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a GraphBasedCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
 	protected_clear();
@@ -483,7 +510,7 @@ GraphBasedCostFunction::protected_assign(
 			if( src_cast_ptr->full_choice_choice_interaction_graph_(i,j) == nullptr ) {
 				full_choice_choice_interaction_graph_(i,j) = nullptr;
 			} else {
-				full_choice_choice_interaction_graph_(i,j) = new Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic >( *(src_cast_ptr->full_choice_choice_interaction_graph_(i,j))  );
+				full_choice_choice_interaction_graph_(i,j) = new Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic >( *(src_cast_ptr->full_choice_choice_interaction_graph_(i,j))  );
 			}
 		}
 	}
@@ -495,11 +522,17 @@ GraphBasedCostFunction::protected_assign(
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
 /// Should be called by overrides.
+template< typename T >
 void
-GraphBasedCostFunction::protected_make_independent() {
+GraphBasedCostFunction<T>::protected_make_independent() {
 	// GNDN
 	Parent::protected_make_independent();
 }
+
+template class GraphBasedCostFunction< bool >;
+template class GraphBasedCostFunction< signed long int >;
+template class GraphBasedCostFunction< masala::base::Size >;
+template class GraphBasedCostFunction< masala::base::Real >;
 
 } // namespace cost_function
 } // namespace cost_function_network
