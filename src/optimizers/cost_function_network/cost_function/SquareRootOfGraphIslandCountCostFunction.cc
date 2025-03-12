@@ -294,7 +294,6 @@ SquareRootOfGraphIslandCountCostFunction::get_data_representation_categories() c
 std::vector< std::string >
 SquareRootOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "square_root" );
 	return outvec;
 }
@@ -320,7 +319,6 @@ SquareRootOfGraphIslandCountCostFunction::get_absent_data_representation_propert
 std::vector< std::string >
 SquareRootOfGraphIslandCountCostFunction::get_keywords() const {
 	std::vector< std::string > outvec( Parent::get_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "square_root" );
 	return outvec;
 }

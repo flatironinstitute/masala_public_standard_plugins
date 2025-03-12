@@ -294,7 +294,6 @@ LogOfGraphIslandCountCostFunction::get_data_representation_categories() const {
 std::vector< std::string >
 LogOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "natural_log" );
 	return outvec;
 }
@@ -320,7 +319,6 @@ LogOfGraphIslandCountCostFunction::get_absent_data_representation_properties() c
 std::vector< std::string >
 LogOfGraphIslandCountCostFunction::get_keywords() const {
 	std::vector< std::string > outvec( Parent::get_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "natural_log" );
 	return outvec;
 }
