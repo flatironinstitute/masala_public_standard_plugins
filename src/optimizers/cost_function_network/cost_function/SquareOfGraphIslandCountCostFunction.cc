@@ -294,7 +294,6 @@ SquareOfGraphIslandCountCostFunction::get_data_representation_categories() const
 std::vector< std::string >
 SquareOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "squared" );
 	return outvec;
 }
@@ -320,7 +319,6 @@ SquareOfGraphIslandCountCostFunction::get_absent_data_representation_properties(
 std::vector< std::string >
 SquareOfGraphIslandCountCostFunction::get_keywords() const {
 	std::vector< std::string > outvec( Parent::get_keywords() );
-	outvec.push_back( "graph_island_count_based" );
 	outvec.push_back( "squared" );
 	return outvec;
 }

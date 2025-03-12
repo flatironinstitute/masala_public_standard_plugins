@@ -24,6 +24,9 @@
 /// - Derived classes compute something from this graph.  (The initial application is to compute the size of islands, and then
 /// to sum some function of each island's size; this is used to promote mutually-connected structures like hydrogen bond networks
 /// when designing peptides and proteins, and is analogous to Rosetta's hbnet scoring term.)
+/// @note This class has been updated to be a template class.  Originally, it stored a boolean graph, but it makes
+/// sense to allow other types of values to occupy edges (for instance, to support Rosetta's interdigitation_bonus
+/// scoring term).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphBasedCostFunction_fwd_hh
@@ -36,23 +39,28 @@ namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
 
+	template< typename T >
 	class GraphBasedCostFunction;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.
-	using GraphBasedCostFunctionSP = MASALA_SHARED_POINTER< GraphBasedCostFunction >;
+	template< typename T >
+	using GraphBasedCostFunctionSP = MASALA_SHARED_POINTER< GraphBasedCostFunction<T> >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a MASALA_SHARED_POINTER for const objects of that class.
-	using GraphBasedCostFunctionCSP = MASALA_SHARED_POINTER< GraphBasedCostFunction const >;
+	template< typename T >
+	using GraphBasedCostFunctionCSP = MASALA_SHARED_POINTER< GraphBasedCostFunction<T> const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a MASALA_WEAK_POINTER for objects of that class.
-	using GraphBasedCostFunctionWP = MASALA_WEAK_POINTER< GraphBasedCostFunction >;
+	template< typename T >
+	using GraphBasedCostFunctionWP = MASALA_WEAK_POINTER< GraphBasedCostFunction<T> >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
-	using GraphBasedCostFunctionCWP = MASALA_WEAK_POINTER< GraphBasedCostFunction const >;
+	template< typename T >
+	using GraphBasedCostFunctionCWP = MASALA_WEAK_POINTER< GraphBasedCostFunction<T> const >;
 
 } // namespace cost_function
 } // namespace cost_function_network

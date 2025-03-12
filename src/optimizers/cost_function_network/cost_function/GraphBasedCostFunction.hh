@@ -24,6 +24,9 @@
 /// - Derived classes compute something from this graph.  (The initial application is to compute the size of islands, and then
 /// to sum some function of each island's size; this is used to promote mutually-connected structures like hydrogen bond networks
 /// when designing peptides and proteins, and is analogous to Rosetta's hbnet scoring term.)
+/// @note This class has been updated to be a template class.  Originally, it stored a boolean graph, but it makes
+/// sense to allow other types of values to occupy edges (for instance, to support Rosetta's interdigitation_bonus
+/// scoring term).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphBasedCostFunction_hh
@@ -57,7 +60,11 @@ namespace cost_function {
 /// - Derived classes compute something from this graph.  (The initial application is to compute the size of islands, and then
 /// to sum some function of each island's size; this is used to promote mutually-connected structures like hydrogen bond networks
 /// when designing peptides and proteins, and is analogous to Rosetta's hbnet scoring term.)
+/// @note This class has been updated to be a template class.  Originally, it stored a boolean graph, but it makes
+/// sense to allow other types of values to occupy edges (for instance, to support Rosetta's interdigitation_bonus
+/// scoring term).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
+template< typename T >
 class GraphBasedCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
 	
 	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction Parent;
@@ -179,7 +186,8 @@ public:
 		masala::base::Size const absolute_node_count
 	);
 
-	/// @brief Declare that two particular choices at two different absolute node indices interact.
+	/// @brief Declare that two particular choices at two different absolute node indices interact, and set a value
+	/// for the edge.
 	/// @details If the node pair has not yet been declared, this declares it.  If the size of the matrix at the two
 	/// absolute residue indices is smaller than the choice indices, this resizes the matrix to the size of the choice
 	/// indices.
@@ -187,12 +195,14 @@ public:
 	/// @param[in] abs_nodeindex_2 The absolute index of the second node (variable or not).
 	/// @param[in] choiceindex_1 The absolute index of the choice at the first node (or 0 for a non-variable node).
 	/// @param[in] choiceindex_2 The absolute index of the choice at the second node (or 0 for a non-variable node).
+	/// @param[in] edge_value The value for this edge.
 	void
 	declare_node_choice_pair_interaction(
 		masala::base::Size const abs_nodeindex_1,
 		masala::base::Size const abs_nodeindex_2,
 		masala::base::Size const choiceindex_1,
-		masala::base::Size const choiceindex_2
+		masala::base::Size const choiceindex_2,
+		T const edge_value
 	);
 
 public:
@@ -254,7 +264,7 @@ protected:
 	/// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
 	/// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
 	/// interaction graph.  Indices can be in any order.  Does not lock mutex.
-	Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const *
+	Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > const *
 	protected_choice_choice_interaction_graph_for_nodepair(
 		masala::base::Size const node1, masala::base::Size const node2
 	) const;
@@ -313,14 +323,14 @@ private:
 	bool use_one_based_node_indexing_ = false;
 
 	/// @brief The full choice-choice interaction graph.  This is a matrix indexed by node pairs of
-	/// pointers to boolean matricies indexed by choice pairs.  If the other matrix has an entry that
+	/// pointers to type T matricies indexed by choice pairs.  If the other matrix has an entry that
 	/// is nullptr, it means that no choices at those two nodes have an interaction.
 	/// @details The outer matrix is indexed by ABSOLUTE node, not variable node.  Nodes with only one
 	/// choice are allowed (and produce single-column or single-row matrices for their interaction graph).
 	/// @note The inner matrices are held by raw pointer. The GraphBasedCostFunction class is responsible for
 	/// deallocating these on destruction.
 	Eigen::Matrix<
-		Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > *,
+		Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > *,
 		Eigen::Dynamic,
 		Eigen::Dynamic
 	> full_choice_choice_interaction_graph_;

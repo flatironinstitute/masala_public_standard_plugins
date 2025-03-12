@@ -50,11 +50,11 @@ namespace cost_function {
 /// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction {
+class GraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction < bool > {
 
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction Parent;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunctionSP ParentSP;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunctionCSP ParentCSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunction<bool> Parent;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunctionSP<bool> ParentSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphBasedCostFunctionCSP<bool> ParentCSP;
 
 public:
 
@@ -163,6 +163,24 @@ public:
 	/// for the island to be counted.
 	/// @details The default minimum size is 2 nodes.
 	void set_min_island_size( masala::base::Size const setting );
+
+	/// @brief Declare that two particular choices at two different absolute node indices interact, and set the boolean value
+	/// for the edge to "true".
+	/// @details If the node pair has not yet been declared, this declares it.  If the size of the matrix at the two
+	/// absolute residue indices is smaller than the choice indices, this resizes the matrix to the size of the choice
+	/// indices.  Calls the parent class declare_node_choice_pair_interaction() function and passes "true" for the fifth
+	/// parameter.
+	/// @param[in] abs_nodeindex_1 The absolute index of the first node (variable or not).
+	/// @param[in] abs_nodeindex_2 The absolute index of the second node (variable or not).
+	/// @param[in] choiceindex_1 The absolute index of the choice at the first node (or 0 for a non-variable node).
+	/// @param[in] choiceindex_2 The absolute index of the choice at the second node (or 0 for a non-variable node).
+	void
+	declare_node_choice_pair_interaction(
+		masala::base::Size const abs_nodeindex_1,
+		masala::base::Size const abs_nodeindex_2,
+		masala::base::Size const choiceindex_1,
+		masala::base::Size const choiceindex_2
+	);
 
 public:
 
