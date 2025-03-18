@@ -16,14 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.cc
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.cc
 /// @brief Implementation for a class for GraphIslandCountCostFunctions.
 /// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh>
 
 // STL headers:
 #include <vector>
@@ -42,6 +42,7 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
@@ -158,11 +159,11 @@ GraphIslandCountCostFunction::class_name() const {
 	return class_name_static();
 }
 
-/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 /// @details Static version.
 std::string
 GraphIslandCountCostFunction::class_namespace_static() {
-	return "standard_masala_plugins::optimizers::cost_function_network::cost_function";
+	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
 }
 
 /// @brief Get the namespace of this class ("standard_masala_plugins::optimizersn::cost_function_network::cost_function").
@@ -442,6 +443,7 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	}
 }
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers

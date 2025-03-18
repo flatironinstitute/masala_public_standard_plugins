@@ -16,15 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/LogOfGraphIslandCountCostFunction.cc
-/// @brief Implementation for a class for LogOfGraphIslandCountCostFunctions.
-/// @details LogOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.cc
+/// @brief Implementation for a class for SquareRootOfGraphIslandCountCostFunctions.
+/// @details SquareRootOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
-/// return the natural log of the sum.
+/// return the square root of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <optimizers/cost_function_network/cost_function/LogOfGraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.hh>
 
 // STL headers:
 #include <vector>
@@ -46,14 +46,15 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Copy constructor.
-LogOfGraphIslandCountCostFunction::LogOfGraphIslandCountCostFunction(
-	LogOfGraphIslandCountCostFunction const & src
+SquareRootOfGraphIslandCountCostFunction::SquareRootOfGraphIslandCountCostFunction(
+	SquareRootOfGraphIslandCountCostFunction const & src
 ) :
 	Parent()
 {
@@ -64,9 +65,9 @@ LogOfGraphIslandCountCostFunction::LogOfGraphIslandCountCostFunction(
 }
 
 // @brief Assignment operator.
-LogOfGraphIslandCountCostFunction &
-LogOfGraphIslandCountCostFunction::operator=(
-	LogOfGraphIslandCountCostFunction const & src
+SquareRootOfGraphIslandCountCostFunction &
+SquareRootOfGraphIslandCountCostFunction::operator=(
+	SquareRootOfGraphIslandCountCostFunction const & src
 ) {
 	std::lock( src.data_representation_mutex(), data_representation_mutex() );
 	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
@@ -77,14 +78,14 @@ LogOfGraphIslandCountCostFunction::operator=(
 
 /// @brief Make a copy of this object.
 masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
-LogOfGraphIslandCountCostFunction::clone() const {
-	return masala::make_shared< LogOfGraphIslandCountCostFunction >( *this );
+SquareRootOfGraphIslandCountCostFunction::clone() const {
+	return masala::make_shared< SquareRootOfGraphIslandCountCostFunction >( *this );
 }
 
 /// @brief Make a copy of this object that is fully independent.
-LogOfGraphIslandCountCostFunctionSP
-LogOfGraphIslandCountCostFunction::deep_clone() const {
-	LogOfGraphIslandCountCostFunctionSP new_object( std::static_pointer_cast< LogOfGraphIslandCountCostFunction >( this->clone() ) );
+SquareRootOfGraphIslandCountCostFunctionSP
+SquareRootOfGraphIslandCountCostFunction::deep_clone() const {
+	SquareRootOfGraphIslandCountCostFunctionSP new_object( std::static_pointer_cast< SquareRootOfGraphIslandCountCostFunction >( this->clone() ) );
 	new_object->make_independent();
 	return new_object;
 }
@@ -95,7 +96,7 @@ LogOfGraphIslandCountCostFunction::deep_clone() const {
 	
 /// @brief Get a description of the API of this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
-LogOfGraphIslandCountCostFunction::get_api_definition() {
+SquareRootOfGraphIslandCountCostFunction::get_api_definition() {
 	using masala::base::Size;
 	using masala::base::Real;
 	using namespace masala::base::api;
@@ -109,12 +110,12 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 		MasalaObjectAPIDefinitionSP api_def(
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this, "A cost function which computes the sum of the sizes of islands "
-				"over a given size threshold and returns the negated sum of the natural logs.",
+				"over a given size threshold and returns the negated sum of the square roots.",
 				false, false
 			)
 		);
 
-		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( LogOfGraphIslandCountCostFunction, api_def );
+		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( SquareRootOfGraphIslandCountCostFunction, api_def );
 
 		// Getters:
 		api_def->add_getter(
@@ -125,7 +126,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"one_based_absolute_node_indexing", "True if the absolute node index is one-based, false if it is zero-based (the default).",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::one_based_absolute_node_indexing,
+					&SquareRootOfGraphIslandCountCostFunction::one_based_absolute_node_indexing,
 					this
 				)
 			)
@@ -137,7 +138,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"absolute_node_count", "The total number of nodes.",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::absolute_node_count,
+					&SquareRootOfGraphIslandCountCostFunction::absolute_node_count,
 					this
 				)
 			)
@@ -147,11 +148,11 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"min_island_size",
 				"Get the minimum number of nodes in an island in order for that island to contribute to the penalty function "
 				"value.  If the number of nodes is greater than or equal to this value, this value is subtracted from the count "
-				"and the result's natural log is computed.  The logs are summed and negated to compute the penalty value.",
+				"and the result's square root is computed.  The square roots are summed and negated to compute the penalty value.",
 				"min_island_size", "The minimum island size.",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::min_island_size,
+					&SquareRootOfGraphIslandCountCostFunction::min_island_size,
 					this
 				)
 			)
@@ -163,11 +164,11 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"set_min_island_size",
 				"Set the minimum number of nodes in an island in order for that island to contribute to the penalty function "
 				"value.  If the number of nodes is greater than or equal to this value, this value is subtracted from the count "
-				"and the result's natural log is computed.  The logs are summed and negated to compute the penalty value.",
+				"and the result's square root is computed.  The square roots are summed and negated to compute the penalty value.",
 				"min_island_size_in", "The minimum island size to set.",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::set_min_island_size,
+					&SquareRootOfGraphIslandCountCostFunction::set_min_island_size,
 					this,
 					std::placeholders::_1
 				)
@@ -182,7 +183,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"it is zero-based (the default).",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::set_one_based_absolute_node_indexing,
+					&SquareRootOfGraphIslandCountCostFunction::set_one_based_absolute_node_indexing,
 					this,
 					std::placeholders::_1
 				)
@@ -197,7 +198,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"absolute_node_count", "The total number of nodes to set.",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::set_absolute_node_count,
+					&SquareRootOfGraphIslandCountCostFunction::set_absolute_node_count,
 					this,
 					std::placeholders::_1
 				)
@@ -215,7 +216,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				"choiceindex_2", "The absolute index of the choice at the second node (or 0 for a non-variable node).",
 				false, false,
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::declare_node_choice_pair_interaction,
+					&SquareRootOfGraphIslandCountCostFunction::declare_node_choice_pair_interaction,
 					this,
 					std::placeholders::_1,
 					std::placeholders::_2,
@@ -229,12 +230,12 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 		api_def->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput < Real, std::vector< Size > const & > >(
 				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
-				"threshold, compute the natural log of the sizes, sum them, and negate the result.  No mutex-locking is performed.",
+				"threshold, compute the square root of the sizes, sum them, and negate the result.  No mutex-locking is performed.",
 				true, false, false, true,
 				"cost_function_value", "The value of the cost function, computed for the current candidate solution.",
 				"candidate_solution", "The candidate solution, expressed as a vector of choices for the variable nodes only.",
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::compute_cost_function,
+					&SquareRootOfGraphIslandCountCostFunction::compute_cost_function,
 					this,
 					std::placeholders::_1
 				)
@@ -243,14 +244,14 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 		api_def->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, std::vector< Size > const & > >(
 				"compute_cost_function_difference", "Compute the cost function difference: for each of two input vectors, find the size of each "
-				"island in the interaction graph over threshold, compute the natural log of the sizes, sum them, negate the result, and return the difference.  "
+				"island in the interaction graph over threshold, compute the square root of the sizes, sum them, negate the result, and return the difference.  "
 				"No mutex-locking is performed.",
 				true, false, false, true,
 				"cost_function_difference", "The difference of the cost function, computed for the two candidate solutions.",
 				"candidate_solution_old", "The old candidate solution, expressed as a vector of choices for the variable nodes only.",
 				"candidate_solution_new", "The new candidate solution, expressed as a vector of choices for the variable nodes only.",
 				std::bind(
-					&LogOfGraphIslandCountCostFunction::compute_cost_function_difference,
+					&SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference,
 					this,
 					std::placeholders::_1,
 					std::placeholders::_2
@@ -269,83 +270,83 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 
 /// @brief Get the category or categories for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "LogOfGraphIslandCountCostFunction" } }
+/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareRootOfGraphIslandCountCostFunction" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
 /// entry in the outer vector), but must be in at least one.  The first one is used as
 /// the primary key.
 std::vector< std::vector< std::string > >
-LogOfGraphIslandCountCostFunction::get_categories() const {
+SquareRootOfGraphIslandCountCostFunction::get_categories() const {
 	std::vector< std::vector< std::string > > outvec( Parent::get_categories() );
-	outvec[0].push_back( "LogOfGraphIslandCountCostFunction" );
+	outvec[0].push_back( "SquareRootOfGraphIslandCountCostFunction" );
 	return outvec;
 }
 
 /// @brief Get the category for this MasalaDataRepresentation.
-/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "LogOfGraphIslandCountCostFunction" } }.
+/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareRootOfGraphIslandCountCostFunction" } }.
 std::vector< std::vector< std::string > >
-LogOfGraphIslandCountCostFunction::get_data_representation_categories() const {
-	return std::vector< std::vector< std::string > >{ { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "LogOfGraphIslandCountCostFunction" } };
+SquareRootOfGraphIslandCountCostFunction::get_data_representation_categories() const {
+	return std::vector< std::vector< std::string > >{ { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareRootOfGraphIslandCountCostFunction" } };
 }
 
 /// @brief Get the keywords for this MasalaDataRepresentation.
-/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }
+/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "square_root" }
 std::vector< std::string >
-LogOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
+SquareRootOfGraphIslandCountCostFunction::get_data_representation_keywords() const {
 	std::vector< std::string > outvec( Parent::get_data_representation_keywords() );
-	outvec.push_back( "natural_log" );
+	outvec.push_back( "square_root" );
 	return outvec;
 }
 
 /// @brief Get the properties of this MasalaDataRepresentation.
-/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }.
+/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "square_root" }.
 std::vector< std::string >
-LogOfGraphIslandCountCostFunction::get_present_data_representation_properties() const {
-	return std::vector< std::string >{ "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" };
+SquareRootOfGraphIslandCountCostFunction::get_present_data_representation_properties() const {
+	return std::vector< std::string >{ "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "square_root" };
 }
 
 /// @brief Get the absent properties of this MasalaDataRepresentation.  This is of course a
 /// non-exhaustive list.
 /// @returns { "pairwise_decomposible" }.
 std::vector< std::string >
-LogOfGraphIslandCountCostFunction::get_absent_data_representation_properties() const {
+SquareRootOfGraphIslandCountCostFunction::get_absent_data_representation_properties() const {
 	return std::vector< std::string >{ "pairwise_decomposible" };
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all
 /// optimization problems; may be overridden by derived classes.
-/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }
+/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "square_root" }
 std::vector< std::string >
-LogOfGraphIslandCountCostFunction::get_keywords() const {
+SquareRootOfGraphIslandCountCostFunction::get_keywords() const {
 	std::vector< std::string > outvec( Parent::get_keywords() );
-	outvec.push_back( "natural_log" );
+	outvec.push_back( "square_root" );
 	return outvec;
 }
 
-/// @brief Get the name of this class ("LogOfGraphIslandCountCostFunction").
+/// @brief Get the name of this class ("SquareRootOfGraphIslandCountCostFunction").
 /// @details Static version.
 std::string
-LogOfGraphIslandCountCostFunction::class_name_static() {
-	return "LogOfGraphIslandCountCostFunction";
+SquareRootOfGraphIslandCountCostFunction::class_name_static() {
+	return "SquareRootOfGraphIslandCountCostFunction";
 }
 
-/// @brief Get the name of this class ("LogOfGraphIslandCountCostFunction").
+/// @brief Get the name of this class ("SquareRootOfGraphIslandCountCostFunction").
 std::string
-LogOfGraphIslandCountCostFunction::class_name() const {
+SquareRootOfGraphIslandCountCostFunction::class_name() const {
 	return class_name_static();
 }
 
-/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 /// @details Static version.
 std::string
-LogOfGraphIslandCountCostFunction::class_namespace_static() {
-	return "standard_masala_plugins::optimizers::cost_function_network::cost_function";
+SquareRootOfGraphIslandCountCostFunction::class_namespace_static() {
+	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
 }
 
 /// @brief Get the namespace of this class ("standard_masala_plugins::optimizersn::cost_function_network::cost_function").
 std::string
-LogOfGraphIslandCountCostFunction::class_namespace() const {
+SquareRootOfGraphIslandCountCostFunction::class_namespace() const {
 	return class_namespace_static();
 }
 
@@ -368,7 +369,7 @@ LogOfGraphIslandCountCostFunction::class_namespace() const {
 /// @details This must be implemented by derived classes.
 /// @note No mutex-locking is performed!
 masala::base::Real
-LogOfGraphIslandCountCostFunction::compute_cost_function(
+SquareRootOfGraphIslandCountCostFunction::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution
 ) const {
 	using masala::base::Size;
@@ -380,7 +381,7 @@ LogOfGraphIslandCountCostFunction::compute_cost_function(
 	for( Size i(0); i<n_nodes; ++i ) {
 		if( island_sizes[i] >= protected_min_island_size() ) {
 			Size const cursize( island_sizes[i] + 1 - protected_min_island_size() );
-			accumulator += std::log( static_cast<Real>(cursize) ); // std::log is ln (i.e. natural logarithm)
+			accumulator += std::sqrt( static_cast<masala::base::Real>( cursize ) );
 		}
 	}
 	return -1.0*protected_weight()*accumulator;
@@ -391,7 +392,7 @@ LogOfGraphIslandCountCostFunction::compute_cost_function(
 /// @details This must be implemented by derived classes.
 /// @note No mutex-locking is performed!
 masala::base::Real
-LogOfGraphIslandCountCostFunction::compute_cost_function_difference(
+SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_old,
 	std::vector< masala::base::Size > const & candidate_solution_new
 ) const {
@@ -413,7 +414,7 @@ LogOfGraphIslandCountCostFunction::compute_cost_function_difference(
 /// @details The base class function simply marks this object as finalized.  Should
 /// be overridden, and overrides should call parent class protected_finalize().
 void
-LogOfGraphIslandCountCostFunction::protected_finalize(
+SquareRootOfGraphIslandCountCostFunction::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
 	// TODO ANY NEEDED FINALIZATION HERE
@@ -422,13 +423,13 @@ LogOfGraphIslandCountCostFunction::protected_finalize(
 }
 
 /// @brief Override of assign_protected_assignmutex_locked().  Calls parent function.
-/// @details Throws if src is not a LogOfGraphIslandCountCostFunction.
+/// @details Throws if src is not a SquareRootOfGraphIslandCountCostFunction.
 void
-LogOfGraphIslandCountCostFunction::protected_assign(
+SquareRootOfGraphIslandCountCostFunction::protected_assign(
 	masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
-	LogOfGraphIslandCountCostFunction const * const src_cast_ptr( dynamic_cast< LogOfGraphIslandCountCostFunction const * >( &src ) );
-	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a LogOfGraphIslandCountCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
+	SquareRootOfGraphIslandCountCostFunction const * const src_cast_ptr( dynamic_cast< SquareRootOfGraphIslandCountCostFunction const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a SquareRootOfGraphIslandCountCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
 	// TODO COPY DATA HERE.
 
@@ -438,7 +439,7 @@ LogOfGraphIslandCountCostFunction::protected_assign(
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
 /// Should be called by overrides.
 void
-LogOfGraphIslandCountCostFunction::protected_make_independent() {
+SquareRootOfGraphIslandCountCostFunction::protected_make_independent() {
 	// GNDN
 	Parent::protected_make_independent();
 }
@@ -448,7 +449,7 @@ LogOfGraphIslandCountCostFunction::protected_make_independent() {
 /// @returns True if no data have been loaded into this data representation, false otherwise.
 /// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
 bool
-LogOfGraphIslandCountCostFunction::protected_empty() const {
+SquareRootOfGraphIslandCountCostFunction::protected_empty() const {
 	return // TODO STUFF HERE &&
 		Parent::protected_empty();
 }
@@ -456,7 +457,7 @@ LogOfGraphIslandCountCostFunction::protected_empty() const {
 /// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
 /// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
 void
-LogOfGraphIslandCountCostFunction::protected_clear() {
+SquareRootOfGraphIslandCountCostFunction::protected_clear() {
 	// TODO CLEAR DATA HERE
 	Parent::protected_clear();
 }
@@ -464,7 +465,7 @@ LogOfGraphIslandCountCostFunction::protected_clear() {
 /// @brief Remove the data loaded in this object AND reset its configuration to defaults.
 /// @details Must be implemented by derived classes, and should call parent class protected_reset().  Performs no mutex-locking.
 void
-LogOfGraphIslandCountCostFunction::protected_reset() {
+SquareRootOfGraphIslandCountCostFunction::protected_reset() {
 	protected_clear();
 	Parent::protected_reset();
 }
@@ -474,6 +475,7 @@ LogOfGraphIslandCountCostFunction::protected_reset() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
