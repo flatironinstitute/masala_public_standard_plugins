@@ -381,7 +381,9 @@ LogOfGraphIslandCountCostFunction::compute_cost_function(
 	for( Size i(0); i<n_nodes; ++i ) {
 		if( island_sizes[i] >= protected_min_island_size() ) {
 			Size const cursize( island_sizes[i] + 1 - protected_min_island_size() );
-			accumulator += std::log( static_cast<Real>(cursize) ); // std::log is ln (i.e. natural logarithm)
+			if( cursize > 0 ) {
+				accumulator += std::log( static_cast<Real>(cursize) ); // std::log is ln (i.e. natural logarithm)
+			}
 		}
 	}
 	return -1.0*protected_weight()*accumulator;
