@@ -411,7 +411,7 @@ GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepai
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
 template< typename T >
-std::pair< bool, masala::base::Size >
+std::pair< bool, masala::base::Size > const &
 GraphBasedCostFunction<T>::protected_varnode_from_absnode(
 	masala::base::Size const absnode_index
 ) const {

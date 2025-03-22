@@ -272,7 +272,7 @@ protected:
 	/// @brief Given an absolute node index, get the variable node index.
 	/// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 	/// <is variable node, variable node index if variable or 0 otherwise>.
-	std::pair< bool, masala::base::Size >
+	std::pair< bool, masala::base::Size > const &
 	protected_varnode_from_absnode(
 		masala::base::Size const absnode_index
 	) const;
