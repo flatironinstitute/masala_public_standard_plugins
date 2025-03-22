@@ -16,15 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.fwd.hh
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.fwd.hh
 /// @brief Forward declarations for a class for SquareRootOfGraphIslandCountCostFunctions.
 /// @details SquareRootOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
 /// return the square root of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_fwd_hh
-#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_fwd_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_fwd_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_fwd_hh
 
 #include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
@@ -32,6 +32,7 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 	class SquareRootOfGraphIslandCountCostFunction;
 
@@ -51,9 +52,10 @@ namespace cost_function {
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
 	using SquareRootOfGraphIslandCountCostFunctionCWP = MASALA_WEAK_POINTER< SquareRootOfGraphIslandCountCostFunction const >;
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_fwd_hh
+#endif //Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_fwd_hh

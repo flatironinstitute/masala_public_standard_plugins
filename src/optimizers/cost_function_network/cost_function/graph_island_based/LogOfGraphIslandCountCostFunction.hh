@@ -16,21 +16,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/SquareOfGraphIslandCountCostFunction.hh
-/// @brief Headers for a class for SquareOfGraphIslandCountCostFunctions.
-/// @details SquareOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/LogOfGraphIslandCountCostFunction.hh
+/// @brief Headers for a class for LogOfGraphIslandCountCostFunctions.
+/// @details LogOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
-/// return the square of the sum.
+/// return the natural log of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareOfGraphIslandCountCostFunction_hh
-#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareOfGraphIslandCountCostFunction_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_LogOfGraphIslandCountCostFunction_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_LogOfGraphIslandCountCostFunction_hh
 
 // Forward declarations:
-#include <optimizers/cost_function_network/cost_function/SquareOfGraphIslandCountCostFunction.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/LogOfGraphIslandCountCostFunction.fwd.hh>
 
 // Parent header:
-#include <optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh>
 
 // Numeric headers:
 
@@ -46,17 +46,18 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
-/// @brief A class for SquareOfGraphIslandCountCostFunctions.
-/// @details SquareOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
+/// @brief A class for LogOfGraphIslandCountCostFunctions.
+/// @details LogOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
-/// return the square of the sum.
+/// return the natural log of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class SquareOfGraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunction {
+class LogOfGraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunction {
 
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunction Parent;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionSP ParentSP;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionCSP ParentCSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunction Parent;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunctionSP ParentSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunctionCSP ParentCSP;
 
 public:
 
@@ -65,26 +66,26 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	SquareOfGraphIslandCountCostFunction() = default;
+	LogOfGraphIslandCountCostFunction() = default;
 
 	/// @brief Copy constructor.
-	SquareOfGraphIslandCountCostFunction(
-		SquareOfGraphIslandCountCostFunction const & src
+	LogOfGraphIslandCountCostFunction(
+		LogOfGraphIslandCountCostFunction const & src
 	);
 
 	// @brief Assignment operator.
-	SquareOfGraphIslandCountCostFunction &
-	operator=( SquareOfGraphIslandCountCostFunction const & src );
+	LogOfGraphIslandCountCostFunction &
+	operator=( LogOfGraphIslandCountCostFunction const & src );
 
 	/// @brief Destructor.
-	~SquareOfGraphIslandCountCostFunction() override = default;
+	~LogOfGraphIslandCountCostFunction() override = default;
 
 	/// @brief Make a copy of this object.
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 	clone() const override;
 
 	/// @brief Make a copy of this object that is fully independent.
-	SquareOfGraphIslandCountCostFunctionSP
+	LogOfGraphIslandCountCostFunctionSP
 	deep_clone() const;
 
 public:
@@ -105,7 +106,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all
 	/// cost functions; may be overridden by derived classes.
-	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }
+	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "LogOfGraphIslandCountCostFunction" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -115,17 +116,17 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the category for this MasalaDataRepresentation.
-	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "SquareOfGraphIslandCountCostFunction" } }.
+	/// @returns { { "CostFunction", "GraphBasedCostFunction", "GraphIslandCountCostFunction", "LogOfGraphIslandCountCostFunction" } }.
 	std::vector< std::vector< std::string > >
 	get_data_representation_categories() const override;
 
 	/// @brief Get the keywords for this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "squared" }
+	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }
 	std::vector< std::string >
 	get_data_representation_keywords() const override;
 
 	/// @brief Get the properties of this MasalaDataRepresentation.
-	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "squared" }.
+	/// @returns { "graph_based", "cost_function", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }.
 	std::vector< std::string >
 	get_present_data_representation_properties() const override;
 
@@ -136,22 +137,22 @@ public:
 	get_absent_data_representation_properties() const override;
 
 	/// @brief Get the keywords for this plugin class.
-	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based" }
+	/// @returns { "optimization_problem", "cost_function", "numeric", "graph_based", "not_pairwise_decomposible", "graph_island_count_based", "natural_log" }
 	std::vector< std::string >
 	get_keywords() const override;
 
-	/// @brief Get the name of this class ("SquareOfGraphIslandCountCostFunction").
+	/// @brief Get the name of this class ("LogOfGraphIslandCountCostFunction").
 	/// @details Static version.
 	static std::string class_name_static();
 
-	/// @brief Get the name of this class ("SquareOfGraphIslandCountCostFunction").
+	/// @brief Get the name of this class ("LogOfGraphIslandCountCostFunction").
 	std::string class_name() const override;
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	/// @details Static version.
 	static std::string class_namespace_static();
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	std::string class_namespace() const override;
 
 public:
@@ -214,7 +215,7 @@ protected:
 	) override;
 
 	/// @brief Override of protected_assign().  Calls parent function.
-	/// @details Throws if src is not a SquareOfGraphIslandCountCostFunction.
+	/// @details Throws if src is not a LogOfGraphIslandCountCostFunction.
 	void protected_assign( masala::base::managers::engine::MasalaDataRepresentation const & src ) override;
 
 	/// @brief Make this object fully independent.  Assumes mutex was already locked.
@@ -253,11 +254,12 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 
-}; // class SquareOfGraphIslandCountCostFunction
+}; // class LogOfGraphIslandCountCostFunction
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareOfGraphIslandCountCostFunction_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_LogOfGraphIslandCountCostFunction_hh

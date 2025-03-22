@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.cc
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.cc
 /// @brief Implementation for a class for SquareRootOfGraphIslandCountCostFunctions.
 /// @details SquareRootOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
@@ -24,7 +24,7 @@
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.hh>
 
 // STL headers:
 #include <vector>
@@ -46,6 +46,7 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
@@ -336,11 +337,11 @@ SquareRootOfGraphIslandCountCostFunction::class_name() const {
 	return class_name_static();
 }
 
-/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 /// @details Static version.
 std::string
 SquareRootOfGraphIslandCountCostFunction::class_namespace_static() {
-	return "standard_masala_plugins::optimizers::cost_function_network::cost_function";
+	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
 }
 
 /// @brief Get the namespace of this class ("standard_masala_plugins::optimizersn::cost_function_network::cost_function").
@@ -474,6 +475,7 @@ SquareRootOfGraphIslandCountCostFunction::protected_reset() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers

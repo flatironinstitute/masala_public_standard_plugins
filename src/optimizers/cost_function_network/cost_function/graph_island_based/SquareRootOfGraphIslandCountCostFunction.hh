@@ -16,21 +16,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.hh
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.hh
 /// @brief Headers for a class for SquareRootOfGraphIslandCountCostFunctions.
 /// @details SquareRootOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
 /// return the square root of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_hh
-#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_hh
 
 // Forward declarations:
-#include <optimizers/cost_function_network/cost_function/SquareRootOfGraphIslandCountCostFunction.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.fwd.hh>
 
 // Parent header:
-#include <optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh>
 
 // Numeric headers:
 
@@ -46,17 +46,18 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 /// @brief A class for SquareRootOfGraphIslandCountCostFunctions.
 /// @details SquareRootOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
 /// return the square root of the sum.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class SquareRootOfGraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunction {
+class SquareRootOfGraphIslandCountCostFunction : public standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunction {
 
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunction Parent;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionSP ParentSP;
-	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::GraphIslandCountCostFunctionCSP ParentCSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunction Parent;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunctionSP ParentSP;
+	typedef standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based::GraphIslandCountCostFunctionCSP ParentCSP;
 
 public:
 
@@ -147,11 +148,11 @@ public:
 	/// @brief Get the name of this class ("SquareRootOfGraphIslandCountCostFunction").
 	std::string class_name() const override;
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	/// @details Static version.
 	static std::string class_namespace_static();
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	std::string class_namespace() const override;
 
 public:
@@ -255,9 +256,10 @@ private:
 
 }; // class SquareRootOfGraphIslandCountCostFunction
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_SquareRootOfGraphIslandCountCostFunction_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_SquareRootOfGraphIslandCountCostFunction_hh

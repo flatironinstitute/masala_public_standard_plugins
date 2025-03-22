@@ -16,15 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/LogOfGraphIslandCountCostFunction.fwd.hh
-/// @brief Forward declarations for a class for LogOfGraphIslandCountCostFunctions.
-/// @details LogOfGraphIslandCountCostFunctions are graph-based cost functions that figure out the
-/// number of elements in the islands in the graph, sum the counts in the islands over a minimum, and
-/// return the natural log of the sum.
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.fwd.hh
+/// @brief Forward declarations for a class for GraphIslandCountCostFunctions.
+/// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
+/// number of elements in the islands in the graph.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_LogOfGraphIslandCountCostFunction_fwd_hh
-#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_LogOfGraphIslandCountCostFunction_fwd_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_fwd_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_fwd_hh
 
 #include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
@@ -32,28 +31,30 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
-	class LogOfGraphIslandCountCostFunction;
+	class GraphIslandCountCostFunction;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.
-	using LogOfGraphIslandCountCostFunctionSP = MASALA_SHARED_POINTER< LogOfGraphIslandCountCostFunction >;
+	using GraphIslandCountCostFunctionSP = MASALA_SHARED_POINTER< GraphIslandCountCostFunction >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a MASALA_SHARED_POINTER for const objects of that class.
-	using LogOfGraphIslandCountCostFunctionCSP = MASALA_SHARED_POINTER< LogOfGraphIslandCountCostFunction const >;
+	using GraphIslandCountCostFunctionCSP = MASALA_SHARED_POINTER< GraphIslandCountCostFunction const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a MASALA_WEAK_POINTER for objects of that class.
-	using LogOfGraphIslandCountCostFunctionWP = MASALA_WEAK_POINTER< LogOfGraphIslandCountCostFunction >;
+	using GraphIslandCountCostFunctionWP = MASALA_WEAK_POINTER< GraphIslandCountCostFunction >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
-	using LogOfGraphIslandCountCostFunctionCWP = MASALA_WEAK_POINTER< LogOfGraphIslandCountCostFunction const >;
+	using GraphIslandCountCostFunctionCWP = MASALA_WEAK_POINTER< GraphIslandCountCostFunction const >;
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_LogOfGraphIslandCountCostFunction_fwd_hh
+#endif //Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_fwd_hh

@@ -16,17 +16,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.hh
+/// @file src/optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh
 /// @brief Headers for a class for GraphIslandCountCostFunctions.
 /// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
 /// number of elements in the islands in the graph.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphIslandCountCostFunction_hh
-#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphIslandCountCostFunction_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_hh
+#define Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_hh
 
 // Forward declarations:
-#include <optimizers/cost_function_network/cost_function/GraphIslandCountCostFunction.fwd.hh>
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.fwd.hh>
 
 // Parent header:
 #include <optimizers/cost_function_network/cost_function/GraphBasedCostFunction.hh>
@@ -45,6 +45,7 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace cost_function_network {
 namespace cost_function {
+namespace graph_island_based {
 
 /// @brief A class for GraphIslandCountCostFunctions.
 /// @details GraphIslandCountCostFunctions are graph-based cost functions that figure out the
@@ -135,11 +136,11 @@ public:
 	/// @brief Get the name of this class ("GraphIslandCountCostFunction").
 	std::string class_name() const override;
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	/// @details Static version.
 	static std::string class_namespace_static();
 
-	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function").
+	/// @brief Get the namespace of this class ("standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based").
 	std::string class_namespace() const override;
 
 public:
@@ -288,9 +289,10 @@ private:
 
 }; // class GraphIslandCountCostFunction
 
+} // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_GraphIslandCountCostFunction_hh
+#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCostFunction_hh
