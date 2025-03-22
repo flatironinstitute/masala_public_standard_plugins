@@ -287,6 +287,15 @@ private:
 	/// @details Defaults to 2.
 	masala::base::Size min_island_size_ = 2;
 
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE VARIABLES COMPUTED BY protected_finalize() FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief A vector of absolute node index pairs, used for rapidly iterating over nodes that
+	/// could interact (and skipping those that couldn't) to turn an O(N^2) calculation into an O(N)
+	/// calculation.
+	std::vector< std::pair< masala::base::Size, masala::base::Size > > interacting_abs_node_indices_;
+
 }; // class GraphIslandCountCostFunction
 
 } // namespace graph_island_based

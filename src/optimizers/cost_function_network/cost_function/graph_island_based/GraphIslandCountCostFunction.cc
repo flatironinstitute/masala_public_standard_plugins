@@ -336,7 +336,19 @@ void
 GraphIslandCountCostFunction::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
-	// TODO ANY NEEDED FINALIZATION HERE
+	using masala::base::Size;
+
+	// Compute the interacting node pairs
+	interacting_abs_node_indices_.clear();
+	masala::base::Size const nnodes( protected_n_nodes_absolute() );
+	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<nnodes-1; ++i ) {
+		for( Size j(i+1); j<nnodes; ++j ) {
+			if( protected_choice_choice_interaction_graph_for_nodepair(i,j) != nullptr ) {
+				interacting_abs_node_indices_.push_back( std::make_pair(i,j) );
+			}
+		}
+	}
+	interacting_abs_node_indices_.shrink_to_fit();
 
 	Parent::protected_finalize( variable_node_indices );
 }
@@ -351,6 +363,7 @@ GraphIslandCountCostFunction::protected_assign(
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a GraphIslandCountCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
 	min_island_size_ = src_cast_ptr->min_island_size_;
+	interacting_abs_node_indices_ = src_cast_ptr->interacting_abs_node_indices_;
 	// TODO COPY DATA HERE.
 
 	Parent::protected_assign( src );
