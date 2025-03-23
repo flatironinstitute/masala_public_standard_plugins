@@ -32,9 +32,6 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/GraphBasedCostFunction.hh>
 
-// Base headers:
-#include <base/error/ErrorHandling.hh>
-
 // STL headers:
 #include <vector>
 #include <string>

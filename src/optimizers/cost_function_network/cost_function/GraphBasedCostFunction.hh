@@ -42,9 +42,7 @@
 
 // Base headers:
 #include <base/types.hh>
-#ifndef NDEBUG
 #include <base/error/ErrorHandling.hh>
-#endif
 
 // External headers:
 #include <external/eigen/Eigen/Core>
