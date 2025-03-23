@@ -330,8 +330,9 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			/// - Increments the ith element of island_sizes with the number of connected nodes appended.
 			/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
 			push_connected_undiscovered_nodes(
-				i, node_sizearray[stackend], nnodes, stackend,
-				node_sizearray, island_sizes, node_discovered, candidate_solution
+				i, node_sizearray[stackend], stackend,
+				node_sizearray, island_sizes, node_discovered,
+				nedges_for_node_in_hbond_graph, edges_for_node_in_hbond_graph
 			);
 		}
 	}
@@ -459,40 +460,24 @@ void
 GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	masala::base::Size const root_of_current_island,
 	masala::base::Size const current_node,
-	masala::base::Size const nnodes,
 	masala::base::Size & stackend,
 	masala::base::Size * node_sizearray,
 	masala::base::Size * island_sizes,
 	bool * node_discovered,
-	std::vector< masala::base::Size > const & candidate_solution
+	masala::base::Size const * const nedges_for_node_in_hbond_graph,
+	masala::base::Size const * const * const edges_for_node_in_hbond_graph
 ) const {
 	using masala::base::Size;
-
-	for( Size iother( static_cast<Size>(protected_use_one_based_node_indexing()) ); iother < nnodes; ++iother ) {
-		if( iother != current_node && node_discovered[iother] == false ) {
-			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * choice_choice_matrix( protected_choice_choice_interaction_graph_for_nodepair( iother, current_node ) );
-			if( choice_choice_matrix != nullptr ) {
-
-				// If we have records of node-node interactions between iother and current_node...
-				std::pair< bool, Size > const varnode_index_lower( protected_varnode_from_absnode( std::min(iother, current_node) ) );
-				std::pair< bool, Size > const varnode_index_upper( protected_varnode_from_absnode( std::max(iother, current_node) ) );
-				Size const choice_index_lower(varnode_index_lower.first ? candidate_solution[ varnode_index_lower.second ] : 0);
-				Size const choice_index_upper(varnode_index_upper.first ? candidate_solution[ varnode_index_upper.second ] : 0);
-				if(
-					static_cast<Size>( choice_choice_matrix->rows() ) > choice_index_lower &&
-					static_cast<Size>( choice_choice_matrix->cols() ) > choice_index_upper &&
-					(*choice_choice_matrix)( choice_index_lower, choice_index_upper ) 
-				) {
-					// std::cout << "\tFound that node " << current_node << " is connected to node " << iother << "." << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
-
-					// If the current choices at iother and current_node interact...
-					island_sizes[iother] = 0;
-					++(island_sizes[root_of_current_island]);
-					node_discovered[iother] = true;
-					node_sizearray[stackend] = iother;
-					++stackend;
-				}
-			}
+	Size const * const edges_for_curnode( edges_for_node_in_hbond_graph[current_node] );
+	for( Size iother_index( 0 ); iother_index < nedges_for_node_in_hbond_graph[current_node] ; ++iother_index ) {
+		Size const iother( edges_for_curnode[iother_index] );
+		if( node_discovered[iother] == false ) {
+			// If the current choices at iother and current_node interact...
+			island_sizes[iother] = 0;
+			++(island_sizes[root_of_current_island]);
+			node_discovered[iother] = true;
+			node_sizearray[stackend] = iother;
+			++stackend;
 		}
 	}
 }

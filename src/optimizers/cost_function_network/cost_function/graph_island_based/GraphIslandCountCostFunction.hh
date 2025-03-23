@@ -269,12 +269,12 @@ private:
 	push_connected_undiscovered_nodes(
 		masala::base::Size const root_of_current_island,
 		masala::base::Size const current_node,
-		masala::base::Size const nnodes,
 		masala::base::Size & stackend,
 		masala::base::Size * node_sizearray,
 		masala::base::Size * island_sizes,
 		bool * node_discovered,
-		std::vector< masala::base::Size > const & candidate_solution
+		masala::base::Size const * const nedges_for_node_in_hbond_graph,
+		masala::base::Size const * const * const edges_for_node_in_hbond_graph
 	) const;
 
 private:
