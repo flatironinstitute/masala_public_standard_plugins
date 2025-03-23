@@ -262,8 +262,8 @@ protected:
 	inline bool protected_use_one_based_node_indexing() const { return use_one_based_node_indexing_; }
 
 	/// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
-	/// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
-	/// interaction graph.  Indices can be in any order.  Does not lock mutex.
+	/// @details Returns nullptr if that's the entry in the full choice interaction graph.
+	/// Indices can be in any order.  Does not lock mutex.
 	Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > const *
 	protected_choice_choice_interaction_graph_for_nodepair(
 		masala::base::Size const node1, masala::base::Size const node2
