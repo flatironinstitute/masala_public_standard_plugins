@@ -374,36 +374,6 @@ GraphBasedCostFunction<T>::protected_n_nodes_absolute() const {
 	return full_choice_choice_interaction_graph_.rows();
 }
 
-/// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
-/// @details Returns nullptr if that's the entry in the full choice interaction graph.
-/// Indices can be in any order.  Does not lock mutex.
-template< typename T >
-Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > const *
-GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepair(
-	masala::base::Size const node1, masala::base::Size const node2
-) const {
-	using masala::base::Size;
-
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 != node2, "protected_choice_choice_interaction_graph_for_nodepair", "Got " + std::to_string( node1 )
-		+ " for both node indices.  Node indices must be different."
-	);
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( (!use_one_based_node_indexing_) || ( node1 > 0 && node2 > 0), "protected_choice_choice_interaction_graph_for_nodepair",
-		"Got a node index of zero, but absolute node indices are one-based."
-	);
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 < static_cast< Size >( full_choice_choice_interaction_graph_.rows() ), "protected_choice_choice_interaction_graph_for_nodepair",
-		"Node index " + std::to_string(node1) + " is out of range.  The full choice-choice interaction graph matrix is " +
-		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
-		+ "."
-	);
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node2 < static_cast< Size >( full_choice_choice_interaction_graph_.rows() ), "protected_choice_choice_interaction_graph_for_nodepair",
-		"Node index " + std::to_string(node2) + " is out of range.  The full choice-choice interaction graph matrix is " +
-		std::to_string(full_choice_choice_interaction_graph_.rows()) + " by " + std::to_string(full_choice_choice_interaction_graph_.cols())
-		+ "."
-	);
-
-	return full_choice_choice_interaction_graph_( std::min(node1, node2), std::max(node1, node2) );
-}
-
 /// @brief Given an absolute node index, get the variable node index.
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
