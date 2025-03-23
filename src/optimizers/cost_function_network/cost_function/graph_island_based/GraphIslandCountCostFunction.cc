@@ -253,14 +253,15 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
 
-	// Compute the current connectivity graph.  This is stack-allocated, and should be small, though it is O(N^2) in memory.
+	// Compute the current connectivity graph.  This is stack-allocated, and should be small, though it is worst case O(N^2) in memory.
 	// N will likely be << 1000; N^2 will likely be less than a megabyte of memory.  If this ever becomes an issue, we can
-	// revisit this.
+	// revisit this.  This is also unlikely to be an issue due to sparsity of the graph: we are only allocating space for the edges
+	// in the interaction graph, not for edges between all nodes.
 	Size * const nedges_for_node_in_hbond_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
 	Size ** const edges_for_node_in_hbond_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
 	for( Size i(0); i<nnodes; ++i ) {
 		nedges_for_node_in_hbond_graph[i] = 0;
-		edges_for_node_in_hbond_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) ); 
+		edges_for_node_in_hbond_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * n_interaction_graph_edges_by_abs_node_[i] ) );
 	}
 	for( Size i( static_cast<Size>(use_onebased) ); i<nnodes-1; ++i ) {
 		std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( i ) );

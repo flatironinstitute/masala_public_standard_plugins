@@ -294,7 +294,12 @@ private:
 	/// @brief A vector of absolute node index pairs, used for rapidly iterating over nodes that
 	/// could interact (and skipping those that couldn't) to turn an O(N^2) calculation into an O(N)
 	/// calculation.
+	/// @details Computed by the protected_finalize() function.
 	std::vector< std::pair< masala::base::Size, masala::base::Size > > interacting_abs_node_indices_;
+
+	/// @brief A vector indicating the number of edges in the interaction graph each absolute node has.
+	/// @details Computed by the protected_finalize() function.
+	std::vector< masala::base::Size > n_interaction_graph_edges_by_abs_node_;
 
 }; // class GraphIslandCountCostFunction
 
