@@ -284,7 +284,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		}
 	}
 
-	TODO TODO TODO CONTINUE HERE;
+	//TODO TODO TODO CONTINUE HERE;
 
 	// Storage for whether we have discovered each node.  Automatically deallocated at function's end since
 	// this is stack-allocated with alloca().
@@ -373,11 +373,15 @@ GraphIslandCountCostFunction::protected_finalize(
 
 	// Compute the interacting node pairs
 	interacting_abs_node_indices_.clear();
+	n_interaction_graph_edges_by_abs_node_.clear();
 	masala::base::Size const nnodes( protected_n_nodes_absolute() );
+	n_interaction_graph_edges_by_abs_node_.resize( nnodes, 0 );
 	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<nnodes-1; ++i ) {
 		for( Size j(i+1); j<nnodes; ++j ) {
 			if( protected_choice_choice_interaction_graph_for_nodepair(i,j) != nullptr ) {
 				interacting_abs_node_indices_.push_back( std::make_pair(i,j) );
+				++n_interaction_graph_edges_by_abs_node_[i];
+				++n_interaction_graph_edges_by_abs_node_[j];
 			}
 		}
 	}
@@ -397,6 +401,7 @@ GraphIslandCountCostFunction::protected_assign(
 
 	min_island_size_ = src_cast_ptr->min_island_size_;
 	interacting_abs_node_indices_ = src_cast_ptr->interacting_abs_node_indices_;
+	n_interaction_graph_edges_by_abs_node_ = src_cast_ptr->n_interaction_graph_edges_by_abs_node_;
 	// TODO COPY DATA HERE.
 
 	Parent::protected_assign( src );
@@ -425,6 +430,8 @@ GraphIslandCountCostFunction::protected_empty() const {
 void
 GraphIslandCountCostFunction::protected_clear() {
 	// TODO CLEAR DATA HERE
+	interacting_abs_node_indices_.clear();
+	n_interaction_graph_edges_by_abs_node_.clear();
 	Parent::protected_clear();
 }
 
