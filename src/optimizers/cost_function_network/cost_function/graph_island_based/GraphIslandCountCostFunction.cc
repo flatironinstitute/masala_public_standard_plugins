@@ -263,29 +263,26 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		nedges_for_node_in_hbond_graph[i] = 0;
 		edges_for_node_in_hbond_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * n_interaction_graph_edges_by_abs_node_[i] ) );
 	}
-	for( Size i( static_cast<Size>(use_onebased) ); i<nnodes-1; ++i ) {
-		std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( i ) );
+	for( auto const & entry : interacting_abs_node_indices_ ) {
+		Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( entry.first, entry.second ) );
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "The interaction graph matirx was null.  "
+				"This is a program error: it ought not to be able to happen.  Please consult a developer."
+		);
+		std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( entry.first ) );
 		Size const choice_i( varnode_i.first ? candidate_solution[varnode_i.second] : 0 );
-			for( Size j(i+1); j<nnodes; ++j ) {
-			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( i, j ) );
-			if( ij_matrix != nullptr ) {
-				std::pair< bool, Size > const & varnode_j( protected_varnode_from_absnode( j ) );
-				Size const choice_j( varnode_j.first ? candidate_solution[varnode_j.second] : 0 );
-				if(
-					static_cast<Size>(ij_matrix->rows()) > choice_i &&
-					static_cast<Size>(ij_matrix->cols()) > choice_j &&
-					(*ij_matrix)( choice_i, choice_j )
-				) {
-					edges_for_node_in_hbond_graph[i][ nedges_for_node_in_hbond_graph[i] ] = j;
-					edges_for_node_in_hbond_graph[j][ nedges_for_node_in_hbond_graph[j] ] = i;
-					nedges_for_node_in_hbond_graph[i] += 1;
-					nedges_for_node_in_hbond_graph[j] += 1;
-				}
-			}
+		std::pair< bool, Size > const & varnode_j( protected_varnode_from_absnode( entry.second ) );
+		Size const choice_j( varnode_j.first ? candidate_solution[varnode_j.second] : 0 );
+		if(
+			static_cast<Size>(ij_matrix->rows()) > choice_i &&
+			static_cast<Size>(ij_matrix->cols()) > choice_j &&
+			(*ij_matrix)( choice_i, choice_j )
+		) {
+			edges_for_node_in_hbond_graph[entry.first][ nedges_for_node_in_hbond_graph[entry.first] ] = entry.second;
+			edges_for_node_in_hbond_graph[entry.second][ nedges_for_node_in_hbond_graph[entry.second] ] = entry.first;
+			nedges_for_node_in_hbond_graph[entry.first] += 1;
+			nedges_for_node_in_hbond_graph[entry.second] += 1;
 		}
 	}
-
-	//TODO TODO TODO CONTINUE HERE;
 
 	// Storage for whether we have discovered each node.  Automatically deallocated at function's end since
 	// this is stack-allocated with alloca().
