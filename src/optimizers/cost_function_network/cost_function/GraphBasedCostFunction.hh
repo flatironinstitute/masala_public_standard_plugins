@@ -275,7 +275,7 @@ protected:
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 != node2, "protected_choice_choice_interaction_graph_for_nodepair", "Got " + std::to_string( node1 )
 			+ " for both node indices.  Node indices must be different."
 		);
-		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 < node2, "protected_choice_choice_interaction_graph_for_nodepair", "Node 1 must be less than node 2." );
+		CHECK_OR_THROW_FOR_CLASS( node1 < node2, "protected_choice_choice_interaction_graph_for_nodepair", "Node 1 must be less than node 2." );
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( (!use_one_based_node_indexing_) || ( node1 > 0 && node2 > 0), "protected_choice_choice_interaction_graph_for_nodepair",
 			"Got a node index of zero, but absolute node indices are one-based."
 		);
