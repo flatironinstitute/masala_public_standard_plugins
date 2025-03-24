@@ -375,8 +375,8 @@ GraphBasedCostFunction<T>::protected_n_nodes_absolute() const {
 }
 
 /// @brief Get a pointer to the choice-choice interaction graph for a pair of nodes.
-/// @details Object must be finalized before use, or this throws.  Returns nullptr if that's the entry in the full choice
-/// interaction graph.  Indices can be in any order.  Does not lock mutex.
+/// @details Returns nullptr if that's the entry in the full choice interaction graph.
+/// Indices can be in any order.  Does not lock mutex.
 template< typename T >
 Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic > const *
 GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepair(
@@ -384,9 +384,6 @@ GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepai
 ) const {
 	using masala::base::Size;
 
-	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "protected_choice_choice_interaction_graph_for_nodepair", "This "
-		+ class_name() + " object must be finalized before this function is called."
-	);
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( node1 != node2, "protected_choice_choice_interaction_graph_for_nodepair", "Got " + std::to_string( node1 )
 		+ " for both node indices.  Node indices must be different."
 	);
@@ -411,7 +408,7 @@ GraphBasedCostFunction<T>::protected_choice_choice_interaction_graph_for_nodepai
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
 template< typename T >
-std::pair< bool, masala::base::Size >
+std::pair< bool, masala::base::Size > const &
 GraphBasedCostFunction<T>::protected_varnode_from_absnode(
 	masala::base::Size const absnode_index
 ) const {

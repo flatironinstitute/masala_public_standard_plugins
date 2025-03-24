@@ -253,9 +253,43 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
 
+	// Compute the current connectivity graph.  This is stack-allocated, and should be small, though it is worst case O(N^2) in memory.
+	// N will likely be << 1000; N^2 will likely be less than a megabyte of memory.  If this ever becomes an issue, we can
+	// revisit this.  This is also unlikely to be an issue due to sparsity of the graph: we are only allocating space for the edges
+	// in the interaction graph, not for edges between all nodes.
+	Size * const nedges_for_node_in_hbond_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
+	Size ** const edges_for_node_in_hbond_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
+	for( Size i(0); i<nnodes; ++i ) {
+		nedges_for_node_in_hbond_graph[i] = 0;
+		edges_for_node_in_hbond_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * n_interaction_graph_edges_by_abs_node_[i] ) );
+	}
+	for( Size i( static_cast<Size>(use_onebased) ); i<nnodes-1; ++i ) {
+		std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( i ) );
+		Size const choice_i( varnode_i.first ? candidate_solution[varnode_i.second] : 0 );
+			for( Size j(i+1); j<nnodes; ++j ) {
+			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( i, j ) );
+			if( ij_matrix != nullptr ) {
+				std::pair< bool, Size > const & varnode_j( protected_varnode_from_absnode( j ) );
+				Size const choice_j( varnode_j.first ? candidate_solution[varnode_j.second] : 0 );
+				if(
+					static_cast<Size>(ij_matrix->rows()) > choice_i &&
+					static_cast<Size>(ij_matrix->cols()) > choice_j &&
+					(*ij_matrix)( choice_i, choice_j )
+				) {
+					edges_for_node_in_hbond_graph[i][ nedges_for_node_in_hbond_graph[i] ] = j;
+					edges_for_node_in_hbond_graph[j][ nedges_for_node_in_hbond_graph[j] ] = i;
+					nedges_for_node_in_hbond_graph[i] += 1;
+					nedges_for_node_in_hbond_graph[j] += 1;
+				}
+			}
+		}
+	}
+
+	//TODO TODO TODO CONTINUE HERE;
+
 	// Storage for whether we have discovered each node.  Automatically deallocated at function's end since
 	// this is stack-allocated with alloca().
-	bool * node_discovered = static_cast< bool * >( alloca( sizeof(bool) * nnodes ) );
+	bool * const node_discovered = static_cast< bool * >( alloca( sizeof(bool) * nnodes ) );
 
 	// Initialize the island_sizes array to be all 1.  We change it to 0 when a node is incorporated into an island
 	// (unless it is the first node in the island, in which case its entry stores the number of connected components).
@@ -296,8 +330,9 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			/// - Increments the ith element of island_sizes with the number of connected nodes appended.
 			/// - Sets the connected nodes to 0 in island_sizes, and true in node_discovered.
 			push_connected_undiscovered_nodes(
-				i, node_sizearray[stackend], nnodes, stackend,
-				node_sizearray, island_sizes, node_discovered, candidate_solution
+				i, node_sizearray[stackend], stackend,
+				node_sizearray, island_sizes, node_discovered,
+				nedges_for_node_in_hbond_graph, edges_for_node_in_hbond_graph
 			);
 		}
 	}
@@ -336,7 +371,23 @@ void
 GraphIslandCountCostFunction::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
-	// TODO ANY NEEDED FINALIZATION HERE
+	using masala::base::Size;
+
+	// Compute the interacting node pairs
+	interacting_abs_node_indices_.clear();
+	n_interaction_graph_edges_by_abs_node_.clear();
+	masala::base::Size const nnodes( protected_n_nodes_absolute() );
+	n_interaction_graph_edges_by_abs_node_.resize( nnodes, 0 );
+	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<nnodes-1; ++i ) {
+		for( Size j(i+1); j<nnodes; ++j ) {
+			if( protected_choice_choice_interaction_graph_for_nodepair(i,j) != nullptr ) {
+				interacting_abs_node_indices_.push_back( std::make_pair(i,j) );
+				++n_interaction_graph_edges_by_abs_node_[i];
+				++n_interaction_graph_edges_by_abs_node_[j];
+			}
+		}
+	}
+	interacting_abs_node_indices_.shrink_to_fit();
 
 	Parent::protected_finalize( variable_node_indices );
 }
@@ -351,6 +402,8 @@ GraphIslandCountCostFunction::protected_assign(
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Cannot assign a GraphIslandCountCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
 
 	min_island_size_ = src_cast_ptr->min_island_size_;
+	interacting_abs_node_indices_ = src_cast_ptr->interacting_abs_node_indices_;
+	n_interaction_graph_edges_by_abs_node_ = src_cast_ptr->n_interaction_graph_edges_by_abs_node_;
 	// TODO COPY DATA HERE.
 
 	Parent::protected_assign( src );
@@ -379,6 +432,8 @@ GraphIslandCountCostFunction::protected_empty() const {
 void
 GraphIslandCountCostFunction::protected_clear() {
 	// TODO CLEAR DATA HERE
+	interacting_abs_node_indices_.clear();
+	n_interaction_graph_edges_by_abs_node_.clear();
 	Parent::protected_clear();
 }
 
@@ -405,40 +460,24 @@ void
 GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	masala::base::Size const root_of_current_island,
 	masala::base::Size const current_node,
-	masala::base::Size const nnodes,
 	masala::base::Size & stackend,
 	masala::base::Size * node_sizearray,
 	masala::base::Size * island_sizes,
 	bool * node_discovered,
-	std::vector< masala::base::Size > const & candidate_solution
+	masala::base::Size const * const nedges_for_node_in_hbond_graph,
+	masala::base::Size const * const * const edges_for_node_in_hbond_graph
 ) const {
 	using masala::base::Size;
-
-	for( Size iother( static_cast<Size>(protected_use_one_based_node_indexing()) ); iother < nnodes; ++iother ) {
-		if( iother != current_node && node_discovered[iother] == false ) {
-			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * choice_choice_matrix( protected_choice_choice_interaction_graph_for_nodepair( iother, current_node ) );
-			if( choice_choice_matrix != nullptr ) {
-
-				// If we have records of node-node interactions between iother and current_node...
-				std::pair< bool, Size > const varnode_index_lower( protected_varnode_from_absnode( std::min(iother, current_node) ) );
-				std::pair< bool, Size > const varnode_index_upper( protected_varnode_from_absnode( std::max(iother, current_node) ) );
-				Size const choice_index_lower(varnode_index_lower.first ? candidate_solution[ varnode_index_lower.second ] : 0);
-				Size const choice_index_upper(varnode_index_upper.first ? candidate_solution[ varnode_index_upper.second ] : 0);
-				if(
-					static_cast<Size>( choice_choice_matrix->rows() ) > choice_index_lower &&
-					static_cast<Size>( choice_choice_matrix->cols() ) > choice_index_upper &&
-					(*choice_choice_matrix)( choice_index_lower, choice_index_upper ) 
-				) {
-					// std::cout << "\tFound that node " << current_node << " is connected to node " << iother << "." << std::endl; // DELETE ME -- FOR DEBUGGING ONLY.
-
-					// If the current choices at iother and current_node interact...
-					island_sizes[iother] = 0;
-					++(island_sizes[root_of_current_island]);
-					node_discovered[iother] = true;
-					node_sizearray[stackend] = iother;
-					++stackend;
-				}
-			}
+	Size const * const edges_for_curnode( edges_for_node_in_hbond_graph[current_node] );
+	for( Size iother_index( 0 ); iother_index < nedges_for_node_in_hbond_graph[current_node] ; ++iother_index ) {
+		Size const iother( edges_for_curnode[iother_index] );
+		if( node_discovered[iother] == false ) {
+			// If the current choices at iother and current_node interact...
+			island_sizes[iother] = 0;
+			++(island_sizes[root_of_current_island]);
+			node_discovered[iother] = true;
+			node_sizearray[stackend] = iother;
+			++stackend;
 		}
 	}
 }

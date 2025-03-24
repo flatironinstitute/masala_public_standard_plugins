@@ -269,12 +269,12 @@ private:
 	push_connected_undiscovered_nodes(
 		masala::base::Size const root_of_current_island,
 		masala::base::Size const current_node,
-		masala::base::Size const nnodes,
 		masala::base::Size & stackend,
 		masala::base::Size * node_sizearray,
 		masala::base::Size * island_sizes,
 		bool * node_discovered,
-		std::vector< masala::base::Size > const & candidate_solution
+		masala::base::Size const * const nedges_for_node_in_hbond_graph,
+		masala::base::Size const * const * const edges_for_node_in_hbond_graph
 	) const;
 
 private:
@@ -286,6 +286,20 @@ private:
 	/// @brief The minimum size an island must have to be counted.
 	/// @details Defaults to 2.
 	masala::base::Size min_island_size_ = 2;
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE VARIABLES COMPUTED BY protected_finalize() FUNCTION
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief A vector of absolute node index pairs, used for rapidly iterating over nodes that
+	/// could interact (and skipping those that couldn't) to turn an O(N^2) calculation into an O(N)
+	/// calculation.
+	/// @details Computed by the protected_finalize() function.
+	std::vector< std::pair< masala::base::Size, masala::base::Size > > interacting_abs_node_indices_;
+
+	/// @brief A vector indicating the number of edges in the interaction graph each absolute node has.
+	/// @details Computed by the protected_finalize() function.
+	std::vector< masala::base::Size > n_interaction_graph_edges_by_abs_node_;
 
 }; // class GraphIslandCountCostFunction
 
