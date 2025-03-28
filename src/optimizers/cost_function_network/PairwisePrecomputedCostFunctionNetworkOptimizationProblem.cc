@@ -322,6 +322,15 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Generate a scratch space for CFN problems.
+/// @details This version will return a PairwisePrecomputedCFNProblemScratchSpace.
+masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cfn_problem_scratch_space", "This object must be finalized before this function is called." );
+	return nullptr; //TODO TODO TODO IMPLEMENT THIS.
+}
+
 /// @brief Given a candidate solution, compute the score.
 /// @details The candidate solution is expressed as a vector of choice indices, with
 /// one entry per variable position, in order of position indices.  (There may not be
@@ -600,6 +609,16 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 		);
 
 		// Work functions
+		api_def->add_work_function(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP > >(
+				"generate_cfn_problem_scratch_space", "Generate a scratch space for this CFN problem class.",
+				true, false, false, true,
+				"cfn_problem_scratch_space", "A shared pointer that points to a scratch space for this problem.  This override returns a "
+				"PairwisePrecomputedCFNProblemScratchSpace.  This is used internally to make recomputation of the cost function efficient.",
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space, this )
+			)
+		);
+
 		work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > compute_absolute_score_fxn(
 			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > >(
 				"compute_absolute_score", "Given a candidate solution, compute the score.  "

@@ -226,6 +226,11 @@ public:
 // WORK FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Generate a scratch space for CFN problems.
+	/// @details This version will return a PairwisePrecomputedCFNProblemScratchSpace.
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+	generate_cfn_problem_scratch_space() const override;
+
 	/// @brief Given a candidate solution, compute the score.
 	/// @details The candidate solution is expressed as a vector of choice indices, with
 	/// one entry per variable position, in order of position indices.  (There may not be
