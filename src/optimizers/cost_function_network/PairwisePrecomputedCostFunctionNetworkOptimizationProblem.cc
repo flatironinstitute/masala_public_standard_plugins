@@ -45,6 +45,7 @@
 
 // Numeric headers:
 #include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
+#include <numeric/optimization/cost_function_network/CFNProblemScratchSpace.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -331,20 +332,20 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score(
 	std::vector< masala::base::Size > const & candidate_solution,
-	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * //cfn_problem_scratch_space
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
-	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_absolute_score", "The problem setup must be finalized before compute_absolute_score() can be called." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_absolute_score", "The problem setup must be finalized before compute_absolute_score() can be called." );
 
 	Real accumulator(
 		total_constant_offset() +
-		masala::numeric::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution ) // Handles anything non-pairwise.
+		masala::numeric::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution, cfn_problem_scratch_space ) // Handles anything non-pairwise.
 	);
 
 	Size const n_pos( candidate_solution.size() );
 	std::vector< std::pair< Size, Size > > const variable_positions( n_choices_at_variable_nodes() );
-	CHECK_OR_THROW_FOR_CLASS( candidate_solution.size() == variable_positions.size(), "compute_absolute_score",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( candidate_solution.size() == variable_positions.size(), "compute_absolute_score",
 		"The number of entries in the candidate solution vector (" + std::to_string( candidate_solution.size() ) +
 		") does not match the number of variable nodes with two or more choices (" + std::to_string( variable_positions.size() ) + ")." );
 	for( Size i(0); i<n_pos; ++i ) {
@@ -386,20 +387,20 @@ masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 	std::vector< masala::base::Size > const & old_solution,
 	std::vector< masala::base::Size > const & new_solution,
-	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * //cfn_problem_scratch_space
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
-	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_score_change", "The problem setup must be finalized "
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_score_change", "The problem setup must be finalized "
 		"before compute_score_change() can be called."
 	);
 
 	Size const npos( protected_total_variable_nodes() ); //Only safe to call if finalized.
-	CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
 		"The size of the old candidate solution vector was " + std::to_string( old_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
-	CHECK_OR_THROW_FOR_CLASS( new_solution.size() == npos, "compute_score_change",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( new_solution.size() == npos, "compute_score_change",
 		"The size of the new candidate solution vector was " + std::to_string( new_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
@@ -409,7 +410,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		ivals[i] = i;
 	}
 
-	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution ) + masala::numeric_api::utility::transform_reduce(
+	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution, cfn_problem_scratch_space ) + masala::numeric_api::utility::transform_reduce(
 		MASALA_UNSEQ_EXECUTION_POLICY
 		ivals.cbegin(), ivals.cend(), 0.0, std::plus{},
 		[this, &old_solution, &new_solution]( Size const i ) {
