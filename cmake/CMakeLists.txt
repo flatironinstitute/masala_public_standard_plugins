@@ -19,7 +19,7 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
 # Set project attributes:
-PROJECT( MasalaStandardPlugins VERSION 0.6 DESCRIPTION "Standard plugins for the Masala molecular modelling suite." )
+PROJECT( MasalaStandardPlugins VERSION 0.7 DESCRIPTION "Standard plugins for the Masala molecular modelling suite." )
 SET( MODE debug )
 SET( CMAKE_BUILD_TYPE Debug )
 # SET( MODE release )
