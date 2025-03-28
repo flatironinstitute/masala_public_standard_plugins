@@ -31,6 +31,11 @@
 #include <vector>
 #include <string>
 
+// Numeric headers:
+#ifndef NDEBUG
+#include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
+#endif
+
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
@@ -189,11 +194,13 @@ SquareOfChoicePenaltySumCostFunction::class_namespace() const {
 /// @brief Given a selection of choices at variable nodes, compute the cost function.
 /// @details This version computes the sum of the selected choices plus a constant,
 /// then squares the result.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareOfChoicePenaltySumCostFunction::compute_cost_function(
-    std::vector< masala::base::Size > const & candidate_solution
+    std::vector< masala::base::Size > const & candidate_solution,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     masala::base::Real const sum( Parent::protected_compute_cost_function_no_weight( candidate_solution ) );
     return protected_weight()*sum*sum;
 }
@@ -203,12 +210,14 @@ SquareOfChoicePenaltySumCostFunction::compute_cost_function(
 /// @details This version computes the sum of the old selected choices plus a constant,
 /// then squares the result.  It repeats this for the new selected choices, then returns
 /// the difference.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareOfChoicePenaltySumCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new
+    std::vector< masala::base::Size > const & candidate_solution_new,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     masala::base::Real const oldsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_old ) );
     masala::base::Real const newsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_new ) );
     return protected_weight() * ( ( newsum * newsum ) - ( oldsum * oldsum ) );

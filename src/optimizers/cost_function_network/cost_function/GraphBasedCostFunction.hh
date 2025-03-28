@@ -217,7 +217,8 @@ public:
 	/// @note No mutex-locking is performed!
 	masala::base::Real
 	compute_cost_function(
-		std::vector< masala::base::Size > const & candidate_solution
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override = 0;
 
 	/// @brief Given an old selection of choices at variable nodes and a new selection,
@@ -227,7 +228,8 @@ public:
 	masala::base::Real
 	compute_cost_function_difference(
 		std::vector< masala::base::Size > const & candidate_solution_old,
-		std::vector< masala::base::Size > const & candidate_solution_new
+		std::vector< masala::base::Size > const & candidate_solution_new,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override = 0;
 
 public:
