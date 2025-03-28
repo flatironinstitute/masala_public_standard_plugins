@@ -799,6 +799,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 
 	CHECK_OR_THROW_FOR_CLASS( problem_ptr != nullptr, "do_one_greedy_optimization_job_in_threads", "A null pointer for the problem was passed to this function." );
 	CostFunctionNetworkOptimizationProblem_API const & problem( *problem_ptr );
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( problem.generate_cfn_problem_scratch_space() );
 
 	std::vector< std::pair< Size, Size > > const nchoices_at_varnodes( problem.n_choices_at_variable_nodes() );
 	Size const n_var_pos( nchoices_at_varnodes.size() );
@@ -807,7 +808,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	// Candidate state: states considered this round.  Iterates through all possible single-point changes.
 	// Best candidate state: lowest-scoring state considered so far this round.
 	std::vector< Size > current_state( starting_state ), candidate_state( starting_state ), best_candidate_state( starting_state );
-	Real current_score( problem.compute_non_approximate_absolute_score( current_state ) );
+	Real current_score( problem.compute_non_approximate_absolute_score( current_state, problem_scratch.get() ) );
 	Real candidate_score( current_score ), best_candidate_score( current_score );
 	
 	do {
@@ -820,7 +821,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			candidate_score = current_score;
 			for( Size j(0); j<nchoice; ++j ) {
 				candidate_state[i] = j;
-				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state );
+				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state, problem_scratch.get() );
 				//write_to_tracer( "[" + masala::base::utility::container::container_to_string( candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
 
 				if( candidate_score < best_candidate_score ) {
@@ -839,7 +840,8 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			{ best_candidate_state, best_candidate_score, n_times_seen_multiplier }
 		},
 		n_replicates,
-		problem_ptr
+		problem_ptr,
+		problem_scratch.get()
 	);
 }
 
