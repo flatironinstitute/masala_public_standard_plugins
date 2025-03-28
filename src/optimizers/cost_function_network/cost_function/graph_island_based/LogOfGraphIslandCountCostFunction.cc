@@ -232,7 +232,7 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 		);
 
 		// Work functions:
-		api_def->add_work_function(
+		MasalaObjectAPIWorkFunctionDefinition_TwoInputSP < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_fxn(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
 				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
 				"threshold, compute the natural log of the sizes, sum them, and negate the result.  No mutex-locking is performed.",
@@ -248,7 +248,10 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				)
 			)
 		);
-		api_def->add_work_function(
+		compute_fxn->set_triggers_no_mutex_lock();
+		api_def->add_work_function( compute_fxn );
+
+		MasalaObjectAPIWorkFunctionDefinition_ThreeInputSP < Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_diff_fxn(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ThreeInput < Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
 				"compute_cost_function_difference", "Compute the cost function difference: for each of two input vectors, find the size of each "
 				"island in the interaction graph over threshold, compute the natural log of the sizes, sum them, negate the result, and return the difference.  "
@@ -267,6 +270,8 @@ LogOfGraphIslandCountCostFunction::get_api_definition() {
 				)
 			)
 		);
+		compute_diff_fxn->set_triggers_no_mutex_lock();
+		api_def->add_work_function( compute_diff_fxn );
 
         api_definition_mutex_locked() = api_def;
     }
