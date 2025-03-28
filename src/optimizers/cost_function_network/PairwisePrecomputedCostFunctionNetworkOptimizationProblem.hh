@@ -235,7 +235,8 @@ public:
 	/// threadsafe from a read-only context.
 	masala::base::Real
 	compute_absolute_score(
-		std::vector< masala::base::Size > const & candidate_solution
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 	) const override;
 
 	/// @brief Given a pair of candidate solutions, compute the difference in their scores.
@@ -248,7 +249,8 @@ public:
 	masala::base::Real
 	compute_score_change(
 		std::vector< masala::base::Size > const & old_solution,
-		std::vector< masala::base::Size > const & new_solution
+		std::vector< masala::base::Size > const & new_solution,
+		masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 	) const override;
 
 public:

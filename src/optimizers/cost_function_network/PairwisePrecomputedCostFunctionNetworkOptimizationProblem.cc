@@ -330,7 +330,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 /// threadsafe from a read-only context.
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score(
-	std::vector< masala::base::Size > const & candidate_solution
+	std::vector< masala::base::Size > const & candidate_solution,
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * //cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
@@ -384,7 +385,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 	std::vector< masala::base::Size > const & old_solution,
-	std::vector< masala::base::Size > const & new_solution
+	std::vector< masala::base::Size > const & new_solution,
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * //cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
@@ -597,8 +599,8 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 		);
 
 		// Work functions
-		work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< Real, std::vector< Size > const & > compute_absolute_score_fxn(
-			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< Real, std::vector< Size > const & > >(
+		work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > compute_absolute_score_fxn(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > >(
 				"compute_absolute_score", "Given a candidate solution, compute the score.  "
 				"The candidate solution is expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.  This override "
@@ -608,18 +610,20 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 				"candidate_solution", "The candidate solution, expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.  (There may not be "
 				"entries for every position, though, since not all positions have at least two choices.)",
+				"cfn_problem_scratch_space", "A pointer to thread_local scratch space for efficiently recomputing this scoring function.",
 				"score", "The score for this candidate solution, computed by this function.",
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score, this, std::placeholders::_1 )
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score, this, std::placeholders::_1, std::placeholders::_2 )
 			)
 		);
 		compute_absolute_score_fxn->set_triggers_no_mutex_lock();
 		api_def->add_work_function( compute_absolute_score_fxn );
 
-		work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP<
+		work_function::MasalaObjectAPIWorkFunctionDefinition_ThreeInputSP<
 			Real, std::vector< Size > const &,
-			std::vector< Size > const &
+			std::vector< Size > const &,
+			masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace *
 		> compute_score_change_fxn(
-			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, std::vector< Size > const & > >(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_ThreeInput< Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > >(
 				"compute_score_change", "Given two candidate solutions, compute the score difference.  "
 				"The candidate solutions are expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices. (There may not be "
@@ -631,8 +635,9 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 				"one entry per variable position, in order of position indices.",
 				"new_solution", "The second candidate solution, expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.",
+				"cfn_problem_scratch_space", "A pointer to thread_local scratch space for efficiently recomputing this scoring function.",
 				"delta_score", "The score change from old to new candidate solutions, computed by this function.",
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change, this, std::placeholders::_1, std::placeholders::_2 )
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
 			)
 		);
 		compute_score_change_fxn->set_triggers_no_mutex_lock();

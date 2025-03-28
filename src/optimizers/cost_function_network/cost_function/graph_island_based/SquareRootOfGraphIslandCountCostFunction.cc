@@ -409,7 +409,7 @@ SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference(
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
-	return compute_cost_function(candidate_solution_new) - compute_cost_function(candidate_solution_old);
+	return compute_cost_function(candidate_solution_new, scratch_space) - compute_cost_function(candidate_solution_old, scratch_space);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
