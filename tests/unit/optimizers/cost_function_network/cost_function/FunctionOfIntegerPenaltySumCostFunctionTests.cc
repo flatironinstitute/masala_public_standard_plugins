@@ -97,17 +97,18 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with constant penal
 
 		std::vector< Real > cost_fxns( 11 );
 		std::vector< Real > const expected{ 8.0, 8.0, 8.0, 8.0, 2.0, 0, 2.0, 2.0, 2.0, 2.0, 2.0 };
-		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 4
-		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 4
-		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 4
-		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
-		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
-		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
-		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 } ); // 1
-		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 } ); // 1
-		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 } ); // 1
-		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 } ); // 1
-		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 } ); // 1
+		// TODO: replace below with scratch space as needed:
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 }, nullptr ); // 4
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 }, nullptr ); // 4
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 }, nullptr ); // 4
+		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 }, nullptr ); // 4
+		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 }, nullptr ); // 1
+		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 }, nullptr ); // 0
+		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 }, nullptr ); // 1
+		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 }, nullptr ); // 1
+		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 }, nullptr ); // 1
+		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 }, nullptr ); // 1
+		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 }, nullptr ); // 1
 
 		tracer->write_to_tracer( tracer_name, "Expected:\t[" + container_to_string( expected, "," ) + "]" );
 		tracer->write_to_tracer( tracer_name, "Actual:\t[" + container_to_string( cost_fxns, "," ) + "]" );
@@ -159,17 +160,18 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with linear penalti
 
 		std::vector< Real > cost_fxns( 11 );
 		std::vector< Real > const expected{ 26.0, 20.0, 14.0, 8.0, 2.0, 0, 2.0, 4.0, 6.0, 8.0, 10.0 };
-		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 13
-		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 10
-		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 7
-		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
-		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
-		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
-		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 } ); // 1
-		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 } ); // 2
-		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 } ); // 3
-		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 } ); // 4
-		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 } ); // 5
+		// TODO: replace below with scratch space as needed:
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 }, nullptr ); // 13
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 }, nullptr ); // 10
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 }, nullptr ); // 7
+		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 }, nullptr ); // 4
+		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 }, nullptr ); // 1
+		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 }, nullptr ); // 0
+		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 }, nullptr ); // 1
+		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 }, nullptr ); // 2
+		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 }, nullptr ); // 3
+		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 }, nullptr ); // 4
+		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 }, nullptr ); // 5
 
 		tracer->write_to_tracer( tracer_name, "Expected:\t[" + container_to_string( expected, "," ) + "]" );
 		tracer->write_to_tracer( tracer_name, "Actual:\t[" + container_to_string( cost_fxns, "," ) + "]" );
@@ -221,17 +223,18 @@ TEST_CASE( "Set up a FunctionOfIntegerPenaltySumCostFunction with quadratic pena
 
 		std::vector< Real > cost_fxns( 11 );
 		std::vector< Real > const expected{ 50.0, 32.0, 18.0, 8.0, 2.0, 0, 2.0, 8.0, 18.0, 32.0, 50.0 };
-		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 } ); // 25
-		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 } ); // 16
-		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 } ); // 9
-		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 } ); // 4
-		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 } ); // 1
-		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 } ); // 0
-		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 } ); // 1
-		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 } ); // 4
-		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 } ); // 9
-		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 } ); // 16
-		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 } ); // 25
+		// TODO: replace below with scratch space as needed:
+		cost_fxns[ 0] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  0 }, nullptr ); // 25
+		cost_fxns[ 1] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  0,  1 }, nullptr ); // 16
+		cost_fxns[ 2] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  0,  1,  1 }, nullptr ); // 9
+		cost_fxns[ 3] = costfxn->compute_cost_function( std::vector< Size >{  0,  0,  1,  1,  1 }, nullptr ); // 4
+		cost_fxns[ 4] = costfxn->compute_cost_function( std::vector< Size >{  0,  1,  1,  1,  1 }, nullptr ); // 1
+		cost_fxns[ 5] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  1 }, nullptr ); // 0
+		cost_fxns[ 6] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  1,  2 }, nullptr ); // 1
+		cost_fxns[ 7] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  1,  2,  2 }, nullptr ); // 4
+		cost_fxns[ 8] = costfxn->compute_cost_function( std::vector< Size >{  1,  1,  2,  2,  2 }, nullptr ); // 9
+		cost_fxns[ 9] = costfxn->compute_cost_function( std::vector< Size >{  1,  2,  2,  2,  2 }, nullptr ); // 16
+		cost_fxns[10] = costfxn->compute_cost_function( std::vector< Size >{  2,  2,  2,  2,  2 }, nullptr ); // 25
 
 		tracer->write_to_tracer( tracer_name, "Expected:\t[" + container_to_string( expected, "," ) + "]" );
 		tracer->write_to_tracer( tracer_name, "Actual:\t[" + container_to_string( cost_fxns, "," ) + "]" );

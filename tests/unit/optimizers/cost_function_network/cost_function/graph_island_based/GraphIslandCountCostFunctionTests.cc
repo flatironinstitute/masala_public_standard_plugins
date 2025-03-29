@@ -156,11 +156,12 @@ TEST_CASE( "Test the function of a SquareOfGraphIslandCountCostFunction.", "[sta
 
 		set_up_graph( *costfxn );
 
-		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
-		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
-		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
-		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
-		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+		// TODO: replace below with scratch space as needed:
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 }, nullptr ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 }, nullptr ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 }, nullptr ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, nullptr ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, nullptr ) );
 
 		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
 		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
@@ -188,11 +189,12 @@ TEST_CASE( "Test the function of a LinearGraphIslandCountCostFunction.", "[stand
 
 		set_up_graph( *costfxn );
 
-		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
-		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
-		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
-		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
-		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+		// TODO: replace below with scratch space as needed:
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 }, nullptr ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 }, nullptr ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 }, nullptr ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, nullptr ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, nullptr ) );
 
 		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
 		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
@@ -220,11 +222,12 @@ TEST_CASE( "Test the function of a SquareRootOfGraphIslandCountCostFunction.", "
 
 		set_up_graph( *costfxn );
 
-		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
-		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
-		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
-		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
-		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+		// TODO: replace below with scratch space as needed:
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 }, nullptr ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 }, nullptr ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 }, nullptr ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, nullptr ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, nullptr ) );
 
 		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
 		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
@@ -252,11 +255,12 @@ TEST_CASE( "Test the function of a LogOfGraphIslandCountCostFunction.", "[standa
 
 		set_up_graph( *costfxn );
 
-		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 } ) );
-		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 } ) );
-		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 } ) );
-		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 } ) );
-		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 } ) );
+		// TODO: replace below with scratch space as needed:
+		Real const all_zero_score( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 0, 0, 0, 0, 0 }, nullptr ) );
+		Real const all_one_score( costfxn->compute_cost_function( std::vector< Size >{ 1, 1, 1, 1, 1, 1, 1, 1 }, nullptr ) );
+		Real const all_two_score( costfxn->compute_cost_function( std::vector< Size >{ 2, 2, 2, 2, 2, 2, 2, 2 }, nullptr ) );
+		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, nullptr ) );
+		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, nullptr ) );
 
 		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
 		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
