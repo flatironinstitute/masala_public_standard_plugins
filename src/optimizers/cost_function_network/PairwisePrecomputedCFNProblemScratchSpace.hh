@@ -64,7 +64,7 @@ public:
 	/// @brief Settings constructor.
 	PairwisePrecomputedCFNProblemScratchSpace(
 		masala::base::Size const n_variable_nodes,
-		std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP > const & cost_functions
+		std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & cost_functions
 	);
 
 	/// @brief Copy constructor.
