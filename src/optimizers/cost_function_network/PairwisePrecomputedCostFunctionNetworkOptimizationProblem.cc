@@ -25,6 +25,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/PairwisePrecomputedCFNProblemScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -328,7 +331,11 @@ masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space() const {
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cfn_problem_scratch_space", "This object must be finalized before this function is called." );
-	return nullptr; //TODO TODO TODO IMPLEMENT THIS.
+
+	return masala::make_shared< PairwisePrecomputedCFNProblemScratchSpace >(
+		interacting_variable_nodes_.size(), // Number of variable nodes.
+		cost_functions() // Cost functions -- to initialize cost function scratch spaces.
+	);
 }
 
 /// @brief Given a candidate solution, compute the score.
