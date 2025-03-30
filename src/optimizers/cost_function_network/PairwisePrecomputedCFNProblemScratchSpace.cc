@@ -40,10 +40,28 @@ namespace cost_function_network {
 /// @brief Settings constructor.
 PairwisePrecomputedCFNProblemScratchSpace::PairwisePrecomputedCFNProblemScratchSpace(
 	masala::base::Size const /*n_variable_nodes*/,
-	std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & /*cost_functions*/
+	std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & cost_functions
 ) :
 	Parent( cost_functions )
 {}
+
+////////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION AND DESTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the name for this class.
+/// @returns "PairwisePrecomputedCFNProblemScratchSpace".
+std::string
+PairwisePrecomputedCFNProblemScratchSpace::class_name() const {
+	return "PairwisePrecomputedCFNProblemScratchSpace";
+}
+
+/// @brief Get the namespace for this class.
+/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+std::string
+PairwisePrecomputedCFNProblemScratchSpace::class_namespace() const {
+	return "standard_masala_plugins::optimizers::cost_function_network";
+}
 
 } // namespace cost_function_network
 } // namespace optimizers

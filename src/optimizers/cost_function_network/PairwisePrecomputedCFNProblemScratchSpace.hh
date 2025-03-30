@@ -83,6 +83,16 @@ public:
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Get the name for this class.
+	/// @returns "PairwisePrecomputedCFNProblemScratchSpace".
+	std::string
+	class_name() const;
+
+	/// @brief Get the namespace for this class.
+	/// @returns "standard_masala_plugins::optimizers::cost_function_network".
+	std::string
+	class_namespace() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

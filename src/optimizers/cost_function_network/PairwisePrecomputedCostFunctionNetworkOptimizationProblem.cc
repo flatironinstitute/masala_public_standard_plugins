@@ -329,12 +329,22 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 /// @details This version will return a PairwisePrecomputedCFNProblemScratchSpace.
 masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space() const {
+	using namespace masala::numeric::optimization::cost_function_network::cost_function;
+	using masala::base::Size;
+
 	std::lock_guard< std::mutex > lock( data_representation_mutex() );
 	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cfn_problem_scratch_space", "This object must be finalized before this function is called." );
 
+	// Make a const copy:
+	std::vector< CostFunctionSP > const & cost_functions_nonconst( cost_functions() );
+	std::vector< CostFunctionCSP > cost_functions_const( cost_functions_nonconst.size(), nullptr );
+	for( Size i(0); i<cost_functions_nonconst.size(); ++i ) {
+		cost_functions_const[i] = cost_functions_nonconst[i];
+	}
+
 	return masala::make_shared< PairwisePrecomputedCFNProblemScratchSpace >(
 		interacting_variable_nodes_.size(), // Number of variable nodes.
-		cost_functions() // Cost functions -- to initialize cost function scratch spaces.
+		cost_functions_const // Cost functions -- to initialize cost function scratch spaces.
 	);
 }
 
