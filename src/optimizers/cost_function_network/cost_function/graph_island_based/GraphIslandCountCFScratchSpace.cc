@@ -125,30 +125,28 @@ GraphIslandCountCFScratchSpace::class_namespace() const {
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
-/// @details Also updates the current 
-void
-GraphIslandCountCFScratchSpace::set_current_candidate_solution(
-	std::vector< masala::base::Size > const & solution_in
-) {
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_in.size() == current_candidate_solution_->size(), "set_current_candidate_solution",
-		"Size mismatch in input candidate solution size (" + std::to_string( solution_in.size() ) + ") versus last current "
-		"candidate solution (" + std::to_string( current_candidate_solution_->size() ) + ")."
-	);
-	move_made_ = true;
-	(*current_candidate_solution_) = solution_in;
-}
-
 /// @brief Set the current state to the last accepted state.
 void
 GraphIslandCountCFScratchSpace::copy_last_accepted_to_current() {
 	using masala::base::Size;
 	(*current_candidate_solution_) = (*last_accepted_candidate_solution_);
 	(*island_sizes_) = (*last_accepted_island_sizes_);
-	(*nedges_for_node_in_connectivity_graph_) = (*last_accepted_nedges_for_node_in_connectivity_graph_);
-	for( Size i(0); i<edges_for_node_in_connectivity_graph_->size(); ++i ) {
-		(*edges_for_node_in_connectivity_graph_)[i] = (*last_accepted_edges_for_node_in_connectivity_graph_)[i];
-	}
+	copy_last_accepted_connectivity_graph_to_current();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// WORK FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Copy the last accepted connectivity graph to that for the current state, then update it for the given state.
+void
+GraphIslandCountCFScratchSpace::update_connectivity_graph_for_current(
+	std::vector< masala::base::Size > const & solution_in
+) {
+	copy_last_accepted_connectivity_graph_to_current();
+	set_current_candidate_solution( solution_in );
+
+	TODO TODO TODO UPDATE CURRENT GIVEN NEW SOLUTION;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +163,34 @@ GraphIslandCountCFScratchSpace::protected_accept_last_move() {
 		std::swap( last_accepted_edges_for_node_in_connectivity_graph_, edges_for_node_in_connectivity_graph_ );
 		move_made_ = false;
 		move_accepted_ = true;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+/// @details Also updates the current 
+void
+GraphIslandCountCFScratchSpace::set_current_candidate_solution(
+	std::vector< masala::base::Size > const & solution_in
+) {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_in.size() == current_candidate_solution_->size(), "set_current_candidate_solution",
+		"Size mismatch in input candidate solution size (" + std::to_string( solution_in.size() ) + ") versus last current "
+		"candidate solution (" + std::to_string( current_candidate_solution_->size() ) + ")."
+	);
+	move_made_ = true;
+	(*current_candidate_solution_) = solution_in;
+}
+
+/// @brief Set the current connectivity graph to that of the last accepted state.
+void
+GraphIslandCountCFScratchSpace::copy_last_accepted_connectivity_graph_to_current() {
+	using masala::base::Size;
+	(*nedges_for_node_in_connectivity_graph_) = (*last_accepted_nedges_for_node_in_connectivity_graph_);
+	for( Size i(0); i<edges_for_node_in_connectivity_graph_->size(); ++i ) {
+		(*edges_for_node_in_connectivity_graph_)[i] = (*last_accepted_edges_for_node_in_connectivity_graph_)[i];
 	}
 }
 

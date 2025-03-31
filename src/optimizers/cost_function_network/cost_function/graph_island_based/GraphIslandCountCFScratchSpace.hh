@@ -149,9 +149,6 @@ public:
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
-	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
-
 	/// @brief Set the current state to the last accepted state.
 	void copy_last_accepted_to_current();
 
@@ -161,6 +158,8 @@ public:
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Copy the last accepted connectivity graph to that for the current state, then update it for the given state.
+	void update_connectivity_graph_for_current( std::vector< masala::base::Size > const & solution_in );
 
 protected:
 
@@ -170,6 +169,18 @@ protected:
 
 	/// @brief Accept the last move.
 	void protected_accept_last_move() override;
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
+
+	/// @brief Set the last accepted connectivity graph to that for the current state.
+	void copy_last_accepted_connectivity_graph_to_current();
 
 private:
 
