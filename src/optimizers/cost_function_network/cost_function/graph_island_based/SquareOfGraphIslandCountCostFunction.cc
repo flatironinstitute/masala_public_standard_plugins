@@ -235,6 +235,17 @@ SquareOfGraphIslandCountCostFunction::get_api_definition() {
 		);
 
 		// Work functions:
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP > >(
+				"generate_cost_function_scratch_space", "Generate a GraphIslandCountCFScratchSpace object, which serves as a thread-local scratch "
+				"space for repeated reevaluation of this cost function.",
+				true, false, true, false,
+				"cost_function_scratch_space", "A GraphIslandCountCFScratchSpace object, which serves as a thread-local scratch "
+				"space for repeated reevaluation of this cost function.",
+				std::bind( &SquareOfGraphIslandCountCostFunction::generate_cost_function_scratch_space, this )
+			)
+		);
+
 		MasalaObjectAPIWorkFunctionDefinition_TwoInputSP < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_fxn(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
 				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
