@@ -46,12 +46,21 @@ namespace graph_island_based {
 
 /// @brief Options constructor.
 GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
-	masala::base::Size const n_absolute_nodes
+	masala::base::Size const n_absolute_nodes,
+    masala::base::Size const n_variable_nodes
 ) :
 	Parent()
 {
 	island_sizes_.resize( n_absolute_nodes );
-	std::fill(  island_sizes_.begin(), island_sizes_.end(), 1 );
+	std::fill( island_sizes_.begin(), island_sizes_.end(), 1 );
+
+    vec1_.resize( n_variable_nodes );
+    vec2_.resize( n_variable_nodes );
+    std::fill( vec1_.begin(), vec1_.end(), 0 );
+    std::fill( vec2_.begin(), vec2_.end(), 0 );
+
+    current_candidate_solution_ = &vec1_;
+    last_accepted_candidate_solution_ = &vec2_;
 }
 
 /// @brief Make a copy of this object.
@@ -76,6 +85,16 @@ GraphIslandCountCFScratchSpace::class_name() const {
 std::string
 GraphIslandCountCFScratchSpace::class_namespace() const {
 	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Accept the last move.
+void
+GraphIslandCountCFScratchSpace::protected_accept_last_move() {
+    std::swap( last_accepted_candidate_solution_, current_candidate_solution_ );
 }
 
 } // namespace graph_island_based

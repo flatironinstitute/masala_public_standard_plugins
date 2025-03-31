@@ -237,7 +237,7 @@ GraphIslandCountCostFunction::generate_cost_function_scratch_space() const {
 	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cost_function_scratch_space", "This " + class_name() + " object must be finalized "
 		"before this function can be called."
 	);
-	return masala::make_shared< GraphIslandCountCFScratchSpace >( protected_n_nodes_absolute() );
+	return masala::make_shared< GraphIslandCountCFScratchSpace >( protected_n_nodes_absolute(), protected_n_nodes_variable() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

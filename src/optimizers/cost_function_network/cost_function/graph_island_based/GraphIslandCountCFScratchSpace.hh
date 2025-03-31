@@ -72,7 +72,8 @@ public:
 
 	/// @brief Options constructor.  Calls finalize
 	GraphIslandCountCFScratchSpace(
-		masala::base::Size const n_absolute_nodes
+		masala::base::Size const n_absolute_nodes,
+		masala::base::Size const n_variable_nodes
 	);
 
 	/// @brief Copy constructor.
@@ -136,11 +137,25 @@ protected:
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Accept the last move.
+	void protected_accept_last_move() override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The current candidate solution.  A pointer that swaps between vec1 and vec2.
+	std::vector< masala::base::Size > * current_candidate_solution_;
+
+	/// @brief The last accepted candidate solution.  A pointer that swaps between vec2 and vec1.
+	std::vector< masala::base::Size > * last_accepted_candidate_solution_;
+
+	/// @brief Storage for current and last candidate solutions.  To avoid unnecessary memory copying,
+	/// these are allocated and referred to by two pointers that can swap.
+	std::vector< masala::base::Size > vec1_;
+	std::vector< masala::base::Size > vec2_;
 
 	/// @brief The sizes of all of the connected components.
 	std::vector< masala::base::Size > island_sizes_;
