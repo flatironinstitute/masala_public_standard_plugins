@@ -113,16 +113,19 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Access the island sizes (connected component node counts).  Const access version.
-	inline std::vector< masala::base::Size > const & island_sizes_const() const { return island_sizes_; }
+	inline std::vector< masala::base::Size > const & island_sizes_const() const { return *island_sizes_; }
 
 	/// @brief Access the island sizes (connected component node counts).  Nonconst access version.
-	inline std::vector< masala::base::Size > & island_sizes() { return island_sizes_; }
+	inline std::vector< masala::base::Size > & island_sizes() { return *island_sizes_; }
 
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
 
 public:
 
@@ -146,19 +149,33 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief The current candidate solution.  A pointer that swaps between vec1 and vec2.
-	std::vector< masala::base::Size > * current_candidate_solution_;
-
-	/// @brief The last accepted candidate solution.  A pointer that swaps between vec2 and vec1.
-	std::vector< masala::base::Size > * last_accepted_candidate_solution_;
-
 	/// @brief Storage for current and last candidate solutions.  To avoid unnecessary memory copying,
 	/// these are allocated and referred to by two pointers that can swap.
 	std::vector< masala::base::Size > vec1_;
 	std::vector< masala::base::Size > vec2_;
 
-	/// @brief The sizes of all of the connected components.
-	std::vector< masala::base::Size > island_sizes_;
+	/// @brief The current candidate solution.  A pointer that swaps between vec1_ and vec2_.
+	std::vector< masala::base::Size > * current_candidate_solution_;
+
+	/// @brief The last accepted candidate solution.  A pointer that swaps between vec2_ and vec1_.
+	std::vector< masala::base::Size > * last_accepted_candidate_solution_;
+
+	/// @brief Storage for current and last island sizes.  To avoid unnecessary memory copying,
+	/// these are allocated and referred to by two pointers that can swap.
+	std::vector< masala::base::Size > vec3_;
+	std::vector< masala::base::Size > vec4_;
+
+	/// @brief The sizes of all of the connected components.  Points to vec3_ or vec4_.
+	std::vector< masala::base::Size > * island_sizes_;
+
+	/// @brief The last accepted sizes of all of the connected components.  Points to vec4_ or vec3_.
+	std::vector< masala::base::Size > * last_accepted_island_sizes_;
+
+	/// @brief Has a move been made since the last accept?
+	bool move_made_ = false;
+
+	/// @brief Has at least one move been accepted?
+	bool move_accepted_ = false;
 
 }; // class GraphIslandCountCFScratchSpace
 

@@ -1,19 +1,19 @@
 /*
-    Standard Masala Plugins
-    Copyright (C) 2025 Vikram K. Mulligan
+	Standard Masala Plugins
+	Copyright (C) 2025 Vikram K. Mulligan
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /// @file src/optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.cc
@@ -31,6 +31,7 @@
 // Numeric headers:
 
 // Base headers:
+#include <base/error/ErrorHandling.hh>
 
 // STL headers:
 
@@ -47,20 +48,25 @@ namespace graph_island_based {
 /// @brief Options constructor.
 GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
 	masala::base::Size const n_absolute_nodes,
-    masala::base::Size const n_variable_nodes
+	masala::base::Size const n_variable_nodes
 ) :
 	Parent()
 {
-	island_sizes_.resize( n_absolute_nodes );
-	std::fill( island_sizes_.begin(), island_sizes_.end(), 1 );
 
-    vec1_.resize( n_variable_nodes );
-    vec2_.resize( n_variable_nodes );
-    std::fill( vec1_.begin(), vec1_.end(), 0 );
-    std::fill( vec2_.begin(), vec2_.end(), 0 );
+	vec1_.resize( n_variable_nodes );
+	vec2_.resize( n_variable_nodes );
+	std::fill( vec1_.begin(), vec1_.end(), 0 );
+	std::fill( vec2_.begin(), vec2_.end(), 0 );
+	current_candidate_solution_ = &vec1_;
+	last_accepted_candidate_solution_ = &vec2_;
 
-    current_candidate_solution_ = &vec1_;
-    last_accepted_candidate_solution_ = &vec2_;
+	vec3_.resize( n_absolute_nodes );
+	vec4_.resize( n_absolute_nodes );
+	std::fill( vec3_.begin(), vec3_.end(), 1 );
+	std::fill( vec4_.begin(), vec4_.end(), 1 );
+	island_sizes_ = &vec3_;
+	last_accepted_island_sizes_ = &vec4_;
+
 }
 
 /// @brief Make a copy of this object.
@@ -88,13 +94,35 @@ GraphIslandCountCFScratchSpace::class_namespace() const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+void
+GraphIslandCountCFScratchSpace::set_current_candidate_solution(
+	std::vector< masala::base::Size > const & solution_in
+) {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_in.size() == current_candidate_solution_->size(), "set_current_candidate_solution",
+		"Size mismatch in input candidate solution size (" + std::to_string( solution_in.size() ) + ") versus last current "
+		"candidate solution (" + std::to_string( current_candidate_solution_->size() ) + ")."
+	);
+	move_made_ = true;
+	(*current_candidate_solution_) = solution_in;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Accept the last move.
 void
 GraphIslandCountCFScratchSpace::protected_accept_last_move() {
-    std::swap( last_accepted_candidate_solution_, current_candidate_solution_ );
+	if( move_made_ ) {
+		std::swap( last_accepted_candidate_solution_, current_candidate_solution_ );
+		std::swap( last_accepted_island_sizes_, island_sizes_ );
+		move_made_ = false;
+		move_accepted_ = true;
+	}
 }
 
 } // namespace graph_island_based
