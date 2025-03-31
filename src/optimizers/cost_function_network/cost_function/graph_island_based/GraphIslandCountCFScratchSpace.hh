@@ -143,6 +143,18 @@ public:
 	/// @brief Non-const access to the vector of vectors of connected node indices by absolute node index in the current connectivity graph.
 	inline std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph() { return *edges_for_node_in_connectivity_graph_; }
 
+	/// @brief Get the size of the drop list.
+	inline masala::base::Size drop_list_size() const { return drop_list_size_; }
+
+	/// @brief Get the size of the add list.
+	inline masala::base::Size add_list_size() const { return add_list_size_; }
+
+	/// @brief Const-access the drop list.
+	inline std::vector< std::pair< masala::base::Size, masala::base::Size > > const & drop_list() const { return drop_list_; }
+
+	/// @brief Const-access the add list.
+	inline std::vector< std::pair< masala::base::Size, masala::base::Size > > const & add_list() const { return add_list_; }
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
