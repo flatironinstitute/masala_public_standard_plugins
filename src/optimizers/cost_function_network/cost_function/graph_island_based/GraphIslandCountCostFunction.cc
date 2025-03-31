@@ -314,7 +314,39 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		std::pair< Size, std::vector< Size > > const & changed_variable_nodes( scratch_space.changed_variable_node_count_and_indices() );
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( changed_variable_nodes.first > 0, "protected_compute_island_sizes", "Expected at least one changed node!" );
 		for( Size i(0); i<changed_variable_nodes.first; ++i ) {
-			TODO TODO TODO;
+			scratch_space.clear_drop_and_add_lists();
+			Size const abs_node_index( protected_absnode_from_varnode( changed_variable_nodes.second[i] ) );
+			Size const old_choiceindex( scratch_space.last_accepted_candidate_solution_const()[i] );
+			Size const new_choiceindex( candidate_solution[i] );
+			for( Size j(0); j<n_interaction_graph_edges_by_abs_node_[abs_node_index]; ++j ) {
+				Size const other_abs_node( interaction_partners_of_abs_node_[abs_node_index][j] );
+				std::pair< bool, Size > const & other_var_node( protected_varnode_from_absnode( other_abs_node ) );
+				Size const old_choiceindex_other( other_var_node.first ? scratch_space.last_accepted_candidate_solution_const()[other_var_node.second] : 0 );
+				Size const new_choiceindex_other( other_var_node.first ? candidate_solution[other_var_node.second] : 0 );
+				Size const firstnode( std::min(abs_node_index, other_abs_node) );
+				Size const secondnode( std::max(abs_node_index, other_abs_node) );
+				Size const old_firstchoice( abs_node_index < other_abs_node ? old_choiceindex : old_choiceindex_other );
+				Size const new_firstchoice( abs_node_index < other_abs_node ? new_choiceindex : new_choiceindex_other );
+				Size const old_secondchoice( abs_node_index >= other_abs_node ? old_choiceindex : old_choiceindex_other );
+				Size const new_secondchoice( abs_node_index >= other_abs_node ? new_choiceindex : new_choiceindex_other );
+				Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix(
+					protected_choice_choice_interaction_graph_for_nodepair( firstnode, secondnode )
+				);
+				bool const connected_old( ij_matrix[old_firstchoice][old_secondchoice] );
+				bool const connected_new( ij_matrix[new_firstchoice][new_secondchoice] );
+				if( connected_old && (!connected_new) ) {
+					scratch_space.indicate_drop( std::make_pair( firstnode, secondnode ) );
+				} else if( connected_new && (!connected_old) ) {
+					scratch_space.indicate_add( std::make_pair( firstnode, secondnode ) );
+				}
+			}
+
+			for( auto const & entry : scratch_space.drop_indices() ) {
+				do_drop( entry, scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			}
+			for( auto const & entry : scratch_space.add_indices() ) {
+				do_add( entry, scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			}
 		}
 	}
 
@@ -407,14 +439,18 @@ GraphIslandCountCostFunction::protected_finalize(
 	// Compute the interacting node pairs
 	interacting_abs_node_indices_.clear();
 	n_interaction_graph_edges_by_abs_node_.clear();
+	interaction_partners_of_abs_node_.clear();
 	masala::base::Size const nnodes( protected_n_nodes_absolute() );
 	n_interaction_graph_edges_by_abs_node_.resize( nnodes, 0 );
+	interaction_partners_of_abs_node_.resize(nnodes);
 	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<nnodes-1; ++i ) {
 		for( Size j(i+1); j<nnodes; ++j ) {
 			if( protected_choice_choice_interaction_graph_for_nodepair(i,j) != nullptr ) {
 				interacting_abs_node_indices_.push_back( std::make_pair(i,j) );
 				++n_interaction_graph_edges_by_abs_node_[i];
 				++n_interaction_graph_edges_by_abs_node_[j];
+				interaction_partners_of_abs_node_[i].push_back(j);
+				interaction_partners_of_abs_node_[j].push_back(i);
 			}
 		}
 	}
