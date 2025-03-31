@@ -371,6 +371,13 @@ GraphBasedCostFunction<T>::protected_n_nodes_absolute() const {
 	return full_choice_choice_interaction_graph_.rows();
 }
 
+/// @brief Get the number of variable nodes, with no mutex-locking.
+template< typename T >
+masala::base::Size
+GraphBasedCostFunction<T>::protected_n_nodes_variable() const {
+	return n_variable_nodes_;
+}
+
 /// @brief Given an absolute node index, get the variable node index.
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
@@ -397,6 +404,8 @@ GraphBasedCostFunction<T>::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
 	using masala::base::Size;
+
+	n_variable_nodes_ = variable_node_indices.size();
 
 	varnodes_by_absnode_.resize( full_choice_choice_interaction_graph_.rows() );
 	std::fill( varnodes_by_absnode_.begin(), varnodes_by_absnode_.end(), std::make_pair(false, 0) );

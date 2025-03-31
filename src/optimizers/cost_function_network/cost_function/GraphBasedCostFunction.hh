@@ -260,6 +260,10 @@ protected:
 	masala::base::Size
 	protected_n_nodes_absolute() const;
 
+	/// @brief Get the number of variable nodes, with no mutex-locking.
+	masala::base::Size
+	protected_n_nodes_variable() const;
+
 	/// @brief Are we using one-based (true) or zero-based (false) node indexing?
 	/// @details Performs no mutex locking.
 	inline bool protected_use_one_based_node_indexing() const { return use_one_based_node_indexing_; }
@@ -368,6 +372,9 @@ private:
 	/// we store < true, varnode_index > if it is a variable node, and < false, 0 > if it is not.
 	/// If the indexing is 1-based, then the 0 entry also gets <true, varnode_index>.
 	std::vector< std::pair< bool, masala::base::Size > > varnodes_by_absnode_;
+
+	/// @brief The number of variable nodes.
+	masala::base::Size n_variable_nodes_ = 0;
 
 }; // class GraphBasedCostFunction
 
