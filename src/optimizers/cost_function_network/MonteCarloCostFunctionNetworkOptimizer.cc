@@ -39,6 +39,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
+#include <numeric/optimization/cost_function_network/CFNProblemScratchSpace.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -1286,6 +1287,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
             last_accepted_solution = current_solution;
             last_accepted_absolute_score = candidate_absolute_score;
+            if( problem_scratch != nullptr ) {
+                problem_scratch->accept_last_move();
+            }
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
             if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
