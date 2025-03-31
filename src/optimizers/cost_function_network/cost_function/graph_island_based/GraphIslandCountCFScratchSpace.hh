@@ -118,6 +118,12 @@ public:
 	/// @brief Access the island sizes (connected component node counts).  Nonconst access version.
 	inline std::vector< masala::base::Size > & island_sizes() { return *island_sizes_; }
 
+	/// @brief Has at least one move been accepted?
+	inline bool at_least_one_move_accepted() const { return move_accepted_; }
+
+	/// @brief Access the last accepted candidate solution vector.  Const access version.
+	inline std::vector< masala::base::Size > const & last_accepted_candidate_solution_const() const { return *last_accepted_candidate_solution_; }
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

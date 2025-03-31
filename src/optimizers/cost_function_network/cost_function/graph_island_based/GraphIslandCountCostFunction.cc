@@ -264,6 +264,11 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
 
+	if( scratch_space.at_least_one_move_accepted() && scratch_space.last_accepted_candidate_solution_const() == candidate_solution ) {
+		scratch_space.copy_last_accepted_to_current();
+		return;
+	}
+
 	// Objects in scratch space we will use:
 	std::vector< Size > & island_sizes( scratch_space.island_sizes() );
 
