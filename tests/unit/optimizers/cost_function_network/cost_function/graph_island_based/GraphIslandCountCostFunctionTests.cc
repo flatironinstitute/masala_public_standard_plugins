@@ -32,6 +32,7 @@
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 // Masala numeric headers:
+#include <numeric_api/base_classes/optimization/cost_function_network/cost_function/PluginCostFunctionScratchSpace.hh>
 #include <numeric_api/auto_generated_api/registration/register_numeric.hh>
 
 // Masala base headers:
@@ -163,17 +164,27 @@ TEST_CASE( "Test the function of a SquareOfGraphIslandCountCostFunction.", "[sta
 		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
 		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
 
-		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
-		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
-		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
-		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
-		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+		scratch->accept_last_move();
+		Real const mixed_score_2_recompute( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
+		scratch->accept_last_move();
+		Real const mixed_score_1_recompute( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 }         -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 }         -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 }         -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }         -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }         -> " + std::to_string( mixed_score_2 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }[recomp] -> " + std::to_string( mixed_score_2_recompute ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }[recomp] -> " + std::to_string( mixed_score_1_recompute ) );
 
 		CHECK( std::abs( all_zero_score + 4.0 ) < 1.0e-6 );
 		CHECK( std::abs( all_one_score + 13.0 ) < 1.0e-6 );
 		CHECK( std::abs( all_two_score + 11.0 ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_1 + 49.0 ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_2 + 18.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2_recompute + 18.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1_recompute + 49.0 ) < 1.0e-6 );
+
 	}() );
 }
 
@@ -196,17 +207,26 @@ TEST_CASE( "Test the function of a LinearGraphIslandCountCostFunction.", "[stand
 		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
 		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
 
-		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
-		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
-		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
-		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
-		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+		scratch->accept_last_move();
+		Real const mixed_score_2_recompute( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
+		scratch->accept_last_move();
+		Real const mixed_score_1_recompute( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 }         -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 }         -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 }         -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }         -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }         -> " + std::to_string( mixed_score_2 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }[recomp] -> " + std::to_string( mixed_score_2_recompute ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }[recomp] -> " + std::to_string( mixed_score_1_recompute ) );
 
 		CHECK( std::abs( all_zero_score + 2.0 ) < 1.0e-6 );
 		CHECK( std::abs( all_one_score + 5.0 ) < 1.0e-6 );
 		CHECK( std::abs( all_two_score + 5.0 ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_1 + 7.0 ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_2 + 6.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2_recompute + 6.0 ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1_recompute + 7.0 ) < 1.0e-6 );
 	}() );
 }
 
@@ -229,17 +249,26 @@ TEST_CASE( "Test the function of a SquareRootOfGraphIslandCountCostFunction.", "
 		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
 		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
 
-		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
-		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
-		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
-		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
-		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+		scratch->accept_last_move();
+		Real const mixed_score_2_recompute( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
+		scratch->accept_last_move();
+		Real const mixed_score_1_recompute( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 }         -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 }         -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 }         -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }         -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }         -> " + std::to_string( mixed_score_2 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }[recomp] -> " + std::to_string( mixed_score_2_recompute ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }[recomp] -> " + std::to_string( mixed_score_1_recompute ) );
 
 		CHECK( std::abs( all_zero_score + std::sqrt(2.0) ) < 1.0e-6 );
 		CHECK( std::abs( all_one_score + std::sqrt(3.0) + std::sqrt(2.0) ) < 1.0e-6 );
 		CHECK( std::abs( all_two_score + 2.0 + std::sqrt(3.0)) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_1 + std::sqrt(7.0) ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_2 + 2.0*std::sqrt(3.0) ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2_recompute + 2.0*std::sqrt(3.0) ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1_recompute + std::sqrt(7.0) ) < 1.0e-6 );
 	}() );
 }
 
@@ -262,17 +291,26 @@ TEST_CASE( "Test the function of a LogOfGraphIslandCountCostFunction.", "[standa
 		Real const mixed_score_1( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
 		Real const mixed_score_2( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
 
-		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 } -> " + std::to_string( all_zero_score ) );
-		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 } -> " + std::to_string( all_one_score ) );
-		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 } -> " + std::to_string( all_two_score ) );
-		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 } -> " + std::to_string( mixed_score_1 ) );
-		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 } -> " + std::to_string( mixed_score_2 ) );
+		scratch->accept_last_move();
+		Real const mixed_score_2_recompute( costfxn->compute_cost_function( std::vector< Size >{ 1, 0, 1, 1, 2, 1, 0, 0 }, scratch.get() ) );
+		scratch->accept_last_move();
+		Real const mixed_score_1_recompute( costfxn->compute_cost_function( std::vector< Size >{ 0, 0, 0, 1, 1, 1, 2, 2 }, scratch.get() ) );
+
+		costfxn->write_to_tracer( "{ 0, 0, 0, 0, 0, 0, 0, 0 }         -> " + std::to_string( all_zero_score ) );
+		costfxn->write_to_tracer( "{ 1, 1, 1, 1, 1, 1, 1, 1 }         -> " + std::to_string( all_one_score ) );
+		costfxn->write_to_tracer( "{ 2, 2, 2, 2, 2, 2, 2, 2 }         -> " + std::to_string( all_two_score ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }         -> " + std::to_string( mixed_score_1 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }         -> " + std::to_string( mixed_score_2 ) );
+		costfxn->write_to_tracer( "{ 1, 0, 1, 1, 2, 1, 0, 0 }[recomp] -> " + std::to_string( mixed_score_2_recompute ) );
+		costfxn->write_to_tracer( "{ 0, 0, 0, 1, 1, 1, 2, 2 }[recomp] -> " + std::to_string( mixed_score_1_recompute ) );
 
 		CHECK( std::abs( all_zero_score + std::log(2.0) ) < 1.0e-6 );
 		CHECK( std::abs( all_one_score + std::log(3.0) + std::log(2.0) ) < 1.0e-6 );
 		CHECK( std::abs( all_two_score + std::log(3.0)) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_1 + std::log(7.0) ) < 1.0e-6 );
 		CHECK( std::abs( mixed_score_2 + 2.0*std::log(3.0) ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_2_recompute + 2.0*std::log(3.0) ) < 1.0e-6 );
+		CHECK( std::abs( mixed_score_1_recompute + std::log(7.0) ) < 1.0e-6 );
 	}() );
 }
 
