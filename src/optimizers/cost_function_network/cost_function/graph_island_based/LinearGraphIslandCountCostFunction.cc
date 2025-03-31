@@ -26,6 +26,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/graph_island_based/LinearGraphIslandCountCostFunction.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -386,7 +389,10 @@ LinearGraphIslandCountCostFunction::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution,
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_cost_function", "Expected a non-null pointer for the scratch space." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( dynamic_cast< GraphIslandCountCFScratchSpace * >( scratch_space ) != nullptr, "compute_cost_function", "Expected "
+		"a pointer to a GraphIslandCountCFScratchSpace object, but got a pointer to a " + scratch_space->class_name() + " object instead."
+	);
 	using masala::base::Size;
 	using masala::base::Real;
 	Size const n_nodes( protected_n_nodes_absolute() );
@@ -412,7 +418,10 @@ LinearGraphIslandCountCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_new,
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_cost_function_difference", "Expected a non-null pointer for the scratch space." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( dynamic_cast< GraphIslandCountCFScratchSpace * >( scratch_space ) != nullptr, "compute_cost_function_difference", "Expected "
+		"a pointer to a GraphIslandCountCFScratchSpace object, but got a pointer to a " + scratch_space->class_name() + " object instead."
+	);
 	return compute_cost_function(candidate_solution_new, scratch_space) - compute_cost_function(candidate_solution_old, scratch_space);
 }
 
