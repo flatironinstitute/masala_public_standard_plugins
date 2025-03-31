@@ -155,6 +155,15 @@ public:
 	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
 	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
 
+	/// @brief Set the size of the drop and add lists to zero.
+	void clear_drop_and_add_lists();
+
+	/// @brief Indicate a connection between two absolute node indices to drop.
+	void indicate_drop( std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop );
+
+	/// @brief Indicate a connection between two absolute node indices to add.
+	void indicate_add( std::pair< masala::base::Size, masala::base::Size > const & pair_to_add );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -237,6 +246,18 @@ private:
 
 	/// @brief The number of changed variable nodes and the changed variable node indices.
 	std::pair< masala::base::Size, std::vector< masala::base::Size > > changed_variable_node_count_and_indices_;
+
+	/// @brief A temporary list of absolute node pair interactions to drop.
+	std::vector< std::pair< masala::base::Size, masala::base::Size > > drop_list_;
+
+	/// @brief A temporary list of absolute node pair interactions to add.
+	std::vector< std::pair< masala::base::Size, masala::base::Size > > add_list_;
+
+	/// @brief The size of the drop list.  (Smaller than the vector to avoid reallocation.)
+	masala::base::Size drop_list_size_ = 0;
+
+	/// @brief The size of the add list.  (Smaller than the vector to avoid reallocation.)
+	masala::base::Size add_list_size_ = 0;
 
 }; // class GraphIslandCountCFScratchSpace
 

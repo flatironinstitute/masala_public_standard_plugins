@@ -84,6 +84,9 @@ GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
 
 	changed_variable_node_count_and_indices_.first = 0;
 	changed_variable_node_count_and_indices_.second.resize( n_variable_nodes, 0 );
+
+	drop_list_.resize( n_absolute_nodes, std::make_pair(0,0) );
+	add_list_.resize( n_absolute_nodes, std::make_pair(0,0) );
 }
 
 /// @brief Make a copy of this object.
@@ -149,6 +152,33 @@ GraphIslandCountCFScratchSpace::set_current_candidate_solution(
 	);
 	move_made_ = true;
 	(*current_candidate_solution_) = solution_in;
+}
+
+/// @brief Set the size of the drop and add lists to zero.
+void
+GraphIslandCountCFScratchSpace::clear_drop_and_add_lists() {
+	drop_list_size_ = 0;
+	add_list_size_ = 0;
+}
+
+/// @brief Indicate a connection between two absolute node indices to drop.
+void
+GraphIslandCountCFScratchSpace::indicate_drop(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop
+) {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( drop_list_size_ < drop_list_.size(), "indicate_drop", "Drop list bounds exceeded.  This is a program error." );
+	drop_list_[drop_list_size_] = pair_to_drop;
+	++drop_list_size_;
+}
+
+/// @brief Indicate a connection between two absolute node indices to add.
+void
+GraphIslandCountCFScratchSpace::indicate_add(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_add
+) {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( add_list_size_ < add_list_.size(), "indicate_add", "Add list bounds exceeded.  This is a program error." );
+	add_list_[add_list_size_] = pair_to_add;
+	++add_list_size_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -341,12 +341,12 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 				}
 			}
 
-			for( auto const & entry : scratch_space.drop_indices() ) {
-				do_drop( entry, scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			for( Size i(0); i<scratch_space.drop_list_size(); ++i ) {
+				do_drop( scratch_space.drop_indices()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
-			for( auto const & entry : scratch_space.add_indices() ) {
-				do_add( entry, scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
-			}
+			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
+				do_add( scratch_space.add_indices()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			}g
 		}
 	}
 
