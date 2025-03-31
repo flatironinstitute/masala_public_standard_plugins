@@ -193,18 +193,18 @@ private:
 	/// @brief The last accepted sizes of all of the connected components.  Points to vec4_ or vec3_.
 	std::vector< masala::base::Size > * last_accepted_island_sizes_;
 
-	/// @brief Storage for the number of edges for a given node in the hydrogen bond graph, and for the list of edges.
+	/// @brief Storage for the number of edges for a given node in the connectivity graph, and for the list of edges.
 	std::vector< masala::base::Size > vec5_;
 	std::vector< masala::base::Size > vec6_;
 	std::vector< std::vector< masala::base::Size > > vec7_;
 	std::vector< std::vector< masala::base::Size > > vec8_;
 
-	/// @brief The number of edges for a given node in the hydrogen bond graph, and for the list of edges.
+	/// @brief The number of edges for a given node in the connectivity graph, and for the list of edges.
 	/// Again, these are vectors that alternate between pointing at vec5_ and vec6_, and vec7_ and vec8_, respectively.
-	std::vector< masala::base::Size > * nedges_for_node_in_hbond_graph_;
-	std::vector< masala::base::Size > * last_accepted_nedges_for_node_in_hbond_graph_;
-	std::vector< std::vector< masala::base::Size > > * edges_for_node_in_hbond_graph_;
-	std::vector< std::vector< masala::base::Size > > * last_accepted_edges_for_node_in_hbond_graph_;
+	std::vector< masala::base::Size > * nedges_for_node_in_connectivity_graph_;
+	std::vector< masala::base::Size > * last_accepted_nedges_for_node_in_connectivity_graph_;
+	std::vector< std::vector< masala::base::Size > > * edges_for_node_in_connectivity_graph_;
+	std::vector< std::vector< masala::base::Size > > * last_accepted_edges_for_node_in_connectivity_graph_;
 
 	/// @brief Has a move been made since the last accept?
 	bool move_made_ = false;

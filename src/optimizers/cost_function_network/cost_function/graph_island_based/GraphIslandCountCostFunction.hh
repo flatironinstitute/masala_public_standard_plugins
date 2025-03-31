@@ -279,8 +279,8 @@ private:
 		masala::base::Size * node_sizearray,
 		std::vector< masala::base::Size > & island_sizes,
 		bool * node_discovered,
-		masala::base::Size const * const nedges_for_node_in_hbond_graph,
-		masala::base::Size const * const * const edges_for_node_in_hbond_graph
+		masala::base::Size const * const nedges_for_node_in_connectivity_graph,
+		masala::base::Size const * const * const edges_for_node_in_connectivity_graph
 	) const;
 
 private:

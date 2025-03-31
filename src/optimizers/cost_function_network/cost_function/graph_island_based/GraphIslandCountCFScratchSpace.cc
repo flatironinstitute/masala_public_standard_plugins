@@ -77,10 +77,10 @@ GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
 		vec7_[i].resize( n_interaction_graph_edges_by_abs_node[i], 0 );
 		vec8_[i].resize( n_interaction_graph_edges_by_abs_node[i], 0 );
 	}
-	nedges_for_node_in_hbond_graph_ = &vec5_;
-	last_accepted_nedges_for_node_in_hbond_graph_ = &vec6_;
-	edges_for_node_in_hbond_graph_ = &vec7_;
-	last_accepted_edges_for_node_in_hbond_graph_ = &vec8_;
+	nedges_for_node_in_connectivity_graph_ = &vec5_;
+	last_accepted_nedges_for_node_in_connectivity_graph_ = &vec6_;
+	edges_for_node_in_connectivity_graph_ = &vec7_;
+	last_accepted_edges_for_node_in_connectivity_graph_ = &vec8_;
 }
 
 /// @brief Make a copy of this object.
@@ -126,6 +126,7 @@ GraphIslandCountCFScratchSpace::class_namespace() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+/// @details Also updates the current 
 void
 GraphIslandCountCFScratchSpace::set_current_candidate_solution(
 	std::vector< masala::base::Size > const & solution_in
@@ -144,9 +145,9 @@ GraphIslandCountCFScratchSpace::copy_last_accepted_to_current() {
 	using masala::base::Size;
 	(*current_candidate_solution_) = (*last_accepted_candidate_solution_);
 	(*island_sizes_) = (*last_accepted_island_sizes_);
-	(*nedges_for_node_in_hbond_graph_) = (*last_accepted_nedges_for_node_in_hbond_graph_);
-	for( Size i(0); i<edges_for_node_in_hbond_graph_->size(); ++i ) {
-		(*edges_for_node_in_hbond_graph_)[i] = (*last_accepted_edges_for_node_in_hbond_graph_)[i];
+	(*nedges_for_node_in_connectivity_graph_) = (*last_accepted_nedges_for_node_in_connectivity_graph_);
+	for( Size i(0); i<edges_for_node_in_connectivity_graph_->size(); ++i ) {
+		(*edges_for_node_in_connectivity_graph_)[i] = (*last_accepted_edges_for_node_in_connectivity_graph_)[i];
 	}
 }
 
@@ -160,8 +161,8 @@ GraphIslandCountCFScratchSpace::protected_accept_last_move() {
 	if( move_made_ ) {
 		std::swap( last_accepted_candidate_solution_, current_candidate_solution_ );
 		std::swap( last_accepted_island_sizes_, island_sizes_ );
-		std::swap( last_accepted_nedges_for_node_in_hbond_graph_, nedges_for_node_in_hbond_graph_ );
-		std::swap( last_accepted_edges_for_node_in_hbond_graph_, edges_for_node_in_hbond_graph_ );
+		std::swap( last_accepted_nedges_for_node_in_connectivity_graph_, nedges_for_node_in_connectivity_graph_ );
+		std::swap( last_accepted_edges_for_node_in_connectivity_graph_, edges_for_node_in_connectivity_graph_ );
 		move_made_ = false;
 		move_accepted_ = true;
 	}
