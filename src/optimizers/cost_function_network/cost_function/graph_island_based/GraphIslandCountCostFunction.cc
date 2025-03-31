@@ -276,11 +276,14 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	// N will likely be << 1000; N^2 will likely be less than a megabyte of memory.  If this ever becomes an issue, we can
 	// revisit this.  This is also unlikely to be an issue due to sparsity of the graph: we are only allocating space for the edges
 	// in the interaction graph, not for edges between all nodes.
-	Size * const nedges_for_node_in_connectivity_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
-	Size ** const edges_for_node_in_connectivity_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
+	// Size * const nedges_for_node_in_connectivity_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
+	// Size ** const edges_for_node_in_connectivity_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
+
+	std::vector< Size > & nedges_for_node_in_connectivity_graph( scratch_space.nedges_for_node_in_connectivity_graph() );
+	std::vector< std::vector< Size > > & edges_for_node_in_connectivity_graph( scratch_space.edges_for_node_in_connectivity_graph() );
+	
 	for( Size i(0); i<nnodes; ++i ) {
 		nedges_for_node_in_connectivity_graph[i] = 0;
-		edges_for_node_in_connectivity_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * n_interaction_graph_edges_by_abs_node_[i] ) );
 	}
 	for( auto const & entry : interacting_abs_node_indices_ ) {
 		Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( entry.first, entry.second ) );
@@ -480,11 +483,11 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	masala::base::Size * node_sizearray,
 	std::vector< masala::base::Size > & island_sizes,
 	bool * node_discovered,
-	masala::base::Size const * const nedges_for_node_in_connectivity_graph,
-	masala::base::Size const * const * const edges_for_node_in_connectivity_graph
+	std::vector< masala::base::Size > const & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > const & edges_for_node_in_connectivity_graph
 ) const {
 	using masala::base::Size;
-	Size const * const edges_for_curnode( edges_for_node_in_connectivity_graph[current_node] );
+	std::vector< Size > const & edges_for_curnode( edges_for_node_in_connectivity_graph[current_node] );
 	for( Size iother_index( 0 ); iother_index < nedges_for_node_in_connectivity_graph[current_node] ; ++iother_index ) {
 		Size const iother( edges_for_curnode[iother_index] );
 		if( node_discovered[iother] == false ) {
