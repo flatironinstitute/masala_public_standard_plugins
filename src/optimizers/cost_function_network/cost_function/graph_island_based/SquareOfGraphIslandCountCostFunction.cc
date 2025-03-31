@@ -397,8 +397,9 @@ SquareOfGraphIslandCountCostFunction::compute_cost_function(
 	using masala::base::Size;
 	using masala::base::Real;
 	Size const n_nodes( protected_n_nodes_absolute() );
-	Size * island_sizes = static_cast<Size *>( alloca( sizeof(Size) * n_nodes ) ); // Since this is stack-allocated with alloca, will automatically be deallocated at function's end.  DO NOT FREE.
-	protected_compute_island_sizes( candidate_solution, island_sizes );
+	GraphIslandCountCFScratchSpace * scratch_space_cast( static_cast< GraphIslandCountCFScratchSpace * >(scratch_space) );
+	protected_compute_island_sizes( candidate_solution, *scratch_space_cast );
+	std::vector< Size > const & island_sizes( scratch_space_cast->island_sizes_const() );
 	Size accumulator(0);
 	for( Size i(0); i<n_nodes; ++i ) {
 		if( island_sizes[i] >= protected_min_island_size() ) {

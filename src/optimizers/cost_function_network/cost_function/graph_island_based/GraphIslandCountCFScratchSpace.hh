@@ -111,12 +111,17 @@ public:
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Access the island sizes (connected component node counts).  Const access version.
+	inline std::vector< masala::base::Size > const & island_sizes_const() const { return island_sizes_; }
+
+	/// @brief Access the island sizes (connected component node counts).  Nonconst access version.
+	inline std::vector< masala::base::Size > & island_sizes() { return island_sizes_; }
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 ////////////////////////////////////////////////////////////////////////////////
-
 
 public:
 

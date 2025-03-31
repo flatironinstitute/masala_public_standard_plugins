@@ -252,18 +252,20 @@ GraphIslandCountCostFunction::generate_cost_function_scratch_space() const {
 /// @brief Compute a vector of island sizes.
 /// @details Uses a depth-first algorithm.  Throws if object not finalized first.  Performs no mutex-locking.
 /// @param[in] candidate_solution The current solution, as a vector of variable node choice indices.
-/// @param[out] island_sizes A pointer to an already-allocated array, of size protected_n_nodes_absolute(), of Sizes.  This
-/// will be filled with the size of islands (in random order), with 0 in any surplus entries.
+/// @param[inout] scratch_space A reference to the thread-local scratch space for repeated evaluation of this GraphIslandCountCostFunction.
 void
 GraphIslandCountCostFunction::protected_compute_island_sizes(
 	std::vector< masala::base::Size > const & candidate_solution,
-	masala::base::Size * island_sizes
+	GraphIslandCountCFScratchSpace & scratch_space
 ) const {
 	using masala::base::Size;
 
 	Size const nnodes( protected_n_nodes_absolute() ); // Will include extra if zero-based.
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
+
+	// Objects in scratch space we will use:
+	std::vector< Size > & island_sizes( scratch_space.island_sizes() );
 
 	// Compute the current connectivity graph.  This is stack-allocated, and should be small, though it is worst case O(N^2) in memory.
 	// N will likely be << 1000; N^2 will likely be less than a megabyte of memory.  If this ever becomes an issue, we can
@@ -471,7 +473,7 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	masala::base::Size const current_node,
 	masala::base::Size & stackend,
 	masala::base::Size * node_sizearray,
-	masala::base::Size * island_sizes,
+	std::vector< masala::base::Size > & island_sizes,
 	bool * node_discovered,
 	masala::base::Size const * const nedges_for_node_in_hbond_graph,
 	masala::base::Size const * const * const edges_for_node_in_hbond_graph
