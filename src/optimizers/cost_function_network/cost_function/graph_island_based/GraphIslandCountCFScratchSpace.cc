@@ -48,25 +48,39 @@ namespace graph_island_based {
 /// @brief Options constructor.
 GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
 	masala::base::Size const n_absolute_nodes,
-	masala::base::Size const n_variable_nodes
+	masala::base::Size const n_variable_nodes,
+	std::vector< masala::base::Size > const & n_interaction_graph_edges_by_abs_node
 ) :
 	Parent()
 {
+	using masala::base::Size;
 
-	vec1_.resize( n_variable_nodes );
-	vec2_.resize( n_variable_nodes );
-	std::fill( vec1_.begin(), vec1_.end(), 0 );
-	std::fill( vec2_.begin(), vec2_.end(), 0 );
+	CHECK_OR_THROW( n_interaction_graph_edges_by_abs_node.size() == n_absolute_nodes, class_namespace_static() + "::" + class_name_static(),
+		"GraphIslandCountCFScratchSpace", "Expected " + std::to_string(n_absolute_nodes) + " entries in the n_interaction_graph_edges_by_abs_node "
+		"vector, but got " + std::to_string(n_interaction_graph_edges_by_abs_node.size()) + "."
+	);
+	vec1_.resize( n_variable_nodes, 0 );
+	vec2_.resize( n_variable_nodes, 0 );
 	current_candidate_solution_ = &vec1_;
 	last_accepted_candidate_solution_ = &vec2_;
 
-	vec3_.resize( n_absolute_nodes );
-	vec4_.resize( n_absolute_nodes );
-	std::fill( vec3_.begin(), vec3_.end(), 1 );
-	std::fill( vec4_.begin(), vec4_.end(), 1 );
+	vec3_.resize( n_absolute_nodes, 1 );
+	vec4_.resize( n_absolute_nodes, 1 );
 	island_sizes_ = &vec3_;
 	last_accepted_island_sizes_ = &vec4_;
 
+	vec5_.resize( n_absolute_nodes, 0 );
+	vec6_.resize( n_absolute_nodes, 0 );
+	vec7_.resize(n_absolute_nodes);
+	vec8_.resize(n_absolute_nodes);
+	for( Size i(0); i<n_absolute_nodes; ++i ) {
+		vec7_[i].resize( n_interaction_graph_edges_by_abs_node[i], 0 );
+		vec8_[i].resize( n_interaction_graph_edges_by_abs_node[i], 0 );
+	}
+	nedges_for_node_in_hbond_graph_ = &vec5_;
+	last_accepted_nedges_for_node_in_hbond_graph_ = &vec6_;
+	edges_for_node_in_hbond_graph_ = &vec7_;
+	last_accepted_edges_for_node_in_hbond_graph_ = &vec8_;
 }
 
 /// @brief Make a copy of this object.
@@ -78,6 +92,20 @@ GraphIslandCountCFScratchSpace::clone() const {
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the name of this class.
+/// @returns "GraphIslandCountCFScratchSpace".
+std::string
+GraphIslandCountCFScratchSpace::class_name_static() {
+	return "GraphIslandCountCFScratchSpace";
+}
+
+/// @brief Get the namespace of this class.
+/// @returns "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based".
+std::string
+GraphIslandCountCFScratchSpace::class_namespace_static() {
+	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
+}
 
 /// @brief Get the name of this class.
 /// @returns "GraphIslandCountCFScratchSpace".
@@ -115,6 +143,10 @@ void
 GraphIslandCountCFScratchSpace::copy_last_accepted_to_current() {
 	(*current_candidate_solution_) = (*last_accepted_candidate_solution_);
 	(*island_sizes_) = (*last_accepted_island_sizes_);
+	copy_graph( current_candidate_solution_, last_accepted_candidate_solution_,
+		&nedges_for_node_in_hbond_graph_, &last_accepted_nedges_for_node_in_hbond_graph_,
+		&edges_for_node_in_hbond_graph_, &last_accepted_edges_for_node_in_hbond_graph_
+	);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,6 +159,8 @@ GraphIslandCountCFScratchSpace::protected_accept_last_move() {
 	if( move_made_ ) {
 		std::swap( last_accepted_candidate_solution_, current_candidate_solution_ );
 		std::swap( last_accepted_island_sizes_, island_sizes_ );
+		std::swap( last_accepted_nedges_for_node_in_hbond_graph_, nedges_for_node_in_hbond_graph_ );
+		std::swap( last_accepted_edges_for_node_in_hbond_graph_, edges_for_node_in_hbond_graph_ );
 		move_made_ = false;
 		move_accepted_ = true;
 	}

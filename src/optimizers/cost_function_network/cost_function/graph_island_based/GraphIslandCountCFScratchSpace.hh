@@ -73,7 +73,8 @@ public:
 	/// @brief Options constructor.  Calls finalize
 	GraphIslandCountCFScratchSpace(
 		masala::base::Size const n_absolute_nodes,
-		masala::base::Size const n_variable_nodes
+		masala::base::Size const n_variable_nodes,
+		std::vector< masala::base::Size > const & n_interaction_graph_edges_by_abs_node
 	);
 
 	/// @brief Copy constructor.
@@ -95,6 +96,18 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the name of this class.
+	/// @returns "GraphIslandCountCFScratchSpace".
+	static
+	std::string
+	class_name_static();
+
+	/// @brief Get the namespace of this class.
+	/// @returns "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based".
+	static
+	std::string
+	class_namespace_static();
 
 	/// @brief Get the name of this class.
 	/// @returns "GraphIslandCountCFScratchSpace".
@@ -179,6 +192,19 @@ private:
 
 	/// @brief The last accepted sizes of all of the connected components.  Points to vec4_ or vec3_.
 	std::vector< masala::base::Size > * last_accepted_island_sizes_;
+
+	/// @brief Storage for the number of edges for a given node in the hydrogen bond graph, and for the list of edges.
+	std::vector< masala::base::Size > vec5_;
+	std::vector< masala::base::Size > vec6_;
+	std::vector< std::vector< masala::base::Size > > vec7_;
+	std::vector< std::vector< masala::base::Size > > vec8_;
+
+	/// @brief The number of edges for a given node in the hydrogen bond graph, and for the list of edges.
+	/// Again, these are vectors that alternate between pointing at vec5_ and vec6_, and vec7_ and vec8_, respectively.
+	std::vector< masala::base::Size > * nedges_for_node_in_hbond_graph_;
+	std::vector< masala::base::Size > * last_accepted_nedges_for_node_in_hbond_graph_;
+	std::vector< std::vector< masala::base::Size > > * edges_for_node_in_hbond_graph_;
+	std::vector< std::vector< masala::base::Size > > * last_accepted_edges_for_node_in_hbond_graph_;
 
 	/// @brief Has a move been made since the last accept?
 	bool move_made_ = false;
