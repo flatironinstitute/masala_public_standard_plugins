@@ -152,14 +152,23 @@ public:
 	/// @brief Set the current state to the last accepted state.
 	void copy_last_accepted_to_current();
 
+	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
+	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Copy the last accepted connectivity graph to that for the current state, then update it for the given state.
-	void update_connectivity_graph_for_current( std::vector< masala::base::Size > const & solution_in );
+	/// @brief Copy the last accepted connectivity graph to that for the current state, then copy in a new current state.
+	/// @note This does NOT update the connectivity graph for the current state.
+	void prepare_connectivity_graph_for_current( std::vector< masala::base::Size > const & solution_in );
+
+	/// @brief Count the number of variable node indices that have changed from previous to current, update the internally-
+	/// stored count and indices, and return a reference to the count and indices.
+	std::pair< masala::base::Size, std::vector< masala::base::Size > > const &
+	changed_variable_node_count_and_indices();
 
 protected:
 
@@ -175,9 +184,6 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
-	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
 
 	/// @brief Set the last accepted connectivity graph to that for the current state.
 	void copy_last_accepted_connectivity_graph_to_current();
@@ -228,6 +234,9 @@ private:
 
 	/// @brief Has at least one move been accepted?
 	bool move_accepted_ = false;
+
+	/// @brief The number of changed variable nodes and the changed variable node indices.
+	std::pair< masala::base::Size, std::vector< masala::base::Size > > changed_variable_node_count_and_indices_;
 
 }; // class GraphIslandCountCFScratchSpace
 

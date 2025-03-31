@@ -310,9 +310,12 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		scratch_space.set_current_candidate_solution( candidate_solution );
 	} else {
 		// Otherwise, update from last accepted.
-		scratch_space.copy_last_accepted_connectivity_graph_to_current();
-		scratch_space.set_current_candidate_solution( candidate_solution );
-		scratch_space.update_connectivity_graph_for_current();
+		scratch_space.prepare_connectivity_graph_for_current( candidate_solution );
+		std::pair< Size, std::vector< Size > > const & changed_variable_nodes( scratch_space.changed_variable_node_count_and_indices() );
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( changed_variable_nodes.first > 0, "protected_compute_island_sizes", "Expected at least one changed node!" );
+		for( Size i(0); i<changed_variable_nodes.first; ++i ) {
+			TODO TODO TODO;
+		}
 	}
 
 	// Storage for whether we have discovered each node.  Automatically deallocated at function's end since
