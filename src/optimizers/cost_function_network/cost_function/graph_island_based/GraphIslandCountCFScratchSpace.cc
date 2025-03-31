@@ -110,6 +110,13 @@ GraphIslandCountCFScratchSpace::set_current_candidate_solution(
 	(*current_candidate_solution_) = solution_in;
 }
 
+/// @brief Set the current state to the last accepted state.
+void
+GraphIslandCountCFScratchSpace::copy_last_accepted_to_current() {
+	(*current_candidate_solution_) = (*last_accepted_candidate_solution_);
+	(*island_sizes_) = (*last_accepted_island_sizes_);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

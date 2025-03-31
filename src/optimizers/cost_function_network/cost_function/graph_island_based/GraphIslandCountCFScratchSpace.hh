@@ -127,6 +127,9 @@ public:
 	/// @brief Set the current candidate solution.  Throws if solution sizes don't match in debug mode.
 	void set_current_candidate_solution( std::vector< masala::base::Size > const & solution_in );
 
+	/// @brief Set the current state to the last accepted state.
+	void copy_last_accepted_to_current();
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
