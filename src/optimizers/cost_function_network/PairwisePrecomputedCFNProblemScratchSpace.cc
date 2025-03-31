@@ -37,13 +37,15 @@ namespace cost_function_network {
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Settings constructor.
+/// @brief Settings constructor.  Finalizes this object with the function call.
 PairwisePrecomputedCFNProblemScratchSpace::PairwisePrecomputedCFNProblemScratchSpace(
 	masala::base::Size const /*n_variable_nodes*/,
 	std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & cost_functions
 ) :
 	Parent( cost_functions )
-{}
+{
+	finalize();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
@@ -60,7 +62,7 @@ PairwisePrecomputedCFNProblemScratchSpace::class_name() const {
 /// @returns "standard_masala_plugins::optimizers::cost_function_network".
 std::string
 PairwisePrecomputedCFNProblemScratchSpace::class_namespace() const {
-	return "standard_masala_plugins::optimizers::cost_function_network";
+	return ".standard_masala_plugins::optimizers::cost_function_network";
 }
 
 } // namespace cost_function_network

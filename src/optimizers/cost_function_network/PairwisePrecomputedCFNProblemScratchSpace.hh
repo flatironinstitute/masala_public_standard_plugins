@@ -61,7 +61,7 @@ public:
 	/// @brief Default constructor.
 	PairwisePrecomputedCFNProblemScratchSpace() = delete;
 
-	/// @brief Settings constructor.
+	/// @brief Settings constructor.  Finalizes this object with the function call.
 	PairwisePrecomputedCFNProblemScratchSpace(
 		masala::base::Size const n_variable_nodes,
 		std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & cost_functions
