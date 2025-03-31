@@ -141,12 +141,13 @@ GraphIslandCountCFScratchSpace::set_current_candidate_solution(
 /// @brief Set the current state to the last accepted state.
 void
 GraphIslandCountCFScratchSpace::copy_last_accepted_to_current() {
+	using masala::base::Size;
 	(*current_candidate_solution_) = (*last_accepted_candidate_solution_);
 	(*island_sizes_) = (*last_accepted_island_sizes_);
-	copy_graph( current_candidate_solution_, last_accepted_candidate_solution_,
-		&nedges_for_node_in_hbond_graph_, &last_accepted_nedges_for_node_in_hbond_graph_,
-		&edges_for_node_in_hbond_graph_, &last_accepted_edges_for_node_in_hbond_graph_
-	);
+	(*nedges_for_node_in_hbond_graph_) = (*last_accepted_nedges_for_node_in_hbond_graph_);
+	for( Size i(0); i<edges_for_node_in_hbond_graph_->size(); ++i ) {
+		(*edges_for_node_in_hbond_graph_)[i] = (*last_accepted_edges_for_node_in_hbond_graph_)[i];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
