@@ -25,6 +25,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -227,6 +230,15 @@ GraphIslandCountCostFunction::declare_node_choice_pair_interaction(
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Generate a GraphIslandCountCFScratchSpace for this cost function.
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
+GraphIslandCountCostFunction::generate_cost_function_scratch_space() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cost_function_scratch_space", "This " + class_name() + " object must be finalized "
+		"before this function can be called."
+	);
+	return masala::make_shared< GraphIslandCountCFScratchSpace >( protected_n_nodes_absolute() );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC INTERFACE DEFINITION

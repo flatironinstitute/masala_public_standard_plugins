@@ -189,6 +189,10 @@ public:
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Generate a GraphIslandCountCFScratchSpace for this cost function.
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
+	generate_cost_function_scratch_space() const override;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////

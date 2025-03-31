@@ -40,6 +40,7 @@
 #include <base/types.hh>
 
 // STL headers:
+#include <vector>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -67,7 +68,12 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	GraphIslandCountCFScratchSpace() = default;
+	GraphIslandCountCFScratchSpace() = delete;
+
+	/// @brief Options constructor.  Calls finalize
+	GraphIslandCountCFScratchSpace(
+		masala::base::Size const n_absolute_nodes
+	);
 
 	/// @brief Copy constructor.
 	GraphIslandCountCFScratchSpace( GraphIslandCountCFScratchSpace const & /*src*/ ) = default;
@@ -88,6 +94,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Get the name of this class.
+	/// @returns "GraphIslandCountCFScratchSpace".
+	std::string
+	class_name() const;
+
+	/// @brief Get the namespace of this class.
+	/// @returns "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based".
+	std::string
+	class_namespace() const;
 
 public:
 
@@ -120,6 +136,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The sizes of all of the connected components.
+	std::vector< masala::base::Size > island_sizes_;
 
 }; // class GraphIslandCountCFScratchSpace
 

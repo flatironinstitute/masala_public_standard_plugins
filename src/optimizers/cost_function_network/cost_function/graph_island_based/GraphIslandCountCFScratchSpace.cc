@@ -44,17 +44,42 @@ namespace graph_island_based {
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Options constructor.
+GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
+	masala::base::Size const n_absolute_nodes
+) :
+	Parent()
+{
+	island_sizes_.resize( n_absolute_nodes );
+	std::fill(  island_sizes_.begin(), island_sizes_.end(), 1 );
+}
+
 /// @brief Make a copy of this object.
 masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionScratchSpaceSP
 GraphIslandCountCFScratchSpace::clone() const {
 	return masala::make_shared< GraphIslandCountCFScratchSpace >( *this );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC MEMBER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get the name of this class.
+/// @returns "GraphIslandCountCFScratchSpace".
+std::string
+GraphIslandCountCFScratchSpace::class_name() const {
+	return "GraphIslandCountCFScratchSpace";
+}
+
+/// @brief Get the namespace of this class.
+/// @returns "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based".
+std::string
+GraphIslandCountCFScratchSpace::class_namespace() const {
+	return "standard_masala_plugins::optimizers::cost_function_network::cost_function::graph_island_based";
+}
 
 } // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network
 } // namespace optimizers
 } // namespace standard_masala_plugins
-
-#endif // Standard_Masala_Plugins_src_optimizers_cost_function_network_cost_function_graph_island_based_GraphIslandCountCFScratchSpace_hh
