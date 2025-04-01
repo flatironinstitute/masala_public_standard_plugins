@@ -356,6 +356,24 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
 				do_add( scratch_space.add_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
+
+			// DELETE THE FOLLOWING -- FOR DEBUGGING ONLY:
+			std::stringstream ss;
+			ss << "Node\tOld_Choice\tNew_Choice\tOld_Connections\tNew_Connections" << std::endl;
+			for(Size i(0); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
+				ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i] << "\t" << candidate_solution[i] << "\t";
+				for(Size j(0); j<scratch_space.last_accepted_nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+					if(j>0) { ss << ","; }
+					ss << scratch_space.last_accepted_edges_for_node_in_connectivity_graph_const()[i][j];
+				}
+				ss << "\t";
+				for(Size j(0); j<scratch_space.nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+					if(j>0) { ss << ","; }
+					ss << scratch_space.edges_for_node_in_connectivity_graph_const()[i][j];
+				}
+				ss << std::endl;
+			}
+			write_to_tracer( ss.str() );
 		}
 	}
 

@@ -137,6 +137,18 @@ public:
 	/// @brief Access the last accepted candidate solution vector.  Const access version.
 	inline std::vector< masala::base::Size > const & last_accepted_candidate_solution_const() const { return *last_accepted_candidate_solution_; }
 
+	/// @brief Const access to the vector of number of edges by absolute node index in the last accepted connectivity graph.
+	inline std::vector< masala::base::Size > const & last_accepted_nedges_for_node_in_connectivity_graph_const() const { return *last_accepted_nedges_for_node_in_connectivity_graph_; }
+
+	/// @brief Const access to the vector of vectors of connected node indices by absolute node index in the last accepted connectivity graph.
+	inline std::vector< std::vector< masala::base::Size > > const & last_accepted_edges_for_node_in_connectivity_graph_const() const { return *last_accepted_edges_for_node_in_connectivity_graph_; }
+
+	/// @brief Const access to the vector of number of edges by absolute node index in the current connectivity graph.
+	inline std::vector< masala::base::Size > const & nedges_for_node_in_connectivity_graph_const() const { return *nedges_for_node_in_connectivity_graph_; }
+
+	/// @brief Const access to the vector of vectors of connected node indices by absolute node index in the current connectivity graph.
+	inline std::vector< std::vector< masala::base::Size > > const & edges_for_node_in_connectivity_graph_const() const { return *edges_for_node_in_connectivity_graph_; }
+
 	/// @brief Non-const access to the vector of number of edges by absolute node index in the current connectivity graph.
 	inline std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph() { return *nedges_for_node_in_connectivity_graph_; }
 
