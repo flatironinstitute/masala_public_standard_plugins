@@ -284,7 +284,6 @@ private:
 	) const;
 
 	/// @brief Drop an edge from the connectivity graph.
-	static
 	void
 	do_drop(
 		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
@@ -293,10 +292,9 @@ private:
 	);
 
 	/// @brief Add an edge to the connectivity graph.
-	static
 	void
 	do_add(
-		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+		std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
 		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
 	);

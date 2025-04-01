@@ -550,7 +550,6 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 }
 
 /// @brief Drop an edge from the connectivity graph.
-/*static*/
 void
 GraphIslandCountCostFunction::do_drop(
 	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
@@ -580,14 +579,38 @@ GraphIslandCountCostFunction::do_drop(
 }
 
 /// @brief Add an edge to the connectivity graph.
-/*static*/
 void
 GraphIslandCountCostFunction::do_add(
-	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
 	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
 ) {
-	TODO TODO TODO:
+	using masala::base::Size;
+	bool found1(false);
+#ifndef NDEBUG
+	bool found2(false);
+#endif
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_add.first]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_add.first][i] == pair_to_add.second ) {
+			found1 = true;
+			break;
+		}
+	}
+#ifndef NDEBUG
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_add.second]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_add.second][i] == pair_to_add.first ) {
+			found2 = true;
+			break;
+		}
+	}
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( found1 == found2, "do_add", "Program error: asymmetric edge found." );
+#endif
+	
+	edges_for_node_in_connectivity_graph[pair_to_add.first][nedges_for_node_in_connectivity_graph[pair_to_add.first]] = pair_to_add.second;
+	edges_for_node_in_connectivity_graph[pair_to_add.second][nedges_for_node_in_connectivity_graph[pair_to_add.second]] = pair_to_add.first;
+	++(nedges_for_node_in_connectivity_graph[pair_to_add.first]);
+	++(nedges_for_node_in_connectivity_graph[pair_to_add.second]);
+
 }
 
 } // namespace graph_island_based
