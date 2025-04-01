@@ -351,9 +351,11 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			}
 
 			for( Size i(0); i<scratch_space.drop_list_size(); ++i ) {
+				write_to_tracer( "Dropping " + std::to_string( scratch_space.drop_list()[i].first ) + "-" + std::to_string( scratch_space.drop_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
 				do_drop( scratch_space.drop_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
 			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
+				write_to_tracer( "Adding " + std::to_string( scratch_space.add_list()[i].first ) + "-" + std::to_string( scratch_space.add_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
 				do_add( scratch_space.add_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
 
