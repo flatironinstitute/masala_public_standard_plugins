@@ -317,7 +317,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			scratch_space.clear_drop_and_add_lists();
 			Size const var_node_index( changed_variable_nodes.second[i] );
 			Size const abs_node_index( protected_absnode_from_varnode( var_node_index ) );
-			write_to_tracer( "Considering absolute node " + std::to_string(abs_node_index) + " (variable node " + std::to_string(var_node_index) + ")." ); // DELETE ME -- FOR DEBUGGING ONLY
+			// write_to_tracer( "Considering absolute node " + std::to_string(abs_node_index) + " (variable node " + std::to_string(var_node_index) + ")." ); // DELETE ME -- FOR DEBUGGING ONLY
 			Size const old_choiceindex( scratch_space.last_accepted_candidate_solution_const()[var_node_index] );
 			Size const new_choiceindex( candidate_solution[var_node_index] );
 			for( Size j(0); j<n_interaction_graph_edges_by_abs_node_[abs_node_index]; ++j ) {
@@ -353,31 +353,31 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			}
 
 			for( Size i(0); i<scratch_space.drop_list_size(); ++i ) {
-				write_to_tracer( "Dropping " + std::to_string( scratch_space.drop_list()[i].first ) + "-" + std::to_string( scratch_space.drop_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
+				// write_to_tracer( "Dropping " + std::to_string( scratch_space.drop_list()[i].first ) + "-" + std::to_string( scratch_space.drop_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
 				do_drop( scratch_space.drop_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
 			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
-				write_to_tracer( "Adding " + std::to_string( scratch_space.add_list()[i].first ) + "-" + std::to_string( scratch_space.add_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
+				// write_to_tracer( "Adding " + std::to_string( scratch_space.add_list()[i].first ) + "-" + std::to_string( scratch_space.add_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
 				do_add( scratch_space.add_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
 			}
 
-			// DELETE THE FOLLOWING -- FOR DEBUGGING ONLY:
-			std::stringstream ss;
-			ss << "Node\tOld_Choice\tNew_Choice\tOld_Connections\tNew_Connections" << std::endl;
-			for(Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
-				ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t" << candidate_solution[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t";
-				for(Size j(0); j<scratch_space.last_accepted_nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
-					if(j>0) { ss << ","; }
-					ss << scratch_space.last_accepted_edges_for_node_in_connectivity_graph_const()[i][j];
-				}
-				ss << "\t";
-				for(Size j(0); j<scratch_space.nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
-					if(j>0) { ss << ","; }
-					ss << scratch_space.edges_for_node_in_connectivity_graph_const()[i][j];
-				}
-				ss << std::endl;
-			}
-			write_to_tracer( ss.str() );
+			// // DELETE THE FOLLOWING -- FOR DEBUGGING ONLY:
+			// std::stringstream ss;
+			// ss << "Node\tOld_Choice\tNew_Choice\tOld_Connections\tNew_Connections" << std::endl;
+			// for(Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
+			// 	ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t" << candidate_solution[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t";
+			// 	for(Size j(0); j<scratch_space.last_accepted_nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+			// 		if(j>0) { ss << ","; }
+			// 		ss << scratch_space.last_accepted_edges_for_node_in_connectivity_graph_const()[i][j];
+			// 	}
+			// 	ss << "\t";
+			// 	for(Size j(0); j<scratch_space.nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+			// 		if(j>0) { ss << ","; }
+			// 		ss << scratch_space.edges_for_node_in_connectivity_graph_const()[i][j];
+			// 	}
+			// 	ss << std::endl;
+			// }
+			// write_to_tracer( ss.str() );
 		}
 	}
 
