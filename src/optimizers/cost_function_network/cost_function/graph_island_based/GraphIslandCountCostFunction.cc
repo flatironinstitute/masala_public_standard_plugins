@@ -333,8 +333,16 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 					protected_choice_choice_interaction_graph_for_nodepair( firstnode, secondnode )
 				);
 				DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "Program error.  Expected a non-null pointer to the I/J matrix." );
-				bool const connected_old( (*ij_matrix)( old_firstchoice, old_secondchoice ) );
-				bool const connected_new( (*ij_matrix)( new_firstchoice, new_secondchoice ) );
+				bool const connected_old(
+					static_cast<Size>(ij_matrix->rows()) > old_firstchoice && static_cast<Size>(ij_matrix->cols()) > old_secondchoice ?
+					(*ij_matrix)( old_firstchoice, old_secondchoice ) :
+					false
+				);
+				bool const connected_new(
+					static_cast<Size>(ij_matrix->rows()) > new_firstchoice && static_cast<Size>(ij_matrix->cols()) > new_secondchoice ?
+					(*ij_matrix)( new_firstchoice, new_secondchoice ) :
+					false
+				);
 				if( connected_old && (!connected_new) ) {
 					scratch_space.indicate_drop( std::make_pair( firstnode, secondnode ) );
 				} else if( connected_new && (!connected_old) ) {
