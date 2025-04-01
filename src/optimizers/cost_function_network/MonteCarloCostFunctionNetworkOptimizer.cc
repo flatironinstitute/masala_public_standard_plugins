@@ -1503,6 +1503,11 @@ MonteCarloCostFunctionNetworkOptimizer::protected_assign(
 	attempts_per_problem_ = src_cast_ptr->attempts_per_problem_;
 	n_solutions_to_store_per_problem_ = src_cast_ptr->n_solutions_to_store_per_problem_;
 	annealing_steps_per_attempt_ = src_cast_ptr->annealing_steps_per_attempt_;
+    use_multimutation_ = src_cast_ptr->use_multimutation_;
+    do_greedy_refinement_ = src_cast_ptr->do_greedy_refinement_;
+    greedy_refinement_mode_ = src_cast_ptr->greedy_refinement_mode_;
+    multimutation_probability_of_one_mutation_ = src_cast_ptr->multimutation_probability_of_one_mutation_;
+
 	annealing_schedule_ = ( src_cast_ptr->annealing_schedule_ == nullptr ? nullptr : src_cast_ptr->annealing_schedule_->deep_clone() );
 
 	if( annealing_schedule_ != nullptr ) {
