@@ -332,8 +332,9 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 				Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix(
 					protected_choice_choice_interaction_graph_for_nodepair( firstnode, secondnode )
 				);
-				bool const connected_old( ij_matrix[old_firstchoice][old_secondchoice] );
-				bool const connected_new( ij_matrix[new_firstchoice][new_secondchoice] );
+				DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "Program error.  Expected a non-null pointer to the I/J matrix." );
+				bool const connected_old( (*ij_matrix)( old_firstchoice, old_secondchoice ) );
+				bool const connected_new( (*ij_matrix)( new_firstchoice, new_secondchoice ) );
 				if( connected_old && (!connected_new) ) {
 					scratch_space.indicate_drop( std::make_pair( firstnode, secondnode ) );
 				} else if( connected_new && (!connected_old) ) {
@@ -346,7 +347,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			}
 			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
 				do_add( scratch_space.add_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
-			}g
+			}
 		}
 	}
 
@@ -555,7 +556,7 @@ GraphIslandCountCostFunction::do_drop(
 	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
 	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
-) {
+) const {
 	using masala::base::Size;
 
 	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_drop.first]; ++i ) {
@@ -584,7 +585,7 @@ GraphIslandCountCostFunction::do_add(
 	std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
 	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
-) {
+) const {
 	using masala::base::Size;
 	bool found1(false);
 #ifndef NDEBUG

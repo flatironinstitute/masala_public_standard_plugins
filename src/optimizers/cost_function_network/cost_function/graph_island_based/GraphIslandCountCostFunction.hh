@@ -289,7 +289,7 @@ private:
 		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
 		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
-	);
+	) const;
 
 	/// @brief Add an edge to the connectivity graph.
 	void
@@ -297,7 +297,7 @@ private:
 		std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
 		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
 		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
-	);
+	) const;
 
 private:
 
