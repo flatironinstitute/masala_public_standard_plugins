@@ -360,8 +360,8 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			// DELETE THE FOLLOWING -- FOR DEBUGGING ONLY:
 			std::stringstream ss;
 			ss << "Node\tOld_Choice\tNew_Choice\tOld_Connections\tNew_Connections" << std::endl;
-			for(Size i(0); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
-				ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i] << "\t" << candidate_solution[i] << "\t";
+			for(Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
+				ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t" << candidate_solution[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t";
 				for(Size j(0); j<scratch_space.last_accepted_nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
 					if(j>0) { ss << ","; }
 					ss << scratch_space.last_accepted_edges_for_node_in_connectivity_graph_const()[i][j];
