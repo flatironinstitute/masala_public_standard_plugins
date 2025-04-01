@@ -549,6 +549,47 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	}
 }
 
+/// @brief Drop an edge from the connectivity graph.
+/*static*/
+void
+GraphIslandCountCostFunction::do_drop(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+) {
+	using masala::base::Size;
+
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_drop.first]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_drop.first][i] == pair_to_drop.second ) {
+			for( Size j(i+1); j<nedges_for_node_in_connectivity_graph[pair_to_drop.first]; ++j ) {
+				edges_for_node_in_connectivity_graph[pair_to_drop.first][j-1]=edges_for_node_in_connectivity_graph[pair_to_drop.first][j];
+			}
+			--(nedges_for_node_in_connectivity_graph[pair_to_drop.first]);
+			break;
+		}
+	}
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_drop.second]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_drop.second][i] == pair_to_drop.first ) {
+			for( Size j(i+1); j<nedges_for_node_in_connectivity_graph[pair_to_drop.second]; ++j ) {
+				edges_for_node_in_connectivity_graph[pair_to_drop.second][j-1]=edges_for_node_in_connectivity_graph[pair_to_drop.second][j];
+			}
+			--(nedges_for_node_in_connectivity_graph[pair_to_drop.second]);
+			break;
+		}
+	}
+}
+
+/// @brief Add an edge to the connectivity graph.
+/*static*/
+void
+GraphIslandCountCostFunction::do_add(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+) {
+	TODO TODO TODO:
+}
+
 } // namespace graph_island_based
 } // namespace cost_function
 } // namespace cost_function_network

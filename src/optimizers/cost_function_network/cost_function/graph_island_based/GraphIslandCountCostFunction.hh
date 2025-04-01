@@ -283,6 +283,24 @@ private:
 		std::vector< std::vector< masala::base::Size > > const & edges_for_node_in_connectivity_graph
 	) const;
 
+	/// @brief Drop an edge from the connectivity graph.
+	static
+	void
+	do_drop(
+		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+	);
+
+	/// @brief Add an edge to the connectivity graph.
+	static
+	void
+	do_add(
+		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+	);
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -306,6 +324,10 @@ private:
 	/// @brief A vector indicating the number of edges in the interaction graph each absolute node has.
 	/// @details Computed by the protected_finalize() function.
 	std::vector< masala::base::Size > n_interaction_graph_edges_by_abs_node_;
+
+	/// @brief A vector of vectors of absolute indices of potential interaction partners of each node, indexed by
+	/// absolute node index.
+	std::vector< std::vector< masala::base::Size > > interaction_partners_of_abs_node_;
 
 }; // class GraphIslandCountCostFunction
 
