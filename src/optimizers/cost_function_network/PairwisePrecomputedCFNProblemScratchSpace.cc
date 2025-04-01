@@ -27,6 +27,8 @@
 // Headers:
 #include <optimizers/cost_function_network/PairwisePrecomputedCFNProblemScratchSpace.hh>
 
+// STL headers:
+#include <string>
 
 namespace standard_masala_plugins {
 namespace optimizers {
