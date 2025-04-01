@@ -634,7 +634,7 @@ GraphIslandCountCostFunction::do_add(
 	}
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( found1 == found2, "do_add", "Program error: asymmetric edge found." );
 #endif
-	if( found1 ) {
+	if( !found1 ) {
 		edges_for_node_in_connectivity_graph[pair_to_add.first][nedges_for_node_in_connectivity_graph[pair_to_add.first]] = pair_to_add.second;
 		edges_for_node_in_connectivity_graph[pair_to_add.second][nedges_for_node_in_connectivity_graph[pair_to_add.second]] = pair_to_add.first;
 		++(nedges_for_node_in_connectivity_graph[pair_to_add.first]);
