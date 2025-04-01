@@ -34,9 +34,7 @@
 #include <iostream>
 
 // Numeric headers:
-#ifndef NDEBUG
 #include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
-#endif
 
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
@@ -423,7 +421,11 @@ FunctionOfIntegerPenaltySumCostFunction::set_penalty_range_start(
 masala::base::Real
 FunctionOfIntegerPenaltySumCostFunction::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	signed long const sum( Parent::protected_compute_cost_function_no_weight( candidate_solution ) );
@@ -441,7 +443,11 @@ masala::base::Real
 FunctionOfIntegerPenaltySumCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_old,
 	std::vector< masala::base::Size > const & candidate_solution_new,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	signed long const oldsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_old ) );

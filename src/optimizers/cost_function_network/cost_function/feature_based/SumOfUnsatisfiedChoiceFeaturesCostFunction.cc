@@ -41,9 +41,7 @@
 #include <base/utility/container/container_util.tmpl.hh>
 
 // Numeric headers:
-#ifndef NDEBUG
 #include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
-#endif
 
 // Optimizers headers:
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
@@ -426,7 +424,11 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function(
     std::vector< masala::base::Size > const & candidate_solution,
-    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#ifndef NDEBUG
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;
@@ -439,8 +441,12 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function(
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new,
-    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+	std::vector< masala::base::Size > const & candidate_solution_new,
+#ifndef NDEBUG
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;

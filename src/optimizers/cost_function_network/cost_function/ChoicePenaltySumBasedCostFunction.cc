@@ -30,9 +30,7 @@
 #include <optimizers/cost_function_network/cost_function/ChoicePenaltySumBasedCostFunction.hh>
 
 // Numeric headers:
-#ifndef NDEBUG
 #include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
-#endif
 
 // STL headers:
 #include <vector>
@@ -259,7 +257,11 @@ template< typename T >
 masala::base::Real
 ChoicePenaltySumBasedCostFunction<T>::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	return protected_weight() * static_cast< masala::base::Real >( protected_compute_cost_function_no_weight( candidate_solution ) );
@@ -276,7 +278,11 @@ masala::base::Real
 ChoicePenaltySumBasedCostFunction<T>::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_old,
 	std::vector< masala::base::Size > const & candidate_solution_new,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	using masala::base::Size;
@@ -285,7 +291,9 @@ ChoicePenaltySumBasedCostFunction<T>::compute_cost_function_difference(
 		+ " must be finalized before this function is called!"
 	);
 	Size const nentries_old( candidate_solution_old.size() );
+#ifndef NDEBUG
 	Size const nentries_new( candidate_solution_new.size() );
+#endif
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( nentries_old == n_variable_positions_, "compute_cost_function", "Expected "
 		"a vector of " + std::to_string( n_variable_positions_ ) + " choices for " + std::to_string( n_variable_positions_ )
 		+ " variable positions in the old candidate solution, but got " + std::to_string( nentries_old ) + "!" 
