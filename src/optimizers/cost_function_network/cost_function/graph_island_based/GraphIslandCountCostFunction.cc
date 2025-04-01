@@ -315,9 +315,11 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( changed_variable_nodes.first > 0, "protected_compute_island_sizes", "Expected at least one changed node!" );
 		for( Size i(0); i<changed_variable_nodes.first; ++i ) {
 			scratch_space.clear_drop_and_add_lists();
-			Size const abs_node_index( protected_absnode_from_varnode( changed_variable_nodes.second[i] ) );
-			Size const old_choiceindex( scratch_space.last_accepted_candidate_solution_const()[i] );
-			Size const new_choiceindex( candidate_solution[i] );
+			Size const var_node_index( changed_variable_nodes.second[i] );
+			Size const abs_node_index( protected_absnode_from_varnode( var_node_index ) );
+			write_to_tracer( "Considering absolute node " + std::to_string(abs_node_index) + " (variable node " + std::to_string(var_node_index) + ")." ); // DELETE ME -- FOR DEBUGGING ONLY
+			Size const old_choiceindex( scratch_space.last_accepted_candidate_solution_const()[var_node_index] );
+			Size const new_choiceindex( candidate_solution[var_node_index] );
 			for( Size j(0); j<n_interaction_graph_edges_by_abs_node_[abs_node_index]; ++j ) {
 				Size const other_abs_node( interaction_partners_of_abs_node_[abs_node_index][j] );
 				std::pair< bool, Size > const & other_var_node( protected_varnode_from_absnode( other_abs_node ) );
