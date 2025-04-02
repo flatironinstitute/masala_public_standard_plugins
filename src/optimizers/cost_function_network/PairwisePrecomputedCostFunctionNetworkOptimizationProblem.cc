@@ -25,6 +25,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/PairwisePrecomputedCFNProblemScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -45,6 +48,7 @@
 
 // Numeric headers:
 #include <numeric_api/utility/cxx_17_compatibility_util_api.hh>
+#include <numeric/optimization/cost_function_network/CFNProblemScratchSpace.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -321,6 +325,29 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Generate a scratch space for CFN problems.
+/// @details This version will return a PairwisePrecomputedCFNProblemScratchSpace.
+masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space() const {
+	using namespace masala::numeric::optimization::cost_function_network::cost_function;
+	using masala::base::Size;
+
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cfn_problem_scratch_space", "This object must be finalized before this function is called." );
+
+	// Make a const copy:
+	std::vector< CostFunctionSP > const & cost_functions_nonconst( cost_functions() );
+	std::vector< CostFunctionCSP > cost_functions_const( cost_functions_nonconst.size(), nullptr );
+	for( Size i(0); i<cost_functions_nonconst.size(); ++i ) {
+		cost_functions_const[i] = cost_functions_nonconst[i];
+	}
+
+	return masala::make_shared< PairwisePrecomputedCFNProblemScratchSpace >(
+		interacting_variable_nodes_.size(), // Number of variable nodes.
+		cost_functions_const // Cost functions -- to initialize cost function scratch spaces.
+	);
+}
+
 /// @brief Given a candidate solution, compute the score.
 /// @details The candidate solution is expressed as a vector of choice indices, with
 /// one entry per variable position, in order of position indices.  (There may not be
@@ -330,20 +357,21 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 /// threadsafe from a read-only context.
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score(
-	std::vector< masala::base::Size > const & candidate_solution
+	std::vector< masala::base::Size > const & candidate_solution,
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
-	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_absolute_score", "The problem setup must be finalized before compute_absolute_score() can be called." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_absolute_score", "The problem setup must be finalized before compute_absolute_score() can be called." );
 
 	Real accumulator(
 		total_constant_offset() +
-		masala::numeric::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution ) // Handles anything non-pairwise.
+		masala::numeric::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem::compute_absolute_score( candidate_solution, cfn_problem_scratch_space ) // Handles anything non-pairwise.
 	);
 
 	Size const n_pos( candidate_solution.size() );
 	std::vector< std::pair< Size, Size > > const variable_positions( n_choices_at_variable_nodes() );
-	CHECK_OR_THROW_FOR_CLASS( candidate_solution.size() == variable_positions.size(), "compute_absolute_score",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( candidate_solution.size() == variable_positions.size(), "compute_absolute_score",
 		"The number of entries in the candidate solution vector (" + std::to_string( candidate_solution.size() ) +
 		") does not match the number of variable nodes with two or more choices (" + std::to_string( variable_positions.size() ) + ")." );
 	for( Size i(0); i<n_pos; ++i ) {
@@ -384,20 +412,21 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 masala::base::Real
 PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 	std::vector< masala::base::Size > const & old_solution,
-	std::vector< masala::base::Size > const & new_solution
+	std::vector< masala::base::Size > const & new_solution,
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 ) const {
 	using masala::base::Real;
 	using masala::base::Size;
-	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_score_change", "The problem setup must be finalized "
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "compute_score_change", "The problem setup must be finalized "
 		"before compute_score_change() can be called."
 	);
 
 	Size const npos( protected_total_variable_nodes() ); //Only safe to call if finalized.
-	CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
 		"The size of the old candidate solution vector was " + std::to_string( old_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
-	CHECK_OR_THROW_FOR_CLASS( new_solution.size() == npos, "compute_score_change",
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( new_solution.size() == npos, "compute_score_change",
 		"The size of the new candidate solution vector was " + std::to_string( new_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
@@ -407,7 +436,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		ivals[i] = i;
 	}
 
-	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution ) + masala::numeric_api::utility::transform_reduce(
+	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution, cfn_problem_scratch_space ) + masala::numeric_api::utility::transform_reduce(
 		MASALA_UNSEQ_EXECUTION_POLICY
 		ivals.cbegin(), ivals.cend(), 0.0, std::plus{},
 		[this, &old_solution, &new_solution]( Size const i ) {
@@ -597,8 +626,18 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 		);
 
 		// Work functions
-		work_function::MasalaObjectAPIWorkFunctionDefinition_OneInputSP< Real, std::vector< Size > const & > compute_absolute_score_fxn(
-			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< Real, std::vector< Size > const & > >(
+		api_def->add_work_function(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP > >(
+				"generate_cfn_problem_scratch_space", "Generate a scratch space for this CFN problem class.",
+				true, false, false, true,
+				"cfn_problem_scratch_space", "A shared pointer that points to a scratch space for this problem.  This override returns a "
+				"PairwisePrecomputedCFNProblemScratchSpace.  This is used internally to make recomputation of the cost function efficient.",
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::generate_cfn_problem_scratch_space, this )
+			)
+		);
+
+		work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > compute_absolute_score_fxn(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > >(
 				"compute_absolute_score", "Given a candidate solution, compute the score.  "
 				"The candidate solution is expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.  This override "
@@ -608,18 +647,20 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 				"candidate_solution", "The candidate solution, expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.  (There may not be "
 				"entries for every position, though, since not all positions have at least two choices.)",
+				"cfn_problem_scratch_space", "A pointer to thread_local scratch space for efficiently recomputing this scoring function.",
 				"score", "The score for this candidate solution, computed by this function.",
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score, this, std::placeholders::_1 )
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_score, this, std::placeholders::_1, std::placeholders::_2 )
 			)
 		);
 		compute_absolute_score_fxn->set_triggers_no_mutex_lock();
 		api_def->add_work_function( compute_absolute_score_fxn );
 
-		work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInputSP<
+		work_function::MasalaObjectAPIWorkFunctionDefinition_ThreeInputSP<
 			Real, std::vector< Size > const &,
-			std::vector< Size > const &
+			std::vector< Size > const &,
+			masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace *
 		> compute_score_change_fxn(
-			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, std::vector< Size > const & > >(
+			masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_ThreeInput< Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * > >(
 				"compute_score_change", "Given two candidate solutions, compute the score difference.  "
 				"The candidate solutions are expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices. (There may not be "
@@ -631,8 +672,9 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 				"one entry per variable position, in order of position indices.",
 				"new_solution", "The second candidate solution, expressed as a vector of choice indices, with "
 				"one entry per variable position, in order of position indices.",
+				"cfn_problem_scratch_space", "A pointer to thread_local scratch space for efficiently recomputing this scoring function.",
 				"delta_score", "The score change from old to new candidate solutions, computed by this function.",
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change, this, std::placeholders::_1, std::placeholders::_2 )
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
 			)
 		);
 		compute_score_change_fxn->set_triggers_no_mutex_lock();

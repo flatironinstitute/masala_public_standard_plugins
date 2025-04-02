@@ -1110,13 +1110,15 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 					curgreedysol->problem()
 				)
 			);
+            masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( curgreedysolprob->generate_cfn_problem_scratch_space() );
 			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  Expected a CostFunctionNetworkOptimizationProblem "
 				"class defining the greedy optimization problem, but got " + curgreedysol->problem()->inner_class_name() + "."
 			);
 			cursols.merge_in_lowest_scoring_solutions(
 				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 				n_to_keep,
-				curgreedysolprob
+				curgreedysolprob,
+                problem_scratch.get()
 			);
 		}
 	}
@@ -1188,6 +1190,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Real;
     using masala::base::Size;
 
+    masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( problem->generate_cfn_problem_scratch_space() );
+
     std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     {
         // Some output:
@@ -1248,7 +1252,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
-    Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution ) );
+    Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution, problem_scratch.get() ) );
     Real candidate_absolute_score( last_accepted_absolute_score );
     // write_to_tracer( "Initial score = " + std::to_string( last_accepted_absolute_score ) ); // DELETE ME
 
@@ -1264,7 +1268,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         } else {
             make_mc_move( current_solution, n_choices_per_variable_node, randgen );
         }
-        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
+        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution, problem_scratch.get() ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
         //     + " old = [" + masala::base::utility::container::container_to_string( last_accepted_solution, "," )
@@ -1336,13 +1340,14 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 				solutions.merge_in_lowest_scoring_solutions(
 					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 					n_solutions_to_store,
-					curgreedysolprob
+					curgreedysolprob,
+                    problem_scratch.get()
 				);
 			}
 		} // Mutex lock scope.
 	} else { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
-        solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
+        solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem, problem_scratch.get() );
     } // End mutex lock scope.
 
     // Minimal output.

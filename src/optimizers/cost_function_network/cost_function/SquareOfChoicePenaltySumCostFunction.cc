@@ -31,6 +31,11 @@
 #include <vector>
 #include <string>
 
+// Numeric headers:
+#ifndef NDEBUG
+#include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
+#endif
+
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
@@ -189,11 +194,13 @@ SquareOfChoicePenaltySumCostFunction::class_namespace() const {
 /// @brief Given a selection of choices at variable nodes, compute the cost function.
 /// @details This version computes the sum of the selected choices plus a constant,
 /// then squares the result.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareOfChoicePenaltySumCostFunction::compute_cost_function(
-    std::vector< masala::base::Size > const & candidate_solution
+    std::vector< masala::base::Size > const & candidate_solution,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     masala::base::Real const sum( Parent::protected_compute_cost_function_no_weight( candidate_solution ) );
     return protected_weight()*sum*sum;
 }
@@ -203,12 +210,14 @@ SquareOfChoicePenaltySumCostFunction::compute_cost_function(
 /// @details This version computes the sum of the old selected choices plus a constant,
 /// then squares the result.  It repeats this for the new selected choices, then returns
 /// the difference.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareOfChoicePenaltySumCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new
+    std::vector< masala::base::Size > const & candidate_solution_new,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     masala::base::Real const oldsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_old ) );
     masala::base::Real const newsum( Parent::protected_compute_cost_function_no_weight( candidate_solution_new ) );
     return protected_weight() * ( ( newsum * newsum ) - ( oldsum * oldsum ) );
@@ -287,28 +296,36 @@ SquareOfChoicePenaltySumCostFunction::get_api_definition() {
                 std::bind( &SquareOfChoicePenaltySumCostFunction::finalize, this, std::placeholders::_1 )
             )
         );
-        api_def->add_work_function(
-            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_OneInput< Real, std::vector< Size > const & > >(
+        work_function::MasalaObjectAPIWorkFunctionDefinitionSP compute_fxn(
+            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
                 "compute_cost_function", "Given a selection of choices at variable nodes, compute the cost function.  This version "
                 "computes the sum of the selected choices plus a constant, then squares the result.", true, false, false, false,
                 "candidate_solution", "A candidate solution, as a vector of choices for each variable position (i.e. position with "
-                "more than one choice).", "score", "The output score: the sum of the penalties for the selected choices, plus a constant "
-                "offset, all squared.", std::bind( &SquareOfChoicePenaltySumCostFunction::compute_cost_function, this, std::placeholders::_1 )
+                "more than one choice).",
+				"scratch_space", "A pointer to scratch space for accelerating this calculation, or nullptr.  Should be nullptr for this class.",
+                "score", "The output score: the sum of the penalties for the selected choices, plus a constant "
+                "offset, all squared.", std::bind( &SquareOfChoicePenaltySumCostFunction::compute_cost_function, this, std::placeholders::_1, std::placeholders::_2 )
             )
         );
-        api_def->add_work_function(
-            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_TwoInput< Real, std::vector< Size > const &, std::vector< Size > const & > >(
+        compute_fxn->set_triggers_no_mutex_lock();
+        api_def->add_work_function(compute_fxn);
+
+        work_function::MasalaObjectAPIWorkFunctionDefinitionSP compute_diff_fxn(
+            masala::make_shared< work_function::MasalaObjectAPIWorkFunctionDefinition_ThreeInput< Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
                 "compute_cost_function_difference", "Given an old selection of choices at variable nodes and a new selection, compute "
                 "the cost function difference.  This version computes the sum of the old selected choices plus a constant, then "
                 "squares the result.  It repeats this for the new selected choices, then returns the difference.",
                 true, false, false, false,
                 "candidate_solution_old", "The old candidate solution, as a vector of choices for each variable position.",
                 "candidate_solution_new", "The new candidate solution, as a vector of choices for each variable position.",
+				"scratch_space", "A pointer to scratch space for accelerating this calculation, or nullptr.  Should be nullptr for this class.",
                 "score", "The output score: the difference of the sum of the penalties for the selected choices, plus a constant "
                 "offset, all squared.",
-                std::bind( &SquareOfChoicePenaltySumCostFunction::compute_cost_function_difference, this, std::placeholders::_1, std::placeholders::_2 )
+                std::bind( &SquareOfChoicePenaltySumCostFunction::compute_cost_function_difference, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
             )
         );
+        compute_diff_fxn->set_triggers_no_mutex_lock();
+        api_def->add_work_function(compute_diff_fxn);
     
         api_definition_mutex_locked() = api_def;
     }

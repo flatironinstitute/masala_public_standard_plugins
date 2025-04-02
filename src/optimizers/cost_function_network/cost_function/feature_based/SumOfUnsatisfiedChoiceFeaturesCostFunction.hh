@@ -298,19 +298,21 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Given a selection of choices at variable nodes, compute the cost function.
-	/// @note No mutex-locking is performed!
+	/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 	masala::base::Real
 	compute_cost_function(
-		std::vector< masala::base::Size > const & candidate_solution
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override;
 
 	/// @brief Given an old selection of choices at variable nodes and a new selection,
 	/// compute the cost function difference.
-	/// @note No mutex-locking is performed!
+	/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 	masala::base::Real
 	compute_cost_function_difference(
 		std::vector< masala::base::Size > const & candidate_solution_old,
-		std::vector< masala::base::Size > const & candidate_solution_new
+		std::vector< masala::base::Size > const & candidate_solution_new,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override;
 
 public:

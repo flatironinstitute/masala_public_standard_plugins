@@ -32,6 +32,11 @@
 #include <sstream>
 #include <iostream>
 
+// Numeric headers:
+#ifndef NDEBUG
+#include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
+#endif
+
 // Base headers:
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
@@ -227,37 +232,46 @@ SquareRootOfGraphIslandCountCostFunction::get_api_definition() {
 		);
 
 		// Work functions:
-		api_def->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput < Real, std::vector< Size > const & > >(
+		MasalaObjectAPIWorkFunctionDefinition_TwoInputSP < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_fxn(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
 				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
 				"threshold, compute the square root of the sizes, sum them, and negate the result.  No mutex-locking is performed.",
 				true, false, false, true,
-				"cost_function_value", "The value of the cost function, computed for the current candidate solution.",
 				"candidate_solution", "The candidate solution, expressed as a vector of choices for the variable nodes only.",
+				"scratch_space", "A pointer to scratch space for accelerating this calculation, or nullptr.  Should be nullptr for this class.",
+				"cost_function_value", "The value of the cost function, computed for the current candidate solution.",
 				std::bind(
 					&SquareRootOfGraphIslandCountCostFunction::compute_cost_function,
-					this,
-					std::placeholders::_1
-				)
-			)
-		);
-		api_def->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, std::vector< Size > const & > >(
-				"compute_cost_function_difference", "Compute the cost function difference: for each of two input vectors, find the size of each "
-				"island in the interaction graph over threshold, compute the square root of the sizes, sum them, negate the result, and return the difference.  "
-				"No mutex-locking is performed.",
-				true, false, false, true,
-				"cost_function_difference", "The difference of the cost function, computed for the two candidate solutions.",
-				"candidate_solution_old", "The old candidate solution, expressed as a vector of choices for the variable nodes only.",
-				"candidate_solution_new", "The new candidate solution, expressed as a vector of choices for the variable nodes only.",
-				std::bind(
-					&SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference,
 					this,
 					std::placeholders::_1,
 					std::placeholders::_2
 				)
 			)
 		);
+		compute_fxn->set_triggers_no_mutex_lock();
+		api_def->add_work_function( compute_fxn );
+		
+		MasalaObjectAPIWorkFunctionDefinition_ThreeInputSP < Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_diff_fxn(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ThreeInput < Real, std::vector< Size > const &, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
+				"compute_cost_function_difference", "Compute the cost function difference: for each of two input vectors, find the size of each "
+				"island in the interaction graph over threshold, compute the square root of the sizes, sum them, negate the result, and return the difference.  "
+				"No mutex-locking is performed.",
+				true, false, false, true,
+				"candidate_solution_old", "The old candidate solution, expressed as a vector of choices for the variable nodes only.",
+				"candidate_solution_new", "The new candidate solution, expressed as a vector of choices for the variable nodes only.",
+				"scratch_space", "A pointer to scratch space for accelerating this calculation, or nullptr.  Should be nullptr for this class.",
+				"cost_function_difference", "The difference of the cost function, computed for the two candidate solutions.",
+				std::bind(
+					&SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2,
+					std::placeholders::_3
+				)
+			)
+		);
+		compute_diff_fxn->set_triggers_no_mutex_lock();
+		api_def->add_work_function( compute_diff_fxn );
 
         api_definition_mutex_locked() = api_def;
     }
@@ -367,11 +381,13 @@ SquareRootOfGraphIslandCountCostFunction::class_namespace() const {
 
 /// @brief Given a selection of choices at variable nodes, compute the cost function.
 /// @details This must be implemented by derived classes.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareRootOfGraphIslandCountCostFunction::compute_cost_function(
-	std::vector< masala::base::Size > const & candidate_solution
+	std::vector< masala::base::Size > const & candidate_solution,
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	using masala::base::Size;
 	using masala::base::Real;
 	Size const n_nodes( protected_n_nodes_absolute() );
@@ -390,13 +406,15 @@ SquareRootOfGraphIslandCountCostFunction::compute_cost_function(
 /// @brief Given an old selection of choices at variable nodes and a new selection,
 /// compute the cost function difference.
 /// @details This must be implemented by derived classes.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_old,
-	std::vector< masala::base::Size > const & candidate_solution_new
+	std::vector< masala::base::Size > const & candidate_solution_new,
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
-	return compute_cost_function(candidate_solution_new) - compute_cost_function(candidate_solution_old);
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
+	return compute_cost_function(candidate_solution_new, scratch_space) - compute_cost_function(candidate_solution_old, scratch_space);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

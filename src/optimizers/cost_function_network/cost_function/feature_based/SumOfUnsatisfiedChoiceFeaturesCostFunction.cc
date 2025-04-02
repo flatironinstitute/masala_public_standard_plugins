@@ -40,6 +40,11 @@
 #include <base/error/ErrorHandling.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
+// Numeric headers:
+#ifndef NDEBUG
+#include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
+#endif
+
 // Optimizers headers:
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 
@@ -417,23 +422,27 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Given a selection of choices at variable nodes, compute the cost function.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function(
-    std::vector< masala::base::Size > const & candidate_solution
+    std::vector< masala::base::Size > const & candidate_solution,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;
     return protected_weight() * static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution ) );
 }
 
 /// @brief Given an old selection of choices at variable nodes and a new selection,
 /// compute the cost function difference.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new
+    std::vector< masala::base::Size > const & candidate_solution_new,
+    masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;
     return protected_weight() * ( static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution_new ) ) - static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution_old ) ) );
 }
