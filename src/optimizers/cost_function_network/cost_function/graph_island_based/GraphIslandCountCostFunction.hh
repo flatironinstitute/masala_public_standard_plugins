@@ -31,6 +31,9 @@
 // Parent header:
 #include <optimizers/cost_function_network/cost_function/GraphBasedCostFunction.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.fwd.hh>
+
 // Numeric headers:
 
 // Base headers:
@@ -189,6 +192,10 @@ public:
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Generate a GraphIslandCountCFScratchSpace for this cost function.
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
+	generate_cost_function_scratch_space() const override;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,12 +211,11 @@ protected:
 	/// @brief Compute a vector of island sizes.
 	/// @details Uses a depth-first algorithm.  Throws if object not finalized first.  Performs no mutex-locking.
 	/// @param[in] candidate_solution The current solution, as a vector of variable node choice indices.
-	/// @param[out] island_sizes A pointer to an already-allocated array, of size protected_n_nodes_absolute(), of Sizes.  This
-	/// will be filled with the size of islands (in random order), with 0 in any surplus entries.
+	/// @param[inout] scratch_space A reference to the thread-local scratch space for repeated evaluation of this GraphIslandCountCostFunction.
 	void
 	protected_compute_island_sizes(
 		std::vector< masala::base::Size > const & candidate_solution,
-		masala::base::Size * island_sizes
+		GraphIslandCountCFScratchSpace & scratch_space
 	) const;
 
 	/// @brief Get the minimum number of nodes that must be in a connected island in the connection graph in order
@@ -271,10 +277,26 @@ private:
 		masala::base::Size const current_node,
 		masala::base::Size & stackend,
 		masala::base::Size * node_sizearray,
-		masala::base::Size * island_sizes,
+		std::vector< masala::base::Size > & island_sizes,
 		bool * node_discovered,
-		masala::base::Size const * const nedges_for_node_in_hbond_graph,
-		masala::base::Size const * const * const edges_for_node_in_hbond_graph
+		std::vector< masala::base::Size > const & nedges_for_node_in_connectivity_graph,
+		std::vector< std::vector< masala::base::Size > > const & edges_for_node_in_connectivity_graph
+	) const;
+
+	/// @brief Drop an edge from the connectivity graph.
+	void
+	do_drop(
+		std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+	) const;
+
+	/// @brief Add an edge to the connectivity graph.
+	void
+	do_add(
+		std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
+		std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+		std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
 	) const;
 
 private:
@@ -300,6 +322,10 @@ private:
 	/// @brief A vector indicating the number of edges in the interaction graph each absolute node has.
 	/// @details Computed by the protected_finalize() function.
 	std::vector< masala::base::Size > n_interaction_graph_edges_by_abs_node_;
+
+	/// @brief A vector of vectors of absolute indices of potential interaction partners of each node, indexed by
+	/// absolute node index.
+	std::vector< std::vector< masala::base::Size > > interaction_partners_of_abs_node_;
 
 }; // class GraphIslandCountCostFunction
 

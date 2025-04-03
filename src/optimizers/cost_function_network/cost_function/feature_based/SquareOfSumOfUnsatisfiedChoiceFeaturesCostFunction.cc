@@ -51,9 +51,7 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_FiveInput.tmpl.hh>
 
 // Numeric headers:
-#ifndef NDEBUG
 #include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
-#endif
 
 // Optimizers headers:
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
@@ -450,7 +448,11 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::get_api_definition() {
 masala::base::Real
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	using masala::base::Real;
@@ -466,7 +468,11 @@ masala::base::Real
 SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_old,
 	std::vector< masala::base::Size > const & candidate_solution_new,
+#ifndef NDEBUG
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
 	using masala::base::Real;

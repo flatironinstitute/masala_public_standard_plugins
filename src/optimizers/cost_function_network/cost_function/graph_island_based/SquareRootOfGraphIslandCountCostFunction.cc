@@ -26,6 +26,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/graph_island_based/SquareRootOfGraphIslandCountCostFunction.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -232,6 +235,17 @@ SquareRootOfGraphIslandCountCostFunction::get_api_definition() {
 		);
 
 		// Work functions:
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_ZeroInput< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP > >(
+				"generate_cost_function_scratch_space", "Generate a GraphIslandCountCFScratchSpace object, which serves as a thread-local scratch "
+				"space for repeated reevaluation of this cost function.",
+				true, false, true, false,
+				"cost_function_scratch_space", "A GraphIslandCountCFScratchSpace object, which serves as a thread-local scratch "
+				"space for repeated reevaluation of this cost function.",
+				std::bind( &SquareRootOfGraphIslandCountCostFunction::generate_cost_function_scratch_space, this )
+			)
+		);
+
 		MasalaObjectAPIWorkFunctionDefinition_TwoInputSP < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > compute_fxn(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_TwoInput < Real, std::vector< Size > const &, masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * > >(
 				"compute_cost_function", "Compute the cost function: find the size of each island in the interaction graph over "
@@ -387,12 +401,16 @@ SquareRootOfGraphIslandCountCostFunction::compute_cost_function(
 	std::vector< masala::base::Size > const & candidate_solution,
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_cost_function", "Expected a non-null pointer for the scratch space." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( dynamic_cast< GraphIslandCountCFScratchSpace * >( scratch_space ) != nullptr, "compute_cost_function", "Expected "
+		"a pointer to a GraphIslandCountCFScratchSpace object, but got a pointer to a " + scratch_space->class_name() + " object instead."
+	);
 	using masala::base::Size;
 	using masala::base::Real;
 	Size const n_nodes( protected_n_nodes_absolute() );
-	Size * island_sizes = static_cast<Size *>( alloca( sizeof(Size) * n_nodes ) ); // Since this is stack-allocated with alloca, will automatically be deallocated at function's end.  DO NOT FREE.
-	protected_compute_island_sizes( candidate_solution, island_sizes );
+	GraphIslandCountCFScratchSpace * scratch_space_cast( static_cast< GraphIslandCountCFScratchSpace * >(scratch_space) );
+	protected_compute_island_sizes( candidate_solution, *scratch_space_cast );
+	std::vector< Size > const & island_sizes( scratch_space_cast->island_sizes_const() );
 	Real accumulator(0);
 	for( Size i(0); i<n_nodes; ++i ) {
 		if( island_sizes[i] >= protected_min_island_size() ) {
@@ -413,7 +431,10 @@ SquareRootOfGraphIslandCountCostFunction::compute_cost_function_difference(
 	std::vector< masala::base::Size > const & candidate_solution_new,
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 ) const {
-	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_cost_function_difference", "Expected a non-null pointer for the scratch space." );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( dynamic_cast< GraphIslandCountCFScratchSpace * >( scratch_space ) != nullptr, "compute_cost_function_difference", "Expected "
+		"a pointer to a GraphIslandCountCFScratchSpace object, but got a pointer to a " + scratch_space->class_name() + " object instead."
+	);
 	return compute_cost_function(candidate_solution_new, scratch_space) - compute_cost_function(candidate_solution_old, scratch_space);
 }
 

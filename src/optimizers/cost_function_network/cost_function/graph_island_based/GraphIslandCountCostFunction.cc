@@ -25,6 +25,9 @@
 // Unit header:
 #include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCostFunction.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/cost_function/graph_island_based/GraphIslandCountCFScratchSpace.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -227,6 +230,15 @@ GraphIslandCountCostFunction::declare_node_choice_pair_interaction(
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Generate a GraphIslandCountCFScratchSpace for this cost function.
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
+GraphIslandCountCostFunction::generate_cost_function_scratch_space() const {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "generate_cost_function_scratch_space", "This " + class_name() + " object must be finalized "
+		"before this function can be called."
+	);
+	return masala::make_shared< GraphIslandCountCFScratchSpace >( protected_n_nodes_absolute(), protected_n_nodes_variable(), n_interaction_graph_edges_by_abs_node_ );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC INTERFACE DEFINITION
@@ -240,12 +252,11 @@ GraphIslandCountCostFunction::declare_node_choice_pair_interaction(
 /// @brief Compute a vector of island sizes.
 /// @details Uses a depth-first algorithm.  Throws if object not finalized first.  Performs no mutex-locking.
 /// @param[in] candidate_solution The current solution, as a vector of variable node choice indices.
-/// @param[out] island_sizes A pointer to an already-allocated array, of size protected_n_nodes_absolute(), of Sizes.  This
-/// will be filled with the size of islands (in random order), with 0 in any surplus entries.
+/// @param[inout] scratch_space A reference to the thread-local scratch space for repeated evaluation of this GraphIslandCountCostFunction.
 void
 GraphIslandCountCostFunction::protected_compute_island_sizes(
 	std::vector< masala::base::Size > const & candidate_solution,
-	masala::base::Size * island_sizes
+	GraphIslandCountCFScratchSpace & scratch_space
 ) const {
 	using masala::base::Size;
 
@@ -253,34 +264,120 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 	bool const use_onebased( protected_use_one_based_node_indexing() );
 	if( nnodes == 0 || (use_onebased && nnodes == 1) ) return; // Do nothing if we have no nodes.
 
+	if( scratch_space.at_least_one_move_accepted() && scratch_space.last_accepted_candidate_solution_const() == candidate_solution ) {
+		scratch_space.copy_last_accepted_to_current();
+		return;
+	}
+
+	// Objects in scratch space we will use:
+	std::vector< Size > & island_sizes( scratch_space.island_sizes() );
+
 	// Compute the current connectivity graph.  This is stack-allocated, and should be small, though it is worst case O(N^2) in memory.
 	// N will likely be << 1000; N^2 will likely be less than a megabyte of memory.  If this ever becomes an issue, we can
 	// revisit this.  This is also unlikely to be an issue due to sparsity of the graph: we are only allocating space for the edges
 	// in the interaction graph, not for edges between all nodes.
-	Size * const nedges_for_node_in_hbond_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
-	Size ** const edges_for_node_in_hbond_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
-	for( Size i(0); i<nnodes; ++i ) {
-		nedges_for_node_in_hbond_graph[i] = 0;
-		edges_for_node_in_hbond_graph[i] = static_cast< Size * >( alloca( sizeof(Size) * n_interaction_graph_edges_by_abs_node_[i] ) );
-	}
-	for( auto const & entry : interacting_abs_node_indices_ ) {
-		Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( entry.first, entry.second ) );
-		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "The interaction graph matirx was null.  "
-				"This is a program error: it ought not to be able to happen.  Please consult a developer."
-		);
-		std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( entry.first ) );
-		Size const choice_i( varnode_i.first ? candidate_solution[varnode_i.second] : 0 );
-		std::pair< bool, Size > const & varnode_j( protected_varnode_from_absnode( entry.second ) );
-		Size const choice_j( varnode_j.first ? candidate_solution[varnode_j.second] : 0 );
-		if(
-			static_cast<Size>(ij_matrix->rows()) > choice_i &&
-			static_cast<Size>(ij_matrix->cols()) > choice_j &&
-			(*ij_matrix)( choice_i, choice_j )
-		) {
-			edges_for_node_in_hbond_graph[entry.first][ nedges_for_node_in_hbond_graph[entry.first] ] = entry.second;
-			edges_for_node_in_hbond_graph[entry.second][ nedges_for_node_in_hbond_graph[entry.second] ] = entry.first;
-			nedges_for_node_in_hbond_graph[entry.first] += 1;
-			nedges_for_node_in_hbond_graph[entry.second] += 1;
+	// Size * const nedges_for_node_in_connectivity_graph = static_cast< Size * >( alloca( sizeof(Size) * nnodes ) );
+	// Size ** const edges_for_node_in_connectivity_graph = static_cast< Size ** >( alloca( sizeof(Size *) * nnodes ) );
+
+	std::vector< Size > & nedges_for_node_in_connectivity_graph( scratch_space.nedges_for_node_in_connectivity_graph() );
+	std::vector< std::vector< Size > > & edges_for_node_in_connectivity_graph( scratch_space.edges_for_node_in_connectivity_graph() );
+	
+	if( (!scratch_space.at_least_one_move_accepted()) ) {
+		// Compute from scratch if we have accepted no moves.
+		for( Size i(0); i<nnodes; ++i ) {
+			nedges_for_node_in_connectivity_graph[i] = 0;
+		}
+		for( auto const & entry : interacting_abs_node_indices_ ) {
+			Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix( protected_choice_choice_interaction_graph_for_nodepair( entry.first, entry.second ) );
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "The interaction graph matirx was null.  "
+					"This is a program error: it ought not to be able to happen.  Please consult a developer."
+			);
+			std::pair< bool, Size > const & varnode_i( protected_varnode_from_absnode( entry.first ) );
+			Size const choice_i( varnode_i.first ? candidate_solution[varnode_i.second] : 0 );
+			std::pair< bool, Size > const & varnode_j( protected_varnode_from_absnode( entry.second ) );
+			Size const choice_j( varnode_j.first ? candidate_solution[varnode_j.second] : 0 );
+			if(
+				static_cast<Size>(ij_matrix->rows()) > choice_i &&
+				static_cast<Size>(ij_matrix->cols()) > choice_j &&
+				(*ij_matrix)( choice_i, choice_j )
+			) {
+				edges_for_node_in_connectivity_graph[entry.first][ nedges_for_node_in_connectivity_graph[entry.first] ] = entry.second;
+				edges_for_node_in_connectivity_graph[entry.second][ nedges_for_node_in_connectivity_graph[entry.second] ] = entry.first;
+				nedges_for_node_in_connectivity_graph[entry.first] += 1;
+				nedges_for_node_in_connectivity_graph[entry.second] += 1;
+			}
+		}
+		scratch_space.set_current_candidate_solution( candidate_solution );
+	} else {
+		// Otherwise, update from last accepted.
+		scratch_space.prepare_connectivity_graph_for_current( candidate_solution );
+		std::pair< Size, std::vector< Size > > const & changed_variable_nodes( scratch_space.changed_variable_node_count_and_indices() );
+		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( changed_variable_nodes.first > 0, "protected_compute_island_sizes", "Expected at least one changed node!" );
+		for( Size i(0); i<changed_variable_nodes.first; ++i ) {
+			scratch_space.clear_drop_and_add_lists();
+			Size const var_node_index( changed_variable_nodes.second[i] );
+			Size const abs_node_index( protected_absnode_from_varnode( var_node_index ) );
+			// write_to_tracer( "Considering absolute node " + std::to_string(abs_node_index) + " (variable node " + std::to_string(var_node_index) + ")." ); // DELETE ME -- FOR DEBUGGING ONLY
+			Size const old_choiceindex( scratch_space.last_accepted_candidate_solution_const()[var_node_index] );
+			Size const new_choiceindex( candidate_solution[var_node_index] );
+			for( Size j(0); j<n_interaction_graph_edges_by_abs_node_[abs_node_index]; ++j ) {
+				Size const other_abs_node( interaction_partners_of_abs_node_[abs_node_index][j] );
+				std::pair< bool, Size > const & other_var_node( protected_varnode_from_absnode( other_abs_node ) );
+				Size const old_choiceindex_other( other_var_node.first ? scratch_space.last_accepted_candidate_solution_const()[other_var_node.second] : 0 );
+				Size const new_choiceindex_other( other_var_node.first ? candidate_solution[other_var_node.second] : 0 );
+				Size const firstnode( std::min(abs_node_index, other_abs_node) );
+				Size const secondnode( std::max(abs_node_index, other_abs_node) );
+				Size const old_firstchoice( abs_node_index < other_abs_node ? old_choiceindex : old_choiceindex_other );
+				Size const new_firstchoice( abs_node_index < other_abs_node ? new_choiceindex : new_choiceindex_other );
+				Size const old_secondchoice( abs_node_index >= other_abs_node ? old_choiceindex : old_choiceindex_other );
+				Size const new_secondchoice( abs_node_index >= other_abs_node ? new_choiceindex : new_choiceindex_other );
+				Eigen::Matrix< bool, Eigen::Dynamic, Eigen::Dynamic > const * const ij_matrix(
+					protected_choice_choice_interaction_graph_for_nodepair( firstnode, secondnode )
+				);
+				DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( ij_matrix != nullptr, "protected_compute_island_sizes", "Program error.  Expected a non-null pointer to the I/J matrix." );
+				bool const connected_old(
+					static_cast<Size>(ij_matrix->rows()) > old_firstchoice && static_cast<Size>(ij_matrix->cols()) > old_secondchoice ?
+					(*ij_matrix)( old_firstchoice, old_secondchoice ) :
+					false
+				);
+				bool const connected_new(
+					static_cast<Size>(ij_matrix->rows()) > new_firstchoice && static_cast<Size>(ij_matrix->cols()) > new_secondchoice ?
+					(*ij_matrix)( new_firstchoice, new_secondchoice ) :
+					false
+				);
+				if( connected_old && (!connected_new) ) {
+					scratch_space.indicate_drop( std::make_pair( firstnode, secondnode ) );
+				} else if( connected_new && (!connected_old) ) {
+					scratch_space.indicate_add( std::make_pair( firstnode, secondnode ) );
+				}
+			}
+
+			for( Size i(0); i<scratch_space.drop_list_size(); ++i ) {
+				// write_to_tracer( "Dropping " + std::to_string( scratch_space.drop_list()[i].first ) + "-" + std::to_string( scratch_space.drop_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
+				do_drop( scratch_space.drop_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			}
+			for( Size i(0); i<scratch_space.add_list_size(); ++i ) {
+				// write_to_tracer( "Adding " + std::to_string( scratch_space.add_list()[i].first ) + "-" + std::to_string( scratch_space.add_list()[i].second ) ); // DELETE ME -- FOR DEBUGGING ONLY
+				do_add( scratch_space.add_list()[i], scratch_space.nedges_for_node_in_connectivity_graph(), scratch_space.edges_for_node_in_connectivity_graph() );
+			}
+
+			// // DELETE THE FOLLOWING -- FOR DEBUGGING ONLY:
+			// std::stringstream ss;
+			// ss << "Node\tOld_Choice\tNew_Choice\tOld_Connections\tNew_Connections" << std::endl;
+			// for(Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<scratch_space.nedges_for_node_in_connectivity_graph().size(); ++i ) {
+			// 	ss << i << "\t" << scratch_space.last_accepted_candidate_solution_const()[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t" << candidate_solution[i-static_cast<Size>(protected_use_one_based_node_indexing())] << "\t";
+			// 	for(Size j(0); j<scratch_space.last_accepted_nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+			// 		if(j>0) { ss << ","; }
+			// 		ss << scratch_space.last_accepted_edges_for_node_in_connectivity_graph_const()[i][j];
+			// 	}
+			// 	ss << "\t";
+			// 	for(Size j(0); j<scratch_space.nedges_for_node_in_connectivity_graph_const()[i]; ++j) {
+			// 		if(j>0) { ss << ","; }
+			// 		ss << scratch_space.edges_for_node_in_connectivity_graph_const()[i][j];
+			// 	}
+			// 	ss << std::endl;
+			// }
+			// write_to_tracer( ss.str() );
 		}
 	}
 
@@ -329,7 +426,7 @@ GraphIslandCountCostFunction::protected_compute_island_sizes(
 			push_connected_undiscovered_nodes(
 				i, node_sizearray[stackend], stackend,
 				node_sizearray, island_sizes, node_discovered,
-				nedges_for_node_in_hbond_graph, edges_for_node_in_hbond_graph
+				nedges_for_node_in_connectivity_graph, edges_for_node_in_connectivity_graph
 			);
 		}
 	}
@@ -373,14 +470,18 @@ GraphIslandCountCostFunction::protected_finalize(
 	// Compute the interacting node pairs
 	interacting_abs_node_indices_.clear();
 	n_interaction_graph_edges_by_abs_node_.clear();
+	interaction_partners_of_abs_node_.clear();
 	masala::base::Size const nnodes( protected_n_nodes_absolute() );
 	n_interaction_graph_edges_by_abs_node_.resize( nnodes, 0 );
+	interaction_partners_of_abs_node_.resize(nnodes);
 	for( Size i( static_cast<Size>(protected_use_one_based_node_indexing()) ); i<nnodes-1; ++i ) {
 		for( Size j(i+1); j<nnodes; ++j ) {
 			if( protected_choice_choice_interaction_graph_for_nodepair(i,j) != nullptr ) {
 				interacting_abs_node_indices_.push_back( std::make_pair(i,j) );
 				++n_interaction_graph_edges_by_abs_node_[i];
 				++n_interaction_graph_edges_by_abs_node_[j];
+				interaction_partners_of_abs_node_[i].push_back(j);
+				interaction_partners_of_abs_node_[j].push_back(i);
 			}
 		}
 	}
@@ -459,14 +560,14 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 	masala::base::Size const current_node,
 	masala::base::Size & stackend,
 	masala::base::Size * node_sizearray,
-	masala::base::Size * island_sizes,
+	std::vector< masala::base::Size > & island_sizes,
 	bool * node_discovered,
-	masala::base::Size const * const nedges_for_node_in_hbond_graph,
-	masala::base::Size const * const * const edges_for_node_in_hbond_graph
+	std::vector< masala::base::Size > const & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > const & edges_for_node_in_connectivity_graph
 ) const {
 	using masala::base::Size;
-	Size const * const edges_for_curnode( edges_for_node_in_hbond_graph[current_node] );
-	for( Size iother_index( 0 ); iother_index < nedges_for_node_in_hbond_graph[current_node] ; ++iother_index ) {
+	std::vector< Size > const & edges_for_curnode( edges_for_node_in_connectivity_graph[current_node] );
+	for( Size iother_index( 0 ); iother_index < nedges_for_node_in_connectivity_graph[current_node] ; ++iother_index ) {
 		Size const iother( edges_for_curnode[iother_index] );
 		if( node_discovered[iother] == false ) {
 			// If the current choices at iother and current_node interact...
@@ -477,6 +578,71 @@ GraphIslandCountCostFunction::push_connected_undiscovered_nodes(
 			++stackend;
 		}
 	}
+}
+
+/// @brief Drop an edge from the connectivity graph.
+void
+GraphIslandCountCostFunction::do_drop(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_drop,
+	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+) const {
+	using masala::base::Size;
+
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_drop.first]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_drop.first][i] == pair_to_drop.second ) {
+			for( Size j(i+1); j<nedges_for_node_in_connectivity_graph[pair_to_drop.first]; ++j ) {
+				edges_for_node_in_connectivity_graph[pair_to_drop.first][j-1]=edges_for_node_in_connectivity_graph[pair_to_drop.first][j];
+			}
+			--(nedges_for_node_in_connectivity_graph[pair_to_drop.first]);
+			break;
+		}
+	}
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_drop.second]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_drop.second][i] == pair_to_drop.first ) {
+			for( Size j(i+1); j<nedges_for_node_in_connectivity_graph[pair_to_drop.second]; ++j ) {
+				edges_for_node_in_connectivity_graph[pair_to_drop.second][j-1]=edges_for_node_in_connectivity_graph[pair_to_drop.second][j];
+			}
+			--(nedges_for_node_in_connectivity_graph[pair_to_drop.second]);
+			break;
+		}
+	}
+}
+
+/// @brief Add an edge to the connectivity graph.
+void
+GraphIslandCountCostFunction::do_add(
+	std::pair< masala::base::Size, masala::base::Size > const & pair_to_add,
+	std::vector< masala::base::Size > & nedges_for_node_in_connectivity_graph,
+	std::vector< std::vector< masala::base::Size > > & edges_for_node_in_connectivity_graph
+) const {
+	using masala::base::Size;
+	bool found1(false);
+#ifndef NDEBUG
+	bool found2(false);
+#endif
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_add.first]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_add.first][i] == pair_to_add.second ) {
+			found1 = true;
+			break;
+		}
+	}
+#ifndef NDEBUG
+	for( Size i(0); i<nedges_for_node_in_connectivity_graph[pair_to_add.second]; ++i ) {
+		if( edges_for_node_in_connectivity_graph[pair_to_add.second][i] == pair_to_add.first ) {
+			found2 = true;
+			break;
+		}
+	}
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( found1 == found2, "do_add", "Program error: asymmetric edge found." );
+#endif
+	if( !found1 ) {
+		edges_for_node_in_connectivity_graph[pair_to_add.first][nedges_for_node_in_connectivity_graph[pair_to_add.first]] = pair_to_add.second;
+		edges_for_node_in_connectivity_graph[pair_to_add.second][nedges_for_node_in_connectivity_graph[pair_to_add.second]] = pair_to_add.first;
+		++(nedges_for_node_in_connectivity_graph[pair_to_add.first]);
+		++(nedges_for_node_in_connectivity_graph[pair_to_add.second]);
+	}
+
 }
 
 } // namespace graph_island_based

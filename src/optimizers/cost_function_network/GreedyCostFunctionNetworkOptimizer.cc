@@ -33,6 +33,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginPairwisePrecomputedCFNProblemScratchSpace.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -827,6 +828,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 				if( candidate_score < best_candidate_score ) {
 					best_candidate_score = candidate_score;
 					best_candidate_state = candidate_state;
+					if( problem_scratch != nullptr ) { problem_scratch->accept_last_move(); } 
 					//write_to_tracer( "Best this round." ); // DELETE ME.
 				}
 			}

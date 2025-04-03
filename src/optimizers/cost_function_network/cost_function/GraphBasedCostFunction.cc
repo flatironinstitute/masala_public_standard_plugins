@@ -371,6 +371,13 @@ GraphBasedCostFunction<T>::protected_n_nodes_absolute() const {
 	return full_choice_choice_interaction_graph_.rows();
 }
 
+/// @brief Get the number of variable nodes, with no mutex-locking.
+template< typename T >
+masala::base::Size
+GraphBasedCostFunction<T>::protected_n_nodes_variable() const {
+	return n_variable_nodes_;
+}
+
 /// @brief Given an absolute node index, get the variable node index.
 /// @details Throws if not yet finalized.  Does not lock mutex.  Returns a pair of
 /// <is variable node, variable node index if variable or 0 otherwise>.
@@ -380,10 +387,22 @@ GraphBasedCostFunction<T>::protected_varnode_from_absnode(
 	masala::base::Size const absnode_index
 ) const {
 	using masala::base::Size;
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "protected_varnode_from_absnode", "This object has not yet been finalized!" );
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( absnode_index < protected_n_nodes_absolute(), "protected_varnode_from_absnode",
 		"Absolute node index " + std::to_string(absnode_index) + " is out of range."
 	);
 	return varnodes_by_absnode_[absnode_index];
+}
+
+/// @brief Given a variable node index, get the absolute node index.
+/// @details Throws if not yet finalized.  Does not lock mutex.
+template< typename T >
+masala::base::Size
+GraphBasedCostFunction<T>::protected_absnode_from_varnode(
+	masala::base::Size const varnode_index
+) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( protected_finalized(), "protected_varnode_from_absnode", "This object has not yet been finalized!" );
+	return absnodes_by_varnode_[varnode_index];
 }
 
 /// @brief Indicate that all data input is complete.  Performs no mutex-locking.
@@ -397,6 +416,9 @@ GraphBasedCostFunction<T>::protected_finalize(
 	std::vector< masala::base::Size > const & variable_node_indices
 ) {
 	using masala::base::Size;
+
+	n_variable_nodes_ = variable_node_indices.size();
+	absnodes_by_varnode_ = variable_node_indices;
 
 	varnodes_by_absnode_.resize( full_choice_choice_interaction_graph_.rows() );
 	std::fill( varnodes_by_absnode_.begin(), varnodes_by_absnode_.end(), std::make_pair(false, 0) );
@@ -438,6 +460,8 @@ GraphBasedCostFunction<T>::protected_clear() {
 	full_choice_choice_interaction_graph_.resize(0, 0);
 
 	varnodes_by_absnode_.clear();
+	absnodes_by_varnode_.clear();
+	n_variable_nodes_ = 0;
 
 	Parent::protected_clear();
 }
@@ -480,6 +504,8 @@ GraphBasedCostFunction<T>::protected_assign(
 	}
 
 	varnodes_by_absnode_ = src_cast_ptr->varnodes_by_absnode_;
+	absnodes_by_varnode_ = src_cast_ptr->absnodes_by_varnode_;
+	n_variable_nodes_ = src_cast_ptr->n_variable_nodes_;
 
 	Parent::protected_assign( src );
 }
