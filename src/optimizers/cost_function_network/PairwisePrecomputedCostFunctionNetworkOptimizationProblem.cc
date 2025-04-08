@@ -421,6 +421,7 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		"before compute_score_change() can be called."
 	);
 
+#ifndef NDEBUG
 	Size const npos( protected_total_variable_nodes() ); //Only safe to call if finalized.
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( old_solution.size() == npos, "compute_score_change",
 		"The size of the old candidate solution vector was " + std::to_string( old_solution.size() ) + ", but "
@@ -430,7 +431,6 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		"The size of the new candidate solution vector was " + std::to_string( new_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
-#ifndef NDEBUG
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( cfn_problem_scratch_space != nullptr, "compute_score_change", "A null scratch space was passed to this function." );
 	PairwisePrecomputedCFNProblemScratchSpace * scratch_space( dynamic_cast< PairwisePrecomputedCFNProblemScratchSpace * >( cfn_problem_scratch_space ) );
 	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_score_change", "The " + cfn_problem_scratch_space->class_name() + " passed to this function was not a PairwisePrecomputedCFNProblemScratchSpace." );
