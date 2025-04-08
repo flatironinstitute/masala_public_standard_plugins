@@ -32,7 +32,6 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <alloca.h>
 
 // Base headers:
 #include <base/utility/execution_policy/util.hh>
@@ -431,15 +430,19 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		"The size of the new candidate solution vector was " + std::to_string( new_solution.size() ) + ", but "
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
+#ifndef NDEBUG
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( cfn_problem_scratch_space != nullptr, "compute_score_change", "A null scratch space was passed to this function." );
+	PairwisePrecomputedCFNProblemScratchSpace * scratch_space( dynamic_cast< PairwisePrecomputedCFNProblemScratchSpace * >( cfn_problem_scratch_space ) );
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space != nullptr, "compute_score_change", "The " + cfn_problem_scratch_space->class_name() + " passed to this function was not a PairwisePrecomputedCFNProblemScratchSpace." );
+#else
+	PairwisePrecomputedCFNProblemScratchSpace * scratch_space( static_cast< PairwisePrecomputedCFNProblemScratchSpace * >( cfn_problem_scratch_space ) );
+#endif
 
-	Size * ivals( static_cast< Size * >( alloca( sizeof(Size) * npos ) ) );
-	for( Size i(0); i < npos; ++i ) {
-		ivals[i] = i;
-	}
+	std::vector< Size > const & ivals( scratch_space->ivals() );
 
 	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution, cfn_problem_scratch_space ) + masala::numeric_api::utility::transform_reduce(
 		MASALA_UNSEQ_EXECUTION_POLICY
-		ivals, ivals + npos, 0.0, std::plus{},
+		ivals.cbegin(), ivals.cend(), 0.0, std::plus{},
 		[this, &old_solution, &new_solution]( Size const i ) {
 			if( old_solution[i] != new_solution[i] ) {
 				Real accumulator(0.0);
