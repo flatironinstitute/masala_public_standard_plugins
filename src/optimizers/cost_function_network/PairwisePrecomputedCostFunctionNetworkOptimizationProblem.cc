@@ -32,6 +32,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <alloca.h>
 
 // Base headers:
 #include <base/utility/execution_policy/util.hh>
@@ -431,14 +432,14 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change(
 		"there are " + std::to_string( npos ) + " variable positions."
 	);
 
-	std::vector< Size > ivals( npos );
+	Size * ivals( static_cast< Size * >( alloca( sizeof(Size) * npos ) ) );
 	for( Size i(0); i < npos; ++i ) {
 		ivals[i] = i;
 	}
 
 	return CostFunctionNetworkOptimizationProblem::compute_score_change( old_solution, new_solution, cfn_problem_scratch_space ) + masala::numeric_api::utility::transform_reduce(
 		MASALA_UNSEQ_EXECUTION_POLICY
-		ivals.cbegin(), ivals.cend(), 0.0, std::plus{},
+		ivals, ivals + npos, 0.0, std::plus{},
 		[this, &old_solution, &new_solution]( Size const i ) {
 			if( old_solution[i] != new_solution[i] ) {
 				Real accumulator(0.0);
