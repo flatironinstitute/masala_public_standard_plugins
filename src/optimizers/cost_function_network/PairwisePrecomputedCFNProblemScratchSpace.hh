@@ -99,6 +99,9 @@ public:
 // GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Get indices of all variable nodes.  Preallocated for convenience and speed.
+	inline std::vector< masala::base::Size > const & ivals() const { return ivals_; }
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,8 +125,11 @@ protected:
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
-// PRIVATE VARIABLES
+// PRIVATE VARIABLES.
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Indices of all variable nodes.  Preallocated for convenience and speed.
+	std::vector< masala::base::Size > ivals_;
 
 }; // class PairwisePrecomputedCFNProblemScratchSpace
 

@@ -41,11 +41,15 @@ namespace cost_function_network {
 
 /// @brief Settings constructor.  Finalizes this object with the function call.
 PairwisePrecomputedCFNProblemScratchSpace::PairwisePrecomputedCFNProblemScratchSpace(
-	masala::base::Size const /*n_variable_nodes*/,
+	masala::base::Size const n_variable_nodes,
 	std::vector< masala::numeric::optimization::cost_function_network::cost_function::CostFunctionCSP > const & cost_functions
 ) :
 	Parent( cost_functions )
 {
+	ivals_.resize( n_variable_nodes );
+	for( masala::base::Size i(0); i<n_variable_nodes; ++i ) {
+		ivals_[i] = i;
+	}
 	finalize();
 }
 
