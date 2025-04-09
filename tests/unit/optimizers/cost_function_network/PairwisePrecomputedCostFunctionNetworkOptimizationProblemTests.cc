@@ -58,7 +58,9 @@ TEST_CASE( "Instantiate a PairwisePrecomputedCostFunctionNetworkOptimizationProb
 TEST_CASE( "Instantiate a PairwisePrecomputedCostFunctionNetworkOptimizationProblem from the plugin manager.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API][instantiation][plugin_manager]" ) {
 	using namespace masala::base::managers::plugin_module;
 	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::registration;
 	REQUIRE_NOTHROW([&](){
+		register_optimizers();
 		MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
 		masala::base::managers::plugin_module::MasalaPluginAPISP problem_uncast(
 			plugman->create_plugin_object_instance_by_short_name(
@@ -70,6 +72,7 @@ TEST_CASE( "Instantiate a PairwisePrecomputedCostFunctionNetworkOptimizationProb
 		CHECK( problem != nullptr );
 
 		problem->write_to_tracer( "Instantiated a PairwisePrecomputedCostFunctionNetworkOptimizationProblem." );
+		unregister_optimizers();
 	}() );
 }
 
