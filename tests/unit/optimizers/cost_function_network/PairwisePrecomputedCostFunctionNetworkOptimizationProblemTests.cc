@@ -202,6 +202,9 @@ TEST_CASE( "Test PairwisePrecomputedCostFunctionNetworkOptimizationProblem::comp
 		PairwisePrecomputedCFNProblemScratchSpaceSP scratch( std::dynamic_pointer_cast< PairwisePrecomputedCFNProblemScratchSpace >( problem->generate_cfn_problem_scratch_space() ) );
 		CHECK( scratch != nullptr );
 		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 18.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 0, 1, 0 }, scratch.get() ) - 4.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 2, 0, 0 }, scratch.get() ) - 14.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 2, 1, 0 }, scratch.get() ) - 2.0 ) < 1.0e-6 );
 
 		unregister_optimizers();
 	}() );
