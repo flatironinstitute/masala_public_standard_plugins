@@ -25,6 +25,7 @@
 
 // Unit headers:
 #include <optimizers_api/auto_generated_api/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API.hh>
+#include <optimizers/cost_function_network/PairwisePrecomputedCFNProblemScratchSpace.hh>
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 
 // Masala numeric headers:
@@ -72,6 +73,136 @@ TEST_CASE( "Instantiate a PairwisePrecomputedCostFunctionNetworkOptimizationProb
 		CHECK( problem != nullptr );
 
 		problem->write_to_tracer( "Instantiated a PairwisePrecomputedCostFunctionNetworkOptimizationProblem." );
+		unregister_optimizers();
+	}() );
+}
+
+TEST_CASE( "Test PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_score_change().", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API][scoring]" ) {
+	using namespace masala::base::managers::plugin_module;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::registration;
+	using namespace standard_masala_plugins::optimizers::cost_function_network;
+	using masala::base::Size;
+	
+	REQUIRE_NOTHROW([&](){
+		register_optimizers();
+		MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+		masala::base::managers::plugin_module::MasalaPluginAPISP problem_uncast(
+			plugman->create_plugin_object_instance_by_short_name(
+				std::vector< std::string >{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" },
+				"PairwisePrecomputedCostFunctionNetworkOptimizationProblem", true
+			)
+		);
+		PairwisePrecomputedCostFunctionNetworkOptimizationProblem_APISP problem( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem_API >( problem_uncast ) );
+		CHECK( problem != nullptr );
+
+		problem->write_to_tracer( "Instantiated a PairwisePrecomputedCostFunctionNetworkOptimizationProblem." );
+
+		// Configure the problem:
+		problem->set_minimum_number_of_choices_at_node(0, 4);
+		problem->set_minimum_number_of_choices_at_node(1, 4);
+		problem->set_minimum_number_of_choices_at_node(2, 4);
+		problem->set_minimum_number_of_choices_at_node(3, 4);
+
+		problem->set_onebody_penalty( 0, 0, 3.0 );
+		problem->set_onebody_penalty( 0, 1, -2.0 );
+		problem->set_onebody_penalty( 0, 2, 1.0 );
+		problem->set_onebody_penalty( 1, 0, 4.0 );
+		problem->set_onebody_penalty( 1, 1, -5.0 );
+		problem->set_onebody_penalty( 1, 2, -3.0 );
+		problem->set_onebody_penalty( 2, 0, -1.0 );
+		problem->set_onebody_penalty( 2, 1, -1.0 );
+		problem->set_onebody_penalty( 2, 2, 2.0 );
+		problem->set_onebody_penalty( 3, 0, 4.0 );
+		problem->set_onebody_penalty( 3, 1, 0.5 );
+		problem->set_onebody_penalty( 3, 2, 4.0 );
+
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 0 ), 1.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 1 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 0, 2 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 0 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 1 ), -2.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 1, 2 ), 7.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 0 ), 3.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 1 ), 6.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 2, 2 ), -6.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 3, 0 ), -6.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 3, 1 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 1 ), std::make_pair( 3, 2 ), 2.5 );
+
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 0 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 1 ), -2.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 0, 2 ), 3.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 0 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 1 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 1, 2 ), -4.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 0 ), 7.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 1 ), 7.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 2, 2 ), -8.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 3, 0 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 3, 1 ), 5.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 2 ), std::make_pair( 3, 2 ), 2.5 );
+
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 0, 0 ), 0.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 0, 1 ), -0.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 0, 2 ), 5.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 1, 0 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 1, 1 ), 0.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 1, 2 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 2, 0 ), -7.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 2, 1 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 2, 2 ), -8.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 3, 0 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 3, 1 ), -5.5 );
+		problem->set_twobody_penalty( std::make_pair( 0, 3 ), std::make_pair( 3, 2 ), -2.5 );
+
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 0 ), 5.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 1 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 0, 2 ), -5.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 0 ), 1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 1 ), 1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 1, 2 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 0 ), 3.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 1 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 2, 2 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 3, 0 ), -4.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 3, 1 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 2 ), std::make_pair( 3, 2 ), 4.5 );
+
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 0, 0 ), -0.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 0, 1 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 0, 2 ), -5.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 1, 0 ), -2.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 1, 1 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 1, 2 ), -1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 2, 0 ), 3.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 2, 1 ), 1.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 2, 2 ), -0.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 3, 0 ), -4.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 3, 1 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 1, 3 ), std::make_pair( 3, 2 ), -1.5 );
+
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 0, 0 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 0, 1 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 0, 2 ), 2.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 1, 0 ), -3.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 1, 1 ), 6.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 1, 2 ), -0.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 2, 0 ), 8.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 2, 1 ), 4.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 2, 2 ), -2.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 3, 0 ), -9.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 3, 1 ), -5.5 );
+		problem->set_twobody_penalty( std::make_pair( 2, 3 ), std::make_pair( 3, 2 ), -3.5 );
+
+		problem->finalize();
+
+		CHECK( problem->finalized() );
+
+		PairwisePrecomputedCFNProblemScratchSpaceSP scratch( std::dynamic_pointer_cast< PairwisePrecomputedCFNProblemScratchSpace >( problem->generate_cfn_problem_scratch_space() ) );
+		CHECK( scratch != nullptr );
+		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 18.0 ) < 1.0e-6 );
+
 		unregister_optimizers();
 	}() );
 }
