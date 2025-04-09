@@ -206,6 +206,23 @@ TEST_CASE( "Test PairwisePrecomputedCostFunctionNetworkOptimizationProblem::comp
 		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 2, 0, 0 }, scratch.get() ) - 14.0 ) < 1.0e-6 );
 		CHECK( std::abs( problem->compute_absolute_score( std::vector< Size >{ 0, 2, 1, 0 }, scratch.get() ) - 2.0 ) < 1.0e-6 );
 
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 0, 0 }, std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 0.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 1, 0 }, std::vector< Size >{ 0, 0, 1, 0 }, scratch.get() ) - 0.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 2, 0, 0 }, std::vector< Size >{ 0, 2, 0, 0 }, scratch.get() ) - 0.0 ) < 1.0e-6 );
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 2, 1, 0 }, std::vector< Size >{ 0, 2, 1, 0 }, scratch.get() ) - 0.0 ) < 1.0e-6 );
+
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 0, 0 }, std::vector< Size >{ 0, 0, 1, 0 }, scratch.get() ) + 14.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 1, 0 }, std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 14.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 0, 0 }, std::vector< Size >{ 0, 2, 0, 0 }, scratch.get() ) + 4.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 2, 0, 0 }, std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 4.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 0, 0, 0 }, std::vector< Size >{ 0, 2, 1, 0 }, scratch.get() ) + 16.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
+		CHECK( std::abs( problem->compute_score_change( std::vector< Size >{ 0, 2, 1, 0 }, std::vector< Size >{ 0, 0, 0, 0 }, scratch.get() ) - 16.0 ) < 1.0e-6 );
+		scratch->accept_last_move();
 		unregister_optimizers();
 	}() );
 }
