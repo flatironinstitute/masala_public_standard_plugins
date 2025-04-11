@@ -108,11 +108,11 @@ TEST_CASE( "Test the samples of the logarithmic annealing schedule.", "[masala::
 		LogarithmicAnnealingSchedule_APISP anneal_sched( std::dynamic_pointer_cast< LogarithmicAnnealingSchedule_API >( plugin_object ) );
 		CHECK( anneal_sched != nullptr );
 
-		anneal_sched->set_final_time_index(20);
+		anneal_sched->set_final_time_index(21);
 		anneal_sched->set_temperature_initial(120.0);
 		anneal_sched->set_temperature_final(0.5);
 
-		for( Size i(0); i<=20; ++i ) {
+		for( Size i(0); i<21; ++i ) {
 			actual_vals[i] = anneal_sched->temperature();
 		}
 
@@ -122,7 +122,7 @@ TEST_CASE( "Test the samples of the logarithmic annealing schedule.", "[masala::
 		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals, 1.0e-6 ) );
 
 		anneal_sched->reset_call_count();
-		for( Size i(22); i>0; --i ) {
+		for( Size i(21); i>0; --i ) {
 			actual_vals2[i-1] = anneal_sched->temperature(i-1);
 		}
 
