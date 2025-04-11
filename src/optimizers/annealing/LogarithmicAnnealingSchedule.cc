@@ -235,8 +235,8 @@ LogarithmicAnnealingSchedule::temperature() const {
 	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
 	Parent::increment_call_count();
 	Size const callcount( call_count() );
-	if( callcount >= protected_call_count_final() ) { return protected_temperature_final(); }
-	Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( protected_call_count_final() - 1 ) );
+	if( callcount > protected_call_count_final() ) { return protected_temperature_final(); }
+	Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( protected_call_count_final() ) );
 	return std::exp( f * log_final_temperature_ + (1.0 - f) * log_initial_temperature_ );
 }
 
@@ -246,10 +246,10 @@ LogarithmicAnnealingSchedule::temperature(
     masala::base::Size const time_index
 ) const {
 	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-	if( time_index >= protected_call_count_final() ) {
+	if( time_index > protected_call_count_final() ) {
 		return protected_temperature_final();
 	}
-	masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( protected_call_count_final() - 1 ) );
+	masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( protected_call_count_final() ) );
 	return std::exp( f * log_final_temperature_ + (1.0 - f) * log_initial_temperature_ );
 }
 
