@@ -59,6 +59,7 @@ LinearAnnealingSchedule &
 LinearAnnealingSchedule::operator=(
     LinearAnnealingSchedule const & src
 ) {
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=(src);
     std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
@@ -331,7 +332,6 @@ LinearAnnealingSchedule::protected_assign(
     temperature_initial_ = src.temperature_initial_;
     temperature_final_ = src.temperature_final_;
     call_count_final_ = src.call_count_final_;
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=(src);
 }
 
 } // namespace annealing
