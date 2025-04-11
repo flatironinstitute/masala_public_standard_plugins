@@ -320,6 +320,7 @@ LinearRepeatAnnealingSchedule::n_repeats() const {
 /// context.  Derived classes should override this function and call the base class version.
 void
 LinearRepeatAnnealingSchedule::protected_reset() /*override*/ {
+    n_repeats_ = 3;
     LinearAnnealingSchedule::protected_reset();
 }
 
