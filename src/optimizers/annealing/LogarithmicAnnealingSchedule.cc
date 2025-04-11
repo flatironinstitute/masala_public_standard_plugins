@@ -134,9 +134,7 @@ LogarithmicAnnealingSchedule::get_api_definition() {
     if( api_definition() == nullptr ) {
         MasalaObjectAPIDefinitionSP api_def(
             masala::make_shared< MasalaObjectAPIDefinition >(
-                *this, "An annealing schedule that ramps linearly in logarithmic space with time.  If "
-				"ramping from a high to a low temperature, this means that more time is spent at the low "
-				"temperatures.", false, false
+                *this, "An annealing schedule that ramps linearly in logarithmic space with time.  If ramping from a high to a low temperature, this means that more time is spent at the low temperatures.", false, false
             )
         );
 
@@ -297,7 +295,9 @@ LogarithmicAnnealingSchedule::set_temperature_final(
 /*virtual*/
 void
 LogarithmicAnnealingSchedule::protected_reset() {
-   Parent::protected_reset();
+	log_initial_temperature_ = std::log( 100.0 );
+	log_final_temperature_ = std::log( 0.3 );
+	Parent::protected_reset();
 }
 
 /// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
@@ -307,12 +307,13 @@ void
 LogarithmicAnnealingSchedule::protected_assign(
     LinearAnnealingSchedule const & src
 ) {
-    LogarithmicAnnealingSchedule const * src_ptr_cast( dynamic_cast< LogarithmicAnnealingSchedule const * >( & src) );
-    CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "A " + src.class_name() +
-        " object was passed to this function.  This could not be cast to a LogarithmicAnnealingSchedule object."
-    );
-	// TODO COPY DATA HERE.
-    Parent::protected_assign( src );
+	LogarithmicAnnealingSchedule const * src_ptr_cast( dynamic_cast< LogarithmicAnnealingSchedule const * >( & src) );
+	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "A " + src.class_name() +
+		" object was passed to this function.  This could not be cast to a LogarithmicAnnealingSchedule object."
+	);
+	log_initial_temperature_ = src_ptr_cast->log_initial_temperature_;
+	log_final_temperature_ = src_ptr_cast->log_final_temperature_;
+	Parent::protected_assign( src );
 }
 
 } // namespace annealing

@@ -32,6 +32,7 @@
 
 // STL headers
 #include <mutex>
+#include <cmath>
 
 namespace standard_masala_plugins {
 namespace optimizers {
