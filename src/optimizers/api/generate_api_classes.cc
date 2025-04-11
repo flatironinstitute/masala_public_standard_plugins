@@ -29,6 +29,7 @@
 #include <optimizers/annealing/LinearAnnealingSchedule.hh>
 #include <optimizers/annealing/LinearRepeatAnnealingSchedule.hh>
 #include <optimizers/annealing/LogarithmicAnnealingSchedule.hh>
+#include <optimizers/annealing/LogarithmicRepeatAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
@@ -63,6 +64,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< annealing::LinearAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LinearRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LogarithmicAnnealingSchedule >() );
+        outvec.emplace_back( masala::make_shared< annealing::LogarithmicRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::GreedyCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );
