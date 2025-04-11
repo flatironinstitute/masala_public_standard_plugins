@@ -107,12 +107,12 @@ TEST_CASE( "Test the samples of the logarithmic repeat annealing schedule with o
 		LogarithmicRepeatAnnealingSchedule_APISP anneal_sched( std::dynamic_pointer_cast< LogarithmicRepeatAnnealingSchedule_API >( plugin_object ) );
 		CHECK( anneal_sched != nullptr );
 
-		anneal_sched->set_final_time_index(20);
+		anneal_sched->set_final_time_index(21);
 		anneal_sched->set_temperature_initial(120.0);
 		anneal_sched->set_temperature_final(0.5);
         anneal_sched->set_n_repeats(1);
 
-		for( Size i(0); i<=20; ++i ) {
+		for( Size i(0); i<21; ++i ) {
 			actual_vals[i] = anneal_sched->temperature();
 		}
 
