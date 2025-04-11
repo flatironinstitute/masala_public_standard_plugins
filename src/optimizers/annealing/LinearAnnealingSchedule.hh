@@ -124,6 +124,7 @@ public:
 
 	/// @brief Set the initial temperature.
 	/// @details In kcal/mol.  Must be non-negative.
+	virtual
 	void
 	set_temperature_initial(
 		masala::base::Real const temperature_in
@@ -131,6 +132,7 @@ public:
 
 	/// @brief Set the final temperature.
 	/// @details In kcal/mol.  Must be non-negative.
+	virtual
 	void
 	set_temperature_final(
 		masala::base::Real const temperature_in
@@ -168,6 +170,12 @@ protected:
 
 	/// @brief Access the final temperature from a mutex-locked context.
 	inline masala::base::Real protected_temperature_final() const { return temperature_final_; }
+
+	/// @brief Nonconst access the initial temperature from a mutex-locked context.
+	inline masala::base::Real & nonconst_protected_temperature_initial() { return temperature_initial_; }
+
+	/// @brief Nonconst access the final temperature from a mutex-locked context.
+	inline masala::base::Real & nonconst_protected_temperature_final() { return temperature_final_; }
 
 	/// @brief Access the expected call count from a mutex-locked context.
 	inline masala::base::Size protected_call_count_final() const { return call_count_final_; }

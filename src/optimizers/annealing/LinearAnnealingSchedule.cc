@@ -176,13 +176,13 @@ LinearAnnealingSchedule::get_api_definition() {
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 100.0.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
+                true, false, std::bind( &LinearAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
         );        api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.3.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
+                true, false, std::bind( &LinearAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
             )
         );
 

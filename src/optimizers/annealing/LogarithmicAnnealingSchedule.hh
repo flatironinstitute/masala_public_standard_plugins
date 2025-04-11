@@ -123,6 +123,19 @@ public:
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Set the initial temperature.
+	/// @details In kcal/mol.  Must be positive.
+	void
+	set_temperature_initial(
+		masala::base::Real const temperature_in
+	) override;
+
+	/// @brief Set the final temperature.
+	/// @details In kcal/mol.  Must be positive.
+	void
+	set_temperature_final(
+		masala::base::Real const temperature_in
+	) override;
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
@@ -148,6 +161,12 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief The natural logarithm of the initial temperature.  Defaults to ln(100.0).
+	masala::base::Real log_initial_temperature_ = ( std::log( 100.0 ) );
+
+	/// @brief The natural logarithm of the final temperature.  Defaults to ln(0.3).
+	masala::base::Real log_final_temperature_ = ( std::log( 0.3 ) );
 
 }; // class LogarithmicAnnealingSchedule
 

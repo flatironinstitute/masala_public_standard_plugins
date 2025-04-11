@@ -178,14 +178,14 @@ LogarithmicAnnealingSchedule::get_api_definition() {
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 100.0.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LogarithmicAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
+                false, true, std::bind( &LogarithmicAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
         );
 		api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.3.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LogarithmicAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
+                false, true, std::bind( &LogarithmicAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
             )
         );
 
@@ -239,7 +239,7 @@ LogarithmicAnnealingSchedule::temperature() const {
 	Size const callcount( call_count() );
 	if( callcount >= protected_call_count_final() ) { return protected_temperature_final(); }
 	Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( protected_call_count_final() - 1 ) );
-	return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
+	return std::exp( f * log_final_temperature_ + (1.0 - f) * log_initial_temperature_ );
 }
 
 /// @brief Return temperature for the Nth timepoint.
@@ -252,13 +252,36 @@ LogarithmicAnnealingSchedule::temperature(
 		return protected_temperature_final();
 	}
 	masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( protected_call_count_final() - 1 ) );
-	return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
+	return std::exp( f * log_final_temperature_ + (1.0 - f) * log_initial_temperature_ );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC SETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief Set the initial temperature.
+/// @details In kcal/mol.  Must be positive.
+void
+LogarithmicAnnealingSchedule::set_temperature_initial(
+    masala::base::Real const temperature_in
+) {
+	CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature_initial", "The initial temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
+	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+	nonconst_protected_temperature_initial() = temperature_in;
+	log_initial_temperature_ = std::log( temperature_in );
+}
+
+/// @brief Set the final temperature.
+/// @details In kcal/mol.  Must be positive.
+void
+LogarithmicAnnealingSchedule::set_temperature_final(
+    masala::base::Real const temperature_in
+) {
+	CHECK_OR_THROW_FOR_CLASS( temperature_in > 0.0, "set_temperature_final", "The final temperature must be greater than zero, but got " + std::to_string( temperature_in ) + " kcal/mol." );
+	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+	nonconst_protected_temperature_final() = temperature_in;
+	log_final_temperature_ = std::log( temperature_in );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
