@@ -157,6 +157,12 @@ protected:
 	/// context.  Derived classes should override this function and call the base class version.
 	void protected_assign( LinearAnnealingSchedule const & src ) override;
 
+	/// @brief Access the log of the initial temperature.
+	inline masala::base::Real protected_log_initial_temperature() const { return log_initial_temperature_; }
+
+	/// @brief Access the log of the final temperature.
+	inline masala::base::Real protected_log_final_temperature() const { return log_final_temperature_; }
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

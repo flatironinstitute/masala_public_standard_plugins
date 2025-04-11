@@ -17,7 +17,8 @@
 */
 
 /// @file src/optimizers/annealing/LogarithmicRepeatAnnealingSchedule.hh
-/// @brief Headers for an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
+/// @brief Headers for an annealing schedule that changes linearly on a log scale with
+/// time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
@@ -28,7 +29,7 @@
 #include <optimizers/annealing/LogarithmicRepeatAnnealingSchedule.fwd.hh>
 
 // Parent class:
-#include <optimizers/annealing/LinearAnnealingSchedule.hh>
+#include <optimizers/annealing/LogarithmicAnnealingSchedule.hh>
 
 // STL headers
 #include <mutex>
@@ -37,10 +38,15 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace annealing {
 
-/// @brief An annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
+/// @brief An annealing schedule that changes linearly on a log scale with time, then
+/// jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class LogarithmicRepeatAnnealingSchedule : public standard_masala_plugins::optimizers::annealing::LinearAnnealingSchedule {
+class LogarithmicRepeatAnnealingSchedule : public standard_masala_plugins::optimizers::annealing::LogarithmicAnnealingSchedule {
+
+	typedef standard_masala_plugins::optimizers::annealing::LogarithmicAnnealingSchedule Parent;
+	typedef standard_masala_plugins::optimizers::annealing::LogarithmicAnnealingScheduleSP ParentSP;
+	typedef standard_masala_plugins::optimizers::annealing::LogarithmicAnnealingScheduleCSP ParentCSP;
 
 public:
 
@@ -83,7 +89,7 @@ public:
 	get_categories() const override;
 
 	/// @brief Get the ahierarchical keywords for this plugin class.
-	/// @details The base class implementation returns { "annealing_schedule", "linear", "repeat", "time_dependent" }
+	/// @details The base class implementation returns { "annealing_schedule", "logarithmic", "repeat", "time_dependent" }
 	std::vector< std::string >
 	get_keywords() const override;
 

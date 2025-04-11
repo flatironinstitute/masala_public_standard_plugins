@@ -17,7 +17,8 @@
 */
 
 /// @file src/optimizers/annealing/LogarithmicRepeatAnnealingSchedule.fwd.hh
-/// @brief Forward declarations for an annealing schedule that changes linearly with time, then jumps back up to ramp down again (a sawtooth pattern).
+/// @brief Forward declarations for an annealing schedule that changes linearly on a log scale with
+/// time, then jumps back up to ramp down again (a sawtooth pattern).
 /// @details Annealing schedules return temperature as a function of number of calls.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
