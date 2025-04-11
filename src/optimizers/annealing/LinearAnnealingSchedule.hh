@@ -179,12 +179,12 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief The initial temperature.
-	/// @details In units of kcal/mol.  Defaults to 3.0.
-	masala::base::Real temperature_initial_ = 3.0;
+	/// @details In units of kcal/mol.  Defaults to 100.0.
+	masala::base::Real temperature_initial_ = 100.0;
 
 	/// @brief The final temperature.
-	/// @details In units of kcal/mol.  Defaults to 0.4.
-	masala::base::Real temperature_final_ = 0.4;
+	/// @details In units of kcal/mol.  Defaults to 0.3.
+	masala::base::Real temperature_final_ = 0.3;
 
 	/// @brief The number of calls expected.
 	/// @details Defaults to 100,000, arbitrarily.

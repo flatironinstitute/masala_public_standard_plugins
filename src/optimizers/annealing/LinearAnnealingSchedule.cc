@@ -49,7 +49,7 @@ namespace annealing {
 LinearAnnealingSchedule::LinearAnnealingSchedule(
     LinearAnnealingSchedule const & src
 ) :
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule( src )
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule()
 {
     *this = src;
 }
@@ -59,7 +59,6 @@ LinearAnnealingSchedule &
 LinearAnnealingSchedule::operator=(
     LinearAnnealingSchedule const & src
 ) {
-    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=( src );
     std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
     std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
     std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
@@ -316,8 +315,8 @@ LinearAnnealingSchedule::get_call_count() const {
 /*virtual*/
 void
 LinearAnnealingSchedule::protected_reset() {
-    temperature_initial_ = 3.0;
-    temperature_final_ = 0.4;
+    temperature_initial_ = 100.0;
+    temperature_final_ = 0.3;
     call_count_final_ = 100000;
     masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::reset_call_count();
 }
@@ -332,6 +331,7 @@ LinearAnnealingSchedule::protected_assign(
     temperature_initial_ = src.temperature_initial_;
     temperature_final_ = src.temperature_final_;
     call_count_final_ = src.call_count_final_;
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=(src);
 }
 
 } // namespace annealing
