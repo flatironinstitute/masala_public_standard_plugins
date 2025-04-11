@@ -232,14 +232,14 @@ LogarithmicAnnealingSchedule::get_api_definition() {
 /// @brief Return temperature.
 masala::base::Real
 LogarithmicAnnealingSchedule::temperature() const {
-    using masala::base::Size;
-    using masala::base::Real;
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-   Parent::increment_call_count();
-    Size const callcount( call_count() );
-    if( callcount >= call_count_final_ ) { return temperature_final_; }
-    Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( call_count_final_ - 1 ) );
-    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
+	using masala::base::Size;
+	using masala::base::Real;
+	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+	Parent::increment_call_count();
+	Size const callcount( call_count() );
+	if( callcount >= protected_call_count_final() ) { return protected_temperature_final(); }
+	Real const f( static_cast< Real >( callcount - 1 ) / static_cast< Real >( protected_call_count_final() - 1 ) );
+	return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
 /// @brief Return temperature for the Nth timepoint.
@@ -247,12 +247,12 @@ masala::base::Real
 LogarithmicAnnealingSchedule::temperature(
     masala::base::Size const time_index
 ) const {
-    std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
-    if( time_index >= call_count_final_ ) {
-        return temperature_final_;
-    }
-    masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( call_count_final_ - 1 ) );
-    return f * temperature_final_ + (1.0 - f) * temperature_initial_;
+	std::lock_guard< std::mutex > lock( annealing_schedule_mutex() );
+	if( time_index >= protected_call_count_final() ) {
+		return protected_temperature_final();
+	}
+	masala::base::Real const f( static_cast< masala::base::Real >( time_index ) / static_cast< masala::base::Real >( protected_call_count_final() - 1 ) );
+	return f * protected_temperature_final() + (1.0 - f) * protected_temperature_initial();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
