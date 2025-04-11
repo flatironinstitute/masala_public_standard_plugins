@@ -141,7 +141,7 @@ LinearAnnealingSchedule::get_api_definition() {
         // Constructors
         api_def->add_constructor(
             masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< LinearAnnealingSchedule > >( 
-                "LinearAnnealingSchedule", "Construct a LinearAnnealingSchedule object, with temperature initialized to 0.62 kcal/mol."
+                "LinearAnnealingSchedule", "Construct a LinearAnnealingSchedule object with default settings."
             )
         );
         api_def->add_constructor(
@@ -154,7 +154,7 @@ LinearAnnealingSchedule::get_api_definition() {
         // Setters
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
-                "reset", "Reset this object's call count, as well as setting temperature back to 0.62.",
+                "reset", "Reset this object's call count.",
                 false, false, std::bind( &LinearAnnealingSchedule::reset, this )
             )
         );
@@ -174,13 +174,13 @@ LinearAnnealingSchedule::get_api_definition() {
         );
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
-                "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 3.0.",
+                "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 100.0.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
                 false, false, std::bind( &LinearAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
         );        api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
-                "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.4.",
+                "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.3.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
                 false, false, std::bind( &LinearAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
             )
