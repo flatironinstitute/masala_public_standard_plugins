@@ -173,8 +173,8 @@ TEST_CASE( "Test the samples of the logarithmic repeat annealing schedule with t
 		3.40442631607654, 2.58841183481742, 1.96798967126543, 1.49627786973884, 1.13763171431211,
 		0.864950249938933, 0.657628409490851, 0.5
 	};
-	std::vector< Real > actual_vals(64, 0.0);
-	std::vector< Real > actual_vals2(64, 0.0);
+	std::vector< Real > actual_vals(63, 0.0);
+	std::vector< Real > actual_vals2(63, 0.0);
 
     REQUIRE_NOTHROW([&](){
 		masala::base::managers::plugin_module::MasalaPluginAPISP plugin_object(
@@ -185,12 +185,12 @@ TEST_CASE( "Test the samples of the logarithmic repeat annealing schedule with t
 		LogarithmicRepeatAnnealingSchedule_APISP anneal_sched( std::dynamic_pointer_cast< LogarithmicRepeatAnnealingSchedule_API >( plugin_object ) );
 		CHECK( anneal_sched != nullptr );
 
-		anneal_sched->set_final_time_index(64);
+		anneal_sched->set_final_time_index(63);
 		anneal_sched->set_temperature_initial(120.0);
 		anneal_sched->set_temperature_final(0.5);
         anneal_sched->set_n_repeats(3);
 
-		for( Size i(0); i<64; ++i ) {
+		for( Size i(0); i<63; ++i ) {
 			actual_vals[i] = anneal_sched->temperature();
 		}
 
@@ -200,7 +200,7 @@ TEST_CASE( "Test the samples of the logarithmic repeat annealing schedule with t
 		CHECK( masala::base::utility::container::equal_within_threshold( expected_vals, actual_vals, 1.0e-6 ) );
 
 		anneal_sched->reset_call_count();
-		for( Size i(65); i>0; --i ) {
+		for( Size i(63); i>0; --i ) {
 			actual_vals2[i-1] = anneal_sched->temperature(i-1);
 		}
 
@@ -212,7 +212,7 @@ TEST_CASE( "Test the samples of the logarithmic repeat annealing schedule with t
 
 		CHECK( std::abs( anneal_sched->temperature(6) - expected_vals[6] ) < 1.0e-6 );
 		CHECK( std::abs( anneal_sched->temperature(8) - expected_vals[8] ) < 1.0e-6 );
-		CHECK( std::abs( anneal_sched->temperature(512) - expected_vals[63] ) < 1.0e-6 );
+		CHECK( std::abs( anneal_sched->temperature(512) - expected_vals[62] ) < 1.0e-6 );
 
     }() );
 
