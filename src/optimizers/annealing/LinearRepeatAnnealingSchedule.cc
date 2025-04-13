@@ -50,9 +50,9 @@ namespace annealing {
 LinearRepeatAnnealingSchedule::LinearRepeatAnnealingSchedule(
     LinearRepeatAnnealingSchedule const & src
 ) :
-    LinearAnnealingSchedule( src ) // Locks mutex and calls protected_assign().
+    LinearAnnealingSchedule()
 {
-   *this = src;
+   *this = src; // Locks mutex and calls protected_assign().
 }
 
 /// @brief Assignment operator.
@@ -60,7 +60,11 @@ LinearRepeatAnnealingSchedule &
 LinearRepeatAnnealingSchedule::operator=(
     LinearRepeatAnnealingSchedule const & src
 ) {
-	LinearAnnealingSchedule::operator=( src );
+    masala::numeric_api::base_classes::optimization::annealing::PluginAnnealingSchedule::operator=( src );
+    std::lock( annealing_schedule_mutex(), src.annealing_schedule_mutex() );
+    std::lock_guard< std::mutex > lock( annealing_schedule_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lock2( src.annealing_schedule_mutex(), std::adopt_lock );
+    protected_assign(src);
     return *this;
 }
 
@@ -140,7 +144,7 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
         // Constructors
         api_def->add_constructor(
             masala::make_shared< MasalaObjectAPIConstructorDefinition_ZeroInput< LinearRepeatAnnealingSchedule > >( 
-                "LinearRepeatAnnealingSchedule", "Construct a LinearRepeatAnnealingSchedule object, with temperature initialized to 0.62 kcal/mol."
+                "LinearRepeatAnnealingSchedule", "Construct a LinearRepeatAnnealingSchedule object."
             )
         );
         api_def->add_constructor(
@@ -153,7 +157,7 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
         // Setters
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
-                "reset", "Reset this object's call count, as well as setting temperature back to 0.62.",
+                "reset", "Reset this object's call count, and all settings.",
                 false, false, std::bind( &LinearRepeatAnnealingSchedule::reset, this )
             )
         );
@@ -173,16 +177,16 @@ LinearRepeatAnnealingSchedule::get_api_definition() {
         );
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
-                "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 3.0.",
+                "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 100.0.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
+                false, true, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_initial, this, std::placeholders::_1 )
             )
         );
 		api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
-                "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.4.",
+                "set_temperature_final", "Set the final temperature, in kcal/mol.  Default is 0.3.",
                 "temperature_in", "The temperature to set, in kcal/mol.  Must be non-negative.",
-                false, false, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
+                false, true, std::bind( &LinearRepeatAnnealingSchedule::set_temperature_final, this, std::placeholders::_1 )
             )
         );
 		api_def->add_setter(
