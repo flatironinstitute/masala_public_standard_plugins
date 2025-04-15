@@ -135,7 +135,7 @@ main(
             mc_opt->set_attempts_per_problem(threadcount);
             mc_opt->set_cpu_threads_to_request(threadcount);
             mc_opt->set_solution_storage_mode("check_on_acceptance");
-            mc_opt->set_n_solutions_to_store_per_problem(5);
+            mc_opt->set_n_solutions_to_store_per_problem(1);
 
             // Run the problem:
             std::chrono::time_point< std::chrono::steady_clock > const starttime(
