@@ -28,7 +28,7 @@
 #include <base/managers/version/MasalaVersionManager.hh>
 
 #define STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
-#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 7
+#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 8
 
 namespace standard_masala_plugins {
 namespace registration_api {
@@ -52,8 +52,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 7 ), // Min version
+        std::pair< Size, Size >( 0, 8 ), // Min version
         "",
+        "Version 0.8 cleaned up a few violations of Masala conventions related to scratch spaces.  "
 		"Prior to version 0.7, cost function problems and cost functions could not accept scratch space pointers.  "
 		"Prior to version 0.6, annotations for API functions indicating preferred data representations were not available.  "
 		"Prior to version 0.5, annotations for API functions were not available, and certain problems existed "
