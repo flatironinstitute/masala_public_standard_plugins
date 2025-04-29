@@ -76,6 +76,14 @@ public:
 
 	/// @brief Destructor.
 	~PairwisePrecomputedCFNProblemScratchSpace() override = default;
+
+	/// @brief Make a copy of this object.
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+	clone() const override;
+
+	/// @brief Make a fully independent copy of this object.
+	PairwisePrecomputedCFNProblemScratchSpaceSP
+	deep_clone() const;
 	
 public:
 
@@ -121,6 +129,9 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Make this object fully independent.
+	void protected_make_independent() override;
 
 private:
 

@@ -53,6 +53,20 @@ PairwisePrecomputedCFNProblemScratchSpace::PairwisePrecomputedCFNProblemScratchS
 	finalize();
 }
 
+/// @brief Make a copy of this object.
+masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+PairwisePrecomputedCFNProblemScratchSpace::clone() const {
+	return masala::make_shared< PairwisePrecomputedCFNProblemScratchSpace >( *this );
+}
+
+/// @brief Make a fully independent copy of this object.
+PairwisePrecomputedCFNProblemScratchSpaceSP
+PairwisePrecomputedCFNProblemScratchSpace::deep_clone() const {
+	PairwisePrecomputedCFNProblemScratchSpaceSP new_obj( masala::make_shared< PairwisePrecomputedCFNProblemScratchSpace >( *this ) );
+	new_obj->protected_make_independent();
+	return new_obj;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION AND DESTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +83,17 @@ PairwisePrecomputedCFNProblemScratchSpace::class_name() const {
 std::string
 PairwisePrecomputedCFNProblemScratchSpace::class_namespace() const {
 	return ".standard_masala_plugins::optimizers::cost_function_network";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Make this object fully independent.
+void
+PairwisePrecomputedCFNProblemScratchSpace::protected_make_independent() {
+	// GNDN
+	Parent::protected_make_independent();
 }
 
 } // namespace cost_function_network
