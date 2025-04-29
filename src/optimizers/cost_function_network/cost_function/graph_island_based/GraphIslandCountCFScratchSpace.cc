@@ -273,6 +273,8 @@ GraphIslandCountCFScratchSpace::protected_make_independent() {
 		edges_for_node_in_connectivity_graph_ = &vec7_;
 		last_accepted_edges_for_node_in_connectivity_graph_ = &vec8_;
 	}
+
+	Parent::protected_make_independent();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
