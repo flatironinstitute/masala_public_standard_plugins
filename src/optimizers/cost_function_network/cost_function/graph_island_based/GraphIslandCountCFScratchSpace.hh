@@ -88,8 +88,12 @@ public:
 	~GraphIslandCountCFScratchSpace() override = default;
 
 	/// @brief Make a copy of this object.
-	masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionScratchSpaceSP
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
 	clone() const override;
+
+	/// @brief Make a fully independent copy of this object.
+	GraphIslandCountCFScratchSpaceSP
+	deep_clone() const;
 
 public:
 
@@ -211,6 +215,9 @@ protected:
 
 	/// @brief Accept the last move.
 	void protected_accept_last_move() override;
+
+	/// @brief Make this object fully independent by deep-cloning all contained data.
+	void protected_make_independent() override;
 
 private:
 

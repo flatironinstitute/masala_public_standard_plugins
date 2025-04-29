@@ -90,9 +90,17 @@ GraphIslandCountCFScratchSpace::GraphIslandCountCFScratchSpace(
 }
 
 /// @brief Make a copy of this object.
-masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionScratchSpaceSP
+masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpaceSP
 GraphIslandCountCFScratchSpace::clone() const {
 	return masala::make_shared< GraphIslandCountCFScratchSpace >( *this );
+}
+
+/// @brief Make a fully independent copy of this object.
+GraphIslandCountCFScratchSpaceSP
+GraphIslandCountCFScratchSpace::deep_clone() const {
+	GraphIslandCountCFScratchSpaceSP new_obj( masala::make_shared< GraphIslandCountCFScratchSpace >( *this ) );
+	new_obj->protected_make_independent();
+	return new_obj;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,6 +237,44 @@ GraphIslandCountCFScratchSpace::protected_accept_last_move() {
 		move_made_ = false;
 		move_accepted_ = true;
 	}
+}
+
+/// @brief Make this object fully independent by deep-cloning all contained data.
+void
+GraphIslandCountCFScratchSpace::protected_make_independent() {
+	if( current_candidate_solution_ != nullptr && *current_candidate_solution_ == vec2_ ) {
+		current_candidate_solution_ = &vec2_;
+		last_accepted_candidate_solution_ = &vec1_;
+	} else {
+		current_candidate_solution_ = &vec1_;
+		last_accepted_candidate_solution_ = &vec2_;
+	}
+
+	if( island_sizes_ != nullptr && *island_sizes_ == vec4_ ) {
+		island_sizes_ = &vec4_;
+		last_accepted_island_sizes_ = &vec3_;
+	} else {
+		island_sizes_ = &vec3_;
+		last_accepted_island_sizes_ = &vec4_;
+	}
+
+	if( nedges_for_node_in_connectivity_graph_ != nullptr && *nedges_for_node_in_connectivity_graph_ == vec6_ ) {
+		nedges_for_node_in_connectivity_graph_ = &vec6_;
+		last_accepted_nedges_for_node_in_connectivity_graph_ = &vec5_;
+	} else {
+		nedges_for_node_in_connectivity_graph_ = &vec5_;
+		last_accepted_nedges_for_node_in_connectivity_graph_ = &vec6_;
+	}
+
+	if( edges_for_node_in_connectivity_graph_ != nullptr && *edges_for_node_in_connectivity_graph_ == vec8_ ) {
+		edges_for_node_in_connectivity_graph_ = &vec8_;
+		last_accepted_edges_for_node_in_connectivity_graph_ = &vec7_;
+	} else {
+		edges_for_node_in_connectivity_graph_ = &vec7_;
+		last_accepted_edges_for_node_in_connectivity_graph_ = &vec8_;
+	}
+
+	Parent::protected_make_independent();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
