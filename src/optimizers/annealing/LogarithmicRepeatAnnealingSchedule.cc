@@ -33,6 +33,7 @@
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/NoUISetterAnnotation.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
@@ -157,26 +158,38 @@ LogarithmicRepeatAnnealingSchedule::get_api_definition() {
         );
 
         // Setters
-        api_def->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
-                "reset", "Reset this object's call count, and all settings.",
-                false, false, std::bind( &LogarithmicRepeatAnnealingSchedule::reset, this )
-            )
-        );
-        api_def->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
-                "reset_call_count", "Reset this object's call count.",
-                false, true, std::bind( &LogarithmicRepeatAnnealingSchedule::reset_call_count, this )
-            )
-        );
-        api_def->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size > >(
-                "set_final_time_index", "Set the final time index in the annealing schedule.",
-                "final_time_index", "The index of the final timepoint in the annealing schedule.  Note that this is actually "
-                "the final zero-based index plus one, or equivalently the number of timepoints.",
-                false, true, std::bind( &LogarithmicRepeatAnnealingSchedule::set_final_time_index, this, std::placeholders::_1 )
-            )
-        );
+		{
+			MasalaObjectAPISetterDefinition_ZeroInputSP reset_fxn(
+				masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
+					"reset", "Reset this object's call count, and all settings.",
+					false, false, std::bind( &LogarithmicRepeatAnnealingSchedule::reset, this )
+				)
+			);
+			reset_fxn->add_setter_annotation( masala::make_shared< setter_annotation::NoUISetterAnnotation >() );
+			api_def->add_setter( reset_fxn );
+		}
+		{
+			MasalaObjectAPISetterDefinition_ZeroInputSP resetcall_fxn(
+				masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput >(
+					"reset_call_count", "Reset this object's call count.",
+					false, true, std::bind( &LogarithmicRepeatAnnealingSchedule::reset_call_count, this )
+				)
+			);
+			resetcall_fxn->add_setter_annotation( masala::make_shared< setter_annotation::NoUISetterAnnotation >() );
+			api_def->add_setter( resetcall_fxn );
+		}
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< masala::base::Size > finaltime_fxn(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size > >(
+					"set_final_time_index", "Set the final time index in the annealing schedule.",
+					"final_time_index", "The index of the final timepoint in the annealing schedule.  Note that this is actually "
+					"the final zero-based index plus one, or equivalently the number of timepoints.",
+					false, true, std::bind( &LogarithmicRepeatAnnealingSchedule::set_final_time_index, this, std::placeholders::_1 )
+				)
+			);
+			finaltime_fxn->add_setter_annotation( masala::make_shared< setter_annotation::NoUISetterAnnotation >() );
+			api_def->add_setter( finaltime_fxn );
+		}
         api_def->add_setter(
             masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Real > >(
                 "set_temperature_initial", "Set the initial temperature, in kcal/mol.  Default is 100.0.",

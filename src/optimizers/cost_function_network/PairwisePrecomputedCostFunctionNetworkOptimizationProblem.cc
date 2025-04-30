@@ -39,6 +39,7 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/NoUISetterAnnotation.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_TwoInput.tmpl.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_ThreeInput.tmpl.hh>
@@ -577,20 +578,28 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 		);
 
 		// Setters:
-		api_def->add_setter(
-			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ZeroInput >(
-				"reset", "Completely reset the problem description, deleting all one-node and two-node penalties and "
-				"all choices for each node.", false, true,
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset, this )
-			)
-		);
-		api_def->add_setter(
-			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ZeroInput >(
-				"finalize", "Indicates that problem setup is complete, locking the one- and two-node penalties and making the object read-only.",
-				false, true,
-				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalize, this )
-			)
-		);
+		{
+			setter::MasalaObjectAPISetterDefinition_ZeroInputSP resetfxn(
+				masala::make_shared< setter::MasalaObjectAPISetterDefinition_ZeroInput >(
+					"reset", "Completely reset the problem description, deleting all one-node and two-node penalties and "
+					"all choices for each node.", false, true,
+					std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::reset, this )
+				)
+			);
+			resetfxn->add_setter_annotation( masala::make_shared< setter::setter_annotation::NoUISetterAnnotation >() );
+			api_def->add_setter( resetfxn );
+		}
+		{
+			setter::MasalaObjectAPISetterDefinition_ZeroInputSP finalizefxn(
+				masala::make_shared< setter::MasalaObjectAPISetterDefinition_ZeroInput >(
+					"finalize", "Indicates that problem setup is complete, locking the one- and two-node penalties and making the object read-only.",
+					false, true,
+					std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::finalize, this )
+				)
+			);
+			finalizefxn->add_setter_annotation( masala::make_shared< setter::setter_annotation::NoUISetterAnnotation >() );
+			api_def->add_setter( finalizefxn );
+		}
 		api_def->add_setter(
 			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< Size, Size, Real > >(
 				"set_onebody_penalty", "Set the one-node penalty for a particular choice index selected at a particular node index.",
