@@ -32,7 +32,7 @@
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.fwd.hh>
@@ -84,7 +84,7 @@ std::string get_all_greedy_refinement_modes();
 /// accept or reject the move based on the difference in energy and the Metropolis criterion.
 /// @note If the annealing schedule used ramps temperature, this does simulated annealing.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class MonteCarloCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer {
+class MonteCarloCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer {
 
 public:
 
@@ -443,7 +443,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
-	void protected_assign( CostFunctionNetworkOptimizer const & src ) override;
+	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
 
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be

@@ -139,7 +139,7 @@ get_all_greedy_refinement_modes() {
 MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     MonteCarloCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
+    masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
 	std::lock( src.cfn_solver_mutex(), cfn_solver_mutex() );
 	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex(), std::adopt_lock );
@@ -151,7 +151,7 @@ MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
 /// @details Needed since we define a mutex.
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src ); // Calls protected_assign().
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::operator=( src ); // Calls protected_assign().
 	return *this;
 }
 
@@ -187,7 +187,7 @@ MonteCarloCostFunctionNetworkOptimizer::make_independent() {
 std::vector< std::vector< std::string > >
 MonteCarloCostFunctionNetworkOptimizer::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_categories();
+	return PluginCostFunctionNetworkOptimizer::get_categories();
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
@@ -196,7 +196,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_categories() const {
 std::vector< std::string >
 MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	std::vector< std::string > keywords( CostFunctionNetworkOptimizer::get_keywords() );
+	std::vector< std::string > keywords( PluginCostFunctionNetworkOptimizer::get_keywords() );
     keywords.push_back( "monte_carlo" );
     keywords.push_back( "simulated_annealing" );
     keywords.push_back( "stochastic" );
@@ -208,7 +208,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
 std::vector< std::vector< std::string > >
 MonteCarloCostFunctionNetworkOptimizer::get_engine_categories() const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_engine_categories();
+	return PluginCostFunctionNetworkOptimizer::get_engine_categories();
 }
 
 /// @brief Get the keywords that this MasalaEngine has.
@@ -1494,7 +1494,7 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
 /// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
 void
 MonteCarloCostFunctionNetworkOptimizer::protected_assign(
-	CostFunctionNetworkOptimizer const & src
+	PluginCostFunctionNetworkOptimizer const & src
 ) {
 	MonteCarloCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< MonteCarloCostFunctionNetworkOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a MonteCarloCostFunctionNetworkOptimizer object." );
@@ -1515,7 +1515,7 @@ MonteCarloCostFunctionNetworkOptimizer::protected_assign(
 	}
 	
 	solution_storage_mode_ = src_cast_ptr->solution_storage_mode_;
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
 }
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
@@ -1528,7 +1528,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation(
 	masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
 ) {
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
 }
 
 /// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.

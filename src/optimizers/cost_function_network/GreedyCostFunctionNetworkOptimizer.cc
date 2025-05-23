@@ -74,7 +74,7 @@ namespace cost_function_network {
 GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
 	GreedyCostFunctionNetworkOptimizer const & src
 ) :
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
 	std::lock( optimizer_mutex_, src.optimizer_mutex_ );
 	std::lock_guard< std::mutex > lock( optimizer_mutex_, std::adopt_lock );
@@ -86,7 +86,7 @@ GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
 /// @details Needed since we define a mutex.
 GreedyCostFunctionNetworkOptimizer &
 GreedyCostFunctionNetworkOptimizer::operator=( GreedyCostFunctionNetworkOptimizer const & src ) {
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );  // Calls protected_assign().
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::operator=( src );  // Calls protected_assign().
 	return *this;
 }
 
@@ -120,7 +120,7 @@ GreedyCostFunctionNetworkOptimizer::make_independent() {
 std::vector< std::vector< std::string > >
 GreedyCostFunctionNetworkOptimizer::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_categories();
+	return PluginCostFunctionNetworkOptimizer::get_categories();
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
@@ -129,7 +129,7 @@ GreedyCostFunctionNetworkOptimizer::get_categories() const {
 std::vector< std::string >
 GreedyCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	std::vector< std::string > keywords( CostFunctionNetworkOptimizer::get_keywords() );
+	std::vector< std::string > keywords( PluginCostFunctionNetworkOptimizer::get_keywords() );
     keywords.push_back( "greedy" );
     keywords.push_back( "deterministic" );
     return keywords;
@@ -140,7 +140,7 @@ GreedyCostFunctionNetworkOptimizer::get_keywords() const {
 std::vector< std::vector< std::string > >
 GreedyCostFunctionNetworkOptimizer::get_engine_categories() const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_engine_categories();
+	return PluginCostFunctionNetworkOptimizer::get_engine_categories();
 }
 
 /// @brief Get the keywords that this MasalaEngine has.
@@ -877,7 +877,7 @@ GreedyCostFunctionNetworkOptimizer::check_starting_state_against_problem(
 /// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
 void
 GreedyCostFunctionNetworkOptimizer::protected_assign(
-	CostFunctionNetworkOptimizer const & src
+	PluginCostFunctionNetworkOptimizer const & src
 ) {
 	GreedyCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< GreedyCostFunctionNetworkOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a GreedyCostFunctionNetworkOptimizer object." );
@@ -887,7 +887,7 @@ GreedyCostFunctionNetworkOptimizer::protected_assign(
 	n_times_seen_multiplier_ = src_cast_ptr->n_times_seen_multiplier_;
 	optimizer_starting_states_ = src_cast_ptr->optimizer_starting_states_;
 	
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
 }
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
@@ -900,7 +900,7 @@ void
 GreedyCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation(
 	masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
 ) {
-	masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
 }
 
 /// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.

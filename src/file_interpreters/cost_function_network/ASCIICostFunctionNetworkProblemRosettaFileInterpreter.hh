@@ -17,8 +17,7 @@
 */
 
 /// @file src/file_interpreters/cost_function_network/ASCIICostFunctionNetworkProblemRosettaFileInterpreter.hh
-/// @brief Headers for a file interpreter for reading and writing ASCII cost function network
-/// optimization problems.
+/// @brief Headers for a file interpreter for reading and writing ASCII files that define cost function network optimization problems.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef StandardMaslaPlugins_src_file_interpreters_cost_function_network_ASCIICostFunctionNetworkProblemRosettaFileInterpreter_hh

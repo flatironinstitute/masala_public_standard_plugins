@@ -49,8 +49,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 10 ), // Min version
+        std::pair< Size, Size >( 0, 11 ), // Min version
         "",
+        "Version 0.11 changed base class names for optimizers, for consistency.  "
         "Version 0.10 added support for deprecation annotations, and updated the build system for centralized versioning.  "
         "Version 0.9 added support for no-UI function annotations.  "
         "Version 0.8 cleaned up a few violations of Masala conventions related to scratch spaces.  "

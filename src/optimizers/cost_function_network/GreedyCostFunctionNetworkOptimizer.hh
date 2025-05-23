@@ -28,7 +28,7 @@
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.fwd.hh>
 
 // Numeric API headers:
@@ -48,7 +48,7 @@ namespace cost_function_network {
 
 /// @brief A CostFunctionNetworkOptimizer that solves a cost function network problem by greedy descent.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GreedyCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer {
+class GreedyCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer {
 
 public:
 
@@ -276,7 +276,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
-	void protected_assign( CostFunctionNetworkOptimizer const & src ) override;
+	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
 
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
