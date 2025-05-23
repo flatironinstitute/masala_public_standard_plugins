@@ -67,7 +67,7 @@ namespace gradient_based {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 GradientDescentFunctionOptimizer::clone() const {
 	return masala::make_shared< GradientDescentFunctionOptimizer >(*this);
 }
@@ -87,7 +87,7 @@ GradientDescentFunctionOptimizer::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
+/// @returns { { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -96,7 +96,7 @@ GradientDescentFunctionOptimizer::deep_clone() const {
 std::vector< std::vector< std::string > >
 GradientDescentFunctionOptimizer::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" }
+		{ "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" }
 	};
 }
 
@@ -123,10 +123,10 @@ GradientDescentFunctionOptimizer::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
+/// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 GradientDescentFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } };
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } };
 }
 
 /// @brief Get the keywords that this MasalaEngine has.
@@ -696,7 +696,7 @@ GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
 /// @details Performs no mutex locking.
 void
 GradientDescentFunctionOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 ) {
 	GradientDescentFunctionOptimizer const * src_ptr_cast( dynamic_cast< GradientDescentFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
@@ -704,7 +704,7 @@ GradientDescentFunctionOptimizer::protected_assign(
 	max_iterations_ = src_ptr_cast->max_iterations_;
 	line_optimizer_ = src_ptr_cast->line_optimizer_;
 
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -718,7 +718,7 @@ GradientDescentFunctionOptimizer::protected_make_independent() {
 		line_optimizer_copy->make_independent();
 		line_optimizer_ = line_optimizer_copy;
 	}
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based

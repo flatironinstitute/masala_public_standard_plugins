@@ -17,12 +17,7 @@
 */
 
 /// @file src/file_interpreters/cost_function_network/ASCIICostFunctionNetworkProblemRosettaFileInterpreter.cc
-/// @brief Implementation for a CostFunctionNetworkOptimizer that solves a cost function network problem using Monte
-/// Carlo methods.
-/// @details This performs a Metropolis-Hastings Monte Carlo search of node setting space, where each move is to
-/// pick a node at random and change its setting at random, compute the change in overall energy or score, and
-/// accept or reject the move based on the difference in energy and the Metropolis criterion.
-/// @note If the annealing schedule used ramps temperature, this does simulated annealing.
+/// @brief Implementation for a file interpreter for reading and writing ASCII files that define cost function network optimization problems.
 /// @author Tristan Zaborniak (tzaborniak@flatironinstitute.org).
 
 // Unit header:
@@ -32,7 +27,7 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/base_classes/optimization/cost_function_network/PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblemCreator.hh>
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 
@@ -601,10 +596,10 @@ ASCIICostFunctionNetworkProblemRosettaFileInterpreter::generate_cfn_problem() co
 		CHECK_OR_THROW_FOR_CLASS( engine_creators.size() > 0, "generate_cfn_problem", "Could not find a Masala "
 			"engine matching name \"" + cfn_optimizer_class_ + "\"."
 		);
-		CostFunctionNetworkOptimizer * engine(nullptr);
+		PluginCostFunctionNetworkOptimizer * engine(nullptr);
 		for( auto const & engine_creator : engine_creators ) {
 			MasalaEngineAPISP masala_engine( engine_creator->create_engine() );
-			engine = dynamic_cast< CostFunctionNetworkOptimizer * >( masala_engine->get_inner_engine_object().get() );
+			engine = dynamic_cast< PluginCostFunctionNetworkOptimizer * >( masala_engine->get_inner_engine_object().get() );
 			if( engine != nullptr ) break;
 		}
 		CHECK_OR_THROW_FOR_CLASS( engine != nullptr, "generate_cfn_problem", "Could not find a cost function "
