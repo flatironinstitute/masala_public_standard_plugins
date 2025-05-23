@@ -14,7 +14,9 @@ cd bin/tests
 ln -s ../../build/*_tests ./
 cd ../api
 ln -s ../../build/generate_*_api ./
-cd ../..
+cd ..
+ln -s ../build/benchmark_monte_carlo_cfn_optimizer ./
+cd ..
 
 mkdir headers/standard_masala_plugins && echo "Created headers/standard_masala_plugins/ directory." || echo "Directory headers/standard_masala_plugins/ already exists."
 rm -r headers/standard_masala_plugins/*
