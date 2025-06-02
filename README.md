@@ -28,27 +28,9 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
     
 6.  Set up symlinks to the dynamic library files in your Masala build directory.
 
-    For Windows:
     ```
     cd $MASALA_STANDARD_PLUGINS/lib
-    for f in $MASALA_PATH/build/*.dylib; do ln -s ${f}; done;
-    for f in $MASALA_PATH/build/*.dylib.0.3; do ln -s ${f}; done;
-    cd ..
-    ```
-
-    For Linux:
-    ```
-    cd $MASALA_STANDARD_PLUGINS/lib
-    for f in $MASALA_PATH/build/*.so; do ln -s ${f}; done;
-    for f in $MASALA_PATH/build/*.so.0.3; do ln -s ${f}; done;
-    cd ..
-    ```
-
-    For Mac:
-    ```
-    cd $MASALA_STANDARD_PLUGINS/lib
-    for f in $MASALA_PATH/build/*.dll; do ln -s ${f}; done;
-    for f in $MASALA_PATH/build/*.dll.0.3; do ln -s ${f}; done;
+    ln -s $MASALA_PATH/build/lib* .
     cd ..
     ```
     
