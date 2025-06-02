@@ -49,8 +49,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 11 ), // Min version
+        std::pair< Size, Size >( 0, 12 ), // Min version
         "",
+        "Version 0.12 updated some of the CMake files, and made the release build the default build.  "
         "Version 0.11 changed base class names for optimizers, for consistency.  "
         "Version 0.10 added support for deprecation annotations, and updated the build system for centralized versioning.  "
         "Version 0.9 added support for no-UI function annotations.  "
