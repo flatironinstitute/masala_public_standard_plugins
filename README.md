@@ -48,5 +48,5 @@ Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatir
 
 ## Compilation
 
-- Note that default compilation is in debug mode.
-- To compile in release mode, edit cmake/CMakeLists.txt, comment out the two "debug" lines, and uncomment the two "release" lines.
+- Note that default compilation is in release mode.
+- To compile in debug mode, edit cmake/CMakeLists.txt and change `SET( MODE release )` to `SET( MODE debug )`.
