@@ -802,6 +802,17 @@ MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
 	greedy_refinement_mode_ = mode_in;
 }
 
+/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps(
+    masala::base::Size const steps_in
+) {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    recompute_from_scratch_every_n_steps_ = steps_in;
+}
+
 /// @brief Set the greedy refinement mode, by string.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
@@ -908,6 +919,15 @@ std::string
 MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string() const {
     std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	return greedy_refinement_name_from_mode( greedy_refinement_mode_ );
+}
+
+/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+masala::base::Size
+MonteCarloCostFunctionNetworkOptimizer::recompute_from_scratch_every_n_steps() const {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    return recompute_from_scratch_every_n_steps_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
