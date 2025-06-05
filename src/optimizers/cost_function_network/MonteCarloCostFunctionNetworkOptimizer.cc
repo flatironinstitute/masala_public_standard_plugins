@@ -499,6 +499,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				)
             )
         );
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size const > >(
+				"set_recompute_from_scratch_every_n_steps",
+				"Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
+				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
+				"every 100 Monte Carlo trajectory steps.",
+				"steps_in", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
+				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
+				"numerical precision errors.  Defaults to every 100 steps.",
+				false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_description->add_getter(
