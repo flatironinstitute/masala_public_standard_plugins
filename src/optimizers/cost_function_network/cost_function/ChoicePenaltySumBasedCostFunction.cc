@@ -55,7 +55,7 @@ ChoicePenaltySumBasedCostFunction<T>::ChoicePenaltySumBasedCostFunction(
 	std::lock( src.data_representation_mutex(), data_representation_mutex() );
 	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
 	std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
-	protected_assign( src );
+	ChoicePenaltySumBasedCostFunction<T>::protected_assign( src );
 }
 
 // @brief Assignment operator.
