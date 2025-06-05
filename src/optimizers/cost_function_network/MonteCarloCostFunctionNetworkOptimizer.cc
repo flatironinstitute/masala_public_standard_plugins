@@ -499,6 +499,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				)
             )
         );
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size const > >(
+				"set_recompute_from_scratch_every_n_steps",
+				"Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
+				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
+				"every 100 Monte Carlo trajectory steps.",
+				"steps_in", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
+				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
+				"numerical precision errors.  Defaults to every 100 steps.",
+				false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_description->add_getter(
@@ -598,6 +611,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				)
             )
         );
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"recompute_from_scratch_every_n_steps",
+				"Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
+				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
+				"every 100 Monte Carlo trajectory steps.",
+				"steps", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
+				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
+				"numerical precision errors.  Defaults to every 100 steps.",
+				false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::recompute_from_scratch_every_n_steps, this )
+			)
+		);
 
         // Work functions:
         api_description->add_work_function(
@@ -802,6 +828,17 @@ MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
 	greedy_refinement_mode_ = mode_in;
 }
 
+/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps(
+    masala::base::Size const steps_in
+) {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    recompute_from_scratch_every_n_steps_ = steps_in;
+}
+
 /// @brief Set the greedy refinement mode, by string.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
@@ -908,6 +945,15 @@ std::string
 MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string() const {
     std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	return greedy_refinement_name_from_mode( greedy_refinement_mode_ );
+}
+
+/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+masala::base::Size
+MonteCarloCostFunctionNetworkOptimizer::recompute_from_scratch_every_n_steps() const {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    return recompute_from_scratch_every_n_steps_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1253,6 +1299,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
+	Size steps_since_score_recomputed(0);
     Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution, problem_scratch.get() ) );
     Real candidate_absolute_score( last_accepted_absolute_score );
     // write_to_tracer( "Initial score = " + std::to_string( last_accepted_absolute_score ) ); // DELETE ME
@@ -1264,6 +1311,13 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
+		if( recompute_from_scratch_every_n_steps_ > 0 ) {
+			++steps_since_score_recomputed;
+			if( recompute_from_scratch_every_n_steps_ == steps_since_score_recomputed ) {
+				steps_since_score_recomputed = 0;
+				last_accepted_absolute_score = problem->compute_absolute_score( last_accepted_solution, problem_scratch.get() );
+			}
+		}
         if( use_multimutation ) {
             make_mc_multimove( current_solution, n_choices_per_variable_node_using_variable_node_indices, poisson_lambda, randgen );
         } else {

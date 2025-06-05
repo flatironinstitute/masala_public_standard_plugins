@@ -50,7 +50,7 @@ PairwisePrecomputedCFNProblemScratchSpace::PairwisePrecomputedCFNProblemScratchS
 	for( masala::base::Size i(0); i<n_variable_nodes; ++i ) {
 		ivals_[i] = i;
 	}
-	finalize();
+	PairwisePrecomputedCFNProblemScratchSpace::finalize();
 }
 
 /// @brief Make a copy of this object.
