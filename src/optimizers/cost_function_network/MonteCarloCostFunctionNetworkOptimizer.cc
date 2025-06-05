@@ -1299,6 +1299,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
+	Size steps_since_score_recomputed(0);
     Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution, problem_scratch.get() ) );
     Real candidate_absolute_score( last_accepted_absolute_score );
     // write_to_tracer( "Initial score = " + std::to_string( last_accepted_absolute_score ) ); // DELETE ME
@@ -1310,6 +1311,13 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
+		if( recompute_from_scratch_every_n_steps_ > 0 ) {
+			++steps_since_score_recomputed;
+			if( recompute_from_scratch_every_n_steps_ == steps_since_score_recomputed ) {
+				steps_since_score_recomputed = 0;
+				last_accepted_absolute_score = problem->compute_absolute_score( last_accepted_solution, problem_scratch.get() );
+			}
+		}
         if( use_multimutation ) {
             make_mc_multimove( current_solution, n_choices_per_variable_node_using_variable_node_indices, poisson_lambda, randgen );
         } else {
