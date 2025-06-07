@@ -692,6 +692,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 	for( Size outer_iter( 0 ); outer_iter < outer_iterations_; ++outer_iter ) {
 		// std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} START OUTER ITER " << outer_iter << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
+		// Reset the simplex for subsequent outer iterations:
 		if( outer_iter > 0 ) {
 			for( Size i(0); i<=ndim; ++i ) {
 				if( i == best_index ) { continue; }
@@ -711,6 +712,9 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			}
 			simplex_scores(i) = objective_function( simplex.row(i).transpose() );
 		}
+		best_index = 0;
+		worst_index = 0;
+		second_worst_index = 0;
 		for( Size j(1); j<=ndim; ++j ) {
 			if( simplex_scores(j) < simplex_scores(best_index) ) {
 				best_index = j;
