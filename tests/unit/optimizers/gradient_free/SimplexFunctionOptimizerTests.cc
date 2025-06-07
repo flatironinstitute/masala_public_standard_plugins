@@ -161,7 +161,7 @@ grad_test_function_2(
 	);
 }
 
-TEST_CASE( "Find the local minimum of a two-dimensional function using the SimplexFunctionOptimizer.", "[standard_masala_plugins::optimizers::gradient_free::SimplexFunctionOptimizer][local_minimization][gradient_free][brent_algorithm][line_optimizer]" ) {
+TEST_CASE( "Find the local minimum of a two-dimensional function using the SimplexFunctionOptimizer.", "[standard_masala_plugins::optimizers::gradient_free::SimplexFunctionOptimizer][local_minimization][gradient_free]" ) {
 	using masala::base::Real;
 	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_free;
 	using masala::base::managers::tracer::MasalaTracerManager;
