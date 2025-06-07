@@ -124,6 +124,7 @@ public:
 
 	/// @brief Set the initial temperature.
 	/// @details In kcal/mol.  Must be non-negative.
+	virtual
 	void
 	set_temperature_initial(
 		masala::base::Real const temperature_in
@@ -131,6 +132,7 @@ public:
 
 	/// @brief Set the final temperature.
 	/// @details In kcal/mol.  Must be non-negative.
+	virtual
 	void
 	set_temperature_final(
 		masala::base::Real const temperature_in
@@ -149,6 +151,35 @@ public:
 	/// @brief Get the call count.
 	masala::base::Size get_call_count() const;
 
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Reset this object without locking mutex.  Should be called from a mutex-locked
+	/// context.  Derived classes should override this function and call the base class version.
+	virtual void protected_reset();
+
+	/// @brief Copy object src to this object without locking mutex.  Should be called from a mutex-locked
+	/// context.  Derived classes should override this function and call the base class version.
+	virtual void protected_assign( LinearAnnealingSchedule const & src );
+
+	/// @brief Access the initial temperature from a mutex-locked context.
+	inline masala::base::Real protected_temperature_initial() const { return temperature_initial_; }
+
+	/// @brief Access the final temperature from a mutex-locked context.
+	inline masala::base::Real protected_temperature_final() const { return temperature_final_; }
+
+	/// @brief Nonconst access the initial temperature from a mutex-locked context.
+	inline masala::base::Real & nonconst_protected_temperature_initial() { return temperature_initial_; }
+
+	/// @brief Nonconst access the final temperature from a mutex-locked context.
+	inline masala::base::Real & nonconst_protected_temperature_final() { return temperature_final_; }
+
+	/// @brief Access the expected call count from a mutex-locked context.
+	inline masala::base::Size protected_call_count_final() const { return call_count_final_; }
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,12 +187,12 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief The initial temperature.
-	/// @details In units of kcal/mol.  Defaults to 3.0.
-	masala::base::Real temperature_initial_ = 3.0;
+	/// @details In units of kcal/mol.  Defaults to 100.0.
+	masala::base::Real temperature_initial_ = 100.0;
 
 	/// @brief The final temperature.
-	/// @details In units of kcal/mol.  Defaults to 0.4.
-	masala::base::Real temperature_final_ = 0.4;
+	/// @details In units of kcal/mol.  Defaults to 0.3.
+	masala::base::Real temperature_final_ = 0.3;
 
 	/// @brief The number of calls expected.
 	/// @details Defaults to 100,000, arbitrarily.

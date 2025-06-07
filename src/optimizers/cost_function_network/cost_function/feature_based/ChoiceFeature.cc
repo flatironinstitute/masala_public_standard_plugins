@@ -89,7 +89,7 @@ ChoiceFeature::ChoiceFeature(
     std::lock( src.mutex_, mutex_ );
     std::lock_guard< std::mutex > lock_this( mutex_, std::adopt_lock );
     std::lock_guard< std::mutex > lock_that( src.mutex_, std::adopt_lock );
-    protected_assign( src );
+    ChoiceFeature::protected_assign( src );
 }
 
 // @brief Assignment operator.

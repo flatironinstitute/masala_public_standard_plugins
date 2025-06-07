@@ -32,6 +32,7 @@
 
 // Base headers:
 #include <base/types.hh>
+#include <base/managers/engine/MasalaEngineAPI.fwd.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
@@ -41,7 +42,7 @@
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/real_valued_local/RealValuedFunctionLocalOptimizer.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
 
 // STL headers:
 #include <limits>
@@ -56,7 +57,7 @@ namespace gradient_based {
 /// line searches with a line search algorithm.  This is relatively inefficient compared to quasi-Newtonian
 /// methods like DFP, BFGS, or L-BFGS.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GradientDescentFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer {
+class GradientDescentFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
 
 public:
 
@@ -75,7 +76,7 @@ public:
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 	clone() const override;
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
@@ -91,7 +92,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -115,9 +116,14 @@ public:
     /// a list of hierarchical categories, and the inner vector is the particular hierarchical
     /// category, from most general to most specific.  Also note that this function is pure
     /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
+
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns  { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
 
 	/// @brief Every class can name itself.
 	/// @returns "GradientDescentFunctionOptimizer".
@@ -153,7 +159,7 @@ public:
 	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 	void
 	set_line_optimizer(
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
+		masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
 	);
 
 	/// @brief Set the tolerance for determining whether or not we've finished our search.
@@ -227,7 +233,7 @@ protected:
 	/// @details Performs no mutex locking.
 	void
 	protected_assign(
-		masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+		masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 	) override;
 
 	/// @brief Make independent: must be implemented by derived classes, which must call the base

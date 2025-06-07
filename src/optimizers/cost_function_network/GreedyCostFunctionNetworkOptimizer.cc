@@ -24,18 +24,23 @@
 // Unit header:
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 
+// Optimizers headers:
+#include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
+
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginPairwisePrecomputedCFNProblemScratchSpace.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/PreferredTemplateDataRepresentationSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -43,6 +48,10 @@
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
+#include <base/managers/engine/data_representation_request/MasalaDataRepresentationNameRequirementCriterion.hh>
+#include <base/managers/engine/MasalaDataRepresentationRequest.hh>
+#include <base/managers/engine/MasalaDataRepresentationManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationCreator.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -63,28 +72,22 @@ namespace cost_function_network {
 /// @brief Copy constructor.
 /// @details Needed since we define a mutex.
 GreedyCostFunctionNetworkOptimizer::GreedyCostFunctionNetworkOptimizer(
-    GreedyCostFunctionNetworkOptimizer const & src
+	GreedyCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
-    std::lock_guard< std::mutex > lock( src.optimizer_mutex_ );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-	n_random_starting_states_ = src.n_random_starting_states_;
-	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
+	std::lock( optimizer_mutex_, src.optimizer_mutex_ );
+	std::lock_guard< std::mutex > lock( optimizer_mutex_, std::adopt_lock );
+	std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
+	GreedyCostFunctionNetworkOptimizer::protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 GreedyCostFunctionNetworkOptimizer &
 GreedyCostFunctionNetworkOptimizer::operator=( GreedyCostFunctionNetworkOptimizer const & src ) {
-    std::lock( optimizer_mutex_, src.optimizer_mutex_ );
-    std::lock_guard< std::mutex > lock1( optimizer_mutex_, std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-	n_random_starting_states_ = src.n_random_starting_states_;
-	n_times_seen_multiplier_ = src.n_times_seen_multiplier_;
-    return *this;
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::operator=( src );  // Calls protected_assign().
+	return *this;
 }
 
 /// @brief Make a copy of this object that's wholly independent.
@@ -117,16 +120,16 @@ GreedyCostFunctionNetworkOptimizer::make_independent() {
 std::vector< std::vector< std::string > >
 GreedyCostFunctionNetworkOptimizer::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_categories();
+	return PluginCostFunctionNetworkOptimizer::get_categories();
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
 std::vector< std::string >
 GreedyCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	std::vector< std::string > keywords( CostFunctionNetworkOptimizer::get_keywords() );
+	std::vector< std::string > keywords( PluginCostFunctionNetworkOptimizer::get_keywords() );
     keywords.push_back( "greedy" );
     keywords.push_back( "deterministic" );
     return keywords;
@@ -137,7 +140,14 @@ GreedyCostFunctionNetworkOptimizer::get_keywords() const {
 std::vector< std::vector< std::string > >
 GreedyCostFunctionNetworkOptimizer::get_engine_categories() const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_engine_categories();
+	return PluginCostFunctionNetworkOptimizer::get_engine_categories();
+}
+
+/// @brief Get the keywords that this MasalaEngine has.
+/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
+std::vector< std::string >
+GreedyCostFunctionNetworkOptimizer::get_engine_keywords() const {
+	return get_keywords();
 }
 
 /// @brief Get the class name.
@@ -204,6 +214,30 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
         ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( GreedyCostFunctionNetworkOptimizer, api_description );
 
         // Setters:
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > template_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > >(
+					"set_template_preferred_cfn_data_representation", "Set a template cost function network optimization problem data representation, "
+					"configured by the user but with no data entered.  This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() "
+					"function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
+					"representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
+					"get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
+					true, false,
+					std::bind( &GreedyCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
+				)
+			);
+			setter_annotation::PreferredTemplateDataRepresentationSetterAnnotationSP annotation(
+				masala::make_shared< setter_annotation::PreferredTemplateDataRepresentationSetterAnnotation >()
+			);
+			annotation->set_data_representation_manager_info(
+				std::vector< std::string >{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" },
+				std::vector< std::string >{ "cpu" },
+				*template_setter,
+				true
+			);
+			template_setter->add_setter_annotation( annotation );
+			api_description->add_setter( template_setter );
+		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
@@ -214,8 +248,8 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
-				"set_n_random_starting_states", "If starting states are not provided in the problem definition, indicate "
-				"the number of random starting states to use.  Defaults to 1.",
+				"set_n_random_starting_states", "If starting states are not provided in the problem definition or in the "
+				"optimizer configuration, indicate the number of random starting states to use.  Defaults to 1.",
 				"n_random_starting_states_in", "The number of random starting states to use.  This number of greedy "
 				"descent trajectories will be carried out for all problems that do not provide starting states.",
 				false, false,
@@ -223,7 +257,64 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 			)
 		);
 
+
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"set_optimizer_starting_states", "Set the starting points to use, as a vector of vectors of choice-by-node.  "
+				"These replace any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the optimizer "
+				"is applied.",
+				"starting_states_in", "The starting points to use, as a vector of vectors of choice-by-node.  These replace any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::set_optimizer_starting_states, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"add_optimizer_starting_states", "Add starting points to use, as a vector of vectors of choice-by-node.  These are "
+				"appended to any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the optimizer "
+				"is applied.",
+				"additional_starting_states", "The additional starting points to use, as a vector of vectors of choice-by-node.  These will "
+				"be appended to any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_states, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::vector< masala::base::Size > const & > > (
+				"add_optimizer_starting_state", "Add a starting point to use, as a vector of choice-by-node.  This is appended "
+				"to any already stored.  Note that by setting the starting points in the optimizer rather than in the problem, "
+				"an error will be thrown at apply time if the number of nodes or choices doesn't match the problem to which the "
+				"optimizer is applied.",
+				"additional_starting_state", "The additional starting point to use, as a vector of choice-by-node.  This will "
+				"be appended to any already stored.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_state, this, std::placeholders::_1 )
+			)
+		);
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_ZeroInput > (
+				"clear_optimizer_starting_states", "Clear the starting points to use.  By setting the starting points in the "
+				"optimizer rather than in the problem, an error will be thrown at apply time if the number of nodes or choices "
+				"doesn't match the problem to which the optimizer is applied.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::clear_optimizer_starting_states, this )
+			)
+		);
+
 		// Getters:
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::managers::engine::MasalaDataRepresentationAPISP > >(
+				"get_template_preferred_cfn_data_representation_copy", "Get a template cost function network optimization problem data representation, configured "
+				"by the user but with no data entered.  If no template CFN problem has been passed in by calling set_template_preferred_cfn_data_representation(), this "
+				"function returns a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Otherwise, it deep-clones the object that was passed in.",
+				"template_preferred_cfn_data_representation_copy", "A deep clone of the configured but empty CFN problem representation that was passed in to "
+				"set_template_preferred_cfn_data_representation(), or a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem if no template was provided.",
+				true, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::get_template_preferred_cfn_data_representation_copy, this )
+			)
+		);
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
 				"cpu_threads_to_request", "Gets the number of threads to request when running problems in parallel.",
@@ -234,12 +325,24 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
 		);
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
-				"n_random_starting_states", "If starting states are not provided in the problem definition, get "
-				"the number of random starting states to use.  Defaults to 1.",
+				"n_random_starting_states", "If starting states are not provided in the problem definition or in the optimizer "
+				"configuration, get the number of random starting states to use.  Defaults to 1.",
 				"n_random_starting_states", "The number of random starting states to use.  This number of greedy "
 				"descent trajectories will be carried out for all problems that do not provide starting states.",
 				false, false,
 				std::bind( &GreedyCostFunctionNetworkOptimizer::n_random_starting_states, this )
+			)
+		);
+		// n_times_seen_multiplier() deliberately omitted from public interface.
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::vector< masala::base::Size > > const & > > (
+				"optimizer_starting_states", "Access the list of starting states that the optimizer has been configured to try.  These "
+				"are provided by the user during optimizer configuration rather than by the problem.  At optimization time, these will "
+				"result in a throw if the size of the state vector doesn't match the number of nodes or choices in the problem.",
+				"optimizer_starting_states", "Starting points to use, provided by the user during optimizer configuration rather than "
+				"by the problem.",
+				false, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::optimizer_starting_states, this )
 			)
 		);
 
@@ -251,7 +354,7 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
                     masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const &
                 >
             >(
-                "run_cost_function_network_optimizer", "Run the optimizer on a cost function network optimization problem, and produce a solution.",
+                "run_cost_function_network_optimizer", "Run the optimizer on a set of cost function network optimization problems, and produce a vector of solutions.",
                 true, false, true, false,
                 "problems", "A set of problems to run.",
                 "solutions", "A vector of solution sets.  Each CostFunctionNetworkOptimizationSolutions object contains the set of solutions for the problem "
@@ -259,6 +362,22 @@ GreedyCostFunctionNetworkOptimizer::get_api_definition() {
                 std::bind( &GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer, this, std::placeholders::_1 )
             )
         );
+		api_description->add_work_function(
+			masala::make_shared<
+				MasalaObjectAPIWorkFunctionDefinition_OneInput<
+					masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP,
+					masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const &
+				>
+			>(
+				"run_cost_function_network_optimizer_on_one_problem", "Run the optimizer on a single cost function network optimization problem, and produce a "
+				"set of one or more solutions.",
+				true, false, false, false,
+				"problem", "A single cost function network optimization problem to run.",
+				"solutions", "A solution set.  The CostFunctionNetworkOptimizationSolutions object contains the set of solutions for the input problem.  "
+				"There may be multiple solutions, depending on settings.",
+				std::bind( &GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer_on_one_problem, this, std::placeholders::_1 )
+			)
+		);
 
         // Convert nonconst to const:
         api_description_ = api_description;
@@ -310,6 +429,51 @@ GreedyCostFunctionNetworkOptimizer::set_n_times_seen_multiplier(
 	n_times_seen_multiplier_ = setting;
 }
 
+/// @brief Set the starting points to use, as a vector of vectors of choice-by-node.  These replace any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::set_optimizer_starting_states(
+	std::vector< std::vector< masala::base::Size > > const & starting_states_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_ = starting_states_in;
+}
+
+/// @brief Add starting points to use, as a vector of vectors of choice-by-node.  These are appended to any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_states(
+	std::vector< std::vector< masala::base::Size > > const & starting_states_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.reserve( optimizer_starting_states_.size() + starting_states_in.size() );
+	for( auto const & state : starting_states_in ) {
+		optimizer_starting_states_.push_back( state );
+	}
+}
+
+/// @brief Add a starting point to use, as a vector of choice-by-node.  This is appended to any already stored.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::add_optimizer_starting_state(
+	std::vector< masala::base::Size > const & starting_state_in
+) {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.push_back( starting_state_in );
+}
+
+/// @brief Clear the starting points to use.
+/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+void
+GreedyCostFunctionNetworkOptimizer::clear_optimizer_starting_states() {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	optimizer_starting_states_.clear();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
@@ -342,11 +506,18 @@ GreedyCostFunctionNetworkOptimizer::n_times_seen_multiplier() const {
 	return n_times_seen_multiplier_;
 }
 
+/// @brief Access the list of starting states that the optimizer has been configured to try.
+std::vector< std::vector< masala::base::Size > > const &
+GreedyCostFunctionNetworkOptimizer::optimizer_starting_states() const {
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+	return optimizer_starting_states_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
+/// @brief Run the optimizer on a vector of cost function network optimization problems, and produce a vector of solutions.
 /// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 /// the problem with the same index.
 std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
@@ -404,17 +575,46 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
         );
         solutions_containers_by_problem.push_back( new_solutions_container );
 
-		// If this problem has starting states, use those:
 		Size n_replicates;
-		if( problem->has_candidate_starting_solutions() ) {
-			starting_states_by_problem.push_back( problem->candidate_starting_solutions() );
-			n_replicates = problem->candidate_starting_solutions().size();
-		} else {
-			// Otherwise, use random starting states:
-			starting_states_by_problem.push_back(
-				generate_random_starting_states( *problem, rg, n_random_starting_states_ )
-			);
-			n_replicates = n_random_starting_states_;
+		bool has_starting_points( false );
+		
+		{
+			// Using predefined starting states:
+
+			// If this problem has starting states, use those:
+			std::vector< std::vector< Size > > starting_states_to_use;
+			if( problem->has_candidate_starting_solutions() ) {
+				// From problem.
+				starting_states_to_use = problem->candidate_starting_solutions();
+				has_starting_points = true;
+			}
+
+			// If this optimizer has staring states, also use those:
+			if( !optimizer_starting_states_.empty() ) {
+				for( auto const & state : optimizer_starting_states_ ) {
+					check_starting_state_against_problem( state, *problem );
+				}
+				if( starting_states_to_use.empty() ) {
+					starting_states_to_use = optimizer_starting_states_;
+				} else {
+					starting_states_to_use.reserve( starting_states_to_use.size() + optimizer_starting_states_.size() );
+					for( auto const & state : optimizer_starting_states_ ) {
+						starting_states_to_use.push_back( state );
+					}
+				}
+				has_starting_points = true;
+			}
+
+			if( has_starting_points ) {
+				starting_states_by_problem.push_back( starting_states_to_use );
+				n_replicates = starting_states_to_use.size();
+			} else {
+				// Otherwise, use random starting states:
+				starting_states_by_problem.push_back(
+					generate_random_starting_states( *problem, rg, n_random_starting_states_ )
+				);
+				n_replicates = n_random_starting_states_;
+			}
 		}
 
 		// Make a vector of work to do:
@@ -460,6 +660,105 @@ GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     return const_solutions_containers_by_problem;
 }
 
+/// @brief Run the optimizer on a cost function network optimization problem, and produce one or more solutions.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
+GreedyCostFunctionNetworkOptimizer::run_cost_function_network_optimizer_on_one_problem(
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
+) const {
+	using namespace masala::base::managers::threads;
+	using namespace masala::base::managers::random;
+    using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+    using masala::base::Size;
+
+    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+
+	// Get the random number generator:
+	MasalaRandomNumberGeneratorHandle rg( MasalaRandomNumberGenerator::get_instance() );
+
+	// Create the multithreaded work request:
+	MasalaThreadedWorkRequest work_request;
+	if( cpu_threads_to_request_ > 0 ) {
+		work_request.set_n_threads_to_request( cpu_threads_to_request_ );
+	} else {
+		work_request.set_request_all_threads();
+	}
+
+	// Starting states: outer vector is a bunch of starting states for the
+	// problem, inner vector is a single starting state (one choice index per variable node).
+	std::vector< std::vector< Size > > starting_states_for_problem;
+
+	// Storage for solutions:
+	CostFunctionNetworkOptimizationSolutions_APISP solutions_container_for_problem(
+		std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( problem->create_solutions_container() )
+	);
+	CHECK_OR_THROW_FOR_CLASS( solutions_container_for_problem != nullptr, "run_cost_function_network_optimizer_on_one_problem",
+		"Could not create appropriate solutions container for " + problem->class_name() + " problem type."
+	);
+
+	Size n_replicates;
+	bool has_starting_points( false );
+		
+	{
+		// Using predefined starting states:
+
+		// If this problem has starting states, use those:
+		std::vector< std::vector< Size > > starting_states_to_use;
+		if( problem->has_candidate_starting_solutions() ) {
+			// From problem.
+			starting_states_to_use = problem->candidate_starting_solutions();
+			n_replicates = problem->candidate_starting_solutions().size();
+			has_starting_points = true;
+		}
+
+		// If this optimizer has staring states, also use those:
+		if( !optimizer_starting_states_.empty() ) {
+			for( auto const & state : optimizer_starting_states_ ) {
+				check_starting_state_against_problem( state, *problem );
+			}
+			if( starting_states_to_use.empty() ) {
+				starting_states_to_use = optimizer_starting_states_;
+			} else {
+				starting_states_to_use.reserve( starting_states_to_use.size() + optimizer_starting_states_.size() );
+				for( auto const & state : optimizer_starting_states_ ) {
+					starting_states_to_use.push_back( state );
+				}
+			}
+			has_starting_points = true;
+		}
+
+		if( has_starting_points ) {
+			starting_states_for_problem = starting_states_to_use;
+			n_replicates = starting_states_to_use.size();
+		} else {
+			// Otherwise, use random starting states:
+			starting_states_for_problem = generate_random_starting_states( *problem, rg, n_random_starting_states_ );
+			n_replicates = n_random_starting_states_;
+		}
+	}
+
+	// Make a vector of work to do:{
+	for( std::vector< Size > const & starting_state : starting_states_for_problem ) {
+		work_request.add_job(
+			std::bind(
+				&GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads,
+				this,
+				std::cref(starting_state),
+				n_replicates,
+				problem,
+				std::ref( *solutions_container_for_problem ),
+				n_times_seen_multiplier_
+			)
+		);
+	}
+
+	masala::base::managers::threads::MasalaThreadedWorkExecutionSummary const thread_summary(
+		MasalaThreadManager::get_instance()->do_work_in_threads( work_request )
+	);
+    thread_summary.write_summary_to_tracer();
+
+    return solutions_container_for_problem;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -501,6 +800,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 
 	CHECK_OR_THROW_FOR_CLASS( problem_ptr != nullptr, "do_one_greedy_optimization_job_in_threads", "A null pointer for the problem was passed to this function." );
 	CostFunctionNetworkOptimizationProblem_API const & problem( *problem_ptr );
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( problem.generate_cfn_problem_scratch_space() );
 
 	std::vector< std::pair< Size, Size > > const nchoices_at_varnodes( problem.n_choices_at_variable_nodes() );
 	Size const n_var_pos( nchoices_at_varnodes.size() );
@@ -509,7 +809,7 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 	// Candidate state: states considered this round.  Iterates through all possible single-point changes.
 	// Best candidate state: lowest-scoring state considered so far this round.
 	std::vector< Size > current_state( starting_state ), candidate_state( starting_state ), best_candidate_state( starting_state );
-	Real current_score( problem.compute_non_approximate_absolute_score( current_state ) );
+	Real current_score( problem.compute_non_approximate_absolute_score( current_state, problem_scratch.get() ) );
 	Real candidate_score( current_score ), best_candidate_score( current_score );
 	
 	do {
@@ -522,12 +822,13 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			candidate_score = current_score;
 			for( Size j(0); j<nchoice; ++j ) {
 				candidate_state[i] = j;
-				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state );
+				candidate_score = problem.compute_non_approximate_absolute_score( candidate_state, problem_scratch.get() );
 				//write_to_tracer( "[" + masala::base::utility::container::container_to_string( candidate_state, "," ) + "]: " + std::to_string( candidate_score) ); // DELETE ME
 
 				if( candidate_score < best_candidate_score ) {
 					best_candidate_score = candidate_score;
 					best_candidate_state = candidate_state;
+					if( problem_scratch != nullptr ) { problem_scratch->accept_last_move(); } 
 					//write_to_tracer( "Best this round." ); // DELETE ME.
 				}
 			}
@@ -541,8 +842,103 @@ GreedyCostFunctionNetworkOptimizer::do_one_greedy_optimization_job_in_threads(
 			{ best_candidate_state, best_candidate_score, n_times_seen_multiplier }
 		},
 		n_replicates,
-		problem_ptr
+		problem_ptr,
+		problem_scratch.get()
 	);
+}
+
+/// @brief Check a candiate solution against a problemd definition, and throw if there's a mismatch in node count, or if the choice indices
+/// are out of range of the problem.
+void
+GreedyCostFunctionNetworkOptimizer::check_starting_state_against_problem(
+	std::vector< masala::base::Size > const & starting_state,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+) const {
+	using masala::base::Size;
+
+	auto const choices_by_varnode( problem.n_choices_at_variable_nodes() );
+	CHECK_OR_THROW_FOR_CLASS( starting_state.size() == choices_by_varnode.size(), "check_starting_states_against_problem",
+		"The number of variable nodes in the problem is " + std::to_string( choices_by_varnode.size() ) + ", but the candidate "
+		"solution has " + std::to_string( starting_state.size() ) + " entries."
+	);
+
+	for( Size i(0), imax(choices_by_varnode.size()); i<imax; ++i ) {
+		CHECK_OR_THROW_FOR_CLASS( choices_by_varnode[i].second > starting_state[i], "check_starting_states_against_problem",
+			"Candidate solution proposes choice index " + std::to_string( starting_state[i] ) + " at variable node " +
+			std::to_string( i ) + ", but this node has only " + std::to_string( choices_by_varnode[i].second ) + " choices."
+		);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+void
+GreedyCostFunctionNetworkOptimizer::protected_assign(
+	PluginCostFunctionNetworkOptimizer const & src
+) {
+	GreedyCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< GreedyCostFunctionNetworkOptimizer const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a GreedyCostFunctionNetworkOptimizer object." );
+
+	cpu_threads_to_request_ = src_cast_ptr->cpu_threads_to_request_;
+	n_random_starting_states_ = src_cast_ptr->n_random_starting_states_;
+	n_times_seen_multiplier_ = src_cast_ptr->n_times_seen_multiplier_;
+	optimizer_starting_states_ = src_cast_ptr->optimizer_starting_states_;
+	
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
+}
+
+/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+/// This version is virtual to allow derived classes to override it, to add checks of their own.  If overridden, the override should call the
+/// base class to set the variable internally.
+void
+GreedyCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation(
+	masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+) {
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
+}
+
+/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+masala::base::managers::engine::MasalaDataRepresentationAPISP
+GreedyCostFunctionNetworkOptimizer::protected_get_default_template_preferred_cfn_data_representation() const {
+	using namespace masala::base::managers::engine;
+	using namespace masala::base::managers::engine::data_representation_request;
+	using masala::base::Size;
+
+	MasalaDataRepresentationNameRequirementCriterionSP name_criterion( masala::make_shared< MasalaDataRepresentationNameRequirementCriterion >( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
+	MasalaDataRepresentationRequest request;
+	request.add_data_representation_criterion( name_criterion );
+	std::vector< MasalaDataRepresentationCreatorCSP > creators( MasalaDataRepresentationManager::get_instance()->get_compatible_data_representation_creators( request ) );
+	CHECK_OR_THROW_FOR_CLASS( creators.size() >= 1, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+	bool found(false);
+	Size found_index(0);
+	for( auto const & creator : creators ) {
+		if( creator->get_plugin_object_namespace_and_name() == "standard_masala_plugins::optimizers::cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) {
+			found = true;
+			break;
+		}
+		++found_index;
+	}
+	CHECK_OR_THROW_FOR_CLASS( found, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+
+	MasalaDataRepresentationAPISP pairwise_cfn_api( creators[found_index]->create_data_representation() );
+	PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP pairwise_cfn( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( pairwise_cfn_api->get_inner_data_representation_object() ) );
+	CHECK_OR_THROW_FOR_CLASS( pairwise_cfn != nullptr, "protected_get_default_template_preferred_cfn_data_representation", "The created object "
+		"could not be interpreted as a PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  This is a program error.  Please consult a developer."
+	);
+
+	// Could configure the pairwise_cfn object here if needed.
+	return pairwise_cfn_api;
 }
 
 

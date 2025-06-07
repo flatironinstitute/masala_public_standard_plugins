@@ -17,8 +17,7 @@
 */
 
 /// @file src/file_interpreters/cost_function_network/ASCIICostFunctionNetworkProblemRosettaFileInterpreter.fwd.hh
-/// @brief Forward declarations for a file interpreter for reading and writing ASCII cost function network
-/// optimization problems.
+/// @brief Forward declarations for a file interpreter for reading and writing ASCII files that define cost function network optimization problems.
 /// @author Tristan Zaborniak (tzaborniak@flatironinstitute.org).
 
 #ifndef StandardMaslaPlugins_src_file_interpreters_cost_function_network_ASCIICostFunctionNetworkProblemRosettaFileInterpreter_fwd_hh

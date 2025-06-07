@@ -32,14 +32,15 @@
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
 
 // Numeric API headers:
-#include <base/types.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 
 // Base headers:
+#include <base/types.hh>
+#include <base/managers/plugin_module/MasalaPluginAPI.fwd.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.fwd.hh>
 
 // STL headers:
@@ -83,7 +84,7 @@ std::string get_all_greedy_refinement_modes();
 /// accept or reject the move based on the difference in energy and the Metropolis criterion.
 /// @note If the annealing schedule used ramps temperature, this does simulated annealing.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class MonteCarloCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer {
+class MonteCarloCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer {
 
 public:
 
@@ -141,6 +142,11 @@ public:
 	/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }
 	std::vector< std::vector< std::string > >
 	get_engine_categories() const override;
+
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
 
 	/// @brief Get the class name.
 	/// @returns "MonteCarloCostFunctionNetworkOptimizer".
@@ -207,8 +213,8 @@ public:
 	void set_n_solutions_to_store_per_problem( masala::base::Size const n_solutions_in );
 
 	/// @brief Set the annealing schedule to use for annealing.
-	/// @details Cloned on input.
-	void set_annealing_schedule( masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in );
+	/// @details Cloned on input.  Throws if the plugin module passed in is not an annealing schedule.
+	void set_annealing_schedule( masala::base::managers::plugin_module::MasalaPluginAPI const & schedule_in );
 
 	/// @brief Set the annealing schedule by name.
 	/// @details Namespace is not required unless the name is not unique.  Throws if
@@ -251,6 +257,11 @@ public:
 
 	/// @brief Set the greedy refinement mode, by string.
 	void set_greedy_refinement_mode( std::string const & mode_name_in );
+
+	/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	void set_recompute_from_scratch_every_n_steps( masala::base::Size const steps_in );
 
 public:
 
@@ -301,6 +312,11 @@ public:
 	/// @brief Get the greedy refinement mode string.
 	std::string greedy_refinement_mode_string() const;
 
+	/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	masala::base::Size recompute_from_scratch_every_n_steps() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -337,8 +353,9 @@ private:
 	/// @details This function runs in threads.
 	void
 	do_one_greedy_refinement_in_threads(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+    	std::vector< masala::base::Size > const & starting_point,
 		masala::base::Size const n_times_seen
 	) const;
 
@@ -429,14 +446,35 @@ private:
 		bool const force_store
 	);
 
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
+
+	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+	/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+	/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+	/// This version just calls the base class version; there are no special checks here.
+	void
+	protected_set_template_preferred_cfn_data_representation(
+		masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+	) override;
+
+	/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+	/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+	masala::base::managers::engine::MasalaDataRepresentationAPISP
+	protected_get_default_template_preferred_cfn_data_representation() const override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE DATA
 ////////////////////////////////////////////////////////////////////////////////
-
-	/// @brief A mutex for threadsafe operation.
-	mutable std::mutex optimizer_mutex_;
 
 	/// @brief The API description.
 	masala::base::api::MasalaObjectAPIDefinitionCSP api_description_;
@@ -482,6 +520,11 @@ private:
 	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
 	/// only checks whether to store a solution when it is accepted.
 	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP;
+
+	/// @brief The frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	masala::base::Size recompute_from_scratch_every_n_steps_ = 100;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

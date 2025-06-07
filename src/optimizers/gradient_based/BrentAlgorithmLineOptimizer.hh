@@ -111,6 +111,11 @@ public:
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
+	/// @brief Keywords for engines.
+	/// @returns { "line_optimizer", "lightweight", "numeric", "brent_algorithm" }
+    std::vector < std::string >
+    get_engine_keywords() const override;
+
 	/// @brief Every class can name itself.
 	/// @returns "BrentAlgorithmLineOptimizer".
 	std::string class_name() const override;

@@ -68,6 +68,10 @@ namespace feature_based {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class SumOfUnsatisfiedChoiceFeaturesCostFunction : public masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction {
 
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction Parent;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionSP ParentSP;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunctionCSP ParentCSP;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,9 +96,6 @@ public:
 	/// @brief This class is pure virtual, and does not define the clone function.
 	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionSP
 	clone() const override = 0;
-
-	/// @brief This class is pure virtual, and does not define the make independent function.
-	void make_independent() override = 0;
 
 public:
 
@@ -122,6 +123,11 @@ public:
 	/// @returns { { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction" } }.
 	std::vector< std::vector< std::string > >
 	get_data_representation_categories() const override;
+
+	/// @brief Get the keywords for this MasalaDataRepresentation.
+	/// @returns { "optimization_problem", "cost_function", "numeric", "not_pairwise_decomposible", "unsatisfied_choice_feature_sum_based" }
+	std::vector< std::string >
+	get_data_representation_keywords() const override;
 
 	/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 	/// is compatible.
@@ -292,19 +298,21 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Given a selection of choices at variable nodes, compute the cost function.
-	/// @note No mutex-locking is performed!
+	/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 	masala::base::Real
 	compute_cost_function(
-		std::vector< masala::base::Size > const & candidate_solution
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override;
 
 	/// @brief Given an old selection of choices at variable nodes and a new selection,
 	/// compute the cost function difference.
-	/// @note No mutex-locking is performed!
+	/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 	masala::base::Real
 	compute_cost_function_difference(
 		std::vector< masala::base::Size > const & candidate_solution_old,
-		std::vector< masala::base::Size > const & candidate_solution_new
+		std::vector< masala::base::Size > const & candidate_solution_new,
+		masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
 	) const override;
 
 public:
@@ -336,14 +344,13 @@ protected:
 		std::vector< masala::base::Size > const & variable_node_indices
 	) override;
 
-	/// @brief Override of assign_mutex_locked().  Calls parent function.
+	/// @brief Override of protected_assign().  Calls parent function.
 	/// @details Throws if src is not a SumOfUnsatisfiedChoiceFeaturesCostFunction.
-	void assign_mutex_locked( CostFunction const & src ) override;
+	void protected_assign( masala::base::managers::engine::MasalaDataRepresentation const & src ) override;
 
 	/// @brief Make this object fully independent.  Assumes mutex was already locked.
 	/// Should be called by overrides.
-	void
-	make_independent_mutex_locked() override;
+	void protected_make_independent() override;
 
 private:
 

@@ -28,7 +28,7 @@
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/cost_function_network/CostFunctionNetworkOptimizer.hh>
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.fwd.hh>
 
 // Numeric API headers:
@@ -48,7 +48,7 @@ namespace cost_function_network {
 
 /// @brief A CostFunctionNetworkOptimizer that solves a cost function network problem by greedy descent.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GreedyCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer {
+class GreedyCostFunctionNetworkOptimizer : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer {
 
 public:
 
@@ -98,7 +98,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+	/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -106,6 +106,11 @@ public:
 	/// @returns { { "Optimizer", "CostFunctionNetworkOptimizer" } }
 	std::vector< std::vector< std::string > >
 	get_engine_categories() const override;
+
+	/// @brief Get the keywords that this MasalaEngine has.
+	/// @returns { "optimizer", "cost_function_network", "numeric", "greedy", "deterministic" }
+	std::vector< std::string >
+	get_engine_keywords() const override;
 
 	/// @brief Get the class name.
 	/// @returns "GreedyCostFunctionNetworkOptimizer".
@@ -143,7 +148,7 @@ public:
 	/// @details The default setting of 0 means "request all available".
 	void set_cpu_threads_to_request( masala::base::Size const threads_in );
 
-	/// @brief If starting states are not provided in the problem definition, indicate
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, indicate
 	/// the number of random starting states to use.  Defaults to 1.
 	void set_n_random_starting_states( masala::base::Size const setting );
 
@@ -155,6 +160,36 @@ public:
 	/// plugin sub-library.
 	void set_n_times_seen_multiplier( masala::base::Size const setting );
 
+	/// @brief Set the starting points to use, as a vector of vectors of choice-by-node.  These replace any already stored.
+	/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+	/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+	void
+	set_optimizer_starting_states(
+		std::vector< std::vector< masala::base::Size > > const & starting_states_in
+	);
+
+	/// @brief Add starting points to use, as a vector of vectors of choice-by-node.  These are appended to any already stored.
+	/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+	/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+	void
+	add_optimizer_starting_states(
+		std::vector< std::vector< masala::base::Size > > const & starting_states_in
+	);
+
+	/// @brief Add a starting point to use, as a vector of choice-by-node.  This is appended to any already stored.
+	/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+	/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+	void
+	add_optimizer_starting_state(
+		std::vector< masala::base::Size > const & starting_state_in
+	);
+
+	/// @brief Clear the starting points to use.
+	/// @details By setting the starting points in the optimizer rather than in the problem, an error will be thrown at apply time if the
+	/// number of nodes or choices doesn't match the problem to which the optimizer is applied.
+	void
+	clear_optimizer_starting_states();
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +200,7 @@ public:
 	/// @details The default setting of 0 means "request all available".
 	masala::base::Size cpu_threads_to_request() const;
 
-	/// @brief If starting states are not provided in the problem definition, get
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, get
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states() const;
 
@@ -177,19 +212,28 @@ public:
 	/// plugin sub-library.
 	masala::base::Size n_times_seen_multiplier() const;
 
+	/// @brief Access the list of starting states that the optimizer has been configured to try.
+	std::vector< std::vector< masala::base::Size > > const & optimizer_starting_states() const;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run the optimizer on a cost function network optimization problem, and produce a solution.
+	/// @brief Run the optimizer on a vector of cost function network optimization problems, and produce a vector of solutions.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 	/// the problem with the same index.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
 	run_cost_function_network_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
 	) const override;
+
+	/// @brief Run the optimizer on a cost function network optimization problem, and produce one or more solutions.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP
+	run_cost_function_network_optimizer_on_one_problem(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP const & problem
+	) const;
 
 private:
 
@@ -217,6 +261,38 @@ private:
 		masala::base::Size const n_times_seen_multiplier
 	) const;
 
+	/// @brief Check a candiate solution against a problemd definition, and throw if there's a mismatch in node count, or if the choice indices
+	/// are out of range of the problem.
+	void
+	check_starting_state_against_problem(
+		std::vector< masala::base::Size > const & starting_state,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_API const & problem
+	) const;
+
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
+
+	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+	/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+	/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+	/// This version just calls the base class version; there are no special checks here.
+	void
+	protected_set_template_preferred_cfn_data_representation(
+		masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+	) override;
+
+	/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+	/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+	masala::base::managers::engine::MasalaDataRepresentationAPISP
+	protected_get_default_template_preferred_cfn_data_representation() const override;
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +309,7 @@ private:
 	/// @details The default of 0 means "all available".
 	masala::base::Size cpu_threads_to_request_ = 0;
 
-	/// @brief If starting states are not provided in the problem definition, indicate
+	/// @brief If starting states are not provided in the problem definition or in the optimizer configuration, indicate
 	/// the number of random starting states to use.  Defaults to 1.
 	masala::base::Size n_random_starting_states_ = 1;
 
@@ -244,6 +320,11 @@ private:
 	/// @note NOT part of the public-facing interface.  Intended only for use by code within this
 	/// plugin sub-library.
 	masala::base::Size n_times_seen_multiplier_ = 1;
+
+	/// @brief Starting points to use, provided by the user during optimizer configuration rather than by the problem.
+	/// @details At optimization time, these will result in a throw if the size of the state vector doesn't match the number of
+	/// nodes or choices in the problem.
+	std::vector< std::vector< masala::base::Size > > optimizer_starting_states_;
 
 }; // class GreedyCostFunctionNetworkOptimizer
 

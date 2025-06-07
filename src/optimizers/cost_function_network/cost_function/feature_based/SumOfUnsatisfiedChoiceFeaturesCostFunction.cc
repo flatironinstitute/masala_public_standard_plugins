@@ -40,6 +40,9 @@
 #include <base/error/ErrorHandling.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
+// Numeric headers:
+#include <numeric/optimization/cost_function_network/cost_function/CostFunctionScratchSpace.hh>
+
 // Optimizers headers:
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 
@@ -57,12 +60,12 @@ namespace feature_based {
 SumOfUnsatisfiedChoiceFeaturesCostFunction::SumOfUnsatisfiedChoiceFeaturesCostFunction(
     SumOfUnsatisfiedChoiceFeaturesCostFunction const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction( src )
+    Parent()
 {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_assign( src );
 }
 
 // @brief Assignment operator.
@@ -70,10 +73,10 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction &
 SumOfUnsatisfiedChoiceFeaturesCostFunction::operator=(
     SumOfUnsatisfiedChoiceFeaturesCostFunction const & src
 ) {
-    std::lock( src.mutex(), mutex() );
-    std::lock_guard< std::mutex > lockthis( mutex(), std::adopt_lock );
-    std::lock_guard< std::mutex > lockthat( src.mutex(), std::adopt_lock );
-    assign_mutex_locked( src );
+    std::lock( src.data_representation_mutex(), data_representation_mutex() );
+    std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
+    std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
+    protected_assign( src );
     return *this;
 }
 
@@ -112,6 +115,16 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::get_keywords() const {
 std::vector< std::vector< std::string > >
 SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_categories() const {
     return std::vector< std::vector< std::string > >{ { "CostFunction", "SumOfUnsatisfiedChoiceFeaturesCostFunction" } };
+}
+
+/// @brief Get the keywords for this MasalaDataRepresentation.
+/// @returns { "optimization_problem", "cost_function", "numeric", "not_pairwise_decomposible", "unsatisfied_choice_feature_sum_based" }
+std::vector< std::string >
+SumOfUnsatisfiedChoiceFeaturesCostFunction::get_data_representation_keywords() const {
+	std::vector< std::string > outvec( CostFunction::get_data_representation_keywords() );
+    outvec.push_back( "not_pairwise_decomposible" );
+    outvec.push_back( "unsatisfied_choice_feature_sum_based" );
+    return outvec;
 }
 
 /// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
@@ -175,7 +188,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_choice_feature_by_absolute_node_
     masala::base::Size const feature_connection_offset
 ) {
     using masala::base::Size;
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "add_choice_feature_by_absolute_node_index",
         "Choice features cannot be added after this object has already been finalized!"
     );
@@ -231,7 +244,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::declare_features_for_node_choices(
     using std::pair;
     using std::vector;
 
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "declare_features_for_node_choices",
         "Choice features cannot be declared after this object has already been finalized!"
     );
@@ -266,7 +279,7 @@ void
 SumOfUnsatisfiedChoiceFeaturesCostFunction::increment_offsets(
     std::unordered_map< masala::base::Size, std::vector< std::vector< masala::base::Size > > > const & offset_increments
 ) {
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "increment_offsets",
         "Choice feature offsets cannot be incremented after this object has already been finalized!"
     );
@@ -289,7 +302,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::increment_offsets_at_node(
     masala::base::Size const absolute_node_index,
     std::vector< std::vector< masala::base::Size > > const & offset_increments
 ) {
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(), "increment_offsets_at_node",
         "Choice feature offsets cannot be incremented after this object has already been finalized!"
     );
@@ -314,7 +327,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
     masala::base::Size const choice_index,
     std::vector< std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > > const & connecting_node_choices_by_feature
 ) {
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(),
         "add_connecting_node_choices_for_features_of_node_choice",
         "Choice feature connections cannot be added after this " + class_name()
@@ -339,7 +352,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
     masala::base::Size const absolute_node_index,
     std::vector< std::vector< std::unordered_map< std::pair< masala::base::Size, masala::base::Size >, masala::base::Size, masala::base::size_pair_hash > > > const & connecting_node_connections_by_choice_and_feature
 ) {
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(),
         "add_connecting_node_choices_for_features_of_node_choices",
         "Choice feature connections cannot be added after this " + class_name()
@@ -382,7 +395,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
     using masala::base::size_pair_hash;
     typedef unordered_map< Size, vector< vector< unordered_map< pair< Size, Size >, Size, size_pair_hash > > > > datastruct;
 
-    std::lock_guard< std::mutex > lock( mutex() );
+    std::lock_guard< std::mutex > lock( data_representation_mutex() );
     CHECK_OR_THROW_FOR_CLASS( !protected_finalized(),
         "add_connecting_node_choices_for_features_of_nodes_choices",
         "Choice feature connections cannot be added after this " + class_name()
@@ -407,23 +420,35 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::add_connecting_node_choices_for_feat
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Given a selection of choices at variable nodes, compute the cost function.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function(
-    std::vector< masala::base::Size > const & candidate_solution
+    std::vector< masala::base::Size > const & candidate_solution,
+#ifndef NDEBUG
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;
     return protected_weight() * static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution ) );
 }
 
 /// @brief Given an old selection of choices at variable nodes and a new selection,
 /// compute the cost function difference.
-/// @note No mutex-locking is performed!
+/// @note No mutex-locking is performed!  The scratch_space pointer should be null.
 masala::base::Real
 SumOfUnsatisfiedChoiceFeaturesCostFunction::compute_cost_function_difference(
     std::vector< masala::base::Size > const & candidate_solution_old,
-    std::vector< masala::base::Size > const & candidate_solution_new
+	std::vector< masala::base::Size > const & candidate_solution_new,
+#ifndef NDEBUG
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * scratch_space
+#else
+	masala::numeric::optimization::cost_function_network::cost_function::CostFunctionScratchSpace * /*scratch_space*/
+#endif
 ) const {
+	DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( scratch_space == nullptr, "compute_cost_function_difference", "Expected a null pointer for the scratch space, but got a pointer to a " + scratch_space->class_name() + " object." );
     using masala::base::Real;
     return protected_weight() * ( static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution_new ) ) - static_cast< Real >( protected_compute_cost_function_no_weight( candidate_solution_old ) ) );
 }
@@ -541,14 +566,14 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_finalize(
     //Do NOT clear choice_features_by_absolute_node_and_choice_, since the shared pointers reside here, and the
     //choice_features_by_variable_node_and_choice_ map stores raw pointers.
 
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::protected_finalize( variable_node_indices );
+    Parent::protected_finalize( variable_node_indices );
 }
 
-/// @brief Override of assign_mutex_locked().  Calls parent function.
+/// @brief Override of protected_assign().  Calls parent function.
 /// @details Throws if src is not a SumOfUnsatisfiedChoiceFeaturesCostFunction.
 void
-SumOfUnsatisfiedChoiceFeaturesCostFunction::assign_mutex_locked(
-    CostFunction const & src
+SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_assign(
+    masala::base::managers::engine::MasalaDataRepresentation const & src
 ) {
     SumOfUnsatisfiedChoiceFeaturesCostFunction const * const src_cast_ptr( dynamic_cast< SumOfUnsatisfiedChoiceFeaturesCostFunction const * >( &src ) );
     CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "assign_mutex_locked", "Cannot assign a SumOfUnsatisfiedChoiceFeaturesCostFunction given an input " + src.class_name() + " object!  Object types do not match." );
@@ -557,13 +582,13 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::assign_mutex_locked(
     choice_features_by_variable_node_and_choice_ = src_cast_ptr->choice_features_by_variable_node_and_choice_;
     fixed_choice_features_by_absolute_node_and_choice_ = src_cast_ptr->fixed_choice_features_by_absolute_node_and_choice_;
 
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::assign_mutex_locked( src );
+    Parent::protected_assign( src );
 }
 
 /// @brief Make this object fully independent.  Assumes mutex was already locked.
 /// Should be called by overrides.
 void
-SumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent_mutex_locked() {
+SumOfUnsatisfiedChoiceFeaturesCostFunction::protected_make_independent() {
     using masala::base::Size;
     using std::unordered_map;
     using std::pair;
@@ -584,13 +609,13 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent_mutex_locked() {
                 pair<Size, Size> const var_node_index_and_choice( variable_node_indices_by_absolute_node_index_.at( it->first.first ), it->first.second );
                 it2 = choice_features_by_variable_node_and_choice_.find( var_node_index_and_choice );
                 DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( it2 != choice_features_by_variable_node_and_choice_.end(),
-                    "make_independent_mutex_locked", "Could not find absolute node "
+                    "protected_make_independent", "Could not find absolute node "
                     + std::to_string(it->first.first) + ", choice " + std::to_string(it->first.second)
                     + " in either the variable nodes or the fixed nodes.  This is a program error."
                 );
             }
             std::vector< ChoiceFeature const * > & vec2( it2->second );
-            DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( vec.size() == vec2.size(), "make_independent_mutex_locked",
+            DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( vec.size() == vec2.size(), "protected_make_independent",
                 "Expected vector size match.  Got vec.size() == " + std::to_string(vec.size()) + ", vec2.size() == "
                 + std::to_string(vec2.size()) + ".  This is a program error."
             );
@@ -599,7 +624,7 @@ SumOfUnsatisfiedChoiceFeaturesCostFunction::make_independent_mutex_locked() {
             }
         }
     }
-    masala::numeric_api::base_classes::optimization::cost_function_network::cost_function::PluginCostFunction::make_independent_mutex_locked();
+    Parent::protected_make_independent();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

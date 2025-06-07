@@ -109,6 +109,7 @@
 		"cfenv": "cpp",
 		"strstream": "cpp",
 		"source_location": "cpp",
-		"alignedvector3": "cpp"
+		"alignedvector3": "cpp",
+		"print": "cpp"
 	}
 }

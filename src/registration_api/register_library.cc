@@ -27,9 +27,6 @@
 #include <base/managers/version/MasalaModuleVersionInfo.hh>
 #include <base/managers/version/MasalaVersionManager.hh>
 
-#define STANDARD_MASALA_LIBRARIES_MAJOR_VERSION 0
-#define STANDARD_MASALA_LIBRARIES_MINOR_VERSION 5
-
 namespace standard_masala_plugins {
 namespace registration_api {
 
@@ -46,24 +43,28 @@ register_library() {
     MasalaModuleVersionInfoSP module_version_info(
         masala::make_shared< MasalaModuleVersionInfo >(
             "Standard Masala Plugins",
-            std::pair< Size, Size >( STANDARD_MASALA_LIBRARIES_MAJOR_VERSION, STANDARD_MASALA_LIBRARIES_MINOR_VERSION )
+            std::pair< Size, Size >( STANDARD_MASALA_PLUGINS_MAJOR_VERSION, STANDARD_MASALA_PLUGINS_MINOR_VERSION )
         )
     );
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 5 ), // Min version
+        std::pair< Size, Size >( 0, 11 ), // Min version
         "",
+        "Version 0.11 changed base class names for optimizers, for consistency.  "
+        "Version 0.10 added support for deprecation annotations, and updated the build system for centralized versioning.  "
+        "Version 0.9 added support for no-UI function annotations.  "
+        "Version 0.8 cleaned up a few violations of Masala conventions related to scratch spaces.  "
+		"Prior to version 0.7, cost function problems and cost functions could not accept scratch space pointers.  "
+		"Prior to version 0.6, annotations for API functions indicating preferred data representations were not available.  "
 		"Prior to version 0.5, annotations for API functions were not available, and certain problems existed "
-		"with including Masala objects in API definitions."
+		"with including Masala objects in API definitions.  "
 		"Prior to version 0.4, certain functions in the CostFunctionNetworkOptimizationProblem class (like "
-		"make_independent()) were unnecessarily made virtual and overridable."
+		"make_independent()) were unnecessarily made virtual and overridable.  "
 		"Prior to version 0.3, certain accessor functions for setter descriptions in API definitions "
 		"returned the wrong type.  "
         "Prior to version 0.2, the Standard Masala Library's SquareOfChoicePenaltySumCostFunction "
-        "and FunctionOfIntegerPenaltySumCostFunction were in the core Masala library.  "
-		"Prior to version 0.4, certain functions in the CostFunctionNetworkOptimizationProblem class (like "
-		"make_independent()) were unnecessarily made virtual and overridable."
+        "and FunctionOfIntegerPenaltySumCostFunction were in the core Masala library."
     );
     MasalaVersionManager::get_instance()->add_library_information( module_version_info );
     standard_masala_plugins::registration::register_sub_libraries();

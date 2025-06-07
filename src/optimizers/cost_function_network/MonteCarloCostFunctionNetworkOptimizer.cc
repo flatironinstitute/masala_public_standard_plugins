@@ -29,6 +29,7 @@
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
 
 // Optimizers headers:
+#include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 
 
@@ -38,12 +39,15 @@
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
 #include <numeric_api/auto_generated_api/optimization/annealing/AnnealingScheduleBase_API.hh>
+#include <numeric/optimization/cost_function_network/CFNProblemScratchSpace.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
+#include <base/api/setter/setter_annotation/PreferredTemplateDataRepresentationSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -52,6 +56,10 @@
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/random/MasalaRandomNumberGenerator.hh>
 #include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationManager.hh>
+#include <base/managers/engine/MasalaDataRepresentationCreator.hh>
+#include <base/managers/engine/data_representation_request/MasalaDataRepresentationNameRequirementCriterion.hh>
+#include <base/managers/engine/MasalaDataRepresentationRequest.hh>
 #include <base/utility/container/container_util.tmpl.hh>
 
 // STL headers:
@@ -131,40 +139,20 @@ get_all_greedy_refinement_modes() {
 MonteCarloCostFunctionNetworkOptimizer::MonteCarloCostFunctionNetworkOptimizer(
     MonteCarloCostFunctionNetworkOptimizer const & src
 ) :
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer( src )
+    masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer( src ) // Calls protected_assign(), but only for the base class, since this is a constructor.
 {
-    std::lock_guard< std::mutex > lock( src.optimizer_mutex_ );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-    attempts_per_problem_ = src.attempts_per_problem_;
-    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
-    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
-    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
-
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_->reset_call_count();
-    }
-
-    solution_storage_mode_ = src.solution_storage_mode_;
+	std::lock( src.cfn_solver_mutex(), cfn_solver_mutex() );
+	std::lock_guard< std::mutex > lock( src.cfn_solver_mutex(), std::adopt_lock );
+	std::lock_guard< std::mutex > lock2( cfn_solver_mutex(), std::adopt_lock );
+	MonteCarloCostFunctionNetworkOptimizer::protected_assign(src); // Repeats call to parent class protected_assign(), but that's okay.  Needed since virtual function calls aren't possible in constructors.
 }
 
 /// @brief Assignment operator.
 /// @details Needed since we define a mutex.
 MonteCarloCostFunctionNetworkOptimizer &
 MonteCarloCostFunctionNetworkOptimizer::operator=( MonteCarloCostFunctionNetworkOptimizer const & src ) {
-    std::lock( optimizer_mutex_, src.optimizer_mutex_ );
-    std::lock_guard< std::mutex > lock1( optimizer_mutex_, std::adopt_lock );
-    std::lock_guard< std::mutex > lock2( src.optimizer_mutex_, std::adopt_lock );
-    masala::numeric_api::base_classes::optimization::cost_function_network::CostFunctionNetworkOptimizer::operator=( src );
-    cpu_threads_to_request_ = src.cpu_threads_to_request_;
-    attempts_per_problem_ = src.attempts_per_problem_;
-    annealing_steps_per_attempt_ = src.annealing_steps_per_attempt_;
-    n_solutions_to_store_per_problem_ = src.n_solutions_to_store_per_problem_;
-    annealing_schedule_ = ( src.annealing_schedule_ == nullptr ? nullptr : src.annealing_schedule_->deep_clone() );
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_->reset_call_count();
-    }
-    solution_storage_mode_ = src.solution_storage_mode_;
-    return *this;
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::operator=( src ); // Calls protected_assign().
+	return *this;
 }
 
 /// @brief Make a copy of this object that's wholly independent.
@@ -199,7 +187,7 @@ MonteCarloCostFunctionNetworkOptimizer::make_independent() {
 std::vector< std::vector< std::string > >
 MonteCarloCostFunctionNetworkOptimizer::get_categories() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_categories();
+	return PluginCostFunctionNetworkOptimizer::get_categories();
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
@@ -208,7 +196,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_categories() const {
 std::vector< std::string >
 MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
     using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	std::vector< std::string > keywords( CostFunctionNetworkOptimizer::get_keywords() );
+	std::vector< std::string > keywords( PluginCostFunctionNetworkOptimizer::get_keywords() );
     keywords.push_back( "monte_carlo" );
     keywords.push_back( "simulated_annealing" );
     keywords.push_back( "stochastic" );
@@ -220,7 +208,14 @@ MonteCarloCostFunctionNetworkOptimizer::get_keywords() const {
 std::vector< std::vector< std::string > >
 MonteCarloCostFunctionNetworkOptimizer::get_engine_categories() const {
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
-	return CostFunctionNetworkOptimizer::get_engine_categories();
+	return PluginCostFunctionNetworkOptimizer::get_engine_categories();
+}
+
+/// @brief Get the keywords that this MasalaEngine has.
+/// @returns { "optimizer", "cost_function_network", "numeric", "monte_carlo", "simulated_annealing", "stochastic" }
+std::vector< std::string >
+MonteCarloCostFunctionNetworkOptimizer::get_engine_keywords() const {
+    return get_keywords();
 }
 
 /// @brief Get the class name.
@@ -323,6 +318,7 @@ MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum_from_string(
 /// @brief Get the API definition for this object.
 masala::base::api::MasalaObjectAPIDefinitionCWP
 MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
+    using namespace masala::base::managers::plugin_module;
     using namespace masala::base::api;
     using namespace masala::base::api::constructor;
     using namespace masala::base::api::setter;
@@ -331,7 +327,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
     using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
     using masala::base::Size;
 
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     if( api_description_ == nullptr ) {
         MasalaObjectAPIDefinitionSP api_description(
             masala::make_shared< MasalaObjectAPIDefinition >(
@@ -348,6 +344,30 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
         ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( MonteCarloCostFunctionNetworkOptimizer, api_description );
 
         // Setters:
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > template_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::managers::engine::MasalaDataRepresentationAPICSP const & > >(
+					"set_template_preferred_cfn_data_representation", "Set a template cost function network optimization problem data representation, "
+					"configured by the user but with no data entered.  This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() "
+					"function can be used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.",
+					"representation_in", "A fully configured but otherwise empty data representation object, to be cached.  Deep clones will be retrievable with the "
+					"get_template_preferred_cfn_data_representation() function when calling code wants to start populating a data representation with data.",
+					true, false,
+					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_template_preferred_cfn_data_representation, this, std::placeholders::_1 )
+				)
+			);
+			setter_annotation::PreferredTemplateDataRepresentationSetterAnnotationSP annotation(
+				masala::make_shared< setter_annotation::PreferredTemplateDataRepresentationSetterAnnotation >()
+			);
+			annotation->set_data_representation_manager_info(
+				std::vector< std::string >{ "OptimizationProblem", "CostFunctionNetworkOptimizationProblem" },
+				std::vector< std::string >{ "cpu" },
+				*template_setter,
+				true
+			);
+			template_setter->add_setter_annotation( annotation );
+			api_description->add_setter( template_setter );
+		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_cpu_threads_to_request", "Sets the number of threads to request when running problems in parallel.",
@@ -370,26 +390,42 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem, this, std::placeholders::_1 )
 			)
 		);
-		api_description->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< AnnealingScheduleBase_API const & > > (
-				"set_annealing_schedule", "Sets the annealing schedule to use for the problem.",
-				"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
-				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
-			)
-		);
-        std::string const available_annealing_schedules(
-            masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
-                std::vector< std::string >{ "AnnealingSchedule" }, true
-            )
-        );
-        api_description->add_setter(
-            masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
-                "set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  The name need not include namespace unless "
-                "there is a name conflict.  Available annealing schedules include: "
-                + available_annealing_schedules + ".", "annealing_schedule_name", "The name of the annealing schedule.",
-                false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
-            )
-        );
+		{
+            std::string const available_annealing_schedules(
+				masala::base::managers::plugin_module::MasalaPluginModuleManager::get_instance()->get_short_names_of_plugins_by_category_cs_list(
+					std::vector< std::string >{ "AnnealingSchedule" }, true
+				)
+			);
+
+			MasalaObjectAPISetterDefinition_OneInputSP< MasalaPluginAPI const & > annealing_sched_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< MasalaPluginAPI const & > > (
+					"set_annealing_schedule", "Sets the annealing schedule to use for the problem.  Available annealing schedule types include: "
+					+ available_annealing_schedules + ".",
+					"annealing_schedule_in", "The annealing schedule to use.  Cloned on input.", false, false,
+					std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule, this, std::placeholders::_1 )
+				)
+			);
+			setter_annotation::OwnedSingleObjectSetterAnnotationSP owned_annotation(
+				masala::make_shared< setter_annotation::OwnedSingleObjectSetterAnnotation >()
+			);
+			owned_annotation->set_plugin_manager_info(
+				std::vector< std::string >{ "AnnealingSchedule" },
+				std::vector< std::string >{ "annealing_schedule" }
+			);
+			annealing_sched_setter->add_setter_annotation( owned_annotation );
+			api_description->add_setter( annealing_sched_setter );
+
+			api_description->add_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
+					"set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  Creates an annealing schedule and leaves it with "
+					"its default configuration (so the set_annealing_schedule() setter should be used instead if you wish to configure "
+					"the annealing schedule).  The name need not include namespace unless there is a name conflict.  Available annealing schedules include: "
+					+ available_annealing_schedules + ".",
+					"annealing_schedule_name", "The name of the annealing schedule.  Must be one of: " + available_annealing_schedules + ".",
+					false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
+				)
+			);
+		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
 				"set_annealing_steps_per_attempt", "Sets the length of the Monte Carlo trajectory performed for each attempt of each problem.",
@@ -463,8 +499,32 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				)
             )
         );
+		api_description->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< masala::base::Size const > >(
+				"set_recompute_from_scratch_every_n_steps",
+				"Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
+				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
+				"every 100 Monte Carlo trajectory steps.",
+				"steps_in", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
+				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
+				"numerical precision errors.  Defaults to every 100 steps.",
+				false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::managers::engine::MasalaDataRepresentationAPISP > >(
+				"get_template_preferred_cfn_data_representation_copy", "Get a template cost function network optimization problem data representation, configured "
+				"by the user but with no data entered.  If no template CFN problem has been passed in by calling set_template_preferred_cfn_data_representation(), this "
+				"function returns a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  Otherwise, it deep-clones the object that was passed in.",
+				"template_preferred_cfn_data_representation_copy", "A deep clone of the configured but empty CFN problem representation that was passed in to "
+				"set_template_preferred_cfn_data_representation(), or a default, empty PairwisePrecomputedCostFunctionNetworkOptimizationProblem if no template was provided.",
+				true, false,
+				std::bind( &GreedyCostFunctionNetworkOptimizer::get_template_preferred_cfn_data_representation_copy, this )
+			)
+		);
 		api_description->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > > (
 				"cpu_threads_to_request", "Gets the number of threads to request when running problems in parallel.",
@@ -551,6 +611,19 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				)
             )
         );
+		api_description->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::base::Size > >(
+				"recompute_from_scratch_every_n_steps",
+				"Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
+				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
+				"every 100 Monte Carlo trajectory steps.",
+				"steps", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
+				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
+				"numerical precision errors.  Defaults to every 100 steps.",
+				false, false,
+				std::bind( &MonteCarloCostFunctionNetworkOptimizer::recompute_from_scratch_every_n_steps, this )
+			)
+		);
 
         // Work functions:
         api_description->add_work_function(
@@ -593,7 +666,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_cpu_threads_to_request(
     masala::base::Size const threads_in
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     cpu_threads_to_request_ = threads_in;
 }
 
@@ -604,7 +677,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_attempts_per_problem(
     masala::base::Size const attempts_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( attempts_in > 0, "set_attempts_per_problem", "The number of attempts per problem must be greater than zero." );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     attempts_per_problem_ = attempts_in;
 }
 
@@ -614,20 +687,23 @@ MonteCarloCostFunctionNetworkOptimizer::set_n_solutions_to_store_per_problem(
     masala::base::Size const n_solutions_in
 ) {
     CHECK_OR_THROW_FOR_CLASS( n_solutions_in > 0, "set_n_solutions_to_store_per_problem", "The number of solutions to return per problem must be greater than zero." );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     n_solutions_to_store_per_problem_ = n_solutions_in;
 }
 
 /// @brief Set the annealing schedule to use for annealing.
-/// @details Cloned on input.
+/// @details Cloned on input.  Throws if the plugin module passed in is not an annealing schedule.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
-    masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API const & schedule_in
+	masala::base::managers::plugin_module::MasalaPluginAPI const & schedule_in
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
-    annealing_schedule_ = schedule_in.deep_clone();
-    annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
-    annealing_schedule_->reset_call_count();
+	using namespace masala::numeric_api::auto_generated_api::optimization::annealing;
+	AnnealingScheduleBase_API const * anneal_sched_ptr( dynamic_cast< AnnealingScheduleBase_API const * >( &schedule_in ) );
+	CHECK_OR_THROW_FOR_CLASS( anneal_sched_ptr != nullptr, "set_annealing_schedule", "The " + schedule_in.inner_class_name() + " object passed to this function was not an AnnealingScheduleBase-derived class." );
+	std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+	annealing_schedule_ = anneal_sched_ptr->deep_clone();
+	annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+	annealing_schedule_->reset_call_count();
 }
 
 /// @brief Set the annealing schedule by name.
@@ -648,7 +724,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name(
         + schedule + "\".  The returned object was not an annealing schedule."
     );
     {
-        std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+        std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
         annealing_schedule_ = annsched;
         annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
         annealing_schedule_->reset_call_count();
@@ -660,7 +736,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_annealing_steps_per_attempt(
     masala::base::Size const steps_in
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     annealing_steps_per_attempt_ = steps_in;
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_->set_final_time_index( steps_in );
@@ -677,7 +753,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
         solution_storage_mode_in != MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::INVALID_MODE,
         "set_solution_storage_mode", "An invalid mode was passed to this function!"
     );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     solution_storage_mode_ = solution_storage_mode_in;
 }
 
@@ -694,7 +770,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_solution_storage_mode(
         "set_solution_storage_mode", "Could not parse \"" + solution_storage_mode_string_in +
         "as a valid solution storage mode!"
     );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     solution_storage_mode_ = mode_enum;
 }
 
@@ -706,7 +782,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_use_multimutation(
     bool const setting
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     use_multimutation_ = setting;
 }
 
@@ -726,7 +802,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_multimutation_probability_of_one_mut
         "The probability of 1 mutation must be in the range (0, 1].  Got a probability of "
         + std::to_string( probability_in ) + ", though!"
     );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     multimutation_probability_of_one_mutation_ = probability_in;
 }
 
@@ -736,7 +812,7 @@ void
 MonteCarloCostFunctionNetworkOptimizer::set_do_greedy_refinement(
 	bool const do_greedy_refinement_in
 ) {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	do_greedy_refinement_ = do_greedy_refinement_in;
 }
 
@@ -748,8 +824,19 @@ MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
 	CHECK_OR_THROW_FOR_CLASS( mode_in != MCOptimizerGreedyRefinementMode::INVALID_MODE && mode_in <= MCOptimizerGreedyRefinementMode::N_MODES,
 		"set_greedy_refinment_mode", "An invalid greedy refinement mode was passed to this function."
 	);
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	greedy_refinement_mode_ = mode_in;
+}
+
+/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+void
+MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps(
+    masala::base::Size const steps_in
+) {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    recompute_from_scratch_every_n_steps_ = steps_in;
 }
 
 /// @brief Set the greedy refinement mode, by string.
@@ -773,7 +860,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
 /// @details The default setting of 0 means "request all available".
 masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return cpu_threads_to_request_;
 }
 
@@ -781,21 +868,21 @@ MonteCarloCostFunctionNetworkOptimizer::cpu_threads_to_request() const {
 /// @details Minimum is 1.
 masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::attempts_per_problem() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return attempts_per_problem_;
 }
 
 /// @brief Get the number of solutions to return for each problem.
 masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::n_solutions_to_store_per_problem() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return n_solutions_to_store_per_problem_;
 }
 
 /// @brief Get the numer of Monte Carlo moves to make in each attempt.
 masala::base::Size
 MonteCarloCostFunctionNetworkOptimizer::annealing_steps_per_attempt() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return annealing_steps_per_attempt_;
 }
 
@@ -810,14 +897,14 @@ MonteCarloCostFunctionNetworkOptimizer::annealing_schedule() const {
 /// @brief Get the solution storage mode, by enum.
 MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode
 MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_enum() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return solution_storage_mode_;
 }
 
 /// @brief Get the solution storage mode, by string.
 std::string
 MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return solution_storage_mode_string_from_enum( solution_storage_mode_ );
 }
 
@@ -827,14 +914,14 @@ MonteCarloCostFunctionNetworkOptimizer::solution_storage_mode_string() const {
 /// @note We actually take a Poisson distribution and add 1, since we don't want 0 mutations.
 bool
 MonteCarloCostFunctionNetworkOptimizer::use_multimutation() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return use_multimutation_;
 }
 
 /// @brief Get the probability of having 1 mutation.  Must be a value between 0 and 1.  Default 0.75.
 masala::base::Real
 MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutation() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return multimutation_probability_of_one_mutation_;
 }
 
@@ -842,22 +929,31 @@ MonteCarloCostFunctionNetworkOptimizer::multimutation_probability_of_one_mutatio
 /// False by default.
 bool
 MonteCarloCostFunctionNetworkOptimizer::do_greedy_refinement() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	return do_greedy_refinement_;
 }
 
 /// @brief Get the greedy refinement mode.
 MCOptimizerGreedyRefinementMode
 MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	return greedy_refinement_mode_;
 }
 
 /// @brief Get the greedy refinement mode string.
 std::string
 MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string() const {
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 	return greedy_refinement_name_from_mode( greedy_refinement_mode_ );
+}
+
+/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+/// to correct the accumulation of small numerical errors.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+masala::base::Size
+MonteCarloCostFunctionNetworkOptimizer::recompute_from_scratch_every_n_steps() const {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
+    return recompute_from_scratch_every_n_steps_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -869,7 +965,7 @@ MonteCarloCostFunctionNetworkOptimizer::greedy_refinement_mode_string() const {
 masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_API &
 MonteCarloCostFunctionNetworkOptimizer::annealing_schedule_nonconst() {
     CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "annealing_schedule", "The annealing schedule must be set before it can be accessed." );
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     return *annealing_schedule_;
 }
 
@@ -884,7 +980,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using masala::base::Size;
 
-    std::lock_guard< std::mutex > lock( optimizer_mutex_ );
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 
     CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "run_cost_function_network_optimizer", "An annealing schedule must be set before calling this function." );
     annealing_schedule_->reset_call_count();
@@ -989,7 +1085,6 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 
 	// Prepare a vector of jobs to do.
 	MasalaThreadedWorkRequest work_vector( cpu_threads_to_request_ );
-	std::vector< std::vector< CostFunctionNetworkOptimizationProblems_APISP > > problems_copies; // Repackaged to have one problem per problems object.
 	std::vector< std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > > greedy_solutions; // Will ultimately have one solution per solutions object.
 
 	for( Size iprob(0); iprob<nprob; ++iprob ) {
@@ -1000,17 +1095,7 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 
 		Size const nsols( solutions_by_problem[iprob]->n_solutions() );
 		greedy_solutions.emplace_back( nsols, nullptr );
-		problems_copies.emplace_back( nsols, nullptr );
-		std::vector< CostFunctionNetworkOptimizationProblems_APISP > & problems_copies_inner( problems_copies[iprob] );
 		for( Size jsol(0); jsol<nsols; ++jsol ) {
-			// Make copies of the problems objects, and ensure that the MC solutions are the unique starting points
-			// for each new problem:
-			problems_copies_inner[jsol] = masala::make_shared< CostFunctionNetworkOptimizationProblems_API >();
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem_cast->deep_clone() )
-			);
-			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "carry_out_greedy_refinement", "Program error.  Could not deep clone problem " + std::to_string( iprob ) + "." );
-			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "carry_out_greedy_refinement", "Program error.  Could not get non-finalized problem description for problem " + std::to_string( iprob ) + "." );
 
 			CostFunctionNetworkOptimizationSolution_APICSP mc_solution_cast(
 				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions_by_problem[iprob]->solution( jsol ) )
@@ -1019,18 +1104,15 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 				"MC solution " + std::to_string( jsol ) + " of problem " + std::to_string( iprob )
 				+ " was not a cost function network optimization solution."
 			);
-			problem_copy->clear_candidate_solutions();
-			problem_copy->add_candidate_solution( mc_solution_cast->solution_at_variable_positions() );
-			problem_copy->finalize();
-			problems_copies_inner[jsol]->add_optimization_problem( problem_copy );
 
 			// Prepare the vector of work to do in threads:
 			work_vector.add_job(
 				std::bind(
 					&MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads,
 					this,
-					std::cref(*problems_copies[iprob][jsol]),
+					problem_cast,
 					std::ref(greedy_solutions[iprob][jsol]),
+                    mc_solution_cast->solution_at_variable_positions(),
 					mc_solution_cast->n_times_solution_was_produced()
 				)
 			);
@@ -1075,13 +1157,15 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 					curgreedysol->problem()
 				)
 			);
+            masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( curgreedysolprob->generate_cfn_problem_scratch_space() );
 			CHECK_OR_THROW_FOR_CLASS( curgreedysolprob != nullptr, "carry_out_greedy_refinement", "Program error.  Expected a CostFunctionNetworkOptimizationProblem "
 				"class defining the greedy optimization problem, but got " + curgreedysol->problem()->inner_class_name() + "."
 			);
 			cursols.merge_in_lowest_scoring_solutions(
 				{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 				n_to_keep,
-				curgreedysolprob
+				curgreedysolprob,
+                problem_scratch.get()
 			);
 		}
 	}
@@ -1091,30 +1175,26 @@ MonteCarloCostFunctionNetworkOptimizer::carry_out_greedy_refinement(
 /// @details This function runs in threads.
 void
 MonteCarloCostFunctionNetworkOptimizer::do_one_greedy_refinement_in_threads(
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & greedy_problems,
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+    std::vector< masala::base::Size > const & starting_point,
 	masala::base::Size const n_times_seen
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
 	//write_to_tracer( "************ n_times_seen: " + std::to_string(n_times_seen) ); // DELETE ME
 
-	CHECK_OR_THROW_FOR_CLASS( greedy_problems.n_problems() == 1, "do_one_greedy_refinement_in_threads", "Program error.  Expected exactly "
-		"one problem in the greedy problems container, but got " + std::to_string( greedy_problems.n_problems() ) + "."
-	);
 	CHECK_OR_THROW_FOR_CLASS( greedy_solutions == nullptr, "do_one_greedy_refinement_in_threads", "Program error.  Expected solutiuons object to be nullptr." );
 
 	GreedyCostFunctionNetworkOptimizer greedyopt;
 	greedyopt.set_cpu_threads_to_request( 1 );
 	greedyopt.set_n_times_seen_multiplier( n_times_seen );
-	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > sols( greedyopt.run_cost_function_network_optimizer( greedy_problems ) );
-	CHECK_OR_THROW_FOR_CLASS( sols.size() == 1 && sols[0]->n_solutions() == 1, "do_one_greedy_refinement_in_threads", "Program error.  "
-		"Expected exactly one solution."
-	);
+    greedyopt.add_optimizer_starting_state( starting_point );
+	CostFunctionNetworkOptimizationSolutions_APICSP sols( greedyopt.run_cost_function_network_optimizer_on_one_problem( greedy_problem ) );
 
 	//write_to_tracer( "************ n_times_seen_by_greedy: " + std::to_string(sols[0]->solution(0)->n_times_solution_was_produced()) ); // DELETE ME
 
-	greedy_solutions = sols[0];
+	greedy_solutions = sols;
 }
 
 /// @brief Run a single Monte Carlo trajectory.
@@ -1157,6 +1237,28 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     using masala::base::Real;
     using masala::base::Size;
 
+    masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP problem_scratch( problem->generate_cfn_problem_scratch_space() );
+
+    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
+    {
+        // Some output:
+        std::ostringstream choicestream;
+        bool first(true);
+        for( auto const & choicepair : n_choices_per_variable_node ) {
+            if( first ) {
+                first = false;
+            } else {
+                choicestream << ",";
+            }
+            choicestream << choicepair.second;
+        }
+        
+        write_to_tracer( "Starting " + std::to_string( annealing_steps ) + "-step Monte Carlo trajectory for problem with " +
+            std::to_string( problem->total_variable_nodes() ) + " variable nodes, with the following choice counts at "
+            "variable nodes: [" + choicestream.str() + "]."
+        );
+    }
+
     // Compute lambda for the Poisson distribution for multiple moves.
     DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS(
         multimutation_probability_of_one_mutation > 0.0 && multimutation_probability_of_one_mutation <= 1.0,
@@ -1181,7 +1283,6 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     local_solutions.reserve( n_solutions_to_store );
 
     /// Selection for the solution:
-    std::vector< std::pair< Size, Size > > const n_choices_per_variable_node( problem->n_choices_at_variable_nodes() ); // First index of each pair is node index, second is number of choices.  Only variable nodes are included.
     Size const n_variable_nodes( n_choices_per_variable_node.size() );
     std::vector< std::pair< Size, Size > > n_choices_per_variable_node_using_variable_node_indices( n_variable_nodes );
     for( Size i(0); i<n_variable_nodes; ++i ) {
@@ -1198,7 +1299,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         last_accepted_solution[i] = current_solution[i];
     }
     // Note: these will accumulate numerical errors.
-    Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution ) );
+	Size steps_since_score_recomputed(0);
+    Real last_accepted_absolute_score( problem->compute_absolute_score( current_solution, problem_scratch.get() ) );
     Real candidate_absolute_score( last_accepted_absolute_score );
     // write_to_tracer( "Initial score = " + std::to_string( last_accepted_absolute_score ) ); // DELETE ME
 
@@ -1209,12 +1311,19 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 
     // Main loop over all steps of the annealing trajectory.
     for( Size step_index(0); step_index < annealing_steps; ++step_index ) {
+		if( recompute_from_scratch_every_n_steps_ > 0 ) {
+			++steps_since_score_recomputed;
+			if( recompute_from_scratch_every_n_steps_ == steps_since_score_recomputed ) {
+				steps_since_score_recomputed = 0;
+				last_accepted_absolute_score = problem->compute_absolute_score( last_accepted_solution, problem_scratch.get() );
+			}
+		}
         if( use_multimutation ) {
             make_mc_multimove( current_solution, n_choices_per_variable_node_using_variable_node_indices, poisson_lambda, randgen );
         } else {
             make_mc_move( current_solution, n_choices_per_variable_node, randgen );
         }
-        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution ) ); // TODO -- option for doing this without mutex lock.
+        Real const deltaE( problem->compute_score_change( last_accepted_solution, current_solution, problem_scratch.get() ) ); // TODO -- option for doing this without mutex lock.
         candidate_absolute_score += deltaE;
         // write_to_tracer( "Move " + std::to_string( step_index ) +
         //     + " old = [" + masala::base::utility::container::container_to_string( last_accepted_solution, "," )
@@ -1232,6 +1341,9 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
         if( randgen->apply_metropolis_criterion( deltaE, annealing_schedule_copy->temperature() ) ) {
             last_accepted_solution = current_solution;
             last_accepted_absolute_score = candidate_absolute_score;
+            if( problem_scratch != nullptr ) {
+                problem_scratch->accept_last_move();
+            }
             //write_to_tracer( "Accepting move " + std::to_string( step_index ) + ".  Current score = " + std::to_string( last_accepted_absolute_score ) + "." ); // DELETE ME            
             if( solution_storage_mode == MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ) {
                 determine_whether_to_store_solution(
@@ -1254,26 +1366,7 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > greedy_solutions( nsol, nullptr );
 
 		for( Size isol(0); isol<nsol; ++isol ) {
-			// Set up a problems container with one greedy refinement problem.
-#ifndef NDEBUG
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
-			);
-			CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "run_mc_trajectory", "Program error.  Could not deep clone problem." );
-			CHECK_OR_THROW_FOR_CLASS( !problem_copy->finalized(), "run_mc_trajectory", "Program error.  Could not get non-finalized problem description for problem." );
-#else
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy(
-				std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->deep_clone() )
-			);
-#endif
-
-			problem_copy->clear_candidate_solutions();
-			//write_to_tracer( "Adding candidate solution [" + masala::base::utility::container::container_to_string( std::get<0>( local_solutions[isol] ), "," ) + "]." );
-			problem_copy->add_candidate_solution( std::get<0>( local_solutions[isol] ) );
-			problem_copy->finalize();
-			CostFunctionNetworkOptimizationProblems_API greedy_problems;
-			greedy_problems.add_optimization_problem( problem_copy );
-			do_one_greedy_refinement_in_threads( greedy_problems, greedy_solutions[isol], std::get<2>( local_solutions[isol] ) );
+			do_one_greedy_refinement_in_threads( problem, greedy_solutions[isol],  std::get<0>( local_solutions[isol] ), std::get<2>( local_solutions[isol] ) );
 		}
 
 		{ // Mutex lock scope
@@ -1305,13 +1398,14 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
 				solutions.merge_in_lowest_scoring_solutions(
 					{ std::make_tuple( curgreedysol->solution_at_variable_positions(), curgreedysol->solution_score(), curgreedysol->n_times_solution_was_produced() ) },
 					n_solutions_to_store,
-					curgreedysolprob
+					curgreedysolprob,
+                    problem_scratch.get()
 				);
 			}
 		} // Mutex lock scope.
 	} else { // Mutex lock scope
         std::lock_guard< std::mutex > lock( solutions_mutex );
-        solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem );
+        solutions.merge_in_lowest_scoring_solutions( local_solutions, n_solutions_to_store, problem, problem_scratch.get() );
     } // End mutex lock scope.
 
     // Minimal output.
@@ -1447,6 +1541,87 @@ MonteCarloCostFunctionNetworkOptimizer::determine_whether_to_store_solution(
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
+void
+MonteCarloCostFunctionNetworkOptimizer::protected_assign(
+	PluginCostFunctionNetworkOptimizer const & src
+) {
+	MonteCarloCostFunctionNetworkOptimizer const * src_cast_ptr( dynamic_cast< MonteCarloCostFunctionNetworkOptimizer const * >( &src ) );
+	CHECK_OR_THROW_FOR_CLASS( src_cast_ptr != nullptr, "protected_assign", "Could not interpret source object of type " + src.class_name() + " as a MonteCarloCostFunctionNetworkOptimizer object." );
+
+	cpu_threads_to_request_ = src_cast_ptr->cpu_threads_to_request_;
+	attempts_per_problem_ = src_cast_ptr->attempts_per_problem_;
+	n_solutions_to_store_per_problem_ = src_cast_ptr->n_solutions_to_store_per_problem_;
+	annealing_steps_per_attempt_ = src_cast_ptr->annealing_steps_per_attempt_;
+    use_multimutation_ = src_cast_ptr->use_multimutation_;
+    do_greedy_refinement_ = src_cast_ptr->do_greedy_refinement_;
+    greedy_refinement_mode_ = src_cast_ptr->greedy_refinement_mode_;
+    multimutation_probability_of_one_mutation_ = src_cast_ptr->multimutation_probability_of_one_mutation_;
+
+	annealing_schedule_ = ( src_cast_ptr->annealing_schedule_ == nullptr ? nullptr : src_cast_ptr->annealing_schedule_->deep_clone() );
+
+	if( annealing_schedule_ != nullptr ) {
+		annealing_schedule_->reset_call_count();
+	}
+	
+	solution_storage_mode_ = src_cast_ptr->solution_storage_mode_;
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
+}
+
+/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
+/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
+/// used to retrieve a deep clone.  This allows the solver to cache its preferred data representation with its setup.
+/// @note This version performs no mutex-locking, and is called by set_template_preferred_cfn_data_representation(), which does lock the mutex.
+/// This version is virtual to allow derived classes to override it, to add checks of their own.  If overridden, the override should call the
+/// base class to set the variable internally.
+void
+MonteCarloCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation(
+	masala::base::managers::engine::MasalaDataRepresentationAPICSP const & representation_in
+) {
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_set_template_preferred_cfn_data_representation( representation_in );
+}
+
+/// @brief If the template preferred CFN data representation has not been set, return a default CFN data representation.
+/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
+masala::base::managers::engine::MasalaDataRepresentationAPISP
+MonteCarloCostFunctionNetworkOptimizer::protected_get_default_template_preferred_cfn_data_representation() const {
+	using namespace masala::base::managers::engine;
+	using namespace masala::base::managers::engine::data_representation_request;
+	using masala::base::Size;
+
+	MasalaDataRepresentationNameRequirementCriterionSP name_criterion( masala::make_shared< MasalaDataRepresentationNameRequirementCriterion >( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
+	MasalaDataRepresentationRequest request;
+	request.add_data_representation_criterion( name_criterion );
+	std::vector< MasalaDataRepresentationCreatorCSP > creators( MasalaDataRepresentationManager::get_instance()->get_compatible_data_representation_creators( request ) );
+	CHECK_OR_THROW_FOR_CLASS( creators.size() >= 1, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+	bool found(false);
+	Size found_index(0);
+	for( auto const & creator : creators ) {
+		if( creator->get_plugin_object_namespace_and_name() == "standard_masala_plugins::optimizers::cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) {
+			found = true;
+			break;
+		}
+		++found_index;
+	}
+	CHECK_OR_THROW_FOR_CLASS( found, "protected_get_default_template_preferred_cfn_data_representation", "Could not find the PairwisePrecomputedCostFunctionNetworkOptimizationProblem class."
+		"  Was it registered with the Masala data representation manager?  (Note that the register_library() function of each plugin library must be called before the library is used.)"
+	);
+
+	MasalaDataRepresentationAPISP pairwise_cfn_api( creators[found_index]->create_data_representation() );
+	PairwisePrecomputedCostFunctionNetworkOptimizationProblemSP pairwise_cfn( std::dynamic_pointer_cast< PairwisePrecomputedCostFunctionNetworkOptimizationProblem >( pairwise_cfn_api->get_inner_data_representation_object() ) );
+	CHECK_OR_THROW_FOR_CLASS( pairwise_cfn != nullptr, "protected_get_default_template_preferred_cfn_data_representation", "The created object "
+		"could not be interpreted as a PairwisePrecomputedCostFunctionNetworkOptimizationProblem.  This is a program error.  Please consult a developer."
+	);
+
+	// Could configure the pairwise_cfn object here if needed.
+	return pairwise_cfn_api;
+}
 
 } // namespace cost_function_network
 } // namespace optimizers

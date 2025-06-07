@@ -62,6 +62,10 @@ namespace cost_function_network {
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class PairwisePrecomputedCostFunctionNetworkOptimizationProblem : public masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem {
 
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblem Parent;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemSP ParentSP;
+	typedef masala::numeric_api::base_classes::optimization::cost_function_network::PluginPairwisePrecomputedCostFunctionNetworkOptimizationProblemCSP ParentCSP;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,12 +78,12 @@ public:
 
 	/// @brief Copy constructor.
 	/// @details Needs to be explicit due to use of std::atomic.
-	PairwisePrecomputedCostFunctionNetworkOptimizationProblem( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & );
+	PairwisePrecomputedCostFunctionNetworkOptimizationProblem( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & src );
 
 	// @brief Assignment operator.
 	/// @details Needs to be explicit due to use of std::atomic.
 	PairwisePrecomputedCostFunctionNetworkOptimizationProblem &
-	operator=( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & );
+	operator=( PairwisePrecomputedCostFunctionNetworkOptimizationProblem const & src );
 
 	/// @brief Destructor.
 	~PairwisePrecomputedCostFunctionNetworkOptimizationProblem() override = default;
@@ -124,6 +128,11 @@ public:
 	std::vector< std::vector< std::string > >
 	get_data_representation_categories() const override;
 
+	/// @brief Get the keywords for this MasalaDataRepresentation.
+	/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "numeric", "cpu" }
+	std::vector< std::string >
+	get_data_representation_keywords() const override;
+
 	/// @brief Get the non-exhaustive list of engines with which this MasalaDataRepresentation
 	/// is compatible.
 	/// @returns { "standard_masala_plugins::optimizers::cost_function_network::MonteCarloCostFunctionNetworkOptimizer" }
@@ -131,7 +140,7 @@ public:
 	get_compatible_masala_engines() const override;
 
 	/// @brief Get the properties of this MasalaDataRepresentation.
-	/// @returns { "optimization_problem", "cost_function_network_optimization_problem" }.
+	/// @returns { "optimization_problem", "cost_function_network_optimization_problem", "cpu" }.
 	std::vector< std::string >
 	get_present_data_representation_properties() const override;
 
@@ -217,6 +226,11 @@ public:
 // WORK FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Generate a scratch space for CFN problems.
+	/// @details This version will return a PairwisePrecomputedCFNProblemScratchSpace.
+	masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP
+	generate_cfn_problem_scratch_space() const override;
+
 	/// @brief Given a candidate solution, compute the score.
 	/// @details The candidate solution is expressed as a vector of choice indices, with
 	/// one entry per variable position, in order of position indices.  (There may not be
@@ -226,7 +240,8 @@ public:
 	/// threadsafe from a read-only context.
 	masala::base::Real
 	compute_absolute_score(
-		std::vector< masala::base::Size > const & candidate_solution
+		std::vector< masala::base::Size > const & candidate_solution,
+		masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 	) const override;
 
 	/// @brief Given a pair of candidate solutions, compute the difference in their scores.
@@ -239,7 +254,8 @@ public:
 	masala::base::Real
 	compute_score_change(
 		std::vector< masala::base::Size > const & old_solution,
-		std::vector< masala::base::Size > const & new_solution
+		std::vector< masala::base::Size > const & new_solution,
+		masala::numeric::optimization::cost_function_network::CFNProblemScratchSpace * cfn_problem_scratch_space
 	) const override;
 
 public:
@@ -257,6 +273,31 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Is this data representation empty?
+	/// @details Must be implemented by derived classes.  Should return its value && the parent class protected_empty().  Performs no mutex-locking.
+	/// @returns True if no data have been loaded into this data representation, false otherwise.
+	/// @note This does not report on whether the data representation has been configured; only whether it has been loaded with data.
+	bool
+	protected_empty() const override;
+
+	/// @brief Remove the data loaded in this object.  Note that this does not result in the configuration being discarded.
+	/// @details Must be implemented by derived classes, and should call parent class protected_clear().  Performs no mutex-locking.
+	void
+	protected_clear() override;
+
+	/// @brief Make this object independent by deep-cloning all of its contained objects.  Must be implemented
+	/// by derived classses.  Performs no mutex-locking.
+	void
+	protected_make_independent() override;
+
+	/// @brief Called by the assignment operator and the copy constructor, this copies all data.  Must be implemented by
+	/// derived classes.  Performs no mutex locking.
+	/// @param src The object that we are copying from.
+	void
+	protected_assign(
+		masala::base::managers::engine::MasalaDataRepresentation const & src
+	) override;
 
 	/// @brief Reset this object.  Assumes mutex has been locked.
 	/// @details Calls parent protected_reset().

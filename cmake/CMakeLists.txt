@@ -19,11 +19,24 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
 # Set project attributes:
-PROJECT( MasalaStandardPlugins VERSION 0.5 DESCRIPTION "Standard plugins for the Masala molecular modelling suite." )
+PROJECT( MasalaStandardPlugins VERSION 0.11 DESCRIPTION "Standard plugins for the Masala molecular modelling suite." )
+
+# Default build is debug mode.  To build in release mode, comment out the two debug lines below and
+# uncomment the release lines.
 SET( MODE debug )
 SET( CMAKE_BUILD_TYPE Debug )
 # SET( MODE release )
 # SET( CMAKE_BUILD_TYPE Release )
+
+# Uncomment the following to enable deprecated API functions.
+#ADD_DEFINITIONS( -DMASALA_ENABLE_DEPRECATED_FUNCTIONS )
+
+# Uncomment the following to disable deprecation warnings.
+#ADD_DEFINITIONS( -DMASALA_DISABLE_DEPRECATION_WARNINGS )
+
+# Ensure that version is set in only one place, in the PROJECT line at the top of this file:
+ADD_DEFINITIONS( -DSTANDARD_MASALA_PLUGINS_MAJOR_VERSION=${CMAKE_PROJECT_VERSION_MAJOR} -DSTANDARD_MASALA_PLUGINS_MINOR_VERSION=${CMAKE_PROJECT_VERSION_MINOR} )
+
 SET( LINK_TYPE SHARED )
 SET( LINK_EXTERNAL_LIBS stdc++ )
 SET( CMAKE_MACOSX_RPATH 0 )
@@ -44,32 +57,32 @@ INCLUDE( compiler.cmake )
 
 # Generate the build lists for the scoring library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins scoring ../src/scoring cmake_generated/scoring.cmake cmake_generated/scoring_api.cmake cmake_generated/scoring_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} scoring ../src/scoring cmake_generated/scoring.cmake cmake_generated/scoring_api.cmake cmake_generated/scoring_tests.cmake
 )
 
 # Generate the build lists for the selectors library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} selectors ../src/selectors cmake_generated/selectors.cmake cmake_generated/selectors_api.cmake cmake_generated/selectors_tests.cmake
 )
 
 # Generate the build lists for the optimizers library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins optimizers ../src/optimizers cmake_generated/optimizers.cmake cmake_generated/optimizers_api.cmake cmake_generated/optimizers_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} optimizers ../src/optimizers cmake_generated/optimizers.cmake cmake_generated/optimizers_api.cmake cmake_generated/optimizers_tests.cmake
 )
 
 # Generate the build lists for the file_interpreters library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins file_interpreters ../src/file_interpreters cmake_generated/file_interpreters.cmake cmake_generated/file_interpreters_api.cmake cmake_generated/file_interpreters_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} file_interpreters ../src/file_interpreters cmake_generated/file_interpreters.cmake cmake_generated/file_interpreters_api.cmake cmake_generated/file_interpreters_tests.cmake
 )
 
 # Generate the build lists for the registration library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins registration ../src/registration cmake_generated/registration.cmake cmake_generated/registration_api.cmake cmake_generated/registration_tests.cmake
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} registration ../src/registration cmake_generated/registration.cmake cmake_generated/registration_api.cmake cmake_generated/registration_tests.cmake
 )
 
 # Generate the build lists for the benchmark library and its API library:
 execute_process(
-    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins benchmark ../src/benchmark cmake_generated/benchmark.cmake NONE NONE
+    COMMAND python3 ../code_templates/generate_cmake_build.py standard_masala_plugins ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} benchmark ../src/benchmark cmake_generated/benchmark.cmake NONE NONE
 )
 
 # Build the scoring library:

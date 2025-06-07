@@ -46,6 +46,7 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
+#include <base/managers/engine/MasalaEngineAPI.hh>
 #include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 // Optimizers headers:
@@ -66,7 +67,7 @@ namespace gradient_based {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 GradientDescentFunctionOptimizer::clone() const {
 	return masala::make_shared< GradientDescentFunctionOptimizer >(*this);
 }
@@ -86,7 +87,7 @@ GradientDescentFunctionOptimizer::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
+/// @returns { { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -95,7 +96,7 @@ GradientDescentFunctionOptimizer::deep_clone() const {
 std::vector< std::vector< std::string > >
 GradientDescentFunctionOptimizer::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" }
+		{ "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" }
 	};
 }
 
@@ -122,10 +123,17 @@ GradientDescentFunctionOptimizer::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
+/// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 GradientDescentFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } };
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } };
+}
+
+/// @brief Get the keywords that this MasalaEngine has.
+/// @returns  { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
+std::vector< std::string >
+GradientDescentFunctionOptimizer::get_engine_keywords() const {
+	return get_keywords();
 }
 
 /// @brief Every class can name itself.
@@ -177,14 +185,20 @@ GradientDescentFunctionOptimizer::set_max_iterations(
 /// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 void
 GradientDescentFunctionOptimizer::set_line_optimizer(
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP const & line_optimizer_in
+	masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
 ) {
-	std::lock_guard< std::mutex > lock( mutex() );
-	line_optimizer_ = line_optimizer_in;
-	if( line_optimizer_ != nullptr ) {
-		write_to_tracer( "Set line optimizer to " + line_optimizer_->class_name() + "." );
-	} else {
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	if( line_optimizer_in == nullptr ) {
+		line_optimizer_ = nullptr;
 		write_to_tracer( "No line optimizer set.  The default BrentAlgorithmLineOptimizer will be used." );
+	} else {
+		PluginLineOptimizerCSP line_opt_cast( std::dynamic_pointer_cast< PluginLineOptimizer const >( line_optimizer_in->get_inner_engine_object_const() ) );
+		CHECK_OR_THROW_FOR_CLASS( line_opt_cast != nullptr, "set_line_optimizer", "The provided objected was of type " + line_optimizer_in->inner_class_name() +
+			", which is not a PluginLineOptimizer derived class!"
+		);
+		std::lock_guard< std::mutex > lock( mutex() );
+		line_optimizer_ = line_opt_cast;
+		write_to_tracer( "Set line optimizer to " + line_optimizer_->class_name() + "." );
 	}
 }
 
@@ -295,6 +309,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
+	using namespace masala::base::managers::engine;
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 	using namespace masala::numeric_api::auto_generated_api::optimization;
@@ -325,11 +340,11 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			)
 		);
 		{
-			MasalaObjectAPISetterDefinition_OneInputSP< PluginLineOptimizerCSP const & > set_line_optimizer_setter(
-				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< PluginLineOptimizerCSP const & > >(
+			MasalaObjectAPISetterDefinition_OneInputSP< MasalaEngineAPICSP > set_line_optimizer_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< MasalaEngineAPICSP > >(
 					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
 					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
-					"is used by default.",
+					"is used by default.  Throws if the MasalaEngine provided cannot be interpreted as a MasalaPluginLineOptimizer.",
 					"line_optimizer_in", "The line optimizer to use when performing gradient-descent minimization.",
 					false, false, std::bind( &GradientDescentFunctionOptimizer::set_line_optimizer, this, std::placeholders::_1 )
 				)
@@ -343,6 +358,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			set_line_optimizer_setter_annotation->set_engine_manager_info(
 				std::vector< std::string >{ "LineOptimizer" },
 				std::vector< std::string >{ "line_optimizer" },
+				*set_line_optimizer_setter,
 				true
 			);
 			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
@@ -680,7 +696,7 @@ GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
 /// @details Performs no mutex locking.
 void
 GradientDescentFunctionOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 ) {
 	GradientDescentFunctionOptimizer const * src_ptr_cast( dynamic_cast< GradientDescentFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
@@ -688,7 +704,7 @@ GradientDescentFunctionOptimizer::protected_assign(
 	max_iterations_ = src_ptr_cast->max_iterations_;
 	line_optimizer_ = src_ptr_cast->line_optimizer_;
 
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -702,7 +718,7 @@ GradientDescentFunctionOptimizer::protected_make_independent() {
 		line_optimizer_copy->make_independent();
 		line_optimizer_ = line_optimizer_copy;
 	}
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based
