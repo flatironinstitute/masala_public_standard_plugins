@@ -64,7 +64,7 @@ namespace gradient_free {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 SimplexFunctionOptimizer::clone() const {
 	return masala::make_shared< SimplexFunctionOptimizer >(*this);
 }
@@ -84,7 +84,7 @@ SimplexFunctionOptimizer::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } }
+/// @returns { { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -93,7 +93,7 @@ SimplexFunctionOptimizer::deep_clone() const {
 std::vector< std::vector< std::string > >
 SimplexFunctionOptimizer::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" }
+		{ "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" }
 	};
 }
 
@@ -120,10 +120,10 @@ SimplexFunctionOptimizer::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer"} }
+/// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 SimplexFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } };
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } };
 }
 
 /// @brief Every class can name itself.
@@ -928,14 +928,14 @@ SimplexFunctionOptimizer::reflect_vertex(
 /// @details Performs no mutex locking.
 void
 SimplexFunctionOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 ) {
 	SimplexFunctionOptimizer const * src_ptr_cast( dynamic_cast< SimplexFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
 
 	max_iterations_ = src_ptr_cast->max_iterations_;
 
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -944,7 +944,7 @@ SimplexFunctionOptimizer::protected_assign(
 void
 SimplexFunctionOptimizer::protected_make_independent() {
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_free
