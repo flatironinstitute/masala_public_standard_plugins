@@ -43,6 +43,7 @@
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 // #include <optimizers/gradient_based/BFGSFunctionOptimizer.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
@@ -78,6 +79,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
         // outvec.emplace_back( masala::make_shared< gradient_based::BFGSFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::GradientDescentFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_free::SimplexFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::BrentAlgorithmLineOptimizer >() );
         // ADD MORE ENTRIES HERE
