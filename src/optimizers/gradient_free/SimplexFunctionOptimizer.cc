@@ -767,7 +767,8 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			if( simplex_scores(old_worst_index) < simplex_scores(best_index) ) {
 				trial_score = simplex_scores(old_worst_index);
 				trial_point = simplex.row( old_worst_index );
-				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, expansion_factor_ );
+				simplex.row(old_worst_index) = old_worst_point;
+				reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, -1.0*expansion_factor_ );
 				// std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} EXPAND " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 				++iter_count;
 				if( simplex_scores(old_worst_index) >= trial_score ) {
@@ -784,11 +785,14 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			// second-worst (i.e. is still worst).
 			// If worse than second-worst but better than old worst, contract on the
 			// outside; otherwise, if worse than old worst, contract on inside:
-			trial_score = simplex_scores(old_worst_index);
-			trial_point = simplex.row( old_worst_index );
-			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
-				( simplex_scores(old_worst_index) > old_worst_score ? 1.0 : -1.0 ) * contraction_factor_
-			);
+			bool const on_inside( simplex_scores(old_worst_index) >= old_worst_score ? true : false );
+			if( on_inside ) {
+				trial_score = old_worst_score;
+				simplex.row(old_worst_index) = old_worst_point;
+			} else {
+				trial_score = simplex_scores( old_worst_index );
+			}
+			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function, contraction_factor_ );
 			// std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} CONTRACT " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 			++iter_count;
 			if( simplex_scores(old_worst_index) < trial_score ) {
@@ -797,8 +801,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 			simplex.row( old_worst_index ) = old_worst_point;
 			simplex_scores(old_worst_index) = old_worst_score;
 			if( iter_count > max_iterations_ ) {
-				converged = false;
-				break;
+				continue;
 			}
 
 			// If not better than old worst, reset and contract about best point:
