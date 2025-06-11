@@ -780,7 +780,8 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				continue;
 			}
 
-			// If we reach here, we know that the reflected point is worse than the second-worst.
+			// If we reach here, we know that the reflected point is worse than the
+			// second-worst (i.e. is still worst).
 			// If worse than second-worst but better than worst, contract on the
 			// outside; otherwise, if worse than worst, contract on inside:
 			trial_score = simplex_scores(old_worst_index);
