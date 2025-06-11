@@ -760,8 +760,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				continue;
 			}
 			if( iter_count > max_iterations_ ) {
-				converged = false;
-				break;
+				continue;
 			}
 
 			// If now best, expand:
@@ -778,10 +777,6 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				best_index = old_worst_index;
 				worst_index = second_worst_index;
 				second_worst_index = find_second_worst_index( best_index, worst_index, simplex_scores );
-				if( iter_count > max_iterations_ ) {
-					converged = false;
-					break;
-				}
 				continue;
 			}
 
