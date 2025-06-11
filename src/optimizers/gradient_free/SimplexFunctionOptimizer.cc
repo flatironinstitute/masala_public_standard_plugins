@@ -106,7 +106,7 @@ SimplexFunctionOptimizer::get_keywords() const {
 		"optimizer",
 		"real_valued",
 		"local_optimizer",
-        "gradient_free",
+		"gradient_free",
 		"numeric"
 	};
 }
@@ -123,7 +123,7 @@ SimplexFunctionOptimizer::get_keywords() const {
 /// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 SimplexFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } };
+	return std::vector< std::vector < std::string > >{ { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } };
 }
 
 /// @brief Every class can name itself.
