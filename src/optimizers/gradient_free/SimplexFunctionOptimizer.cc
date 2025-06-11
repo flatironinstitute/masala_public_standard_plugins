@@ -782,12 +782,12 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 
 			// If we reach here, we know that the reflected point is worse than the
 			// second-worst (i.e. is still worst).
-			// If worse than second-worst but better than worst, contract on the
-			// outside; otherwise, if worse than worst, contract on inside:
+			// If worse than second-worst but better than old worst, contract on the
+			// outside; otherwise, if worse than old worst, contract on inside:
 			trial_score = simplex_scores(old_worst_index);
 			trial_point = simplex.row( old_worst_index );
 			reflect_vertex( other_centroid, false, simplex, old_worst_index, simplex_scores, objective_function,
-				( simplex_scores(old_worst_index) > old_worst_score ? -1.0 : 1.0 ) * contraction_factor_
+				( simplex_scores(old_worst_index) > old_worst_score ? 1.0 : -1.0 ) * contraction_factor_
 			);
 			// std::cout << "{" << masala::base::managers::threads::MasalaThreadManager::get_instance()->get_thread_manager_thread_id() << "} CONTRACT " << simplex << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 			++iter_count;
