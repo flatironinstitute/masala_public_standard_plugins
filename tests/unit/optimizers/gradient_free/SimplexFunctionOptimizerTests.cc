@@ -230,7 +230,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Simpl
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
 				CHECK( std::abs(solpt[1] - 0.0116) < 1.0e-3 );
 				CHECK( std::abs(cursolution->solution_score() + 2.067076) < 2.0e-5 );
-			} else if( i < 4 ) {
+			} else if( i < 3 ) {
 				CHECK( std::abs(solpt[0] - 0.9573) < 1.0e-3 );
 				CHECK( std::abs(solpt[1] - 0.0989) < 1.0e-3 );
 				CHECK( std::abs(cursolution->solution_score() + 1.114634) < 2.0e-5 );

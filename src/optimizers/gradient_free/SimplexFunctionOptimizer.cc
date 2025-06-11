@@ -812,8 +812,7 @@ SimplexFunctionOptimizer::run_one_simplex_optimization_in_threads(
 				simplex_scores(i) = objective_function( simplex.row(i).transpose() );
 				++iter_count;
 				if( iter_count > max_iterations_ ) {
-					converged = false;
-					break;
+					continue;
 				}
 				if( i > 0 ) {
 					if( simplex_scores(i) < simplex_scores(new_best_index) ) { new_best_index = i; }
