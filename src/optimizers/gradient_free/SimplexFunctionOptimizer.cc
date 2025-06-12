@@ -371,7 +371,9 @@ SimplexFunctionOptimizer::get_api_definition() {
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
 				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
-				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"may be smaller if there is less work to do, or if there are fewer threads available.  Note that the "
+				"only thing parallelized are different problems or different starting points of the same problem.  Within "
+				"a given trajectory, there is no parallelism.",
 				"setting", "The number of threads to request.  Different starting points of the same problem or "
 				"different starting points of different problems can be carried out simultaneously in threads.",
 				false, false,
@@ -424,7 +426,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"set_expansion_factor", "Set the amount by which to expand, "
 				"when expanding the simplex.",
 				"setting", "The amount by which to expand, when expanding the simplex.  "
-				"Must be greater than 1.",
+				"Must be greater than 1.  Defaults to 2.0.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::set_expansion_factor, this, std::placeholders::_1 )
 			)
@@ -434,7 +436,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"set_contraction_factor", "Set the amount by which to contract, "
 				"when contracting the simplex.",
 				"setting", "The amount by which to contract, when contracting the simplex.  "
-				"Must be between 0 and 1.",
+				"Must be between 0 and 1.  Defaults to 0.5.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::set_contraction_factor, this, std::placeholders::_1 )
 			)
@@ -444,7 +446,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 				"set_shrink_factor", "Set the amount by which to shrink, when shrinking the simplex about "
 				"the best vertex.  Must be between 0 and 1.",
 				"setting", "The amount by which to shrink, when contracting the simplex about the best vertex.  "
-				"Must be between 0 and 1.",
+				"Must be between 0 and 1.  Defaults to 0.5.",
 				false, false,
 				std::bind( &SimplexFunctionOptimizer::set_shrink_factor, this, std::placeholders::_1 )
 			)
