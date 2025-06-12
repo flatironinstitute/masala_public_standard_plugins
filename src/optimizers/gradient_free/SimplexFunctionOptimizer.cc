@@ -424,7 +424,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_expansion_factor", "Set the amount by which to expand, "
-				"when expanding the simplex.",
+				"when expanding the simplex.  Must be greater than 1.  Defaults to 2.0.",
 				"setting", "The amount by which to expand, when expanding the simplex.  "
 				"Must be greater than 1.  Defaults to 2.0.",
 				false, false,
@@ -434,7 +434,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_contraction_factor", "Set the amount by which to contract, "
-				"when contracting the simplex.",
+				"when contracting the simplex.  Must be between 0 and 1.  Defaults to 0.5.",
 				"setting", "The amount by which to contract, when contracting the simplex.  "
 				"Must be between 0 and 1.  Defaults to 0.5.",
 				false, false,
@@ -444,7 +444,7 @@ SimplexFunctionOptimizer::get_api_definition() {
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
 				"set_shrink_factor", "Set the amount by which to shrink, when shrinking the simplex about "
-				"the best vertex.  Must be between 0 and 1.",
+				"the best vertex.  Must be between 0 and 1.  Must be between 0 and 1.  Defaults to 0.5.",
 				"setting", "The amount by which to shrink, when contracting the simplex about the best vertex.  "
 				"Must be between 0 and 1.  Defaults to 0.5.",
 				false, false,
