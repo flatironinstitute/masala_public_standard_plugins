@@ -19,8 +19,7 @@
 /// @file src/numeric_api/base_classes/optimization/gradient_based/ArmijoInexactLineOptimizer.hh
 /// @brief Headers for the ArmijoInexactLineOptimizer.
 /// @details The ArmijoInexactLineOptimizer carries out gradient-free optimization of a function
-/// along a line.  It uses the algorithm of Richard P. Brent described in "Algorithms for Minimization
-/// Without Derivatives" (1973).
+/// along a line by the method of Larry Armijo, Pacific J. Math. 16(1): 1-3 (1966).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_ArmijoInexactLineOptimizer_hh
@@ -44,9 +43,8 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
-/// @brief The ArmijoInexactLineOptimizer, which carries out gradient-free optimization of a function
-/// along a line.  It uses the algorithm of Richard P. Brent described in "Algorithms for Minimization
-/// Without Derivatives" (1973).
+/// @details The ArmijoInexactLineOptimizer carries out gradient-free optimization of a function
+/// along a line by the method of Larry Armijo, Pacific J. Math. 16(1): 1-3 (1966).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class ArmijoInexactLineOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizer {
 
