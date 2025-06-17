@@ -257,8 +257,7 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this,
 				"The ArmijoInexactLineOptimizer carries out gradient-free optimization of a function "
-				"along a line.  It uses the algorithm of Richard P. Brent described in ''Algorithms for Minimization "
-				"Without Derivatives'' (1973).",
+				"along a line by the method of Larry Armijo, Pacific J. Math. 16(1): 1-3 (1966).",
 				false, false
 			)
 		);
