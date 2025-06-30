@@ -1,12 +1,26 @@
 # Standard Masala Plugins
 
+## Version
+
+The Standard Masala Plugins library is currently version 0.11 (beta release).  The full version 1.0 will be released shortly.
+
 ## Description
 
 Standard plugins for distribution with the Masala software suite.  These are released under an AGPLv3 licence, permitting use for any purpose (not-for-profit or commercial), but requiring that any redistribution of this or any derived product retain an AGPL licence (version 3 or later) and include source code.
 
-## Author
+## Authors
 
-Vikram K. Mulligan, Research Scientist, Center for Computational Biology, Flatiron Institute (vmulligan@flatironinstitute.org)
+The Standard Masala Plugins were created by Vikram K. Mulligan, a Research Scientist in the Center for Computational Biology, at the Flatiron Institute.  For questions, e-mail vmulligan@flatironinstitute.org.
+
+In addition, the following individuals contributed to the development of the Standard Masala Plugins:
+
+- Noora Azadvari, a graduate student at the University of Oregon (eazadvar@uoregon.edu).
+- Tristan Zaborniak, a graduate student at the University of Victoria (tristanz@uvic.ca).
+- Qiyao Zhu, a Flatiron Research Fellow in the Center for Computational Biology, Flatiron Institute (qzhu@flatironinstitute.org).
+- S.M. Bargeen A. Turzo, a Flatiron Research Fellow in the Center for Computational Biology, Flatiron Institute (bturzo@flatironinstitute.org).
+- P. Douglas Renfrew, a Research Scientist in the Center for Computational Biology, Flatiron Institute (pdrenfrew@flatironinstitute.org).
+
+The Standard Masala Plugins are maintained by the Biomolecular Design (BmD) Group in the Center for Computatonal Biology at the Flatiron Institute.  Vikram K. Mulligan and P. Douglas Renfrew co-head the BmD Group.
 
 ## Setup
 
@@ -78,3 +92,7 @@ doxygen Doxyfile.src
 ```
 
 (Note that Doxygen must be installed.) Documentation will be addded to the `html_docs/` directory.  Delete this directory to recompile documentation from scratch.
+
+## Licence
+
+Masala and the Standard Masala Plugins are released under an AGPL version 3 licence.  This licence permits anyone to use the software for any purpose (not-for-profit or commercial), as well as to modify the software and incorporate it into derivative works.  The one stipulation is that if any modified version or derivative work is distributed, or users are given access to it over a network, then the source code must be made available under a GPL or AGPL licence (version 3 or later).  This ensures that the software remains free and open-source.  For full details, see the LICENCE file.
