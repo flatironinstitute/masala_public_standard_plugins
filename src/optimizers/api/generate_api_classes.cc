@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2022 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -43,6 +43,7 @@
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 // #include <optimizers/gradient_based/BFGSFunctionOptimizer.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 
@@ -78,6 +79,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
         // outvec.emplace_back( masala::make_shared< gradient_based::BFGSFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::GradientDescentFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_free::SimplexFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::BrentAlgorithmLineOptimizer >() );
         // ADD MORE ENTRIES HERE

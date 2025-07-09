@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2022 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -75,7 +75,7 @@ SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::SquareOfSumOfUnsatisfiedChoi
 	std::lock( src.data_representation_mutex(), data_representation_mutex() );
 	std::lock_guard< std::mutex > lockthis( data_representation_mutex(), std::adopt_lock );
 	std::lock_guard< std::mutex > lockthat( src.data_representation_mutex(), std::adopt_lock );
-	protected_assign( src );
+	SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction::protected_assign( src );
 }
 
 // @brief Assignment operator.

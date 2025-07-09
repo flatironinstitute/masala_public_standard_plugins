@@ -16,42 +16,42 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric_api/base_classes/optimization/gradient_based/BrentAlgorithmLineOptimizer.fwd.hh
-/// @brief Forward declarations for the BrentAlgorithmLineOptimizer.
-/// @details The BrentAlgorithmLineOptimizer carries out gradient-free optimization of a function
-/// along a line.  It uses the algorithm of Richard P. Brent described in "Algorithms for Minimization
-/// Without Derivatives" (1973).
+/// @file src/numeric_api/base_classes/optimization/gradient_free/SimplexFunctionOptimizer.fwd.hh
+/// @brief Forward declarations for the SimplexFunctionOptimizer.
+/// @details The SimplexFunctionOptimizer carries out local minimization of an arbitrary function
+/// without using gradient information.  This is relatively inefficient compared to quasi-Newtonian
+/// methods like DFP, BFGS, or L-BFGS.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_BrentAlgorithmLineOptimizer_fwd_hh
-#define Standard_Masala_Plugins_src_optimizers_gradient_based_BrentAlgorithmLineOptimizer_fwd_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_gradient_free_SimplexFunctionOptimizer_fwd_hh
+#define Standard_Masala_Plugins_src_optimizers_gradient_free_SimplexFunctionOptimizer_fwd_hh
 
 #include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
 namespace standard_masala_plugins {
 namespace optimizers {
-namespace gradient_based {
+namespace gradient_free {
 
-	class BrentAlgorithmLineOptimizer;
+	class SimplexFunctionOptimizer;
 
 	/// @brief We will use the convention that an class name followed by SP
 	/// represents a MASALA_SHARED_POINTER for objects of that class.
-	using BrentAlgorithmLineOptimizerSP = MASALA_SHARED_POINTER< BrentAlgorithmLineOptimizer >;
+	using SimplexFunctionOptimizerSP = MASALA_SHARED_POINTER< SimplexFunctionOptimizer >;
 
 	/// @brief We will use the convention that an class name followed by CSP
 	/// represents a MASALA_SHARED_POINTER for const objects of that class.
-	using BrentAlgorithmLineOptimizerCSP = MASALA_SHARED_POINTER< BrentAlgorithmLineOptimizer const >;
+	using SimplexFunctionOptimizerCSP = MASALA_SHARED_POINTER< SimplexFunctionOptimizer const >;
 
 	/// @brief We will use the convention that an class name followed by WP
 	/// represents a MASALA_WEAK_POINTER for objects of that class.
-	using BrentAlgorithmLineOptimizerWP = MASALA_WEAK_POINTER< BrentAlgorithmLineOptimizer >;
+	using SimplexFunctionOptimizerWP = MASALA_WEAK_POINTER< SimplexFunctionOptimizer >;
 
 	/// @brief We will use the convention that an class name followed by CWP
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
-	using BrentAlgorithmLineOptimizerCWP = MASALA_WEAK_POINTER< BrentAlgorithmLineOptimizer const >;
+	using SimplexFunctionOptimizerCWP = MASALA_WEAK_POINTER< SimplexFunctionOptimizer const >;
 
-} // namespace gradient_based
+} // namespace gradient_free
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //Standard_Masala_Plugins_src_optimizers_gradient_based_BrentAlgorithmLineOptimizer_fwd_hh
+#endif //Standard_Masala_Plugins_src_optimizers_gradient_free_SimplexFunctionOptimizer_fwd_hh

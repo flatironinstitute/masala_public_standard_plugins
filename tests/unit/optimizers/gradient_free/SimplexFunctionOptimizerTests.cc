@@ -16,19 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file tests/unit/optimizers/gradient_based/GradientBasedOptimizerTests.cc
-/// @brief Unit tests for the utility functions and classes used for line searches,
-/// gradient-descent minimization, and other local optimization.
+/// @file tests/unit/optimizers/gradient_free/SimplexOptimizerTests.cc
+/// @brief Unit tests for the SimplexFunctionOptimizer
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit testing library (Catch2) headers:
 #include <external/catch2/single_include/catch2/catch.hpp>
 
 // Unit headers:
-#include <optimizers/gradient_based/util.hh>
-#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
-#include <optimizers_api/auto_generated_api/gradient_based/BrentAlgorithmLineOptimizer_API.hh>
-#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers_api/auto_generated_api/gradient_free/SimplexFunctionOptimizer_API.hh>
 
 // Registraton headers:
 #include <registration_api/register_library.hh>
@@ -38,6 +34,7 @@
 
 // Masala base headers:
 #include <base/types.hh>
+#include <base/error/ErrorHandling.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
 
@@ -59,7 +56,7 @@ namespace standard_masala_plugins {
 namespace tests {
 namespace unit {
 namespace optimizers {
-namespace gradient_based {
+namespace gradient_free {
 
 masala::base::Real
 test_gaussian(
@@ -120,7 +117,7 @@ test_function_2(
 ) {
 	// For plotting using Desmos:
 	// -1.0\cdot\exp\left(\frac{-\left(x-1\right)^{2}}{.25}\right)\exp\left(\frac{-y^{2}}{1}\right)-2.0\cdot\exp\left(\frac{-\left(x+1\right)^{2}}{1}\right)\exp\left(\frac{-y^{2}}{0.25}\right)-2.5\cdot\exp\left(\frac{-x^{2}}{1}\right)\exp\left(\frac{-\left(y-2\right)^{2}}{1.5}\right)
-	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_based", "test_function_2", "Expected a function of two variables." );
+	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_free", "test_function_2", "Expected a function of two variables." );
 	masala::base::Real const xval(x[0]);
 	masala::base::Real const yval(x[1]);
 	return ( invert ? -1.0 : 1.0 ) * (
@@ -141,7 +138,7 @@ grad_test_function_2(
 ) {
 	// For plotting using Desmos:
 	// -1.0\cdot\exp\left(\frac{-\left(x-1\right)^{2}}{.25}\right)\exp\left(\frac{-y^{2}}{1}\right)-2.0\cdot\exp\left(\frac{-\left(x+1\right)^{2}}{1}\right)\exp\left(\frac{-y^{2}}{0.25}\right)-2.5\cdot\exp\left(\frac{-x^{2}}{1}\right)\exp\left(\frac{-\left(y-2\right)^{2}}{1.5}\right)
-	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_based", "grad_test_function_2", "Expected a function of two variables." );
+	CHECK_OR_THROW( x.size() == 2, "standard_masala_plugins::tests::unit::optimizers::gradient_free", "grad_test_function_2", "Expected a function of two variables." );
 	masala::base::Real const xval(x[0]);
 	masala::base::Real const yval(x[1]);
 
@@ -164,106 +161,9 @@ grad_test_function_2(
 	);
 }
 
-TEST_CASE( "Find the bounds of a local minimization problem using parabolic extrapolation.", "[standard_masala_plugins::optimizers::gradient_based::bracket_minimum_with_parabolic_extrapolation][local_minimization][bounds]" ) {
+TEST_CASE( "Find the local minimum of a two-dimensional function using the SimplexFunctionOptimizer.", "[standard_masala_plugins::optimizers::gradient_free::SimplexFunctionOptimizer][local_minimization][gradient_free]" ) {
 	using masala::base::Real;
-	using namespace standard_masala_plugins::optimizers::gradient_based;
-	using masala::base::managers::tracer::MasalaTracerManager;
-	using masala::base::managers::tracer::MasalaTracerManagerHandle;
-
-	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
-
-	std::function< Real( Real ) > const fxn1( std::bind( &test_function_1, std::placeholders::_1, false ) );
-	std::vector< std::pair< Real, Real > > initial_lefts_and_centres {
-		std::make_pair( 1.0, 1.1 ),
-		std::make_pair( 2.4, 2.41 ),
-		std::make_pair( 1.0, 0.9 ),
-		std::make_pair( 2.45, 2.46 ),
-		std::make_pair( 5.0, 5.1 )
-	};
-
-	masala::base::Size counter(0);
-	for( auto const & entry : initial_lefts_and_centres ) {
-		++counter;
-		Real left( entry.first ), centre( entry.second ), right(0), fxn_left(0), fxn_centre(0), fxn_right(0);
-		REQUIRE_NOTHROW([&](){
-			bracket_minimum_with_parabolic_extrapolation( left, centre, right, fxn_left, fxn_centre, fxn_right, fxn1 );
-		}() );
-
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_left = " + std::to_string(entry.first) + "\tinitial_centre = " + std::to_string(entry.second)  );
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "left = " + std::to_string(left) + "\tfxn_left = " + std::to_string( fxn_left ) );
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "centre = " + std::to_string(centre) + "\tfxn_centre = " + std::to_string( fxn_centre ) );
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "right = " + std::to_string(right) + "\tfxn_right = " + std::to_string( fxn_right ) );
-
-		if( counter <= 3 ) {
-			CHECK( left <= 2.002 );
-			CHECK( right >= 2.002 );
-			//CHECK( right < 2.440 );
-		} else if( counter == 4 ) {
-			//CHECK( left > 2.440 );
-			CHECK( left <= 2.995 );
-			CHECK( right >= 2.995 );
-			//CHECK( right < 3.266 );
-		} else {
-			//CHECK( left > 3.266 );
-			CHECK( left <= 3.397 );
-			CHECK( right >= 3.397 );
-		}
-		CHECK( right > centre );
-		CHECK( right > left );
-		CHECK( left < centre );
-		CHECK( fxn_centre < fxn_left );
-		CHECK( fxn_centre < fxn_right );
-	}
-}
-
-TEST_CASE( "Find the local minimum of a function using the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][brent_algorithm][line_optimizer]" ) {
-	using masala::base::Real;
-	using namespace standard_masala_plugins::optimizers::gradient_based;
-	using masala::base::managers::tracer::MasalaTracerManager;
-	using masala::base::managers::tracer::MasalaTracerManagerHandle;
-
-	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
-
-	std::function< Real( Eigen::VectorXd const & ) > const fxn1b( std::bind( &test_function_1b, std::placeholders::_1, false ) );
-	std::vector< Real > initial_points { 1.0, 2.4, 2.45, 3.6, 5.0 };
-
-	masala::base::Size counter(0);
-	for( Real const entry : initial_points ) {
-		++counter;
-		Eigen::VectorXd x0, x, searchdir;
-		x0.resize(1);
-		x.resize(1);
-		searchdir.resize(1);
-		x0[0] = entry;
-		searchdir[0] = 1.0;
-		Real f_at_x0( fxn1b(x0) ), f_at_x( 0.0 );
-		REQUIRE_NOTHROW([&](){
-			BrentAlgorithmLineOptimizer brent_optimizer;
-			//brent_optimizer.set_max_iters(0);
-			//brent_optimizer.set_tolerance(3.0e-8);
-			brent_optimizer.run_line_optimizer( fxn1b, x0, f_at_x0, Eigen::VectorXd(), searchdir, x, f_at_x );
-		}() );
-
-		Real const xval( x[0] );
-		tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(counter) + ":\tinitial_x = " + std::to_string(entry) + "\tx = " + std::to_string(xval) + "\tf(x) = " + std::to_string(f_at_x)  );
-
-		if( counter <= 2 ) {
-			CHECK( std::abs(xval - 2.002) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 2.018) < 2.0e-3 );
-		} else if( counter == 3 || counter == 5 ) {
-			CHECK( std::abs(xval - 2.995) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 0.999) < 2.0e-3 );
-		} else if( counter == 4 ) {
-			CHECK( std::abs(xval - 3.397) < 2.0e-3 );
-			CHECK( std::abs(f_at_x + 0.475) < 2.0e-3 );
-		}
-	}
-}
-
-TEST_CASE( "Find the local minimum of a two-dimensional function using the GradientDescentFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::GradientDescientFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][brent_algorithm][line_optimizer]" ) {
-	using masala::base::Real;
-	using namespace standard_masala_plugins::optimizers::gradient_based;
-	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_based;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_free;
 	using masala::base::managers::tracer::MasalaTracerManager;
 	using masala::base::managers::tracer::MasalaTracerManagerHandle;
 	using masala::base::managers::threads::MasalaThreadManager;
@@ -306,11 +206,10 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			curproblems->add_optimization_problem( curproblem );
 		}
 
-		GradientDescentFunctionOptimizer gradopt;
-		gradopt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer_API >() );
-		gradopt.set_throw_if_iterations_exceeded(true);
-		gradopt.set_threads_to_request(3);
-		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( gradopt.run_real_valued_local_optimizer( *curproblems ) );
+		SimplexFunctionOptimizer_APISP simplexopt( masala::make_shared<SimplexFunctionOptimizer_API>() );
+		simplexopt->set_throw_if_iterations_exceeded(true);
+		simplexopt->set_threads_to_request(3);
+		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( simplexopt->run_real_valued_local_optimizer( *curproblems ) );
 
 		CHECK( cursolutions_vec.size() == initial_points.size() );
 
@@ -322,7 +221,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			Eigen::VectorXd const solpt( cursolution->solution_point() );
 			CHECK( solpt.size() == 2 );
 
-			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
+			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_free::UtilityFunctionTests", "Attempt " + std::to_string(i)
 				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
 				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
@@ -331,7 +230,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
 				CHECK( std::abs(solpt[1] - 0.0116) < 1.0e-3 );
 				CHECK( std::abs(cursolution->solution_score() + 2.067076) < 2.0e-5 );
-			} else if( i < 4 ) {
+			} else if( i < 3 ) {
 				CHECK( std::abs(solpt[0] - 0.9573) < 1.0e-3 );
 				CHECK( std::abs(solpt[1] - 0.0989) < 1.0e-3 );
 				CHECK( std::abs(cursolution->solution_score() + 1.114634) < 2.0e-5 );
@@ -350,7 +249,7 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 	masala::core_api::auto_generated_api::registration::unregister_core();
 }
 
-} // namespace cost_function_network
+} // namespace gradient_free
 } // namespace optimizers
 } // namespace unit
 } // namespace tests

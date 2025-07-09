@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2022 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -258,6 +258,11 @@ public:
 	/// @brief Set the greedy refinement mode, by string.
 	void set_greedy_refinement_mode( std::string const & mode_name_in );
 
+	/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	void set_recompute_from_scratch_every_n_steps( masala::base::Size const steps_in );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -306,6 +311,11 @@ public:
 
 	/// @brief Get the greedy refinement mode string.
 	std::string greedy_refinement_mode_string() const;
+
+	/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	masala::base::Size recompute_from_scratch_every_n_steps() const;
 
 public:
 
@@ -510,6 +520,11 @@ private:
 	/// checking every solution considered to see whether it should be stored. CHECK_ON_ACCEPTANCE
 	/// only checks whether to store a solution when it is accepted.
 	MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode solution_storage_mode_ = MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_AT_EVERY_STEP;
+
+	/// @brief The frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	masala::base::Size recompute_from_scratch_every_n_steps_ = 100;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 
