@@ -48,6 +48,7 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/setter/setter_annotation/PreferredTemplateDataRepresentationSetterAnnotation.hh>
+#include <base/api/setter/setter_annotation/DeprecatedSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
@@ -415,16 +416,25 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 			annealing_sched_setter->add_setter_annotation( owned_annotation );
 			api_description->add_setter( annealing_sched_setter );
 
-			api_description->add_setter(
+            MasalaObjectAPISetterDefinition_OneInputSP< std::string const & > by_name_setter(
 				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< std::string const & > >(
 					"set_annealing_schedule_by_name", "Sets the annealing schedule, by name.  Creates an annealing schedule and leaves it with "
 					"its default configuration (so the set_annealing_schedule() setter should be used instead if you wish to configure "
 					"the annealing schedule).  The name need not include namespace unless there is a name conflict.  Available annealing schedules include: "
 					+ available_annealing_schedules + ".",
-					"annealing_schedule_name", "The name of the annealing schedule.  Must be one of: " + available_annealing_schedules + ".",
+					"annealing_schedule_name", "The name of the annealing schedule.  Must be one of: " + available_annealing_schedules + ".  NOTE THAT THIS "
+                    "FUNCTION IS DEPRECATED.  Please use the set_annealing_schedule() function instead.",
 					false, false, std::bind( &MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule_by_name, this, std::placeholders::_1 )
 				)
-			);
+            );
+            by_name_setter->add_setter_annotation(
+                masala::make_shared< setter::setter_annotation::DeprecatedSetterAnnotation >(
+                    "Standard Masala Plugins",
+                    std::pair< Size, Size >( 0, 12 ),
+                    std::pair< Size, Size >( 1, 0 )
+                )
+            );
+			api_description->add_setter( by_name_setter );
 		}
 		api_description->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > > (
