@@ -2,7 +2,7 @@
 
 ## Version
 
-The Standard Masala Plugins library is currently version 0.11 (beta release).  The full version 1.0 will be released shortly.
+The Standard Masala Plugins library is currently version 0.12 (beta release).  The full version 1.0 will be released shortly.
 
 ## Description
 
@@ -62,8 +62,8 @@ The Standard Masala Plugins are maintained by the Biomolecular Design (BmD) Grou
 
 ## Compilation
 
-- Note that default compilation is in debug mode.
-- To compile in release mode, edit cmake/CMakeLists.txt, comment out the two "debug" lines, and uncomment the two "release" lines.
+- Note that default compilation is in release mode.
+- To compile in debug mode, edit cmake/CMakeLists.txt and change `SET( MODE release )` to `SET( MODE debug )`.
 
 ## Building Doxygen code documentation
 
