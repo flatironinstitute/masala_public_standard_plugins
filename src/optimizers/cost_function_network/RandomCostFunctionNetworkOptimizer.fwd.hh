@@ -17,7 +17,7 @@
 */
 
 /// @file src/optimizers/cost_function_network/RandomCostFunctionNetworkOptimizer.fwd.hh
-/// @brief Headers for a CostFunctionNetworkOptimizer that solves a cost function network problem by picking a
+/// @brief Forward declarations for a CostFunctionNetworkOptimizer that solves a cost function network problem by picking a
 /// solution at random.
 /// @details This is intended as a control during methods development, to compare a new solver to just choosing
 /// a solution at random.  This is NOT intended to be a useful production solver.
