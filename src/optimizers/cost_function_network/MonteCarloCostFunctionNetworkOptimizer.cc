@@ -167,6 +167,7 @@ MonteCarloCostFunctionNetworkOptimizer::deep_clone() const {
 /// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
 void
 MonteCarloCostFunctionNetworkOptimizer::make_independent() {
+    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
     if( annealing_schedule_ != nullptr ) {
         annealing_schedule_ = annealing_schedule_->deep_clone();
     }
