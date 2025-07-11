@@ -321,95 +321,65 @@ RandomCostFunctionNetworkOptimizer::attempts_per_problem() const {
 std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP >
 RandomCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems
-) const {
-	using namespace masala::base::managers::threads;
+) const { 
+	using namespace masala::base::managers::random;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	using masala::base::Size;
+	using masala::base::Real;
 
 	std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
 
-	TODO TODO TODO;
+	// Get the handle of the random generator:
+	MasalaRandomNumberGeneratorHandle rg( MasalaRandomNumberGenerator::get_instance() );
 
-// 	CHECK_OR_THROW_FOR_CLASS( annealing_schedule_ != nullptr, "run_cost_function_network_optimizer", "An annealing schedule must be set before calling this function." );
-// 	annealing_schedule_->reset_call_count();
-// 	annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
+	// Create storange for solutions and generate random solutions:
+	Size const nproblems( problems.n_problems() );
+	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > solutions_by_problem;
+	solutions_by_problem.reserve( nproblems );
+	for( Size i(0); i<nproblems; ++i ) {
+		CostFunctionNetworkOptimizationProblem_APICSP problem( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >( problems.problem(i) ) );
+		CHECK_OR_THROW_FOR_CLASS( problem != nullptr, "run_cost_function_network_optimizer", "Problem " + std::to_string(i) + " was of type "
+			+ problems.problem(i)->inner_class_name() + ", which could not be interpreted as a CostFunctionNetworkOptimizationProblem."
+		);
 
-// 	// Create storange for solutions.
-// 	Size const nproblems( problems.n_problems() );
-// 	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_by_problem;
-// 	std::vector< std::mutex > solution_mutexes( nproblems );
-// 	solutions_by_problem.reserve( nproblems );
-// 	for( Size i(0); i<nproblems; ++i ) {
-// 		masala::numeric_api::auto_generated_api::optimization::OptimizationSolutions_APISP new_solutions_container_uncast(
-// 			problems.problem(i)->create_solutions_container()
-// 		);
-// 		CostFunctionNetworkOptimizationSolutions_APISP new_solutions_container(
-// 			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >(
-// 				new_solutions_container_uncast
-// 			)
-// 		);
-// 		CHECK_OR_THROW_FOR_CLASS( new_solutions_container != nullptr, "run_cost_function_network_optimizer", "Problem "
-// 			+ std::to_string(i) + " created a " + new_solutions_container_uncast->inner_class_name() + " container, but this function "
-// 			"only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
-// 			"this ought not to happen."
-// 		);
-// 		solutions_by_problem.push_back( new_solutions_container );
-// 	}
-// 	solutions_by_problem.shrink_to_fit();
+		masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP scratchspace(
+			problem->generate_cfn_problem_scratch_space() // May or may not be nullptr.
+		);
 
-// 	// Create work vector.
-// 	MasalaThreadedWorkRequest work_request( cpu_threads_to_request_ );
-// 	work_request.reserve( nproblems * attempts_per_problem_ );
-// 	for( Size i(0); i<nproblems; ++i ) {
-// #ifndef NDEBUG
-// 		// Redundant check that this is a cost function network optimization problem in debug mode.
-// 		CostFunctionNetworkOptimizationProblem_APICSP problem_cast( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(problems.problem(i)) );
-// 		DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( problem_cast != nullptr, "run_cost_function_network_optimizer", "Program error: problem "
-// 			+ std::to_string(i) + " is not enclosed in a CostFunctionNetworkOptimizationProblem_API!  It is a " + problems.problem(i)->inner_class_name() + " encapsulated in a "
-// 			+ problems.problem(i)->class_name() + "."
-// 		);
-// #else
-// 		// Just assume that this is the right problem type in release mode.
-// 		CostFunctionNetworkOptimizationProblem_APICSP problem_cast( std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API const >(problems.problem(i)) );
-// #endif
-// 		for( Size j(0); j<attempts_per_problem_; ++j ) {
-// 			work_request.add_job(
-// 				std::bind( &RandomCostFunctionNetworkOptimizer::run_mc_trajectory, this,
-// 					j, // replicate index
-// 					i, // problem index
-// 					annealing_steps_per_attempt_, // Steps in the MC search.
-// 					n_solutions_to_store_per_problem_, // Solutions per problem.
-// 					std::cref( *annealing_schedule_ ), // A copy of the annealing schedule.
-// 					problem_cast, // The problem description.
-// 					std::ref( *(solutions_by_problem[i]) ), // The storage for the collection of solutions.
-// 					( n_solutions_to_store_per_problem_ > 1 ? solution_storage_mode_ : RandomCostFunctionNetworkOptimizerSolutionStorageMode::CHECK_ON_ACCEPTANCE ), // The solution storage mode
-// 					use_multimutation_, // Do we do more than one mutation at a time?
-// 					multimutation_probability_of_one_mutation_, // Probability of doing just one mutation, in multimutation mode.
-// 					do_greedy_refinement_, // Do greedy refinement?
-// 					greedy_refinement_mode_, // Greedy refinement mode.
-// 					std::ref( solution_mutexes[i] ) // A mutex for locking the solution storage for the problem.
-// 				)
-// 			);
-// 		}
-// 	}
+		masala::numeric_api::auto_generated_api::optimization::OptimizationSolutions_APISP new_solutions_container_uncast(
+			problem->create_solutions_container()
+		);
+		CostFunctionNetworkOptimizationSolutions_APISP new_solutions_container(
+			std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >(
+				new_solutions_container_uncast
+			)
+		);
+		CHECK_OR_THROW_FOR_CLASS( new_solutions_container != nullptr, "run_cost_function_network_optimizer", "Problem "
+			+ std::to_string(i) + " created a " + new_solutions_container_uncast->inner_class_name() + " container, but this function "
+			"only works with CostFunctionNetworkOptimizationSolutions containers.  Program error.  Please consult a developer, as "
+			"this ought not to happen."
+		);
 
-// 	// Do the work.
-// 	MasalaThreadedWorkExecutionSummary const threading_summary( MasalaThreadManager::get_instance()->do_work_in_threads( work_request ) );
-// 	threading_summary.write_summary_to_tracer();
+		std::vector< std::pair< Size, Size > > const nchoices_at_varnodes( problem->n_choices_at_variable_nodes() );
+		Size const nvarnodes( nchoices_at_varnodes.size() );
+		for( Size iattempt(0); iattempt < attempts_per_problem_; ++iattempt ) {
+			std::vector< Size > soln_vec( nvarnodes );
+			for( Size inode(0); inode < nvarnodes; ++i ) {
+				soln_vec[i] = rg->uniform_size_distribution( 0, nchoices_at_varnodes[inode].second );
+			}
+			new_solutions_container->merge_in_lowest_scoring_solutions(
+				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple( soln_vec, problem->compute_absolute_score( soln_vec, scratchspace.get() ), 1 ) },
+				attempts_per_problem_,
+				problem,
+				scratchspace.get()
+			);
+		}
 
-// 	// Do the greedy refinement, if we're doing that.
-// 	if( do_greedy_refinement_ && greedy_refinement_mode_ != MCOptimizerGreedyRefinementMode::REFINE_BEST_OF_EACH_TRAJECTORY ) {
-// 		write_to_tracer( "Carrying out greedy refinement of all solutions found." );
-// 		carry_out_greedy_refinement( problems, solutions_by_problem, greedy_refinement_mode_ );
-// 	}
+		solutions_by_problem.push_back( new_solutions_container );
+	}
+	solutions_by_problem.shrink_to_fit();
 
-// 	// Nonconst to const requires a silly extra step:
-// 	std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > const_solutions_by_problem( nproblems );
-// 	for( Size i(0); i<nproblems; ++i ) {
-// 		const_solutions_by_problem[i] = solutions_by_problem[i];
-// 	}
-
-// 	return const_solutions_by_problem;
+	return solutions_by_problem;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
