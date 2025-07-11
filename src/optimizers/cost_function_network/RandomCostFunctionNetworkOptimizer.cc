@@ -364,8 +364,8 @@ RandomCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 		Size const nvarnodes( nchoices_at_varnodes.size() );
 		for( Size iattempt(0); iattempt < attempts_per_problem_; ++iattempt ) {
 			std::vector< Size > soln_vec( nvarnodes );
-			for( Size inode(0); inode < nvarnodes; ++i ) {
-				soln_vec[i] = rg->uniform_size_distribution( 0, nchoices_at_varnodes[inode].second );
+			for( Size inode(0); inode < nvarnodes; ++inode ) {
+				soln_vec[inode] = rg->uniform_size_distribution( 0, nchoices_at_varnodes[inode].second );
 			}
 			new_solutions_container->merge_in_lowest_scoring_solutions(
 				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple( soln_vec, problem->compute_absolute_score( soln_vec, scratchspace.get() ), 1 ) },
