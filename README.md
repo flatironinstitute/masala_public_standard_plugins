@@ -18,6 +18,7 @@ In addition, the following individuals contributed to the development of the Sta
 - Tristan Zaborniak, a graduate student at the University of Victoria (tristanz@uvic.ca).
 - Qiyao Zhu, a Flatiron Research Fellow in the Center for Computational Biology, Flatiron Institute (qzhu@flatironinstitute.org).
 - S.M. Bargeen A. Turzo, a Flatiron Research Fellow in the Center for Computational Biology, Flatiron Institute (bturzo@flatironinstitute.org).
+- Parisa Hossienzadeh, a professor at the University of Oregon (parisah@uoregon.edu).
 - P. Douglas Renfrew, a Research Scientist in the Center for Computational Biology, Flatiron Institute (pdrenfrew@flatironinstitute.org).
 
 The Standard Masala Plugins are maintained by the Biomolecular Design (BmD) Group in the Center for Computatonal Biology at the Flatiron Institute.  Vikram K. Mulligan and P. Douglas Renfrew co-head the BmD Group.
