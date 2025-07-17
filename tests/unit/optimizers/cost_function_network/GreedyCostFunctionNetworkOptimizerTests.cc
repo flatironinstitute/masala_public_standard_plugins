@@ -60,7 +60,7 @@ TEST_CASE( "Instantiate an GreedyCostFunctionNetworkOptimizer.", "[standard_masa
     }() );
 }
 
-TEST_CASE( "Solve a simple problem with the GreedyCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::ConstantAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_API][optimization]" ) {
+TEST_CASE( "Solve a simple problem with the GreedyCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_API][optimization]" ) {
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::base::managers::tracer;
