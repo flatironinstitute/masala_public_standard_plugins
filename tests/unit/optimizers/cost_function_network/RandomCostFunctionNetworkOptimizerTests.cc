@@ -93,7 +93,9 @@ TEST_CASE( "Solve a simple problem with the RandomCostFunctionNetworkOptimizer."
 			masala::make_shared< RandomCostFunctionNetworkOptimizer_API >()
 		);
 		randopt->set_attempts_per_problem(100000);
-		
+
+		randopt->write_to_tracer( "Starting test of RandomCostFunctionNetworkOptimizer.  Note that due to the stochastic nature of this optimizer, it could occasionally fail to find all 27 solutions in 10000 attempts." );
+
 		solutions = randopt->run_cost_function_network_optimizer( *problem_container );
 
 	}() );
