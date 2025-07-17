@@ -16,15 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file tests/unit/optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizerTests.cc
-/// @brief Unit tests for the GreedyCostFunctionNetworkOptimizer class.
+/// @file tests/unit/optimizers/cost_function_network/RandomCostFunctionNetworkOptimizerTests.cc
+/// @brief Unit tests for the RandomCostFunctionNetworkOptimizer class.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit testing library (Catch2) headers:
 #include <external/catch2/single_include/catch2/catch.hpp>
 
 // Unit headers:
-#include <optimizers_api/auto_generated_api/cost_function_network/GreedyCostFunctionNetworkOptimizer_API.hh>
+#include <optimizers_api/auto_generated_api/cost_function_network/RandomCostFunctionNetworkOptimizer_API.hh>
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 #include <optimizers_api/utility/cost_function_network/util.hh>
 
@@ -37,6 +37,7 @@
 #include <numeric_api/utility/optimization/cost_function_network/util.hh>
 
 // Masala base headers:
+#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
 #include <base/utility/container/container_util.tmpl.hh>
@@ -51,16 +52,16 @@ namespace unit {
 namespace optimizers {
 namespace cost_function_network {
 
-TEST_CASE( "Instantiate an GreedyCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_API][instantiation]" ) {
+TEST_CASE( "Instantiate an RandomCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::RandomCostFunctionNetworkOptimizer_API][instantiation]" ) {
     REQUIRE_NOTHROW([&](){
-        optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_APISP greedyopt(
-            masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_API >()
+        optimizers_api::auto_generated_api::cost_function_network::RandomCostFunctionNetworkOptimizer_APISP randopt(
+            masala::make_shared< optimizers_api::auto_generated_api::cost_function_network::RandomCostFunctionNetworkOptimizer_API >()
         );
-        greedyopt->write_to_tracer( "Instantiated a GreedyCostFunctionNetworkOptimizer." );
+        randopt->write_to_tracer( "Instantiated a RandomCostFunctionNetworkOptimizer." );
     }() );
 }
 
-TEST_CASE( "Solve a simple problem with the GreedyCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::GreedyCostFunctionNetworkOptimizer_API][optimization]" ) {
+TEST_CASE( "Solve a simple problem with the RandomCostFunctionNetworkOptimizer.", "[standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::RandomCostFunctionNetworkOptimizer_API][optimization]" ) {
     using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
     using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
     using namespace masala::base::managers::tracer;
@@ -83,28 +84,29 @@ TEST_CASE( "Solve a simple problem with the GreedyCostFunctionNetworkOptimizer."
 				"PairwisePrecomputedCostFunctionNetworkOptimizationProblem", false, false
 			)
 		);
-		test_problem->add_candidate_solution( std::vector< Size >{ 0, 0, 0 } );
-		test_problem->add_candidate_solution( std::vector< Size >{ 1, 1, 2 } );
 		test_problem->finalize();
 		problem_container->add_optimization_problem(
 			test_problem
 		);
 		
-		GreedyCostFunctionNetworkOptimizer_APISP greedyopt(
-			masala::make_shared< GreedyCostFunctionNetworkOptimizer_API >()
+		RandomCostFunctionNetworkOptimizer_APISP randopt(
+			masala::make_shared< RandomCostFunctionNetworkOptimizer_API >()
 		);
-		greedyopt->set_cpu_threads_to_request(2);
-		
-		solutions = greedyopt->run_cost_function_network_optimizer( *problem_container );
+		randopt->set_attempts_per_problem(100000);
 
+		randopt->write_to_tracer( "Starting test of RandomCostFunctionNetworkOptimizer.  Note that due to the stochastic nature of this optimizer, it could occasionally fail to find all 27 solutions in 10000 attempts." );
+
+		solutions = randopt->run_cost_function_network_optimizer( *problem_container );
 
 	}() );
 
-	tracer->write_to_tracer( "GreedyCostFunctionNetworkOptimizerTests", "Got " + std::to_string( solutions[0]->n_solutions() ) + " solutions." );
-	tracer->write_to_tracer( "GreedyCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
-	tracer->write_to_tracer( "GreedyCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
+	Size const nsol( solutions[0]->n_solutions() );
+	CHECK( solutions.size() == 1 );
+	tracer->write_to_tracer( "RandomCostFunctionNetworkOptimizerTests", "Got " + std::to_string( nsol ) + " solutions." );
+	tracer->write_to_tracer( "RandomCostFunctionNetworkOptimizerTests", "SOLUTION\tTIMES_SEEN\tSCORE\tCHOICE_SELECTION" );
+	tracer->write_to_tracer( "RandomCostFunctionNetworkOptimizerTests", "--------\t----------\t-----\t----------------" );
 
-	for( masala::base::Size i(0); i<solutions[0]->n_solutions(); ++i ) {
+	for( masala::base::Size i(0); i<nsol; ++i ) {
 		CostFunctionNetworkOptimizationSolution_APICSP solution( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[0]->solution(i) ) );
 		CHECK( solution != nullptr );
 		std::ostringstream ss;
@@ -113,13 +115,16 @@ TEST_CASE( "Solve a simple problem with the GreedyCostFunctionNetworkOptimizer."
 			<< std::setw(5) << solution->solution_score() << "\t"
 			<< "[" << masala::base::utility::container::container_to_string( solution->solution_at_variable_positions(), ",") << "]";
 		tracer->write_to_tracer( "GreedyCostFunctionNetworkOptimizerTests", ss.str() );
+		CHECK( solution->n_times_solution_was_produced() > 5 );
 	}
 
-	CHECK( solutions.size() == 1 );
-	CHECK( solutions[0]->n_solutions() == 1 );
-	CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 6.0 ) < 1.0e-8 );
+	CHECK( solutions[0]->n_solutions() == 27 );
 	CHECK( solutions[0]->solution(0)->solution_is_valid() );
-	CHECK( solutions[0]->solution(0)->n_times_solution_was_produced() == 2 );
+	CHECK( std::abs( solutions[0]->solution(0)->solution_score() - 6 ) < 1.0e-8 );
+	CHECK( std::abs( solutions[0]->solution(1)->solution_score() - 7 ) < 1.0e-8 );
+	CHECK( std::abs( solutions[0]->solution(2)->solution_score() - 18 ) < 1.0e-8 );
+	CHECK( std::abs( solutions[0]->solution(3)->solution_score() - 22 ) < 1.0e-8 );
+	CHECK( std::abs( solutions[0]->solution(4)->solution_score() - 23 ) < 1.0e-8 );
 
     optimizers_api::auto_generated_api::registration::unregister_optimizers();
     masala::numeric_api::auto_generated_api::registration::unregister_numeric();

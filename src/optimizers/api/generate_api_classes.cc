@@ -31,6 +31,7 @@
 #include <optimizers/annealing/LogarithmicAnnealingSchedule.hh>
 #include <optimizers/annealing/LogarithmicRepeatAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
+#include <optimizers/cost_function_network/RandomCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 #include <optimizers/cost_function_network/cost_function/FunctionOfIntegerPenaltySumCostFunction.hh>
@@ -67,6 +68,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< annealing::LogarithmicAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LogarithmicRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::RandomCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::GreedyCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction >() );
