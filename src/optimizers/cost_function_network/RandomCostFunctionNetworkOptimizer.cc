@@ -365,7 +365,11 @@ RandomCostFunctionNetworkOptimizer::run_cost_function_network_optimizer(
 		for( Size iattempt(0); iattempt < attempts_per_problem_; ++iattempt ) {
 			std::vector< Size > soln_vec( nvarnodes );
 			for( Size inode(0); inode < nvarnodes; ++inode ) {
-				soln_vec[inode] = rg->uniform_size_distribution( 0, nchoices_at_varnodes[inode].second );
+				DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( nchoices_at_varnodes[inode].second > 0, "run_cost_function_network_optimizer",
+					"Expected a nonzero number of choices for variable node " + std::to_string( inode )
+					+ ", but got 0!"
+				);
+				soln_vec[inode] = rg->uniform_size_distribution( 0, nchoices_at_varnodes[inode].second - 1 );
 			}
 			new_solutions_container->merge_in_lowest_scoring_solutions(
 				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple( soln_vec, problem->compute_absolute_score( soln_vec, scratchspace.get() ), 1 ) },
