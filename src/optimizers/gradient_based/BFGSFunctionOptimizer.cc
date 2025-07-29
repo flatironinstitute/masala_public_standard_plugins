@@ -252,10 +252,13 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APISP > outvec_nonconst( problems.n_problems() );
 
 	MasalaThreadedWorkRequest work_vector;
+	Size jobcounter(0);
 	for( Size i(0); i<problems.n_problems(); ++i ) {
+		outvec_nonconst[i] = masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >();
+
 		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
 			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) )
 		);
@@ -263,17 +266,40 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 			"Could not interpret problem " + std::to_string(i) + " (of type " + problems.problem(i)->inner_class_name() +
 			") as a RealValuedFunctionLocalOptimizationProblem."
 		);
-		work_vector.add_job(
-			std::bind(
-				BFGSFunctionOptimizer::run_one_job_in_threads,
-				this,
-				i,
-				std::cref(curproblem),
-				std::ref(outvec[i])
-			)
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function(), "run_real_valued_local_optimizer",
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not implement an objective function."
 		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function_gradient(), "run_real_valued_local_optimizer",
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not implement an objective function gradient."
+		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_at_least_one_starting_point(), "run_real_valued_local_optimizer",
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not have at least one starting point."
+		);
+
+		Size const nstarts( curproblem->starting_points().size() );
+		for( Size j(0); j<nstarts; ++j ) {
+			work_vector.add_job(
+				std::bind(
+					BFGSFunctionOptimizer::run_one_job_in_threads,
+					this,
+					jobcounter,
+					i, j,
+					std::cref(curproblem),
+					std::ref(outvec[i])
+				)
+			);
+			++jobcounter;
+		}
 	}
 
+	// Nonconst to const:
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
+	for( Size i(0); i<problems.n_problems(); ++i ) {
+		outvec[i] = outvec_nonconst[i];
+	}
 	return outvec;
 }
 
@@ -286,17 +312,41 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 void
 BFGSFunctionOptimizer::run_one_job_in_threads(
 	masala::base::Size const job_index,
+	masala::base::Size const problem_index,
+	masala::base::Size const start_index,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & //solution
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 
+	// Redundant checks:
+	CHECK_OR_THROW_FOR_CLASS( problem->has_objective_function(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not implement an objective function."
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem->has_objective_function_gradient(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not implement an objective function gradient."
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem->has_at_least_one_starting_point(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not have at least one starting point."
+	);
+
 	bool converged(false);
 
 	Size iter(0);
-	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points() ); TODO TODO TODO REFACTOR FOR THIS!
+	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
+
+	Real curscore( compute_fxn(p) );
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad;
+	curgrad.resize( p.size() );
+	compute_fxn_grad( p, curgrad );
+
 	while( iter < max_iterations_ ) {
 		TODO TODO TODO;
 		++iter;
@@ -304,17 +354,23 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 
 	if( !converged ) {
 		write_to_tracer( "Warning!  The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
-			+ std::to_string(job_index) + "were exhausted, but the function did not converge!"
+			+ std::to_string(job_index) + " (problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index)
+			+ ")" + " were exhausted, but the function did not converge!"
 		);
 	}
 
-	RealValuedFunctionLocalOptimizationSolutions_APISP solutions_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
 	RealValuedFunctionLocalOptimizationSolution_APISP solution_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
 	solution_out->set_converged(converged);
 	solution_out->set_iterations( iter + 1 );
 	solution_out->set_problem( problem );
+	solution_out->set_starting_point_and_index( problem->starting_points()[start_index], start_index );
 	solution_out->set_n_times_solution_was_produced(1);
-	solution_out->set_solution_point( p )
+	solution_out->set_solution_point( p );
+	solution_out->set_solution_score( curscore );
+	solution_out->set_solution_score_data_representation_approximation( curscore );
+	solution_out->set_solution_score_solver_approximation( curscore );
+
+	solutions->add_optimization_solution( solution_out );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

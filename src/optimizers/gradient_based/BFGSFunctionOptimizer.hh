@@ -209,8 +209,10 @@ private:
 	void
 	run_one_job_in_threads(
 		masala::base::Size const job_index,
+		masala::base::Size const problem_index,
+		masala::base::Size const start_index,
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solution
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
 	) const;
 
 private:
