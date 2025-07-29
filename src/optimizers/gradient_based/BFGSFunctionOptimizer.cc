@@ -30,6 +30,7 @@
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 
 // Base headers:
@@ -265,9 +266,9 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 		work_vector.add_job(
 			std::bind(
 				BFGSFunctionOptimizer::run_one_job_in_threads,
+				this,
 				i,
-				std::cref(*curproblem),
-				max_iterations_,
+				std::cref(curproblem),
 				std::ref(outvec[i])
 			)
 		);
@@ -281,16 +282,39 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
-/// @details This function executes in threads.  This is a static function.
-/*static*/
+/// @details This function executes in threads.
 void
 BFGSFunctionOptimizer::run_one_job_in_threads(
-	masala::base::Size const ,//job_index,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & ,//problem,
-	masala::base::Size const ,//max_iterations,
+	masala::base::Size const job_index,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & //solution
-) {
-	TODO TODO TODO;
+) const {
+	using masala::base::Size;
+	using masala::base::Real;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+
+	bool converged(false);
+
+	Size iter(0);
+	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points() ); TODO TODO TODO REFACTOR FOR THIS!
+	while( iter < max_iterations_ ) {
+		TODO TODO TODO;
+		++iter;
+	}
+
+	if( !converged ) {
+		write_to_tracer( "Warning!  The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
+			+ std::to_string(job_index) + "were exhausted, but the function did not converge!"
+		);
+	}
+
+	RealValuedFunctionLocalOptimizationSolutions_APISP solutions_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
+	RealValuedFunctionLocalOptimizationSolution_APISP solution_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
+	solution_out->set_converged(converged);
+	solution_out->set_iterations( iter + 1 );
+	solution_out->set_problem( problem );
+	solution_out->set_n_times_solution_was_produced(1);
+	solution_out->set_solution_point( p )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
