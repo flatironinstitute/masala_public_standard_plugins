@@ -285,10 +285,10 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 /*static*/
 void
 BFGSFunctionOptimizer::run_one_job_in_threads(
-	masala::base::Size const job_index,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & problem,
-	masala::base::Size const max_iterations,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solution
+	masala::base::Size const ,//job_index,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & ,//problem,
+	masala::base::Size const ,//max_iterations,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & //solution
 ) {
 	TODO TODO TODO;
 }
