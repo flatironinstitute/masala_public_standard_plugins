@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2024 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -110,6 +110,11 @@ public:
 	/// @returns { {"LineOptimizer", "BrentAlgorithmLineOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
+
+	/// @brief Keywords for engines.
+	/// @returns { "line_optimizer", "lightweight", "numeric", "brent_algorithm" }
+    std::vector < std::string >
+    get_engine_keywords() const override;
 
 	/// @brief Every class can name itself.
 	/// @returns "BrentAlgorithmLineOptimizer".

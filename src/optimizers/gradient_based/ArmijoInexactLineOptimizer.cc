@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2024 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -19,8 +19,7 @@
 /// @file src/numeric_api/base_classes/optimization/gradient_based/ArmijoInexactLineOptimizer.cc
 /// @brief Implementation of the ArmijoInexactLineOptimizer.
 /// @details The ArmijoInexactLineOptimizer carries out gradient-free optimization of a function
-/// along a line.  It uses the algorithm of Richard P. Brent described in "Algorithms for Minimization
-/// Without Derivatives" (1973).
+/// along a line by the method of Larry Armijo, Pacific J. Math. 16(1): 1-3 (1966).
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
@@ -113,6 +112,19 @@ ArmijoInexactLineOptimizer::get_keywords() const {
 std::vector< std::vector < std::string > >
 ArmijoInexactLineOptimizer::get_engine_categories() const {
     return std::vector< std::vector < std::string > >{ { "LineOptimizer", "ArmijoInexactLineOptimizer" } };
+}
+
+/// @brief Keywords for engines.
+/// @returns { "line_optimizer", "lightweight", "numeric", "armijo", "inexact" }
+std::vector < std::string >
+ArmijoInexactLineOptimizer::get_engine_keywords() const {
+	return std::vector< std::string > {
+		"line_optimizer",
+		"lightweight",
+		"numeric",
+		"armijo",
+		"inexact"
+	};
 }
 
 /// @brief Every class can name itself.
@@ -245,8 +257,7 @@ ArmijoInexactLineOptimizer::get_api_definition() {
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this,
 				"The ArmijoInexactLineOptimizer carries out gradient-free optimization of a function "
-				"along a line.  It uses the algorithm of Richard P. Brent described in ''Algorithms for Minimization "
-				"Without Derivatives'' (1973).",
+				"along a line by the method of Larry Armijo, Pacific J. Math. 16(1): 1-3 (1966).",
 				false, false
 			)
 		);

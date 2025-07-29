@@ -1,6 +1,6 @@
 /*
     Standard Masala Plugins
-    Copyright (C) 2022 Vikram K. Mulligan
+    Copyright (C) 2025 Vikram K. Mulligan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -26,7 +26,7 @@
 // Optimizers API headers
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 #include <optimizers_api/auto_generated_api/cost_function_network/MonteCarloCostFunctionNetworkOptimizer_API.hh>
-#include <optimizers_api/auto_generated_api/annealing/LinearAnnealingSchedule_API.hh>
+#include <optimizers_api/auto_generated_api/annealing/LogarithmicRepeatAnnealingSchedule_API.hh>
 
 // Numeric API headers
 #include <numeric_api/utility/optimization/cost_function_network/util.hh>
@@ -77,7 +77,7 @@ main(
 #ifndef NDEBUG
         Size const total_steps( 100000 ); // Do a hundred thousand Monte Carlo steps for each threadcount in debug mode.
 #else
-        Size const total_steps( 1000000 ); // Do a million Monte Carlo steps for each threadcount in release mode.
+        Size const total_steps( 10000000 ); // Do a million Monte Carlo steps for each threadcount in release mode.
 #endif
 
         Size const nthread_total( tm->hardware_threads() );
@@ -96,9 +96,12 @@ main(
         problems->add_optimization_problem( construct_test_problem( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" ) );
 
         // Prepare the annealing schedule:
-        LinearAnnealingSchedule_APISP anneal_sched(
-            masala::make_shared< LinearAnnealingSchedule_API >()
+        LogarithmicRepeatAnnealingSchedule_APISP anneal_sched(
+            masala::make_shared< LogarithmicRepeatAnnealingSchedule_API >()
         );
+        anneal_sched->set_temperature_initial(100.0);
+        anneal_sched->set_temperature_initial(0.3);
+        anneal_sched->set_n_repeats(3);
 
         // Prepare the vector of stuff to be done.  Each entry is threadcount, replicate number, output time in microseconds.
         std::vector< std::tuple< Size, Size, Size > > jobs;
@@ -131,8 +134,8 @@ main(
             mc_opt->set_annealing_steps_per_attempt( total_steps );
             mc_opt->set_attempts_per_problem(threadcount);
             mc_opt->set_cpu_threads_to_request(threadcount);
-            mc_opt->set_solution_storage_mode("check_at_every_step");
-            mc_opt->set_n_solutions_to_store_per_problem(5);
+            mc_opt->set_solution_storage_mode("check_on_acceptance");
+            mc_opt->set_n_solutions_to_store_per_problem(1);
 
             // Run the problem:
             std::chrono::time_point< std::chrono::steady_clock > const starttime(
