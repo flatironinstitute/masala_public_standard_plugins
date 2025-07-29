@@ -200,6 +200,23 @@ public:
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
+	/// @details This function executes in threads.  This is a static function.
+	static
+	void
+	run_one_job_in_threads(
+		masala::base::Size const job_index,
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & problem,
+		masala::base::Size const max_iterations,
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solution
+	);
+
+private:
+
+////////////////////////////////////////////////////////////////////////////////
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 

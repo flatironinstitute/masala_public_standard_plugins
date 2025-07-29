@@ -28,6 +28,7 @@
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 
@@ -38,6 +39,8 @@
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
 // STL headers:
 #include <vector>
@@ -240,13 +243,54 @@ BFGSFunctionOptimizer::get_api_definition() {
 /// the problem with the same index.
 std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
 BFGSFunctionOptimizer::run_real_valued_local_optimizer(
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & //problems
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+	using namespace masala::base::managers::threads;
+	using masala::base::Size;
 
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec;
-	//TODO TODO TODO;
+	std::lock_guard< std::mutex > lock( mutex() );
+
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
+
+	MasalaThreadedWorkRequest work_vector;
+	for( Size i(0); i<problems.n_problems(); ++i ) {
+		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
+			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) )
+		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem != nullptr, "run_real_valued_local_optimizer",
+			"Could not interpret problem " + std::to_string(i) + " (of type " + problems.problem(i)->inner_class_name() +
+			") as a RealValuedFunctionLocalOptimizationProblem."
+		);
+		work_vector.add_job(
+			std::bind(
+				BFGSFunctionOptimizer::run_one_job_in_threads,
+				i,
+				std::cref(*curproblem),
+				max_iterations_,
+				std::ref(outvec[i])
+			)
+		);
+	}
+
 	return outvec;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
+/// @details This function executes in threads.  This is a static function.
+/*static*/
+void
+BFGSFunctionOptimizer::run_one_job_in_threads(
+	masala::base::Size const job_index,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & problem,
+	masala::base::Size const max_iterations,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP & solution
+) {
+	TODO TODO TODO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
