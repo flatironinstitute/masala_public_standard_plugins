@@ -283,12 +283,12 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 		for( Size j(0); j<nstarts; ++j ) {
 			work_vector.add_job(
 				std::bind(
-					BFGSFunctionOptimizer::run_one_job_in_threads,
+					&BFGSFunctionOptimizer::run_one_job_in_threads,
 					this,
 					jobcounter,
 					i, j,
 					std::cref(curproblem),
-					std::ref(outvec[i])
+					std::ref(outvec_nonconst[i])
 				)
 			);
 			++jobcounter;
