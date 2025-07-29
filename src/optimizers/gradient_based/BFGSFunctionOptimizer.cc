@@ -53,7 +53,7 @@ namespace gradient_based {
 
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
-masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 BFGSFunctionOptimizer::clone() const {
 	return masala::make_shared< BFGSFunctionOptimizer >(*this);
 }
@@ -258,11 +258,11 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 /// @details Performs no mutex locking.
 void
 BFGSFunctionOptimizer::protected_assign(
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 ) {
 	BFGSFunctionOptimizer const * src_ptr_cast( dynamic_cast< BFGSFunctionOptimizer const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_assign( src );
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
 /// @brief Make independent: must be implemented by derived classes, which must call the base
@@ -271,7 +271,7 @@ BFGSFunctionOptimizer::protected_assign(
 void
 BFGSFunctionOptimizer::protected_make_independent() {
 	// TODO
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer::protected_make_independent();
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
 } // namespace gradient_based

@@ -37,7 +37,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/real_valued_local/RealValuedFunctionLocalOptimizer.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -47,7 +47,7 @@ namespace gradient_based {
 /// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class BFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer {
+class BFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
 
 public:
 
@@ -66,7 +66,7 @@ public:
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
-	masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizerSP
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
 	clone() const override;
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
@@ -173,7 +173,7 @@ protected:
 	/// @details Performs no mutex locking.
 	void
 	protected_assign(
-		masala::numeric_api::base_classes::optimization::real_valued_local::RealValuedFunctionLocalOptimizer const & src
+		masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 	) override;
 
 	/// @brief Make independent: must be implemented by derived classes, which must call the base
