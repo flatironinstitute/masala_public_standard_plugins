@@ -46,6 +46,9 @@
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
+// Optimizers headers:
+#include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
+
 // STL headers:
 #include <vector>
 #include <string>
@@ -317,9 +320,16 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 ) const {
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 	using namespace masala::base::managers::threads;
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using masala::base::Size;
 
 	std::lock_guard< std::mutex > lock( mutex() );
+
+	PluginLineOptimizerCSP line_optimizer(
+		line_optimizer_ == nullptr ?
+		masala::make_shared< BrentAlgorithmLineOptimizer >() :
+		line_optimizer_
+	);
 
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APISP > outvec_nonconst( problems.n_problems() );
 
@@ -350,6 +360,12 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 
 		Size const nstarts( curproblem->starting_points().size() );
 		for( Size j(0); j<nstarts; ++j ) {
+			PluginLineOptimizerCSP line_optimizer_clone( std::dynamic_pointer_cast< PluginLineOptimizer const >( line_optimizer->deep_clone() ) );
+			CHECK_OR_THROW_FOR_CLASS( line_optimizer_clone != nullptr, "run_real_valued_local_optimizer",
+					"Unable to properly clone the " + line_optimizer->class_name() + " class instance.  This is a "
+					"program error that ought not to happen.  Please consult a developer."
+			);
+
 			work_vector.add_job(
 				std::bind(
 					&BFGSFunctionOptimizer::run_one_job_in_threads,
@@ -357,6 +373,7 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 					jobcounter,
 					i, j,
 					std::cref(curproblem),
+					line_optimizer_clone,
 					std::ref(outvec_nonconst[i])
 				)
 			);
@@ -384,6 +401,7 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	masala::base::Size const problem_index,
 	masala::base::Size const start_index,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
 ) const {
 	using masala::base::Size;
@@ -402,6 +420,10 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	CHECK_OR_THROW_FOR_CLASS( problem->has_at_least_one_starting_point(), "run_one_job_in_threads",
 		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
 		") does not have at least one starting point."
+	);
+	CHECK_OR_THROW_FOR_CLASS( line_optimizer != nullptr, "run_one_job_in_threads",
+		"Got a null pointer for the line optimizer.  This is a program error that ought not to happen.  "
+		"Please consult a developer."
 	);
 
 	bool converged(false);
