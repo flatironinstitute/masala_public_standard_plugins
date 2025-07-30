@@ -32,6 +32,7 @@
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.hh>
 
 // Base headers:
 #include <base/error/ErrorHandling.hh>
@@ -39,7 +40,9 @@
 #include <base/api/MasalaObjectAPIDefinition.hh>
 #include <base/api/constructor/MasalaObjectAPIConstructorMacros.hh>
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/managers/engine/MasalaEngineAPI.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
@@ -165,6 +168,28 @@ BFGSFunctionOptimizer::set_max_iterations(
 	max_iterations_ = setting;
 }
 
+/// @brief Set a line optimizer to use for the line searches.
+/// @details Used directly, not cloned.  If none is provided (or if this is set to
+/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
+void
+BFGSFunctionOptimizer::set_line_optimizer(
+	masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
+) {
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	if( line_optimizer_in == nullptr ) {
+		line_optimizer_ = nullptr;
+		write_to_tracer( "No line optimizer set.  The default BrentAlgorithmLineOptimizer will be used." );
+	} else {
+		PluginLineOptimizerCSP line_opt_cast( std::dynamic_pointer_cast< PluginLineOptimizer const >( line_optimizer_in->get_inner_engine_object_const() ) );
+		CHECK_OR_THROW_FOR_CLASS( line_opt_cast != nullptr, "set_line_optimizer", "The provided objected was of type " + line_optimizer_in->inner_class_name() +
+			", which is not a PluginLineOptimizer derived class!"
+		);
+		std::lock_guard< std::mutex > lock( mutex() );
+		line_optimizer_ = line_opt_cast;
+		write_to_tracer( "Set line optimizer to " + line_optimizer_->class_name() + "." );
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,6 +200,15 @@ masala::base::Size
 BFGSFunctionOptimizer::max_iterations() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return max_iterations_;
+}
+
+/// @brief Get the line optimizer used for the line searches.
+/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
+/// is used by default.
+masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
+BFGSFunctionOptimizer::line_optimizer() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return line_optimizer_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +226,9 @@ masala::base::api::MasalaObjectAPIDefinitionCWP
 BFGSFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::setter;
+	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
+	using namespace masala::base::managers::engine;
 	using masala::base::Size;
 	using masala::base::Real;
 
@@ -219,6 +255,31 @@ BFGSFunctionOptimizer::get_api_definition() {
 				false, false, std::bind( &BFGSFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
 			)
 		);
+		{
+			MasalaObjectAPISetterDefinition_OneInputSP< MasalaEngineAPICSP > set_line_optimizer_setter(
+				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< MasalaEngineAPICSP > >(
+					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
+					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
+					"is used by default.  Throws if the MasalaEngine provided cannot be interpreted as a MasalaPluginLineOptimizer.",
+					"line_optimizer_in", "The line optimizer to use when performing quasi-Newtonian gradient-descent minimization.",
+					false, false, std::bind( &BFGSFunctionOptimizer::set_line_optimizer, this, std::placeholders::_1 )
+				)
+			);
+			OwnedSingleObjectSetterAnnotationSP set_line_optimizer_setter_annotation( masala::make_shared< OwnedSingleObjectSetterAnnotation >() );
+			set_line_optimizer_setter_annotation->set_plugin_manager_info(
+				std::vector< std::string >{ "LineOptimizer" },
+				std::vector< std::string >{ "line_optimizer" },
+				true
+			);
+			set_line_optimizer_setter_annotation->set_engine_manager_info(
+				std::vector< std::string >{ "LineOptimizer" },
+				std::vector< std::string >{ "line_optimizer" },
+				*set_line_optimizer_setter,
+				true
+			);
+			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
+			api_def->add_setter( set_line_optimizer_setter );
+		}
 
 		// Getters:
 		api_def->add_getter(
@@ -226,6 +287,14 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &BFGSFunctionOptimizer::max_iterations, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP > >(
+				"line_optimizer", "Get the line optimizer to use for the line searches.  If this is nullptr, then a BrentAlgorithmLineOptimizer "
+				"is used by default.",
+				"line_optimizer", "The line optimizer to use for the line searches when performing quasi-Newtonian gradient descent minimization.",
+				false, false, std::bind( &BFGSFunctionOptimizer::line_optimizer, this )
 			)
 		);
 

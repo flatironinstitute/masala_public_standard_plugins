@@ -30,12 +30,14 @@
 #include <optimizers/gradient_based/BFGSFunctionOptimizer.fwd.hh>
 
 // Base headers:
+#include <base/managers/engine/MasalaEngineAPI.fwd.hh>
 #include <base/types.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
+#include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.fwd.hh>
 
 // Parent header:
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
@@ -137,6 +139,14 @@ public:
 	/// @details A setting of 0 means loop until convergence.
 	void set_max_iterations( masala::base::Size const setting );
 
+	/// @brief Set a line optimizer to use for the line searches.
+	/// @details Used directly, not cloned.  If none is provided (or if this is set to
+	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
+	void
+	set_line_optimizer(
+		masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
+	);
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +156,12 @@ public:
 	/// @brief Get the maximum number of steps that we can take
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations() const;
+
+	/// @brief Get the line optimizer used for the line searches.
+	/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
+	/// is used by default.
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
+	line_optimizer() const;
 
 public:
 
@@ -224,6 +240,10 @@ private:
 	/// @brief The maximum number of steps that we're allowed to take.
 	/// @details A setting of 0 means loop until convergence.
 	masala::base::Size max_iterations_ = 2000;
+
+	/// @brief A line optimizer used for the line searches.
+	/// @details If none is provided, a BrentAlgorithmLineOptimizer is used.
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer_;
 
 }; // class BFGSFunctionOptimizer
 
