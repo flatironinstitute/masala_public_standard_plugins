@@ -44,6 +44,7 @@
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 #include <base/managers/engine/MasalaEngineAPI.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
+#include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
 
 // Optimizers headers:
@@ -258,6 +259,16 @@ BFGSFunctionOptimizer::get_api_definition() {
 				false, false, std::bind( &BFGSFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"setting", "The number of threads to request.  Different starting points of the same problem or "
+				"different starting points of different problems can be carried out simultaneously in threads.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::set_threads_to_request, this, std::placeholders::_1 )
+			)
+		);
 		{
 			MasalaObjectAPISetterDefinition_OneInputSP< MasalaEngineAPICSP > set_line_optimizer_setter(
 				masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< MasalaEngineAPICSP > >(
@@ -290,6 +301,15 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
 				false, false, std::bind( &BFGSFunctionOptimizer::max_iterations, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"threads_to_request", "Get the number of threads requested by this optimizer.",
+				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::threads_to_request, this )
 			)
 		);
 		api_def->add_getter(
@@ -380,6 +400,12 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 			++jobcounter;
 		}
 	}
+
+	// Actually run the work in threads:
+	work_vector.set_n_threads_to_request( threads_to_request() );
+	MasalaThreadedWorkExecutionSummary const execution_summary(
+		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
+	);
 
 	// Nonconst to const:
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
