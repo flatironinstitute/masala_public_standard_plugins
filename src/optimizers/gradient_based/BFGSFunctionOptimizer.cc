@@ -339,13 +339,20 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 
 	Size iter(0);
 	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] );
+	Eigen::Vector< Real, Eigen::Dynamic > pnew;
+	pnew.resize( p.size() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
 
 	Real curscore( compute_fxn(p) );
-	Eigen::Vector< Real, Eigen::Dynamic > curgrad;
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad, curdirection;
 	curgrad.resize( p.size() );
+	curdirection.resize( p.size() );
 	compute_fxn_grad( p, curgrad );
+	curdirection = curgrad;
+
+	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > inv_hessian;
+	inv_hessian.setIdentity( p.size(), p.size() );
 
 	while( iter < max_iterations_ ) {
 		TODO TODO TODO;
