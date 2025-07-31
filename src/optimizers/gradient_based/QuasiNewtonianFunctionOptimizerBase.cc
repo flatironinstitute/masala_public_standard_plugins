@@ -84,7 +84,7 @@ QuasiNewtonianFunctionOptimizerBase::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizerBase" } }
+/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
@@ -93,7 +93,7 @@ QuasiNewtonianFunctionOptimizerBase::deep_clone() const {
 std::vector< std::vector< std::string > >
 QuasiNewtonianFunctionOptimizerBase::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizerBase" }
+		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" }
 	};
 }
 
@@ -121,10 +121,10 @@ QuasiNewtonianFunctionOptimizerBase::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizerBase"} }
+/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
 QuasiNewtonianFunctionOptimizerBase::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizerBase" } };
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" } };
 }
 
 /// @brief Every class can name itself.
@@ -562,6 +562,10 @@ QuasiNewtonianFunctionOptimizerBase::protected_assign(
 ) {
 	QuasiNewtonianFunctionOptimizerBase const * src_ptr_cast( dynamic_cast< QuasiNewtonianFunctionOptimizerBase const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
+
+	max_iterations_ = src_ptr_cast->max_iterations_;
+	line_optimizer_ = src_ptr_cast->line_optimizer_;
+
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
 
@@ -570,7 +574,16 @@ QuasiNewtonianFunctionOptimizerBase::protected_assign(
 /// @details Performs no mutex locking.
 void
 QuasiNewtonianFunctionOptimizerBase::protected_make_independent() {
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+
 	// TODO
+	if( line_optimizer_ != nullptr ) {
+		PluginLineOptimizerSP line_opt_copy( std::dynamic_pointer_cast< PluginLineOptimizer >( line_optimizer_->deep_clone() ) );
+		CHECK_OR_THROW_FOR_CLASS( line_opt_copy != nullptr, "protected_make_independent", "Unable to properly deep-clone "
+			+ line_optimizer_->class_name() + " obejct.  This is a program error that ought not to happen.  Please consult a developer."
+		);
+		line_optimizer_ = line_opt_copy;
+	}
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }
 
