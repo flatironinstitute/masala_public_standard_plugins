@@ -458,6 +458,7 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] );
 	Eigen::Vector< Real, Eigen::Dynamic > pnew;
 	pnew.resize( p.size() );
+	pnew = p;
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
 
@@ -479,7 +480,7 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 		line_optimizer->run_line_optimizer( compute_fxn, p, curscore, curgrad, -curdirection, pnew, newscore );
 
 		// Test for convergence:
-		if( serach_converged( p, pnew ) ) {
+		if( search_converged( p, pnew ) ) {
 			converged = true;
 			break;
 		}
@@ -502,6 +503,7 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 		// Update the current position and gradient:
 		p = pnew;
 		curgrad = newgrad;
+		curscore = newscore;
 
 		// Increment the iteration:
 		++iter;
@@ -512,6 +514,11 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 			+ std::to_string(job_index) + " (problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index)
 			+ ")" + " were exhausted, but the function did not converge!"
 		);
+	} else {
+		write_to_tracer( "For problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index) + ", the "
+			+ class_name() + "'s search for a local minimum converged in " + std::to_string( iter+1 ) + " iterations.  New function value: " +
+			std::to_string( newscore ) + "."
+		);
 	}
 
 	RealValuedFunctionLocalOptimizationSolution_APISP solution_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
@@ -520,10 +527,10 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	solution_out->set_problem( problem );
 	solution_out->set_starting_point_and_index( problem->starting_points()[start_index], start_index );
 	solution_out->set_n_times_solution_was_produced(1);
-	solution_out->set_solution_point( p );
-	solution_out->set_solution_score( curscore );
-	solution_out->set_solution_score_data_representation_approximation( curscore );
-	solution_out->set_solution_score_solver_approximation( curscore );
+	solution_out->set_solution_point( pnew );
+	solution_out->set_solution_score( newscore );
+	solution_out->set_solution_score_data_representation_approximation( newscore );
+	solution_out->set_solution_score_solver_approximation( newscore );
 
 	solutions->add_optimization_solution( solution_out );
 }
