@@ -471,7 +471,7 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > inv_hessian;
 	inv_hessian.setIdentity( p.size(), p.size() );
 
-	while( iter < max_iterations_ ) {
+	while( max_iterations_ == 0 || iter < max_iterations_ ) {
 		TODO TODO TODO;
 		++iter;
 	}
