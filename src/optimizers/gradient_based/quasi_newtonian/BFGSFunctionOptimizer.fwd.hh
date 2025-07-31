@@ -23,14 +23,15 @@
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_fwd_hh
-#define Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_fwd_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_fwd_hh
+#define Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_fwd_hh
 
 #include <base/managers/memory/util.hh> // For MASALA_SHARED_POINTER
 
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
+namespace quasi_newtonian {
 
 	class BFGSFunctionOptimizer;
 
@@ -50,8 +51,9 @@ namespace gradient_based {
 	/// represents a MASALA_WEAK_POINTER for const objects of that class.
 	using BFGSFunctionOptimizerCWP = MASALA_WEAK_POINTER< BFGSFunctionOptimizer const >;
 
+} // namespace quasi_newtonian
 } // namespace gradient_based
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif //Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_fwd_hh
+#endif //Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_fwd_hh

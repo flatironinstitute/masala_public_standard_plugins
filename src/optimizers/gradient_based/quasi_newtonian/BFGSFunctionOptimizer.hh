@@ -23,11 +23,11 @@
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
-#define Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_hh
+#define Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_hh
 
 // Forward declarations:
-#include <optimizers/gradient_based/BFGSFunctionOptimizer.fwd.hh>
+#include <optimizers/gradient_based/quasi_newtonian/BFGSFunctionOptimizer.fwd.hh>
 
 // Base headers:
 #include <base/managers/engine/MasalaEngineAPI.fwd.hh>
@@ -40,17 +40,18 @@
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.fwd.hh>
 
 // Parent header:
-#include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
+#include <optimizers/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
+namespace quasi_newtonian {
 
 /// @brief The BFGSFunctionOptimizer, which carries out gradient-descent minimization of an arbitrary function
 /// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class BFGSFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
+class BFGSFunctionOptimizer : public standard_masala_plugins::optimizers::gradient_based::QuasiNewtonianFunctionOptimizerBase {
 
 public:
 
@@ -85,7 +86,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "BFGSFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer", "BFGSFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -96,7 +97,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "bfgs" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -109,7 +110,7 @@ public:
     /// a list of hierarchical categories, and the inner vector is the particular hierarchical
     /// category, from most general to most specific.  Also note that this function is pure
     /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "BFGSFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer", "BFGSFunctionOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
@@ -135,33 +136,11 @@ public:
 // SETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Set the maximum number of steps that we can take.
-	/// @details A setting of 0 means loop until convergence.
-	void set_max_iterations( masala::base::Size const setting );
-
-	/// @brief Set a line optimizer to use for the line searches.
-	/// @details Used directly, not cloned.  If none is provided (or if this is set to
-	/// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
-	void
-	set_line_optimizer(
-		masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
-	);
-
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-	/// @brief Get the maximum number of steps that we can take
-	/// @details A setting of 0 means loop until convergence.
-	masala::base::Size max_iterations() const;
-
-	/// @brief Get the line optimizer used for the line searches.
-	/// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
-	/// is used by default.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-	line_optimizer() const;
 
 public:
 
@@ -205,36 +184,15 @@ public:
 // WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run the optimizer on a set of gradient-based loss function minimization problems, and produce a set of solutions.
-	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
-	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (BFGS)
-	/// to carry out gradient-descent minimization.
-	std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
-	run_real_valued_local_optimizer(
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
-	) const override;
-
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
-	/// @details This function executes in threads.  Expected to be called from a mutex-locked context.
-	void
-	run_one_job_in_threads(
-		masala::base::Size const job_index,
-		masala::base::Size const problem_index,
-		masala::base::Size const start_index,
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
-	) const;
-
 	/// @brief Update the approximation of the inverse of the Hessian matrix.
 	/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
-	/// @note Expected to be called from a mutex-locked context.
+	/// @note Expected to be called from a mutex-locked context.  Must be implemented for derived classes.
 	void
 	update_inverse_hessian(
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
@@ -242,7 +200,7 @@ private:
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
-	) const;
+	) const override;
 
 private:
 
@@ -250,18 +208,11 @@ private:
 // PRIVATE VARIABLES
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief The maximum number of steps that we're allowed to take.
-	/// @details A setting of 0 means loop until convergence.
-	masala::base::Size max_iterations_ = 2000;
-
-	/// @brief A line optimizer used for the line searches.
-	/// @details If none is provided, a BrentAlgorithmLineOptimizer is used.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer_;
-
 }; // class BFGSFunctionOptimizer
 
+} // namespace quasi_newtonian
 } // namespace gradient_based
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_BFGSFunctionOptimizer_hh
+#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_quasi_newtonian_BFGSFunctionOptimizer_hh
