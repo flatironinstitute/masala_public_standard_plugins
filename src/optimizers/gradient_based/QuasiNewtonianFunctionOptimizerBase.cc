@@ -99,7 +99,7 @@ QuasiNewtonianFunctionOptimizerBase::get_categories() const {
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian" }
 std::vector< std::string >
 QuasiNewtonianFunctionOptimizerBase::get_keywords() const {
 	return std::vector< std::string > {
@@ -108,8 +108,7 @@ QuasiNewtonianFunctionOptimizerBase::get_keywords() const {
 		"local_optimizer",
         "gradient_based",
 		"numeric",
-		"quasi-newtonian",
-		"l-bfgs"
+		"quasi-newtonian"
 	};
 }
 
@@ -242,14 +241,13 @@ QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 		MasalaObjectAPIDefinitionSP api_def(
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this,
-				"A gradient-descent function optimizer that uses the Broyden-Fletcher-Goldfarb-Shanno "
-				"algorithm (BFGS), a quasi-Newtonian method that relies only on gradients to approximate the inverse "
-				"Hessian matrix, to carry out gradient descent for a differentiable function in R^N.",
-				false, false
+				"A base class for optimizers that implement quasi-Newtonian methods, such as the DFP, BFGS, or L-BFGS algorithms.  "
+				"This base class is not meant to be instantiated by code beyond the build system.",
+				false, true
 			)
 		);
 		
-		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( QuasiNewtonianFunctionOptimizerBase, api_def );
+		ADD_PROTECTED_CONSTRUCTOR_DEFINITIONS( QuasiNewtonianFunctionOptimizerBase, api_def );
 
 		// Setters:
 		api_def->add_setter(
@@ -537,7 +535,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 
 /// @brief Update the approximation of the inverse of the Hessian matrix.
 /// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
-/// @note Expected to be called from a mutex-locked context.
+/// @note Expected to be called from a mutex-locked context.  Must be implemented by derived classes.
 void
 QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_old,
@@ -546,7 +544,9 @@ QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_new,
 	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
 ) const {
-	TODO TODO TODO;
+	MASALA_THROW( class_namespace() + "::" + class_name(), "update_inverse_hessian",
+		"This function must be implemented by derived classes."
+	);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

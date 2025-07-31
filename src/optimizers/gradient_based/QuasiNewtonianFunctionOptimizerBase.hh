@@ -17,10 +17,9 @@
 */
 
 /// @file src/numeric_api/base_classes/optimization/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh
-/// @brief Headers for the QuasiNewtonianFunctionOptimizerBase.
-/// @details The QuasiNewtonianFunctionOptimizerBase carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
-/// algorithm.
+/// @brief Headers for the QuasiNewtonianFunctionOptimizerBase base class.
+/// @details The QuasiNewtonianFunctionOptimizerBase class serves as a base class for optimizers that carry out gradient-
+/// descent minimization of functions using quasi-Newtonian approaches, such as the DFP, BFGS, and L-BFGS algorithms.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 #ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_QuasiNewtonianFunctionOptimizerBase_hh
@@ -46,9 +45,9 @@ namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
-/// @brief The QuasiNewtonianFunctionOptimizerBase, which carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
-/// algorithm.
+/// @brief The QuasiNewtonianFunctionOptimizerBase base class.
+/// @details The QuasiNewtonianFunctionOptimizerBase class serves as a base class for optimizers that carry out gradient-
+/// descent minimization of functions using quasi-Newtonian approaches, such as the DFP, BFGS, and L-BFGS algorithms.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class QuasiNewtonianFunctionOptimizerBase : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
 
@@ -96,7 +95,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian", "l-bfgs" }
+	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -234,7 +233,8 @@ private:
 
 	/// @brief Update the approximation of the inverse of the Hessian matrix.
 	/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
-	/// @note Expected to be called from a mutex-locked context.
+	/// @note Expected to be called from a mutex-locked context.  Must be implemented by derived classes.
+	virtual
 	void
 	update_inverse_hessian(
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
