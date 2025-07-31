@@ -463,8 +463,9 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 
 	Real curscore( compute_fxn(p) );
 	Real newscore( curscore );
-	Eigen::Vector< Real, Eigen::Dynamic > curgrad, curdirection;
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, curdirection;
 	curgrad.resize( p.size() );
+	newgrad.resize( p.size() );
 	curdirection.resize( p.size() );
 	compute_fxn_grad( p, curgrad );
 	curdirection = curgrad;
@@ -477,7 +478,32 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 		// Run the line optimizer along the current direction (the gradient modified by the approximation of the inverse Hessian):
 		line_optimizer->run_line_optimizer( compute_fxn, p, curscore, curgrad, -curdirection, pnew, newscore );
 
-		TODO TODO TODO;
+		// Test for convergence:
+		if( serach_converged( p, pnew ) ) {
+			converged = true;
+			break;
+		}
+
+		// Compute the new gradient:
+		compute_fxn_grad( pnew, newgrad );
+
+		// Test for convergence:
+		if( gradient_converged( newgrad ) ) {
+			converged = true;
+			break;
+		}
+
+		// Update the inverse Hessian approximation:
+		update_inverse_hessian( p, pnew, curgrad, newgrad, inv_hessian );
+
+		// Update the search direction:
+		curdirection = inv_hessian * newgrad;
+
+		// Update the current position and gradient:
+		p = pnew;
+		curgrad = newgrad;
+
+		// Increment the iteration:
 		++iter;
 	}
 
