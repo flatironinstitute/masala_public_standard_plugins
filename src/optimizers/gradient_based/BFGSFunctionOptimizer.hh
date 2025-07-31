@@ -221,7 +221,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
-	/// @details This function executes in threads.
+	/// @details This function executes in threads.  Expected to be called from a mutex-locked context.
 	void
 	run_one_job_in_threads(
 		masala::base::Size const job_index,
@@ -230,6 +230,18 @@ private:
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
 		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
+	) const;
+
+	/// @brief Update the approximation of the inverse of the Hessian matrix.
+	/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
+	/// @note Expected to be called from a mutex-locked context.
+	void
+	update_inverse_hessian(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
 	) const;
 
 private:

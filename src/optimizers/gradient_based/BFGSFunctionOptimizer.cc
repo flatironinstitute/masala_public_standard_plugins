@@ -420,7 +420,7 @@ BFGSFunctionOptimizer::run_real_valued_local_optimizer(
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
-/// @details This function executes in threads.
+/// @details This function executes in threads.  Expected to be called from a mutex-locked context.
 void
 BFGSFunctionOptimizer::run_one_job_in_threads(
 	masala::base::Size const job_index,
@@ -533,6 +533,20 @@ BFGSFunctionOptimizer::run_one_job_in_threads(
 	solution_out->set_solution_score_solver_approximation( newscore );
 
 	solutions->add_optimization_solution( solution_out );
+}
+
+/// @brief Update the approximation of the inverse of the Hessian matrix.
+/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
+/// @note Expected to be called from a mutex-locked context.
+void
+BFGSFunctionOptimizer::update_inverse_hessian(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_old,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_old,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_new,
+	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
+) const {
+	TODO TODO TODO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
