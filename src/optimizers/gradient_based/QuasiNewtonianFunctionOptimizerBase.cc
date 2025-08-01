@@ -704,6 +704,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		);
 	}
 
+	TODO TODO TODO move all of this to emulate the GrdientDescentFunctionOptimizer;
 	RealValuedFunctionLocalOptimizationSolution_APISP solution_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
 	solution_out->set_converged(converged);
 	solution_out->set_iterations( iter + 1 );
