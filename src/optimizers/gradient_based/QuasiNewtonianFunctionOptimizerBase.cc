@@ -541,7 +541,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		// }
 
 		// Update the inverse Hessian approximation:
-		update_inverse_hessian( p, pnew, curgrad, newgrad, inv_hessian );
+		update_inverse_hessian( delta_p, curgrad, newgrad, inv_hessian );
 
 		// Update the search direction:
 		curdirection = inv_hessian * newgrad;
@@ -586,8 +586,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 /// @note Expected to be called from a mutex-locked context.  Must be implemented by derived classes.
 void
 QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_old,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_diff,
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_old,
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_new,
 	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian

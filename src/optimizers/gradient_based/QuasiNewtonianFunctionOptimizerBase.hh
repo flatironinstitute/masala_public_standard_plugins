@@ -250,8 +250,7 @@ private:
 	virtual
 	void
 	update_inverse_hessian(
-		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
-		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian

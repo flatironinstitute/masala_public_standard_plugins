@@ -196,8 +196,7 @@ private:
 	inline
 	void
 	update_inverse_hessian(
-		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
-		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
@@ -207,7 +206,6 @@ private:
 		using Eigen::Matrix;
 		using Eigen::Dynamic;
 
-		Vector< Real, Dynamic > const p_diff( p_new - p_old );
 		Vector< Real, Dynamic > const grad_diff( grad_new - grad_old );
 		Real const p_diff_dot_grad_diff( p_diff.dot( grad_diff ) );
 
