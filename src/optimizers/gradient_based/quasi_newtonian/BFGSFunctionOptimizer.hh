@@ -119,7 +119,7 @@ public:
 	std::string class_name() const override;
 
 	/// @brief Every class can provide its own namespace.
-	/// @returns "standard_masala_plugins::optimizers::gradient_based".
+	/// @returns "standard_masala_plugins::optimizers::gradient_based::quasi_newtonian".
 	std::string class_namespace() const override;
 
 	/// @brief Every class can name itself.
@@ -127,7 +127,7 @@ public:
 	static std::string class_name_static();
 
 	/// @brief Every class can provide its own namespace.
-	/// @returns "standard_masala_plugins::optimizers::gradient_based".
+	/// @returns "standard_masala_plugins::optimizers::gradient_based::quasi_newtonian".
 	static std::string class_namespace_static();
 
 public:

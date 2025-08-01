@@ -137,7 +137,7 @@ BFGSFunctionOptimizer::class_name() const {
 }
 
 /// @brief Every class can provide its own namespace.
-/// @returns "standard_masala_plugins::optimizers::gradient_based".
+/// @returns "standard_masala_plugins::optimizers::gradient_based::quasi_newtonian".
 std::string
 BFGSFunctionOptimizer::class_namespace() const {
 	return class_namespace_static();
@@ -152,11 +152,11 @@ BFGSFunctionOptimizer::class_name_static() {
 }
 
 /// @brief Every class can provide its own namespace.
-/// @returns "standard_masala_plugins::optimizers::gradient_based".
+/// @returns "standard_masala_plugins::optimizers::gradient_based::quasi_newtonian".
 /*static*/
 std::string
 BFGSFunctionOptimizer::class_namespace_static() {
-	return "standard_masala_plugins::optimizers::gradient_based";
+	return "standard_masala_plugins::optimizers::gradient_based::quasi_newtonian";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
