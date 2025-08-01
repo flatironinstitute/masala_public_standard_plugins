@@ -235,6 +235,21 @@ QuasiNewtonianFunctionOptimizerBase::set_throw_if_iterations_exceeded(
 	throw_if_iterations_exceeded_ = setting;
 }
 
+/// @brief Set the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+/// to the identity matrix.
+/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+/// needs to be adjusted.
+void
+QuasiNewtonianFunctionOptimizerBase::set_min_inv_hessian_determinant(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.0, "set_min_inv_hessian_determinant",
+		"The minimum inverse Hessian determinant must be non-negative."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	min_inv_hessian_determinant_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +295,16 @@ bool
 QuasiNewtonianFunctionOptimizerBase::throw_if_iterations_exceeded() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return throw_if_iterations_exceeded_;
+}
+
+/// @brief Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+/// to the identity matrix.
+/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+/// needs to be adjusted.
+masala::base::Real
+QuasiNewtonianFunctionOptimizerBase::min_inv_hessian_determinant() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return min_inv_hessian_determinant_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -389,6 +414,17 @@ QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_min_inv_hessian_determinant", "Set the minimum absolute value of the determinant of the approximate inverse "
+				"Hessian matrix, below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the "
+				"Hessian becomes singular.  The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_min_inv_hessian_determinant, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -443,6 +479,17 @@ QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 				"exceeded, false otherwise.",
 				false, false,
 				std::bind( &QuasiNewtonianFunctionOptimizerBase::throw_if_iterations_exceeded, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"min_inv_hessian_determinant", "Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, "
+				"below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the Hessian becomes singular.  "
+				"The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::min_inv_hessian_determinant, this )
 			)
 		);
 

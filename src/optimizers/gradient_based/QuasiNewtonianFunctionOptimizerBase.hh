@@ -163,6 +163,12 @@ public:
 	/// (false, the default).
 	void set_throw_if_iterations_exceeded( bool const setting );
 
+	/// @brief Set the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	void set_min_inv_hessian_determinant( masala::base::Real const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +198,12 @@ public:
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded() const;
+
+	/// @brief Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	masala::base::Real min_inv_hessian_determinant() const;
 
 public:
 
@@ -325,6 +337,12 @@ private:
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded_ = false;
+
+	/// @brief The minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	masala::base::Real min_inv_hessian_determinant_ = 4.0 * std::numeric_limits< masala::base::Real >::epsilon();
 
 }; // class QuasiNewtonianFunctionOptimizerBase
 

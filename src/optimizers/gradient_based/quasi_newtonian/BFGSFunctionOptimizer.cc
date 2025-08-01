@@ -277,6 +277,17 @@ BFGSFunctionOptimizer::get_api_definition() {
 				std::bind( &BFGSFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_min_inv_hessian_determinant", "Set the minimum absolute value of the determinant of the approximate inverse "
+				"Hessian matrix, below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the "
+				"Hessian becomes singular.  The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::set_min_inv_hessian_determinant, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -331,6 +342,17 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"exceeded, false otherwise.",
 				false, false,
 				std::bind( &BFGSFunctionOptimizer::throw_if_iterations_exceeded, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"min_inv_hessian_determinant", "Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, "
+				"below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the Hessian becomes singular.  "
+				"The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::min_inv_hessian_determinant, this )
 			)
 		);
 
