@@ -582,8 +582,8 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
 	for( Size i(0); i<problems.n_problems(); ++i ) {
 		RealValuedFunctionLocalOptimizationSolutions_APISP cur_solutions( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
-		for( Size j(0); j<solution_storage_temp[i].size(); ++j ) {
-			cur_solutions->add_optimization_solution( solution_storage_temp[i][j] );
+		for( Size j(0); j<outvec_nonconst[i].size(); ++j ) {
+			cur_solutions->add_optimization_solution( outvec_nonconst[i][j] );
 		}
 		outvec[i] = cur_solutions; // Nonconst to const.
 	}
@@ -712,7 +712,6 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		);
 	}
 
-	RealValuedFunctionLocalOptimizationSolution_APISP solution( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
 	solution->set_converged(converged);
 	solution->set_iterations( iter + 1 );
 	solution->set_problem( problem );
