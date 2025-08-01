@@ -498,20 +498,19 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 	bool converged(false);
 
 	Size iter(0);
-	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] );
-	Eigen::Vector< Real, Eigen::Dynamic > pnew;
+	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] ), pnew, delta_p;
 	pnew.resize( p.size() );
 	pnew = p;
-	Eigen::Vector< Real, Eigen::Dynamic > delta_p;
 	delta_p.resize( p.size() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
 
 	Real curscore( compute_fxn(p) );
 	Real newscore( curscore );
-	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, curdirection;
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, delta_grad, curdirection;
 	curgrad.resize( p.size() );
 	newgrad.resize( p.size() );
+	delta_grad.resize( p.size() );
 	curdirection.resize( p.size() );
 	compute_fxn_grad( p, curgrad );
 	curdirection = curgrad;
@@ -533,6 +532,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 
 		// Compute the new gradient:
 		compute_fxn_grad( pnew, newgrad );
+		delta_grad = newgrad - curgrad;
 
 		// Test for convergence:
 		// if( gradient_converged( newgrad ) ) {
@@ -541,7 +541,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		// }
 
 		// Update the inverse Hessian approximation:
-		update_inverse_hessian( delta_p, curgrad, newgrad, inv_hessian );
+		update_inverse_hessian( delta_p, delta_grad, inv_hessian );
 
 		// Update the search direction:
 		curdirection = inv_hessian * newgrad;
@@ -587,8 +587,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 void
 QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_diff,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_old,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_diff,
 	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
 ) const {
 	MASALA_THROW( class_namespace() + "::" + class_name(), "update_inverse_hessian",
