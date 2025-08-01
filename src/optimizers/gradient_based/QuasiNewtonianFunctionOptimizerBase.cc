@@ -611,8 +611,8 @@ QuasiNewtonianFunctionOptimizerBase::search_converged(
 	using masala::base::Size;
 
 	Real biggestval(0.0), curval;
-	Size const ndim( delta_p.size() );
-	DEBUG_MODE_CHECK_OR_THROW( ndim == p_new.size(),
+	Size const ndim( static_cast< Size >( delta_p.size() ) );
+	DEBUG_MODE_CHECK_OR_THROW( ndim == static_cast< Size >( p_new.size() ),
 		class_namespace_static() + "::" + class_name_static(), "search_converged",
 		"Expected delta_p and p_new vectors to be of the same size.  This is a program "
 		"error that ought not to occur.  Please consult a developer."
