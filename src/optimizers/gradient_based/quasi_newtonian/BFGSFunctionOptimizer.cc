@@ -296,13 +296,32 @@ BFGSFunctionOptimizer::get_api_definition() {
 /// @note Expected to be called from a mutex-locked context.  Must be implemented for derived classes.
 void
 BFGSFunctionOptimizer::update_inverse_hessian(
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_old,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_new,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_old,
-	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_new,
-	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
 ) const {
-	TODO TODO TODO;
+	using masala::base::Real;
+	using Eigen::Vector;
+	using Eigen::Matrix;
+	using Eigen::Dynamic;
+
+	Vector< Real, Dynamic > const p_diff( p_new - p_old );
+	Vector< Real, Dynamic > const grad_diff( grad_new - grad_old );
+	Real const p_diff_dot_grad_diff( p_diff.dot( grad_diff ) );
+
+	Vector< Real, Dynamic > const inv_hessian_old_times_grad_diff( inv_hessian * grad_diff );
+	Real const grad_diff_inv_hess_grad_diff( grad_diff.dot( inv_hessian_old_times_grad_diff ) );
+
+	Vector< Real, Dynamic > const u(
+		p_diff / p_diff_dot_grad_diff
+		- inv_hessian_old_times_grad_diff / grad_diff_inv_hess_grad_diff
+	);
+
+	inv_hessian += ( p_diff.cross( p_diff ) / ( p_diff_dot_grad_diff ) )
+		- ( inv_hessian_old_times_grad_diff.cross( inv_hessian_old_times_grad_diff ) / grad_diff_inv_hess_grad_diff )
+		+ grad_diff_inv_hess_grad_diff * u.cross(u);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
