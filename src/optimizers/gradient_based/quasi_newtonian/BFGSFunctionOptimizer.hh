@@ -217,7 +217,7 @@ private:
 		inv_hessian += ( p_diff * ( p_diff.transpose() ) / ( p_diff_dot_grad_diff ) )
 			- ( scratchvec1 * ( scratchvec1.transpose() ) / grad_diff_inv_hess_grad_diff )
 			+ grad_diff_inv_hess_grad_diff * scratchvec2 * ( scratchvec2.transpose() );
-		
+
 		if( protected_min_inv_hessian_determinant() > 0.0 && inv_hessian.determinant() < protected_min_inv_hessian_determinant() ) {
 			write_to_tracer( "Singular inverse Hessian approximation detected.  Resetting to identity matrix." );
 			inv_hessian.setIdentity( inv_hessian.rows(), inv_hessian.cols() );
