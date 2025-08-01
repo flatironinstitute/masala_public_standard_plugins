@@ -286,6 +286,18 @@ private:
 		masala::base::Real const tolerance
 	);
 
+	/// @brief Determine whether the search has converged, based on the change in gradient.
+	/// @return True for convergence, false otherwise.
+	/// @note Static function.
+	static
+	bool
+	gradient_converged(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+		masala::base::Real const grad_tolerance,
+		masala::base::Real const curscore
+	);
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////

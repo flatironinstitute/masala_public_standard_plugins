@@ -619,10 +619,10 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		delta_grad = newgrad - curgrad;
 
 		// Test for convergence:
-		// if( gradient_converged( newgrad ) ) {
-		// 	converged = true;
-		// 	break;
-		// }
+		if( gradient_converged( pnew, newgrad, gradient_tolerance_, curscore ) ) {
+			converged = true;
+			break;
+		}
 
 		// Update the inverse Hessian approximation:
 		update_inverse_hessian( delta_p, delta_grad, scratchvec1, scratchvec2, inv_hessian );
@@ -718,6 +718,38 @@ QuasiNewtonianFunctionOptimizerBase::search_converged(
 		}
 	}
 	return biggestval < tolerance;
+}
+
+/// @brief Determine whether the search has converged, based on the change in gradient.
+/// @return True for convergence, false otherwise.
+/// @note Static function.
+/*static*/
+bool
+QuasiNewtonianFunctionOptimizerBase::gradient_converged(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+	masala::base::Real const grad_tolerance,
+	masala::base::Real const curscore
+) {
+	using masala::base::Real;
+	using masala::base::Size;
+
+	Real biggestval(0.0), curval;
+	Real const abscurscore( std::max( std::abs( curscore ), 1.0 ) );
+	Size const ndim( static_cast< Size >( p_new.size() ) );
+	DEBUG_MODE_CHECK_OR_THROW( ndim == static_cast< Size >( grad_new.size() ),
+		class_namespace_static() + "::" + class_name_static(), "gradient_converged",
+		"Expected delta_grad and grad_new vectors to be of the same size.  This is a program "
+		"error that ought not to occur.  Please consult a developer."
+	);
+	for( Size i(0); i<ndim; ++i ) {
+		curval = std::abs( grad_new[i] ) * std::max( std::abs( p_new[i] ), 1.0 ) / abscurscore;
+		if( curval > biggestval ) {
+			biggestval = curval;
+		}
+	}
+
+	return biggestval < grad_tolerance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
