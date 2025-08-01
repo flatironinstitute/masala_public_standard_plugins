@@ -640,10 +640,19 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 	}
 
 	if( !converged ) {
-		write_to_tracer( "Warning!  The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
-			+ std::to_string(job_index) + " (problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index)
-			+ ")" + " were exhausted, but the function did not converge!"
-		);
+		if( throw_if_iterations_exceeded_ ) {
+			MASALA_THROW( class_namespace() + "::" + class_name(), "run_one_job_in_threads",
+				"The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
+				+ std::to_string(job_index) + " (problem " + std::to_string(problem_index)
+				+ ", starting point " + std::to_string(start_index)
+				+ ")" + " were exhausted, but the function did not converge!"
+			);
+		} else {
+			write_to_tracer( "Warning!  The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
+				+ std::to_string(job_index) + " (problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index)
+				+ ")" + " were exhausted, but the function did not converge!"
+			);
+		}
 	} else {
 		write_to_tracer( "For problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index) + ", the "
 			+ class_name() + "'s search for a local minimum converged in " + std::to_string( iter+1 ) + " iterations.  New function value: " +
