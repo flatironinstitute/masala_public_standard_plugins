@@ -815,6 +815,10 @@ QuasiNewtonianFunctionOptimizerBase::protected_assign(
 
 	max_iterations_ = src_ptr_cast->max_iterations_;
 	line_optimizer_ = src_ptr_cast->line_optimizer_;
+	tolerance_ = src_ptr_cast->tolerance_;
+	gradient_tolerance_ = src_ptr_cast->gradient_tolerance_;
+	throw_if_iterations_exceeded_ = src_ptr_cast->throw_if_iterations_exceeded_;
+	min_inv_hessian_determinant_ = src_ptr_cast->min_inv_hessian_determinant_;
 
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
