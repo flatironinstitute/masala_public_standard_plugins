@@ -319,9 +319,9 @@ BFGSFunctionOptimizer::update_inverse_hessian(
 		- inv_hessian_old_times_grad_diff / grad_diff_inv_hess_grad_diff
 	);
 
-	inv_hessian += ( p_diff.cross( p_diff ) / ( p_diff_dot_grad_diff ) )
-		- ( inv_hessian_old_times_grad_diff.cross( inv_hessian_old_times_grad_diff ) / grad_diff_inv_hess_grad_diff )
-		+ grad_diff_inv_hess_grad_diff * u.cross(u);
+	inv_hessian += ( p_diff * ( p_diff.transpose() ) / ( p_diff_dot_grad_diff ) )
+		- ( inv_hessian_old_times_grad_diff * ( inv_hessian_old_times_grad_diff.transpose() ) / grad_diff_inv_hess_grad_diff )
+		+ grad_diff_inv_hess_grad_diff * u * ( u.transpose() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
