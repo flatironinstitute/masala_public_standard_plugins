@@ -198,6 +198,8 @@ private:
 	update_inverse_hessian(
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_diff,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec1,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec2,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
 	) const override {
 		using masala::base::Real;
@@ -207,17 +209,14 @@ private:
 
 		Real const p_diff_dot_grad_diff( p_diff.dot( grad_diff ) );
 
-		Vector< Real, Dynamic > const inv_hessian_old_times_grad_diff( inv_hessian * grad_diff );
-		Real const grad_diff_inv_hess_grad_diff( grad_diff.dot( inv_hessian_old_times_grad_diff ) );
+		scratchvec1 = inv_hessian * grad_diff;
+		Real const grad_diff_inv_hess_grad_diff( grad_diff.dot( scratchvec1 ) );
 
-		Vector< Real, Dynamic > const u(
-			p_diff / p_diff_dot_grad_diff
-			- inv_hessian_old_times_grad_diff / grad_diff_inv_hess_grad_diff
-		);
+		scratchvec2 = p_diff / p_diff_dot_grad_diff - scratchvec1 / grad_diff_inv_hess_grad_diff;
 
 		inv_hessian += ( p_diff * ( p_diff.transpose() ) / ( p_diff_dot_grad_diff ) )
-			- ( inv_hessian_old_times_grad_diff * ( inv_hessian_old_times_grad_diff.transpose() ) / grad_diff_inv_hess_grad_diff )
-			+ grad_diff_inv_hess_grad_diff * u * ( u.transpose() );
+			- ( scratchvec1 * ( scratchvec1.transpose() ) / grad_diff_inv_hess_grad_diff )
+			+ grad_diff_inv_hess_grad_diff * scratchvec2 * ( scratchvec2.transpose() );
 	}
 
 private:

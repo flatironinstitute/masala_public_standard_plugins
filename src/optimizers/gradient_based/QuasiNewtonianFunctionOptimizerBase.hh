@@ -252,6 +252,8 @@ private:
 	update_inverse_hessian(
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_diff,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec1,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec2,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
 	) const;
 

@@ -507,10 +507,12 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 
 	Real curscore( compute_fxn(p) );
 	Real newscore( curscore );
-	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, delta_grad, curdirection;
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, delta_grad, scratchvec1, scratchvec2, curdirection;
 	curgrad.resize( p.size() );
 	newgrad.resize( p.size() );
 	delta_grad.resize( p.size() );
+	scratchvec1.resize( p.size() );
+	scratchvec2.resize( p.size() );
 	curdirection.resize( p.size() );
 	compute_fxn_grad( p, curgrad );
 	curdirection = curgrad;
@@ -541,7 +543,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		// }
 
 		// Update the inverse Hessian approximation:
-		update_inverse_hessian( delta_p, delta_grad, inv_hessian );
+		update_inverse_hessian( delta_p, delta_grad, scratchvec1, scratchvec2, inv_hessian );
 
 		// Update the search direction:
 		curdirection = inv_hessian * newgrad;
@@ -588,6 +590,8 @@ void
 QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_diff,
 	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_diff,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & ,//scratchvec1,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & ,//scratchvec2,
 	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
 ) const {
 	MASALA_THROW( class_namespace() + "::" + class_name(), "update_inverse_hessian",
