@@ -523,13 +523,11 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 		line_optimizer_
 	);
 
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APISP > outvec_nonconst( problems.n_problems() );
+	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > outvec_nonconst( problems.n_problems() );
 
 	MasalaThreadedWorkRequest work_vector;
 	Size jobcounter(0);
 	for( Size i(0); i<problems.n_problems(); ++i ) {
-		outvec_nonconst[i] = masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >();
-
 		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
 			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) )
 		);
@@ -551,9 +549,13 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 		);
 
 		Size const nstarts( curproblem->starting_points().size() );
+		outvec_nonconst[i].resize(nstarts);
+
 		for( Size j(0); j<nstarts; ++j ) {
 			PluginLineOptimizerSP line_optimizer_clone( line_optimizer->clone() );
 			line_optimizer_clone->make_independent();
+
+			outvec_nonconst[i][j] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >();
 
 			work_vector.add_job(
 				std::bind(
@@ -563,7 +565,7 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 					i, j,
 					std::cref(curproblem),
 					line_optimizer_clone,
-					std::ref(outvec_nonconst[i])
+					std::ref(outvec_nonconst[i][j])
 				)
 			);
 			++jobcounter;
@@ -576,11 +578,17 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
 	);
 
-	// Nonconst to const:
+	// Bundle all the solutions up into containers:
 	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
 	for( Size i(0); i<problems.n_problems(); ++i ) {
-		outvec[i] = outvec_nonconst[i];
+		RealValuedFunctionLocalOptimizationSolutions_APISP cur_solutions( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
+		for( Size j(0); j<solution_storage_temp[i].size(); ++j ) {
+			cur_solutions->add_optimization_solution( solution_storage_temp[i][j] );
+		}
+		outvec[i] = cur_solutions; // Nonconst to const.
 	}
+	outvec.shrink_to_fit();
+
 	return outvec;
 }
 
@@ -597,7 +605,7 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 	masala::base::Size const start_index,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP const & problem,
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APISP & solutions
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
@@ -704,19 +712,16 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		);
 	}
 
-	TODO TODO TODO move all of this to emulate the GrdientDescentFunctionOptimizer;
-	RealValuedFunctionLocalOptimizationSolution_APISP solution_out( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
-	solution_out->set_converged(converged);
-	solution_out->set_iterations( iter + 1 );
-	solution_out->set_problem( problem );
-	solution_out->set_starting_point_and_index( problem->starting_points()[start_index], start_index );
-	solution_out->set_n_times_solution_was_produced(1);
-	solution_out->set_solution_point( pnew );
-	solution_out->set_solution_score( newscore );
-	solution_out->set_solution_score_data_representation_approximation( newscore );
-	solution_out->set_solution_score_solver_approximation( newscore );
-
-	solutions->add_optimization_solution( solution_out );
+	RealValuedFunctionLocalOptimizationSolution_APISP solution( masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >() );
+	solution->set_converged(converged);
+	solution->set_iterations( iter + 1 );
+	solution->set_problem( problem );
+	solution->set_starting_point_and_index( problem->starting_points()[start_index], start_index );
+	solution->set_n_times_solution_was_produced(1);
+	solution->set_solution_point( pnew );
+	solution->set_solution_score( newscore );
+	solution->set_solution_score_data_representation_approximation( newscore );
+	solution->set_solution_score_solver_approximation( newscore );
 }
 
 /// @brief Update the approximation of the inverse of the Hessian matrix.
