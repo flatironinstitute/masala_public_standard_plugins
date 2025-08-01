@@ -98,7 +98,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi-newtonian" }
+	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi_newtonian" }
 	std::vector< std::string >
 	get_keywords() const override;
 
