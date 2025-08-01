@@ -241,6 +241,13 @@ protected:
 	void
 	protected_make_independent() override;
 
+	/// @brief Allow derived classes to access the minimum determinant of the inverse Hessian.
+	inline
+	masala::base::Real
+	protected_min_inv_hessian_determinant() const {
+		return min_inv_hessian_determinant_;
+	}
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
