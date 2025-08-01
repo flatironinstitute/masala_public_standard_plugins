@@ -193,6 +193,7 @@ private:
 	/// @brief Update the approximation of the inverse of the Hessian matrix.
 	/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
 	/// @note Expected to be called from a mutex-locked context.  Must be implemented for derived classes.
+	inline
 	void
 	update_inverse_hessian(
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_old,
@@ -200,7 +201,28 @@ private:
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_old,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
-	) const override;
+	) const override {
+		using masala::base::Real;
+		using Eigen::Vector;
+		using Eigen::Matrix;
+		using Eigen::Dynamic;
+
+		Vector< Real, Dynamic > const p_diff( p_new - p_old );
+		Vector< Real, Dynamic > const grad_diff( grad_new - grad_old );
+		Real const p_diff_dot_grad_diff( p_diff.dot( grad_diff ) );
+
+		Vector< Real, Dynamic > const inv_hessian_old_times_grad_diff( inv_hessian * grad_diff );
+		Real const grad_diff_inv_hess_grad_diff( grad_diff.dot( inv_hessian_old_times_grad_diff ) );
+
+		Vector< Real, Dynamic > const u(
+			p_diff / p_diff_dot_grad_diff
+			- inv_hessian_old_times_grad_diff / grad_diff_inv_hess_grad_diff
+		);
+
+		inv_hessian += ( p_diff * ( p_diff.transpose() ) / ( p_diff_dot_grad_diff ) )
+			- ( inv_hessian_old_times_grad_diff * ( inv_hessian_old_times_grad_diff.transpose() ) / grad_diff_inv_hess_grad_diff )
+			+ grad_diff_inv_hess_grad_diff * u * ( u.transpose() );
+	}
 
 private:
 
