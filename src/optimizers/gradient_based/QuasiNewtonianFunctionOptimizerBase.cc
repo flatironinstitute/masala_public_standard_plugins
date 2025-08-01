@@ -552,11 +552,8 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 
 		Size const nstarts( curproblem->starting_points().size() );
 		for( Size j(0); j<nstarts; ++j ) {
-			PluginLineOptimizerCSP line_optimizer_clone( std::dynamic_pointer_cast< PluginLineOptimizer const >( line_optimizer->deep_clone() ) );
-			CHECK_OR_THROW_FOR_CLASS( line_optimizer_clone != nullptr, "run_real_valued_local_optimizer",
-					"Unable to properly clone the " + line_optimizer->class_name() + " class instance.  This is a "
-					"program error that ought not to happen.  Please consult a developer."
-			);
+			PluginLineOptimizerSP line_optimizer_clone( line_optimizer->clone() );
+			line_optimizer_clone->make_independent();
 
 			work_vector.add_job(
 				std::bind(
@@ -832,10 +829,8 @@ QuasiNewtonianFunctionOptimizerBase::protected_make_independent() {
 
 	// TODO
 	if( line_optimizer_ != nullptr ) {
-		PluginLineOptimizerSP line_opt_copy( std::dynamic_pointer_cast< PluginLineOptimizer >( line_optimizer_->deep_clone() ) );
-		CHECK_OR_THROW_FOR_CLASS( line_opt_copy != nullptr, "protected_make_independent", "Unable to properly deep-clone "
-			+ line_optimizer_->class_name() + " obejct.  This is a program error that ought not to happen.  Please consult a developer."
-		);
+		PluginLineOptimizerSP line_opt_copy( line_optimizer_->clone() );
+		line_opt_copy->make_independent();
 		line_optimizer_ = line_opt_copy;
 	}
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
