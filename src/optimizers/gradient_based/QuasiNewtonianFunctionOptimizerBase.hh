@@ -42,7 +42,7 @@
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
 
 // External headers:
-#include <eigen/Eigen/Core>
+#include <external/eigen/Eigen/Core>
 
 namespace standard_masala_plugins {
 namespace optimizers {
