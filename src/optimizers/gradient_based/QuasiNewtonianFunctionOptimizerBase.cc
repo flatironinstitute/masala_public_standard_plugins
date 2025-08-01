@@ -571,7 +571,7 @@ QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 	}
 
 	// Actually run the work in threads:
-	work_vector.set_n_threads_to_request( threads_to_request() );
+	work_vector.set_n_threads_to_request( protected_threads_to_request() );
 	MasalaThreadedWorkExecutionSummary const execution_summary(
 		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
 	);
