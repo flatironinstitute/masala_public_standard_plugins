@@ -248,6 +248,16 @@ BFGSFunctionOptimizer::get_api_definition() {
 			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
 			api_def->add_setter( set_line_optimizer_setter );
 		}
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_tolerance", "Set the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance_in", "The tolerance to set.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::set_tolerance, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -272,6 +282,16 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"is used by default.",
 				"line_optimizer", "The line optimizer to use for the line searches when performing quasi-Newtonian gradient descent minimization.",
 				false, false, std::bind( &BFGSFunctionOptimizer::line_optimizer, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"tolerance", "Get the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance", "The tolerance for determining whether the search has converged.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::tolerance, this )
 			)
 		);
 

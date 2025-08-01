@@ -193,6 +193,22 @@ QuasiNewtonianFunctionOptimizerBase::set_line_optimizer(
 	}
 }
 
+/// @brief Set the tolerance for determining whether or not we've finished our search.
+/// @details The default is the square root of machine precision (the theoretical lower limit for
+/// any sensible value of tolerance).
+void
+QuasiNewtonianFunctionOptimizerBase::set_tolerance(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
+		"set_tolerance", "The tolerance must be greater than or equal to the square root of machine precision ("
+		+ std::to_string( std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ) )
+		+ ").  Got " + std::to_string( setting ) + "."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	tolerance_ = setting;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GETTER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +228,15 @@ masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOp
 QuasiNewtonianFunctionOptimizerBase::line_optimizer() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return line_optimizer_;
+}
+
+/// @brief Get the tolerance for determining whether or not we've finished our search.
+/// @details The default is the square root of machine precision (the theoretical lower limit for
+/// any sensible value of tolerance).
+masala::base::Real
+QuasiNewtonianFunctionOptimizerBase::tolerance() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return tolerance_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -292,6 +317,16 @@ QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 			set_line_optimizer_setter->add_setter_annotation( set_line_optimizer_setter_annotation );
 			api_def->add_setter( set_line_optimizer_setter );
 		}
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_tolerance", "Set the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance_in", "The tolerance to set.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_tolerance, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -316,6 +351,16 @@ QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 				"is used by default.",
 				"line_optimizer", "The line optimizer to use for the line searches when performing quasi-Newtonian gradient descent minimization.",
 				false, false, std::bind( &QuasiNewtonianFunctionOptimizerBase::line_optimizer, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"tolerance", "Get the tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of tolerance).",
+				"tolerance", "The tolerance for determining whether the search has converged.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::tolerance, this )
 			)
 		);
 
@@ -457,6 +502,8 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 	Eigen::Vector< Real, Eigen::Dynamic > pnew;
 	pnew.resize( p.size() );
 	pnew = p;
+	Eigen::Vector< Real, Eigen::Dynamic > delta_p;
+	delta_p.resize( p.size() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
 	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
 
@@ -478,7 +525,8 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		line_optimizer->run_line_optimizer( compute_fxn, p, curscore, curgrad, -curdirection, pnew, newscore );
 
 		// Test for convergence:
-		if( search_converged( p, pnew ) ) {
+		delta_p = pnew - p;
+		if( search_converged( delta_p, pnew, tolerance_ ) ) {
 			converged = true;
 			break;
 		}
@@ -487,10 +535,10 @@ QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
 		compute_fxn_grad( pnew, newgrad );
 
 		// Test for convergence:
-		if( gradient_converged( newgrad ) ) {
-			converged = true;
-			break;
-		}
+		// if( gradient_converged( newgrad ) ) {
+		// 	converged = true;
+		// 	break;
+		// }
 
 		// Update the inverse Hessian approximation:
 		update_inverse_hessian( p, pnew, curgrad, newgrad, inv_hessian );
@@ -547,6 +595,36 @@ QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
 	MASALA_THROW( class_namespace() + "::" + class_name(), "update_inverse_hessian",
 		"This function must be implemented by derived classes."
 	);
+}
+
+
+/// @brief Determine whether the search has converged, based on the change in coordinates.
+/// @return True for convergence, false otherwise.
+/// @note Static function.
+/*static*/
+bool
+QuasiNewtonianFunctionOptimizerBase::search_converged(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & delta_p,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+	masala::base::Real const tolerance
+) {
+	using masala::base::Real;
+	using masala::base::Size;
+
+	Real biggestval(0.0), curval;
+	Size const ndim( delta_p.size() );
+	DEBUG_MODE_CHECK_OR_THROW( ndim == p_new.size(),
+		class_namespace_static() + "::" + class_name_static(), "search_converged",
+		"Expected delta_p and p_new vectors to be of the same size.  This is a program "
+		"error that ought not to occur.  Please consult a developer."
+	);
+	for( Size i(0); i<ndim; ++i ) {
+		curval = std::abs( delta_p[i] ) / std::max( std::abs( p_new[i] ), 1.0 );
+		if( curval > biggestval ) {
+			biggestval = curval;
+		}
+	}
+	return biggestval < tolerance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

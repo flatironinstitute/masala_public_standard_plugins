@@ -149,6 +149,11 @@ public:
 		masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
 	);
 
+	/// @brief Set the tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	void set_tolerance( masala::base::Real const setting );
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,6 +169,11 @@ public:
 	/// is used by default.
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
 	line_optimizer() const;
+
+	/// @brief Get the tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	masala::base::Real tolerance() const;
 
 public:
 
@@ -247,6 +257,17 @@ private:
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
 	) const;
 
+	/// @brief Determine whether the search has converged, based on the change in coordinates.
+	/// @return True for convergence, false otherwise.
+	/// @note Static function.
+	static
+	bool
+	search_converged(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & delta_p,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		masala::base::Real const tolerance
+	);
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,6 +281,11 @@ private:
 	/// @brief A line optimizer used for the line searches.
 	/// @details If none is provided, a BrentAlgorithmLineOptimizer is used.
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer_;
+
+	/// @brief The tolerance for determining whether or not we've finished our search.
+	/// @details The default is the square root of machine precision (the theoretical lower limit for
+	/// any sensible value of tolerance).
+	masala::base::Real tolerance_ = std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() );
 
 }; // class QuasiNewtonianFunctionOptimizerBase
 
