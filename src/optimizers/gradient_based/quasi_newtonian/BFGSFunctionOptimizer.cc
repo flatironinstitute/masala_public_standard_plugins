@@ -258,6 +258,25 @@ BFGSFunctionOptimizer::get_api_definition() {
 				std::bind( &BFGSFunctionOptimizer::set_tolerance, this, std::placeholders::_1 )
 			)
 		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_gradient_tolerance", "Set the gradient tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of gradient tolerance).",
+				"gradient_tolerance_in", "The gradient tolerance to set.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::set_gradient_tolerance, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< bool > >(
+				"set_throw_if_iterations_exceeded", "Set whether we should throw if "
+				"iteration maximum is exceeded (true), or just warn (false, the default).",
+				"setting", "True if we want to throw if iteration maximum is exceeded, false otherwise.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
+			)
+		);
 
 		// Getters:
 		api_def->add_getter(
@@ -292,6 +311,26 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"tolerance", "The tolerance for determining whether the search has converged.",
 				false, false,
 				std::bind( &BFGSFunctionOptimizer::tolerance, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"gradient_tolerance", "Get the gradient tolerance for determining whether or not we've "
+				"finished our search.  The default is the square root of machine precision "
+				"(the theoretical lower limit for any sensible value of gradient tolerance).",
+				"gradient_tolerance", "The tolerance for determining whether the search has converged.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::gradient_tolerance, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< bool > >(
+				"throw_if_iterations_exceeded", "Get whether we throw if "
+				"iteration maximum is exceeded (true), or just warn (false, the default).",
+				"throw_if_iterations_exceeded", "True if we throw if iteration maximum is "
+				"exceeded, false otherwise.",
+				false, false,
+				std::bind( &BFGSFunctionOptimizer::throw_if_iterations_exceeded, this )
 			)
 		);
 
