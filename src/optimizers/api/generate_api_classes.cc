@@ -44,6 +44,7 @@
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
 #include <optimizers/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh>
 #include <optimizers/gradient_based/quasi_newtonian/BFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/quasi_newtonian/DFPFunctionOptimizer.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
 #include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
@@ -82,6 +83,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
         outvec.emplace_back( masala::make_shared< gradient_based::QuasiNewtonianFunctionOptimizerBase >() );
         outvec.emplace_back( masala::make_shared< gradient_based::quasi_newtonian::BFGSFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::quasi_newtonian::DFPFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::GradientDescentFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_free::SimplexFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );
