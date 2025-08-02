@@ -19,7 +19,7 @@
 /// @file src/numeric_api/base_classes/optimization/gradient_based/BFGSFunctionOptimizer.hh
 /// @brief Headers for the BFGSFunctionOptimizer.
 /// @details The BFGSFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
+/// for which gradients are available using the quasi-Newtonian Broyden-Fletcher-Goldfarb-Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
@@ -48,7 +48,7 @@ namespace gradient_based {
 namespace quasi_newtonian {
 
 /// @brief The BFGSFunctionOptimizer, which carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
+/// for which gradients are available using the quasi-Newtonian Broyden-Fletcher-Goldfarb-Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 class BFGSFunctionOptimizer : public standard_masala_plugins::optimizers::gradient_based::QuasiNewtonianFunctionOptimizerBase {

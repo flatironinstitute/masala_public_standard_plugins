@@ -19,7 +19,7 @@
 /// @file src/numeric_api/base_classes/optimization/gradient_based/BFGSFunctionOptimizer.cc
 /// @brief Implementation of the BFGSFunctionOptimizer.
 /// @details The BFGSFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
+/// for which gradients are available using the quasi-Newtonian Broyden-Fletcher-Goldfarb-Shanno
 /// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
