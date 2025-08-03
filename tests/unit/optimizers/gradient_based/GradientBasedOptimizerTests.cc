@@ -328,7 +328,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the DFPFu
 			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
 				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
-				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
 
 			if( i < 2 ) {
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
@@ -419,7 +420,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the BFGSF
 			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
 				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
-				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
 
 			if( i < 2 ) {
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
@@ -509,7 +511,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
 				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
-				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
 
 			if( i < 2 ) {
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
