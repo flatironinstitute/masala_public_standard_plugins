@@ -265,12 +265,14 @@ private:
 	/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
 	/// in threads.  This function is called from a mutex-locked context.
 	/// @param[in] problem The problem to solve.
+	/// @param[in] problem_index The index of the problem.
 	/// @param[in] starting_point_index The index of the starting point for the problem.
 	/// @param[in] line_optimizer The line optimizer to use when solving this problem.
 	/// @param[out] solutions The solution container into which we will put the solution.
 	void
 	run_real_valued_local_optimizer_on_one_problem(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+		masala::base::Size const problem_index,
 		masala::base::Size const starting_point_index,
 		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution

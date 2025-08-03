@@ -560,6 +560,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 					&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
 					this,
 					curproblem,
+					iproblem,
 					j_starting_point,
 					line_optimizer_copy,
 					std::ref( *solution_storage_temp[iproblem][j_starting_point] )
@@ -594,12 +595,14 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 /// @brief Run a single local optimization problem in a thread.  This function runs in parallel
 /// in threads.  This function is called from a mutex-locked context.
 /// @param[in] problem The problem to solve.
+/// @param[in] problem_index The index of the problem.
 /// @param[in] starting_point_index The index of the starting point for the problem.
 /// @param[in] line_optimizer The line optimizer to use when solving this problem.
 /// @param[out] solutions The solution container into which we will put the solution.
 void
 GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+	masala::base::Size const problem_index,
 	masala::base::Size const starting_point_index,
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
@@ -622,7 +625,7 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	new_x.resize( static_cast< Eigen::Index >( ndims ) );
 	grad_at_x.resize( static_cast< Eigen::Index >( ndims ) );
 	grad_test_vec.resize( static_cast< Eigen::Index >( ndims ) );
-	Real fxn_at_x, new_fxn_at_x;
+	Real fxn_at_x(0.0), new_fxn_at_x(0.0);
 
 	Size iter_counter(0);
 	bool converged(false);
@@ -659,12 +662,23 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem
 	}
 
 	// Message or error on non-convergence:
-	if( throw_if_iterations_exceeded_ ) {
-		CHECK_OR_THROW_FOR_CLASS( converged, "run_real_valued_local_optimizer_on_one_problem", "After " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
-	} else {
-		if( !converged ) {
-			write_to_tracer( "Warning: after " + std::to_string( iter_counter ) + " iterations, the minimization problem has not converged." );
+	if( !converged ) {
+		if( throw_if_iterations_exceeded_ ) {
+			MASALA_THROW( class_namespace_static() + "::" + class_name_static(),
+				"run_real_valued_local_optimizer_on_one_problem", "After " + std::to_string( iter_counter )
+				+ " iterations, the minimization problem has not converged."
+			);
+		} else {
+			write_to_tracer( "Warning: after " + std::to_string( iter_counter ) + " iterations, minimization "
+				"problem " + std::to_string( problem_index ) + ", starting point " + std::to_string( starting_point_index)
+				+ ", has not converged."
+			);
 		}
+	} else {
+		write_to_tracer( "For problem " + std::to_string(problem_index) + ", starting point " + std::to_string( starting_point_index ) + ", the "
+			+ class_name() + "'s search for a local minimum converged in " + std::to_string( iter_counter ) + " iterations.  New function value: " +
+			std::to_string( fxn_at_x ) + "."
+		);
 	}
 
 	// Common to all OptimizationSolution objects:
