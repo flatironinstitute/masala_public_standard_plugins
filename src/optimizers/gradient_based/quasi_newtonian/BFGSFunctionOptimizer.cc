@@ -42,6 +42,7 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 #include <base/managers/engine/MasalaEngineAPI.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
@@ -186,9 +187,12 @@ BFGSFunctionOptimizer::get_api_definition() {
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
+	using namespace masala::base::api::work_function;
 	using namespace masala::base::managers::engine;
 	using masala::base::Size;
 	using masala::base::Real;
+	using namespace masala::numeric_api::auto_generated_api::optimization;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
@@ -353,6 +357,34 @@ BFGSFunctionOptimizer::get_api_definition() {
 				"which we reset the inverse Hessian to the identity matrix.",
 				false, false,
 				std::bind( &BFGSFunctionOptimizer::min_inv_hessian_determinant, this )
+			)
+		);
+
+		// Work functions
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP >, RealValuedFunctionLocalOptimizationProblems_API const & > >(
+				"run_real_valued_local_optimizer", "Run the BFGS optimizer on a set of loss function "
+				"local minimization problems, and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &BFGSFunctionOptimizer::run_real_valued_local_optimizer, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< OptimizationSolutions_APICSP >, OptimizationProblems_API const & > >(
+				"run_optimizer", "Run the BFGS optimizer on a set of loss function local minimization problems, "
+				"and produce a set of solutions.",
+				true, false, true, false,
+				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
+				"a gradient function, and provide at least one starting point.",
+				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
+				"of solutions corresponds to the problem with the same index.  The various solutions in the "
+				"set come from different starting points defined in the problem.",
+				std::bind( &BFGSFunctionOptimizer::run_optimizer, this, std::placeholders::_1 )
 			)
 		);
 
