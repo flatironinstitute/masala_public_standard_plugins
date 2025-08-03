@@ -29,6 +29,8 @@
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
 #include <optimizers_api/auto_generated_api/gradient_based/BrentAlgorithmLineOptimizer_API.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_based/quasi_newtonian/BFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/quasi_newtonian/DFPFunctionOptimizer.hh>
 
 // Registraton headers:
 #include <registration_api/register_library.hh>
@@ -260,6 +262,190 @@ TEST_CASE( "Find the local minimum of a function using the Brent line search alg
 	}
 }
 
+TEST_CASE( "Find the local minimum of a two-dimensional function using the DFPFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::quasi_newtonian::DFPFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][dfp][quasi_newtonian][brent_algorithm][line_optimizer]" ) {
+	using masala::base::Real;
+	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using namespace standard_masala_plugins::optimizers::gradient_based::quasi_newtonian;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_based;
+	using masala::base::managers::tracer::MasalaTracerManager;
+	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+	using masala::base::managers::threads::MasalaThreadManager;
+	using masala::base::managers::threads::MasalaThreadManagerHandle;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+
+	masala::core_api::auto_generated_api::registration::register_core();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+	standard_masala_plugins::registration_api::register_library();
+
+	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+	MasalaThreadManagerHandle threadman( MasalaThreadManager::get_instance() );
+	threadman->set_total_threads(3);
+
+	std::function< Real( Eigen::VectorXd const & ) > const fxn2( std::bind( &test_function_2, std::placeholders::_1, false ) );
+	std::function< Real( Eigen::VectorXd const &, Eigen::VectorXd & ) > const fxn2_grad( std::bind( &grad_test_function_2, std::placeholders::_1, std::placeholders::_2, false ) );
+	std::vector< std::vector< Real > > const initial_points {
+		{ -1.5, 0.1 },
+		{ -0.9, -0.1 },
+		{ 0.9, -0.1 },
+		{ 2.0, 0.1 },
+		{ 0.1, 3.0 },
+		{ -0.1, 1.8 },
+	};
+
+	RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
+
+	REQUIRE_NOTHROW([&](){
+		for( std::vector< Real > const & entry : initial_points ) {
+			Eigen::VectorXd x0;
+			x0.resize(2);
+			x0[0] = entry[0];
+			x0[1] = entry[1];
+
+			RealValuedFunctionLocalOptimizationProblem_APISP curproblem( masala::make_shared< RealValuedFunctionLocalOptimizationProblem_API >() );
+			curproblem->add_starting_point( x0 );
+			curproblem->set_objective_function( fxn2 );
+			curproblem->set_objective_function_gradient( fxn2_grad );
+			curproblem->finalize();
+			curproblems->add_optimization_problem( curproblem );
+		}
+
+		DFPFunctionOptimizer dfp_opt;
+		dfp_opt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer_API >() );
+		dfp_opt.set_throw_if_iterations_exceeded(true);
+		dfp_opt.set_threads_to_request(3);
+		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( dfp_opt.run_real_valued_local_optimizer( *curproblems ) );
+
+		CHECK( cursolutions_vec.size() == initial_points.size() );
+
+		for( masala::base::Size i(0); i<cursolutions_vec.size(); ++i ) {
+			RealValuedFunctionLocalOptimizationSolutions_API const & cursolutions( *cursolutions_vec[i] );
+			CHECK( cursolutions.n_solutions() == 1 );
+			RealValuedFunctionLocalOptimizationSolution_APICSP cursolution( std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationSolution_API const >( cursolutions.solution(0) ) );
+			CHECK( cursolution != nullptr );
+			Eigen::VectorXd const solpt( cursolution->solution_point() );
+			CHECK( solpt.size() == 2 );
+
+			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
+				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
+				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
+
+			if( i < 2 ) {
+				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0116) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.067076) < 2.0e-5 );
+			} else if( i < 4 ) {
+				CHECK( std::abs(solpt[0] - 0.9573) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0989) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 1.114634) < 2.0e-5 );
+			} else {
+				CHECK( std::abs(solpt[0] - 0.0005) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 1.9996) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.5) < 2.0e-2 );
+			}
+		}
+	}() );
+
+	threadman->set_total_threads(1);
+
+	standard_masala_plugins::registration_api::unregister_library();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	masala::core_api::auto_generated_api::registration::unregister_core();
+}
+
+TEST_CASE( "Find the local minimum of a two-dimensional function using the BFGSFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::quasi_newtonian::BFGSFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][bfgs][quasi_newtonian][brent_algorithm][line_optimizer]" ) {
+	using masala::base::Real;
+	using namespace standard_masala_plugins::optimizers::gradient_based;
+	using namespace standard_masala_plugins::optimizers::gradient_based::quasi_newtonian;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::gradient_based;
+	using masala::base::managers::tracer::MasalaTracerManager;
+	using masala::base::managers::tracer::MasalaTracerManagerHandle;
+	using masala::base::managers::threads::MasalaThreadManager;
+	using masala::base::managers::threads::MasalaThreadManagerHandle;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
+
+	masala::core_api::auto_generated_api::registration::register_core();
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+	standard_masala_plugins::registration_api::register_library();
+
+	MasalaTracerManagerHandle tm( MasalaTracerManager::get_instance() );
+	MasalaThreadManagerHandle threadman( MasalaThreadManager::get_instance() );
+	threadman->set_total_threads(3);
+
+	std::function< Real( Eigen::VectorXd const & ) > const fxn2( std::bind( &test_function_2, std::placeholders::_1, false ) );
+	std::function< Real( Eigen::VectorXd const &, Eigen::VectorXd & ) > const fxn2_grad( std::bind( &grad_test_function_2, std::placeholders::_1, std::placeholders::_2, false ) );
+	std::vector< std::vector< Real > > const initial_points {
+		{ -1.5, 0.1 },
+		{ -0.9, -0.1 },
+		{ 0.9, -0.1 },
+		{ 2.0, 0.1 },
+		{ 0.1, 3.0 },
+		{ -0.1, 1.8 },
+	};
+
+	RealValuedFunctionLocalOptimizationProblems_APISP curproblems( masala::make_shared< RealValuedFunctionLocalOptimizationProblems_API >() );
+
+	REQUIRE_NOTHROW([&](){
+		for( std::vector< Real > const & entry : initial_points ) {
+			Eigen::VectorXd x0;
+			x0.resize(2);
+			x0[0] = entry[0];
+			x0[1] = entry[1];
+
+			RealValuedFunctionLocalOptimizationProblem_APISP curproblem( masala::make_shared< RealValuedFunctionLocalOptimizationProblem_API >() );
+			curproblem->add_starting_point( x0 );
+			curproblem->set_objective_function( fxn2 );
+			curproblem->set_objective_function_gradient( fxn2_grad );
+			curproblem->finalize();
+			curproblems->add_optimization_problem( curproblem );
+		}
+
+		BFGSFunctionOptimizer bfgs_opt;
+		bfgs_opt.set_line_optimizer( masala::make_shared< BrentAlgorithmLineOptimizer_API >() );
+		bfgs_opt.set_throw_if_iterations_exceeded(true);
+		bfgs_opt.set_threads_to_request(3);
+		std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > const cursolutions_vec( bfgs_opt.run_real_valued_local_optimizer( *curproblems ) );
+
+		CHECK( cursolutions_vec.size() == initial_points.size() );
+
+		for( masala::base::Size i(0); i<cursolutions_vec.size(); ++i ) {
+			RealValuedFunctionLocalOptimizationSolutions_API const & cursolutions( *cursolutions_vec[i] );
+			CHECK( cursolutions.n_solutions() == 1 );
+			RealValuedFunctionLocalOptimizationSolution_APICSP cursolution( std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationSolution_API const >( cursolutions.solution(0) ) );
+			CHECK( cursolution != nullptr );
+			Eigen::VectorXd const solpt( cursolution->solution_point() );
+			CHECK( solpt.size() == 2 );
+
+			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
+				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
+				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
+
+			if( i < 2 ) {
+				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0116) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.067076) < 2.0e-5 );
+			} else if( i < 4 ) {
+				CHECK( std::abs(solpt[0] - 0.9573) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 0.0989) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 1.114634) < 2.0e-5 );
+			} else {
+				CHECK( std::abs(solpt[0] - 0.0005) < 1.0e-3 );
+				CHECK( std::abs(solpt[1] - 1.9996) < 1.0e-3 );
+				CHECK( std::abs(cursolution->solution_score() + 2.5) < 2.0e-2 );
+			}
+		}
+	}() );
+
+	threadman->set_total_threads(1);
+
+	standard_masala_plugins::registration_api::unregister_library();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+	masala::core_api::auto_generated_api::registration::unregister_core();
+}
+
 TEST_CASE( "Find the local minimum of a two-dimensional function using the GradientDescentFunctionOptimizer and the Brent line search algorithm.", "[standard_masala_plugins::optimizers::gradient_based::GradientDescientFunctionOptimizer][standard_masala_plugins::optimizers::gradient_based::BrentAlgorithmLineOptimizer][local_minimization][gradient_descent][brent_algorithm][line_optimizer]" ) {
 	using masala::base::Real;
 	using namespace standard_masala_plugins::optimizers::gradient_based;
@@ -325,7 +511,8 @@ TEST_CASE( "Find the local minimum of a two-dimensional function using the Gradi
 			tm->write_to_tracer( "standard_masala_plugins::tests::unit::optimizers::gradient_based::UtilityFunctionTests", "Attempt " + std::to_string(i)
 				+ ":\tinitial_point = [" + std::to_string(initial_points[i][0]) + "," + std::to_string(initial_points[i][1])
 				+ "]\tsoln_point = [" + std::to_string(solpt[0]) + "," + std::to_string(solpt[1])
-				+ "]\tf(x) = " + std::to_string(cursolution->solution_score()) );
+				+ "]\titers = " + std::to_string(cursolution->iterations())
+				+ "\tf(x) = " + std::to_string(cursolution->solution_score()) );
 
 			if( i < 2 ) {
 				CHECK( std::abs(solpt[0] + 0.9659) < 1.0e-3 );

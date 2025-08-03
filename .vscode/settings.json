@@ -110,6 +110,7 @@
 		"strstream": "cpp",
 		"source_location": "cpp",
 		"alignedvector3": "cpp",
-		"print": "cpp"
+		"print": "cpp",
+		"core": "cpp"
 	}
 }
