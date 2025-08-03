@@ -196,6 +196,7 @@ private:
 	inline
 	void
 	update_inverse_hessian(
+		masala::base::Size const iter,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec1,
@@ -216,7 +217,7 @@ private:
 			- ( scratchvec1 * ( scratchvec1.transpose() ) / grad_diff_inv_hess_grad_diff );
 
 		if( protected_min_inv_hessian_determinant() > 0.0 && inv_hessian.determinant() < protected_min_inv_hessian_determinant() ) {
-			write_to_tracer( "Singular inverse Hessian approximation detected.  Resetting to identity matrix." );
+			write_to_tracer( "Singular inverse Hessian approximation detected on iteration " + std::to_string(iter) + ".  Resetting to identity matrix." );
 			inv_hessian.setIdentity( inv_hessian.rows(), inv_hessian.cols() );
 		}
 	}

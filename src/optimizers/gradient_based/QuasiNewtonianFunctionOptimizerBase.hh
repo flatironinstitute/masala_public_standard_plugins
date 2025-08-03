@@ -288,6 +288,7 @@ private:
 	virtual
 	void
 	update_inverse_hessian(
+		masala::base::Size const iter,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_diff,
 		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec1,
