@@ -63,8 +63,12 @@ The Standard Masala Plugins are maintained by the Biomolecular Design (BmD) Grou
 
 ## Compilation
 
+To compile, run the `buildme.sh` script.
+
 - Note that default compilation is in release mode.
 - To compile in debug mode, edit cmake/CMakeLists.txt and change `SET( MODE release )` to `SET( MODE debug )`.
+
+The compilation may be deleted completely by running the `delete_build.sh` script.  Note that this is not necessary when small changes to the source code are made: simply re-running `buildme.sh` will recompile and relink only the subset of files that need recompilation or relinking.
 
 ## Building Doxygen code documentation
 
