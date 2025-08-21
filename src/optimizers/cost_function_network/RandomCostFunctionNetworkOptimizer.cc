@@ -403,7 +403,7 @@ RandomCostFunctionNetworkOptimizer::protected_assign(
 void
 RandomCostFunctionNetworkOptimizer::protected_make_independent() {
 	api_description_ = nullptr;
-	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::make_independent();
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_make_independent();
 }
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
