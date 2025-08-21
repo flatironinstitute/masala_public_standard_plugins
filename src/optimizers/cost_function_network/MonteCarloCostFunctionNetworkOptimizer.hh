@@ -108,10 +108,6 @@ public:
 	MonteCarloCostFunctionNetworkOptimizerSP
 	deep_clone() const;
 
-	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
-	void
-	make_independent();
-
 	/// @brief Destructor.
 	~MonteCarloCostFunctionNetworkOptimizer() override = default;
 
@@ -454,6 +450,9 @@ protected:
 
 	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
 	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
+
+	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+	void protected_make_independent() override;
 
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be

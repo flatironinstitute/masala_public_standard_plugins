@@ -164,16 +164,6 @@ MonteCarloCostFunctionNetworkOptimizer::deep_clone() const {
     return new_optimizer;
 }
 
-/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
-void
-MonteCarloCostFunctionNetworkOptimizer::make_independent() {
-    std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
-    if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_ = annealing_schedule_->deep_clone();
-    }
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -1581,6 +1571,16 @@ MonteCarloCostFunctionNetworkOptimizer::protected_assign(
 	
 	solution_storage_mode_ = src_cast_ptr->solution_storage_mode_;
 	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
+}
+
+/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+void
+MonteCarloCostFunctionNetworkOptimizer::protected_make_independent() {
+	api_description_ = nullptr;
+	if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_ = annealing_schedule_->deep_clone();
+    }
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_make_independent();
 }
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
