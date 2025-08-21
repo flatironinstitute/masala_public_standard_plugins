@@ -1578,7 +1578,8 @@ void
 MonteCarloCostFunctionNetworkOptimizer::protected_make_independent() {
 	api_description_ = nullptr;
 	if( annealing_schedule_ != nullptr ) {
-        annealing_schedule_ = annealing_schedule_->deep_clone();
+        annealing_schedule_ = annealing_schedule_->clone();
+        annealing_schedule_->make_independent();
     }
 	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_make_independent();
 }
