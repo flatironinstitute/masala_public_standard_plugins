@@ -104,14 +104,6 @@ RandomCostFunctionNetworkOptimizer::deep_clone() const {
 	return new_optimizer;
 }
 
-/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
-void
-RandomCostFunctionNetworkOptimizer::make_independent() {
-	// std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
-	// GNDN.
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -405,6 +397,13 @@ RandomCostFunctionNetworkOptimizer::protected_assign(
 	attempts_per_problem_ = src_cast_ptr->attempts_per_problem_;
 	
 	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_assign( src );
+}
+
+/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+void
+RandomCostFunctionNetworkOptimizer::protected_make_independent() {
+	api_description_ = nullptr;
+	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer::protected_make_independent();
 }
 
 /// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.

@@ -108,10 +108,6 @@ public:
 	MonteCarloCostFunctionNetworkOptimizerSP
 	deep_clone() const;
 
-	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
-	void
-	make_independent();
-
 	/// @brief Destructor.
 	~MonteCarloCostFunctionNetworkOptimizer() override = default;
 
@@ -341,24 +337,6 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Perform greedy refinement on all solutions found.
-	void
-	carry_out_greedy_refinement(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
-		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
-		MCOptimizerGreedyRefinementMode const greedy_mode
-	) const;
-
-	/// @brief Carry out a single greedy optimization/
-	/// @details This function runs in threads.
-	void
-	do_one_greedy_refinement_in_threads(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
-    	std::vector< masala::base::Size > const & starting_point,
-		masala::base::Size const n_times_seen
-	) const;
-
 	/// @brief Run a single Monte Carlo trajectory.
 	/// @details This function runs in threads.
 	/// @param[in] replicate_index The index of this replicate for this problem.
@@ -392,6 +370,30 @@ private:
 		bool const do_greedy,
 		MCOptimizerGreedyRefinementMode const greedy_mode,
 		std::mutex & solutions_mutex
+	) const;
+
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Perform greedy refinement on all solutions found.
+	void
+	carry_out_greedy_refinement(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
+		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
+		MCOptimizerGreedyRefinementMode const greedy_mode
+	) const;
+
+	/// @brief Carry out a single greedy optimization/
+	/// @details This function runs in threads.
+	void
+	do_one_greedy_refinement_in_threads(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+    	std::vector< masala::base::Size > const & starting_point,
+		masala::base::Size const n_times_seen
 	) const;
 
 	/// @brief Make a Monte Carlo move.
@@ -446,14 +448,11 @@ private:
 		bool const force_store
 	);
 
-protected:
-
-////////////////////////////////////////////////////////////////////////////////
-// PROTECTED FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
-
 	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
 	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
+
+	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+	void protected_make_independent() override;
 
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
