@@ -203,6 +203,16 @@ public:
 		masala::base::Real const penalty
 	) override;
 
+	/// @brief Add to the onebody penalty for a choice at a node.  If no onebody penalty has been
+	/// added, this sets it.
+	/// @details Must be implemented by derived classes.
+	void
+	add_to_onebody_penalty(
+		masala::base::Size const node_index,
+		masala::base::Size const choice_index,
+		masala::base::Real const penalty
+	) override;
+
     /// @brief Set the two-node penalty for a particular pair of choice indices corresponding to a particular
     /// pair of node indices.
     /// @param[in] node_indices A pair of node indices.  The lower index should be first.  (This function will
@@ -361,6 +371,16 @@ private:
 	static
 	void
 	set_entry_in_vector(
+		std::vector< masala::base::Real > & vec,
+		masala::base::Size const index,
+		masala::base::Real const value
+	);
+
+	/// @brief Given a vector with a certain number of entries, add an input value to the value of entry N.  If the
+	/// vector length is less than N+1, extend the vector, padding it with zeros.
+	static
+	void
+	add_to_entry_in_vector(
 		std::vector< masala::base::Real > & vec,
 		masala::base::Size const index,
 		masala::base::Real const value
