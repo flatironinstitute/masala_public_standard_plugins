@@ -230,6 +230,21 @@ public:
         masala::base::Real penalty
     ) override;
 
+	/// @brief Add to the two-node penalty for a particular pair of choice indices corresponding to a particular
+	/// pair of node indices.  If the two-node penalty hasn't been set, this sets it.
+	/// @param[in] node_indices A pair of node indices.  The lower index should be first.  (This function should
+	/// throw if it is not, since it makes the choice indices ambiguous).
+	/// @param[in] choice_indices The corresponding pair of choice indices.  The first entry should be the choice
+	/// index for the lower-numbered node, and the second should be the choice index for the higher-numbered node.
+	/// @param[in] penalty The value to be added to the two-node penalty (or, if negative, bonus).
+	/// @details Must be implemented by derived classes.
+	void
+	add_to_twobody_penalty(
+		std::pair< masala::base::Size, masala::base::Size > const & node_indices,
+		std::pair< masala::base::Size, masala::base::Size > const & choice_indices,
+		masala::base::Real penalty
+	) override;
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -391,6 +406,16 @@ private:
 	static
 	void
 	set_entry_in_matrix(
+		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & mat,
+		std::pair< masala::base::Size, masala::base::Size > const & indices,
+		masala::base::Real const value
+	);
+
+	/// @brief Given a matrix with certain dimensions, add an input value to the value of an entry.  If the matrix
+	/// is too small, resize it appropriately, padding with zeros.
+	static
+	void
+	add_to_entry_in_matrix(
 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & mat,
 		std::pair< masala::base::Size, masala::base::Size > const & indices,
 		masala::base::Real const value
