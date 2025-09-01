@@ -49,8 +49,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 14 ), // Min version
+        std::pair< Size, Size >( 0, 15 ), // Min version
         "",
+        "Version 0.15 added the add_to_onebody_penalty() and add_to_twobody_penalty() functions for pairwise precomputed CFN problems.  "
         "Version 0.14 added the protected_make_independent() function for CFN optimizers.  "
         "Version 0.13 updated some of the CMake files, made the release build the default build, and added support for AVX512 instructions.  "
         "Version 0.12 updated the Masala random generator to ensure that different MPI processes had different random seeds.  "

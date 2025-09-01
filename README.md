@@ -2,7 +2,7 @@
 
 ## Version
 
-The Standard Masala Plugins library is currently version 0.14 (beta release).  The full version 1.0 will be released shortly.
+The Standard Masala Plugins library is currently version 0.15 (beta release).  The full version 1.0 will be released shortly.
 
 ## Description
 
