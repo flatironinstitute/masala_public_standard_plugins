@@ -678,21 +678,40 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 			)
 		);
 		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< Size, Size, Real > >(
+				"add_to_onebody_penalty", "Add to the onebody penalty for a choice at a node.  If no onebody penalty has been "
+				"added, this sets it.",
+				"node_index", "The index of the node for which we're setting a penalty.",
+				"choice_index", "The index of the choice at this node for which we're setting a penalty.",
+				"penalty", "The value to add to the penalty (or, if negative, bonus).", true, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_onebody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
+			)
+		);
+		api_def->add_setter(
 			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size > const &, std::pair< Size, Size > const &, Real > >(
 				"set_twobody_penalty", "Set the two-node penalty for a pair of choices at a pair of nodes.",
-
 				"node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
 				"throw if it is not, since it makes the choice indices ambiguous).",
-
 				"choice_indices", "The corresponding pair of choice indices.  The first entry should be the choice "
 				"index for the lower-numbered node, and the second should be the choice index for the higher-numbered "
 				"node.",
-
 				"penalty", "The value of the penalty (or, if negative, bonus).",
-
 				true, false,
-
 				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size > const &, std::pair< Size, Size > const &, Real > >(
+				"add_to_twobody_penalty", "dd to the two-node penalty for a particular pair of choice indices corresponding to a "
+				"particular pair of node indices.  If the two-node penalty hasn't been set, this sets it.",
+				"node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
+				"throw if it is not, since it makes the choice indices ambiguous).",
+				"choice_indices", "The corresponding pair of choice indices.  The first entry should be the choice "
+				"index for the lower-numbered node, and the second should be the choice index for the higher-numbered "
+				"node.",
+				"penalty", "The value to add to the penalty (or, if negative, bonus).",
+				true, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_twobody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
 			)
 		);
 
