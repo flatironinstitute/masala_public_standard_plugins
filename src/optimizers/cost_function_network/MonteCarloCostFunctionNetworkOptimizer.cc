@@ -702,7 +702,8 @@ MonteCarloCostFunctionNetworkOptimizer::set_annealing_schedule(
 	AnnealingScheduleBase_API const * anneal_sched_ptr( dynamic_cast< AnnealingScheduleBase_API const * >( &schedule_in ) );
 	CHECK_OR_THROW_FOR_CLASS( anneal_sched_ptr != nullptr, "set_annealing_schedule", "The " + schedule_in.inner_class_name() + " object passed to this function was not an AnnealingScheduleBase-derived class." );
 	std::lock_guard< std::mutex > lock( cfn_solver_mutex() );
-	annealing_schedule_ = anneal_sched_ptr->deep_clone();
+	annealing_schedule_ = anneal_sched_ptr->clone();
+    annealing_schedule_->make_independent();
 	annealing_schedule_->set_final_time_index( annealing_steps_per_attempt_ );
 	annealing_schedule_->reset_call_count();
 }
@@ -1141,7 +1142,8 @@ MonteCarloCostFunctionNetworkOptimizer::run_mc_trajectory(
     masala::base::Real const poisson_lambda( -std::log( multimutation_probability_of_one_mutation ) );
 
     // Make a copy of the annealing schedule.
-    AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.deep_clone() );
+    AnnealingScheduleBase_APISP annealing_schedule_copy( annealing_schedule.clone() );
+    annealing_schedule_copy->make_independent();
     annealing_schedule_copy->reset_call_count();
 
     // Store local solutions as a vector of tuples of (solution vector, score, count of times seen)
@@ -1563,9 +1565,10 @@ MonteCarloCostFunctionNetworkOptimizer::protected_assign(
     greedy_refinement_mode_ = src_cast_ptr->greedy_refinement_mode_;
     multimutation_probability_of_one_mutation_ = src_cast_ptr->multimutation_probability_of_one_mutation_;
 
-	annealing_schedule_ = ( src_cast_ptr->annealing_schedule_ == nullptr ? nullptr : src_cast_ptr->annealing_schedule_->deep_clone() );
+	annealing_schedule_ = ( src_cast_ptr->annealing_schedule_ == nullptr ? nullptr : src_cast_ptr->annealing_schedule_->clone() );
 
 	if( annealing_schedule_ != nullptr ) {
+        annealing_schedule_->make_independent();
 		annealing_schedule_->reset_call_count();
 	}
 	

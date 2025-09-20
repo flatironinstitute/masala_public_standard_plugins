@@ -469,6 +469,56 @@ protected:
 	masala::base::managers::engine::MasalaDataRepresentationAPISP
 	protected_get_default_template_preferred_cfn_data_representation() const override;
 
+	/// @brief Allow derived classes to access the API description.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::api::MasalaObjectAPIDefinitionCSP & protected_api_description() { return api_description_; }
+
+	/// @brief Allow derived classes to access the annealing schedule.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP const & protected_annealing_schedule() const { return annealing_schedule_; }
+
+	/// @brief Allow derived classes to access the annealing steps per attempt.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_annealing_steps_per_attempt() const { return annealing_steps_per_attempt_; }
+
+	/// @brief Allow derived classes to access the maximum number of CPU threads to request for parallel execution.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_cpu_threads_to_request() const { return cpu_threads_to_request_; }
+
+	/// @brief Allow derived classes to access the number of times to attempt each problem.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_attempts_per_problem() const { return attempts_per_problem_; }
+
+	/// @brief Allow derived classes to access the number of solutions to store for each problem.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_n_solutions_to_store_per_problem() const { return n_solutions_to_store_per_problem_; }
+
+	/// @brief Allow derived classes to access whether we're using multimutation.
+	/// @details Intended for use only in a mutex-locked context.
+	inline bool protected_use_multimutation() const { return use_multimutation_; }
+
+	/// @brief Allow derived classes to access the probability of one mutation when using multimutation mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Real protected_multimutation_probability_of_one_mutation() const { return multimutation_probability_of_one_mutation_; }
+
+	/// @brief Allow derived classes to access the solution storage mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode protected_solution_storage_mode() const { return solution_storage_mode_; }
+
+	/// @brief If true, we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	/// @details Intended for use only in a mutex-locked context.
+	inline bool protected_do_greedy_refinement() const { return do_greedy_refinement_; }
+
+	/// @brief Allow derived classes to access the greedy refinement mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline MCOptimizerGreedyRefinementMode protected_greedy_refinement_mode() const { return greedy_refinement_mode_; }
+
+	/// @brief Allow derived classes to access the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_recompute_from_scratch_every_n_steps() const{ return recompute_from_scratch_every_n_steps_; }
+
 private:
 
 ////////////////////////////////////////////////////////////////////////////////
