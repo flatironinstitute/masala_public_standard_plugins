@@ -48,7 +48,7 @@ register_library() {
             "Azadvari, Q. Zhu, S.M.B.A. Turzo, P. Hosseinzadeh, P.D.  ",
             "Renfrew, and V.K. Mulligan.  (2025).  The open-source    ",
             "Masala software suite: Facilitating rapid methods        ",
-            "development for synthetic heteropolymer design. \033[4mbioRxiv\033[24m ",
+            "development for synthetic heteropolymer design. \033[4mbioRxiv\033[24m  ",
             "https://doi.org/10.1101/2025.07.02.662756.               ",
             "                                                         "
         },
