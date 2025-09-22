@@ -23,8 +23,8 @@ PROJECT( MasalaStandardPlugins VERSION 1.0 DESCRIPTION "Standard plugins for the
 
 # Default build is release mode.  To build in debug mode (recommeded for development),
 # change the nex tline to SET( MODE debug ).
-#SET( MODE release )
-SET( MODE debug )
+SET( MODE release )
+#SET( MODE debug )
 IF( ${MODE} STREQUAL "release" )
 	SET( CMAKE_BUILD_TYPE Release )
 ELSEIF( ${MODE} STREQUAL "debug" )
