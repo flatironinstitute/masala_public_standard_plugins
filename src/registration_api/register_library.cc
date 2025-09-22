@@ -42,15 +42,15 @@ register_library() {
     );
     tm->add_destruction_message(
         "STANDARD_MASALA_PLUGINS",
-        {  //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            "This run of Masala used the Standard Masala Plugins      ",
-            "library.  This library's citation is: T. Zaborniak, N.   ",
-            "Azadvari, Q. Zhu, S.M.B.A. Turzo, P. Hosseinzadeh, P.D.  ",
-            "Renfrew, and V.K. Mulligan.  (2025).  The open-source    ",
-            "Masala software suite: Facilitating rapid methods        ",
-            "development for synthetic heteropolymer design. \033[4mbioRxiv\033[24m  ",
-            "https://doi.org/10.1101/2025.07.02.662756.               ",
-            "                                                         "
+        {  //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            "This run of Masala used the Standard Masala Plugins    ",
+            "library.  This library's citation is: T. Zaborniak, N. ",
+            "Azadvari, Q. Zhu, S.M.B.A. Turzo, P. Hosseinzadeh, P.D.",
+            "Renfrew, and V.K. Mulligan.  (2025).  The open-source  ",
+            "Masala software suite: Facilitating rapid methods      ",
+            "development for synthetic heteropolymer design. \033[4mbioRxiv\033[24m",
+            "https://doi.org/10.1101/2025.07.02.662756.             ",
+            "                                                       "
         },
         "standard_masala_plugins_citation_message"
     );
