@@ -1,6 +1,6 @@
 \mainpage Standard Masala Plugins
 
-\image html Masala_logo_v3_sm.png width=512px
+\image html Masala_logo_standard_plugins_sm.png width=512px
 
 ## Description
 

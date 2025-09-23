@@ -1,6 +1,6 @@
 # Standard Masala Plugins
 
-![Masala logo](logos/Masala_logo_v3_sm.png)
+![Masala logo](logos/Masala_logo_standard_plugins_sm.png)
 
 ## Version
 
