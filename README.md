@@ -86,7 +86,7 @@ All source code (both manually-written sub-libraries and auto-generated API sub-
 doxygen Doxyfile.src
 ```
 
-(Note that Doxygen must be installed.) Documentation will be addded to the `html_docs/` directory.  Delete this directory to recompile documentation from scratch.
+(Note that Doxygen must be installed.) Documentation will be addded to the `html_docs/` directory.  Delete this directory to recompile documentation from scratch.  Prebuild Doxygen documentation for the current version of the Standard Masala Plugins library may be found at [https://users.flatironinstitute.org/~vmulligan/doxygen/masala_standard_plugins_doxygen/index.html](https://users.flatironinstitute.org/~vmulligan/doxygen/masala_standard_plugins_doxygen/index.html).
 
 ## Licence
 
