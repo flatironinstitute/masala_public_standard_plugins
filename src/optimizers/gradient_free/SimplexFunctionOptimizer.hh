@@ -94,7 +94,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -118,7 +118,7 @@ public:
 	/// a list of hierarchical categories, and the inner vector is the particular hierarchical
 	/// category, from most general to most specific.  Also note that this function is pure
 	/// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "PluginRealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "SimplexFunctionOptimizer"} }
 	std::vector< std::vector < std::string > >
 	get_engine_categories() const override;
 

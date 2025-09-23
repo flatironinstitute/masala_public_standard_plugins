@@ -16,23 +16,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric_api/base_classes/optimization/gradient_based/GradientDescentFunctionOptimizer.cc
-/// @brief Implementation of the GradientDescentFunctionOptimizer.
-/// @details The GradientDescentFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using an iterative approach of computing gradients and carrying out
-/// line searches with a line search algorithm.  This is relatively inefficient compared to quasi-Newtonian
-/// methods like DFP, BFGS, or L-BFGS.
+/// @file src/numeric_api/base_classes/optimization/gradient_based/QuasiNewtonianFunctionOptimizerBase.cc
+/// @brief Implementation of the QuasiNewtonianFunctionOptimizerBase.
+/// @details The QuasiNewtonianFunctionOptimizerBase carries out gradient-descent minimization of an arbitrary function
+/// for which gradients are available using the quasi-Newtonian Broyden–Fletcher–Goldfarb–Shanno
+/// algorithm.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
 // Unit header:
-#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
+#include <optimizers/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh>
 
 // Numeric API headers:
 #include <numeric_api/auto_generated_api/optimization/OptimizationProblems_API.hh>
-#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.hh>
-#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.hh>
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.hh>
 
 // Base headers:
@@ -43,11 +42,10 @@
 #include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 #include <base/api/setter/setter_annotation/OwnedSingleObjectSetterAnnotation.hh>
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
+#include <base/managers/engine/MasalaEngineAPI.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/threads/MasalaThreadedWorkExecutionSummary.hh>
 #include <base/managers/threads/MasalaThreadedWorkRequest.hh>
-#include <base/managers/engine/MasalaEngineAPI.hh>
-#include <base/utility/container/container_util.tmpl.hh> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 // Optimizers headers:
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
@@ -55,7 +53,6 @@
 // STL headers:
 #include <vector>
 #include <string>
-// #include <iostream> // COMMENT ME OUT.  FOR DEBUGGING ONLY.
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -68,15 +65,15 @@ namespace gradient_based {
 /// @brief Clone operation: copy this object and return a shared pointer to the
 /// copy.  Contained objects may still be shared.
 masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizerSP
-GradientDescentFunctionOptimizer::clone() const {
-	return masala::make_shared< GradientDescentFunctionOptimizer >(*this);
+QuasiNewtonianFunctionOptimizerBase::clone() const {
+	return masala::make_shared< QuasiNewtonianFunctionOptimizerBase >(*this);
 }
 
 /// @brief Deep clone operation: copy this object and return a shared pointer to the
 /// copy, making sure that all contained objects are also copied.
-GradientDescentFunctionOptimizerSP
-GradientDescentFunctionOptimizer::deep_clone() const {
-	GradientDescentFunctionOptimizerSP new_obj( std::static_pointer_cast< GradientDescentFunctionOptimizer >( clone() ) );
+QuasiNewtonianFunctionOptimizerBaseSP
+QuasiNewtonianFunctionOptimizerBase::deep_clone() const {
+	QuasiNewtonianFunctionOptimizerBaseSP new_obj( std::static_pointer_cast< QuasiNewtonianFunctionOptimizerBase >( clone() ) );
 	new_obj->make_independent();
 	return new_obj;
 }
@@ -87,30 +84,31 @@ GradientDescentFunctionOptimizer::deep_clone() const {
 
 /// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 /// may be overridden by derived classes.
-/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
+/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" } }
 /// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 /// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 /// in more than one hierarchical category (in which case there would be more than one
 /// entry in the outer vector), but must be in at least one.  The first one is used as
 /// the primary key.
 std::vector< std::vector< std::string > >
-GradientDescentFunctionOptimizer::get_categories() const {
+QuasiNewtonianFunctionOptimizerBase::get_categories() const {
 	return std::vector< std::vector< std::string > > {
-		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" }
+		{ "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" }
 	};
 }
 
 /// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 /// by derived classes.
-/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
+/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi_newtonian" }
 std::vector< std::string >
-GradientDescentFunctionOptimizer::get_keywords() const {
+QuasiNewtonianFunctionOptimizerBase::get_keywords() const {
 	return std::vector< std::string > {
 		"optimizer",
 		"real_valued",
 		"local_optimizer",
         "gradient_based",
-		"numeric"
+		"numeric",
+		"quasi_newtonian"
 	};
 }
 
@@ -123,46 +121,39 @@ GradientDescentFunctionOptimizer::get_keywords() const {
 /// a list of hierarchical categories, and the inner vector is the particular hierarchical
 /// category, from most general to most specific.  Also note that this function is pure
 /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
+/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer"} }
 std::vector< std::vector < std::string > >
-GradientDescentFunctionOptimizer::get_engine_categories() const {
-    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } };
-}
-
-/// @brief Get the keywords that this MasalaEngine has.
-/// @returns  { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
-std::vector< std::string >
-GradientDescentFunctionOptimizer::get_engine_keywords() const {
-	return get_keywords();
+QuasiNewtonianFunctionOptimizerBase::get_engine_categories() const {
+    return std::vector< std::vector < std::string > >{ { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" } };
 }
 
 /// @brief Every class can name itself.
-/// @returns "GradientDescentFunctionOptimizer".
+/// @returns "QuasiNewtonianFunctionOptimizerBase".
 std::string
-GradientDescentFunctionOptimizer::class_name() const {
+QuasiNewtonianFunctionOptimizerBase::class_name() const {
 	return class_name_static();
 }
 
 /// @brief Every class can provide its own namespace.
 /// @returns "standard_masala_plugins::optimizers::gradient_based".
 std::string
-GradientDescentFunctionOptimizer::class_namespace() const {
+QuasiNewtonianFunctionOptimizerBase::class_namespace() const {
 	return class_namespace_static();
 }
 
 /// @brief Every class can name itself.
-/// @returns "GradientDescentFunctionOptimizer".
+/// @returns "QuasiNewtonianFunctionOptimizerBase".
 /*static*/
 std::string
-GradientDescentFunctionOptimizer::class_name_static() {
-	return "GradientDescentFunctionOptimizer";
+QuasiNewtonianFunctionOptimizerBase::class_name_static() {
+	return "QuasiNewtonianFunctionOptimizerBase";
 }
 
 /// @brief Every class can provide its own namespace.
 /// @returns "standard_masala_plugins::optimizers::gradient_based".
 /*static*/
 std::string
-GradientDescentFunctionOptimizer::class_namespace_static() {
+QuasiNewtonianFunctionOptimizerBase::class_namespace_static() {
 	return "standard_masala_plugins::optimizers::gradient_based";
 }
 
@@ -173,7 +164,7 @@ GradientDescentFunctionOptimizer::class_namespace_static() {
 /// @brief Set the maximum number of steps that we can take.
 /// @details A setting of 0 means loop until convergence.
 void
-GradientDescentFunctionOptimizer::set_max_iterations(
+QuasiNewtonianFunctionOptimizerBase::set_max_iterations(
 	masala::base::Size const setting
 ) {
 	std::lock_guard< std::mutex > lock( mutex() );
@@ -184,7 +175,7 @@ GradientDescentFunctionOptimizer::set_max_iterations(
 /// @details Used directly, not cloned.  If none is provided (or if this is set to
 /// nullptr), then a BrentAlgorithmLineOptimizer is used by default.
 void
-GradientDescentFunctionOptimizer::set_line_optimizer(
+QuasiNewtonianFunctionOptimizerBase::set_line_optimizer(
 	masala::base::managers::engine::MasalaEngineAPICSP line_optimizer_in
 ) {
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
@@ -206,7 +197,7 @@ GradientDescentFunctionOptimizer::set_line_optimizer(
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of tolerance).
 void
-GradientDescentFunctionOptimizer::set_tolerance(
+QuasiNewtonianFunctionOptimizerBase::set_tolerance(
 	masala::base::Real const setting
 ) {
 	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
@@ -222,7 +213,7 @@ GradientDescentFunctionOptimizer::set_tolerance(
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of gradient tolerance).
 void
-GradientDescentFunctionOptimizer::set_gradient_tolerance(
+QuasiNewtonianFunctionOptimizerBase::set_gradient_tolerance(
 	masala::base::Real const setting
 ) {
 	CHECK_OR_THROW_FOR_CLASS( setting >= 0.99 * std::sqrt( std::numeric_limits< masala::base::Real >::epsilon() ),
@@ -237,11 +228,26 @@ GradientDescentFunctionOptimizer::set_gradient_tolerance(
 /// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 /// (false, the default).
 void
-GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded(
+QuasiNewtonianFunctionOptimizerBase::set_throw_if_iterations_exceeded(
 	bool const setting
 ) {
 	std::lock_guard< std::mutex > lock( mutex() );
 	throw_if_iterations_exceeded_ = setting;
+}
+
+/// @brief Set the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+/// to the identity matrix.
+/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+/// needs to be adjusted.
+void
+QuasiNewtonianFunctionOptimizerBase::set_min_inv_hessian_determinant(
+	masala::base::Real const setting
+) {
+	CHECK_OR_THROW_FOR_CLASS( setting >= 0.0, "set_min_inv_hessian_determinant",
+		"The minimum inverse Hessian determinant must be non-negative."
+	);
+	std::lock_guard< std::mutex > lock( mutex() );
+	min_inv_hessian_determinant_ = setting;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +257,7 @@ GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded(
 /// @brief Get the maximum number of steps that we can take
 /// @details A setting of 0 means loop until convergence.
 masala::base::Size
-GradientDescentFunctionOptimizer::max_iterations() const {
+QuasiNewtonianFunctionOptimizerBase::max_iterations() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return max_iterations_;
 }
@@ -260,7 +266,7 @@ GradientDescentFunctionOptimizer::max_iterations() const {
 /// @details Could be nullptr, in which case a BrentAlgorithmLineOptimizer
 /// is used by default.
 masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-GradientDescentFunctionOptimizer::line_optimizer() const {
+QuasiNewtonianFunctionOptimizerBase::line_optimizer() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return line_optimizer_;
 }
@@ -269,7 +275,7 @@ GradientDescentFunctionOptimizer::line_optimizer() const {
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of tolerance).
 masala::base::Real
-GradientDescentFunctionOptimizer::tolerance() const {
+QuasiNewtonianFunctionOptimizerBase::tolerance() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return tolerance_;
 }
@@ -278,7 +284,7 @@ GradientDescentFunctionOptimizer::tolerance() const {
 /// @details The default is the square root of machine precision (the theoretical lower limit for
 /// any sensible value of gradient tolerance).
 masala::base::Real
-GradientDescentFunctionOptimizer::gradient_tolerance() const {
+QuasiNewtonianFunctionOptimizerBase::gradient_tolerance() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return gradient_tolerance_;
 }
@@ -286,9 +292,19 @@ GradientDescentFunctionOptimizer::gradient_tolerance() const {
 /// @brief Should we throw if iterations are exceeded (true), or just warn
 /// (false, the default)?
 bool
-GradientDescentFunctionOptimizer::throw_if_iterations_exceeded() const {
+QuasiNewtonianFunctionOptimizerBase::throw_if_iterations_exceeded() const {
 	std::lock_guard< std::mutex > lock( mutex() );
 	return throw_if_iterations_exceeded_;
+}
+
+/// @brief Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+/// to the identity matrix.
+/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+/// needs to be adjusted.
+masala::base::Real
+QuasiNewtonianFunctionOptimizerBase::min_inv_hessian_determinant() const {
+	std::lock_guard< std::mutex > lock( mutex() );
+	return min_inv_hessian_determinant_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,16 +319,12 @@ GradientDescentFunctionOptimizer::throw_if_iterations_exceeded() const {
 /// whether it is safe to use the function pointers.  Not ideal, but better than
 /// nothing.
 masala::base::api::MasalaObjectAPIDefinitionCWP
-GradientDescentFunctionOptimizer::get_api_definition() {
+QuasiNewtonianFunctionOptimizerBase::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::setter;
 	using namespace masala::base::api::setter::setter_annotation;
 	using namespace masala::base::api::getter;
-	using namespace masala::base::api::work_function;
 	using namespace masala::base::managers::engine;
-	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
-	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
-	using namespace masala::numeric_api::auto_generated_api::optimization;
 	using masala::base::Size;
 	using masala::base::Real;
 
@@ -322,21 +334,30 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 		MasalaObjectAPIDefinitionSP api_def(
 			masala::make_shared< MasalaObjectAPIDefinition >(
 				*this,
-				"A gradient-descent function optimizer that uses the Broyden-Fletcher-Goldfarb-Shanno "
-				"algorithm (BFGS), a quasi-Newtonian method that relies only on gradients to approximate the inverse "
-				"Hessian matrix, to carry out gradient descent for a differentiable function in R^N.",
-				false, false
+				"A base class for optimizers that implement quasi-Newtonian methods, such as the DFP, BFGS, or L-BFGS algorithms.  "
+				"This base class is not meant to be instantiated by code beyond the build system.",
+				false, true
 			)
 		);
 		
-		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( GradientDescentFunctionOptimizer, api_def );
+		ADD_PROTECTED_CONSTRUCTOR_DEFINITIONS( QuasiNewtonianFunctionOptimizerBase, api_def );
 
 		// Setters:
 		api_def->add_setter(
 			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
 				"set_max_iterations", "Set the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations_in", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
-				false, false, std::bind( &GradientDescentFunctionOptimizer::set_max_iterations, this, std::placeholders::_1 )
+				false, false, std::bind( &QuasiNewtonianFunctionOptimizerBase::set_max_iterations, this, std::placeholders::_1 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
+				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				"setting", "The number of threads to request.  Different starting points of the same problem or "
+				"different starting points of different problems can be carried out simultaneously in threads.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_threads_to_request, this, std::placeholders::_1 )
 			)
 		);
 		{
@@ -345,8 +366,8 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 					"set_line_optimizer", "Set a line optimizer to use for the line searches.  Used directly, "
 					"not cloned.  If none is provided (or if this is set to nullptr), then a BrentAlgorithmLineOptimizer "
 					"is used by default.  Throws if the MasalaEngine provided cannot be interpreted as a MasalaPluginLineOptimizer.",
-					"line_optimizer_in", "The line optimizer to use when performing gradient-descent minimization.",
-					false, false, std::bind( &GradientDescentFunctionOptimizer::set_line_optimizer, this, std::placeholders::_1 )
+					"line_optimizer_in", "The line optimizer to use when performing quasi-Newtonian gradient-descent minimization.",
+					false, false, std::bind( &QuasiNewtonianFunctionOptimizerBase::set_line_optimizer, this, std::placeholders::_1 )
 				)
 			);
 			OwnedSingleObjectSetterAnnotationSP set_line_optimizer_setter_annotation( masala::make_shared< OwnedSingleObjectSetterAnnotation >() );
@@ -371,7 +392,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"(the theoretical lower limit for any sensible value of tolerance).",
 				"tolerance_in", "The tolerance to set.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::set_tolerance, this, std::placeholders::_1 )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_tolerance, this, std::placeholders::_1 )
 			)
 		);
 		api_def->add_setter(
@@ -381,7 +402,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"(the theoretical lower limit for any sensible value of gradient tolerance).",
 				"gradient_tolerance_in", "The gradient tolerance to set.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::set_gradient_tolerance, this, std::placeholders::_1 )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_gradient_tolerance, this, std::placeholders::_1 )
 			)
 		);
 		api_def->add_setter(
@@ -390,17 +411,18 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"iteration maximum is exceeded (true), or just warn (false, the default).",
 				"setting", "True if we want to throw if iteration maximum is exceeded, false otherwise.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_throw_if_iterations_exceeded, this, std::placeholders::_1 )
 			)
 		);
 		api_def->add_setter(
-			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Size > >(
-				"set_threads_to_request", "Set the number of threads requested by this optimizer.  The actual number "
-				"may be smaller if there is less work to do, or if there are fewer threads available.",
-				"setting", "The number of threads to request.  Different starting points of the same problem or "
-				"different starting points of different problems can be carried out simultaneously in threads.",
+			masala::make_shared< MasalaObjectAPISetterDefinition_OneInput< Real > >(
+				"set_min_inv_hessian_determinant", "Set the minimum absolute value of the determinant of the approximate inverse "
+				"Hessian matrix, below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the "
+				"Hessian becomes singular.  The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::set_threads_to_request, this, std::placeholders::_1 )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::set_min_inv_hessian_determinant, this, std::placeholders::_1 )
 			)
 		);
 
@@ -409,15 +431,24 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
 				"max_iterations", "Get the maximum number of steps that we can take.  A setting of 0 means loop until convergence.",
 				"max_iterations", "The maximum number of iterations for the quasi-Newton gradient descent search for a local minimum.",
-				false, false, std::bind( &GradientDescentFunctionOptimizer::max_iterations, this )
+				false, false, std::bind( &QuasiNewtonianFunctionOptimizerBase::max_iterations, this )
 			)
 		);
 		api_def->add_getter(
-			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< PluginLineOptimizerCSP > >(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
+				"threads_to_request", "Get the number of threads requested by this optimizer.",
+				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
+				"may be smaller if there is less work to do, or if there are fewer threads available.",
+				false, false,
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::threads_to_request, this )
+			)
+		);
+		api_def->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP > >(
 				"line_optimizer", "Get the line optimizer to use for the line searches.  If this is nullptr, then a BrentAlgorithmLineOptimizer "
 				"is used by default.",
-				"line_optimizer", "The line optimizer to use for the line searches.",
-				false, false, std::bind( &GradientDescentFunctionOptimizer::line_optimizer, this )
+				"line_optimizer", "The line optimizer to use for the line searches when performing quasi-Newtonian gradient descent minimization.",
+				false, false, std::bind( &QuasiNewtonianFunctionOptimizerBase::line_optimizer, this )
 			)
 		);
 		api_def->add_getter(
@@ -427,7 +458,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"(the theoretical lower limit for any sensible value of tolerance).",
 				"tolerance", "The tolerance for determining whether the search has converged.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::tolerance, this )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::tolerance, this )
 			)
 		);
 		api_def->add_getter(
@@ -437,7 +468,7 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"(the theoretical lower limit for any sensible value of gradient tolerance).",
 				"gradient_tolerance", "The tolerance for determining whether the search has converged.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::gradient_tolerance, this )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::gradient_tolerance, this )
 			)
 		);
 		api_def->add_getter(
@@ -447,44 +478,18 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 				"throw_if_iterations_exceeded", "True if we throw if iteration maximum is "
 				"exceeded, false otherwise.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::throw_if_iterations_exceeded, this )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::throw_if_iterations_exceeded, this )
 			)
 		);
 		api_def->add_getter(
-			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Size > >(
-				"threads_to_request", "Get the number of threads requested by this optimizer.",
-				"threads_to_request", "The number of threads requested by this optimizer.  The actual number "
-				"may be smaller if there is less work to do, or if there are fewer threads available.",
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< Real > >(
+				"min_inv_hessian_determinant", "Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, "
+				"below which we reset the Hessian to the identity matrix.  Quasi-Newtonian methods fail if the Hessian becomes singular.  "
+				"The default value is 4 times machine precision, and rarely needs to be adjusted.",
+				"min_inv_hessian_determinant", "The minimum value for the determinant of the approximation of the inverse Hessian, below "
+				"which we reset the inverse Hessian to the identity matrix.",
 				false, false,
-				std::bind( &GradientDescentFunctionOptimizer::threads_to_request, this )
-			)
-		);
-
-		// Work functions
-		api_def->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP >, RealValuedFunctionLocalOptimizationProblems_API const & > >(
-				"run_real_valued_local_optimizer", "Run the optimizer on a set of loss function "
-				"local minimization problems, and produce a set of solutions.",
-				true, false, true, false,
-				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
-				"a gradient function, and provide at least one starting point.",
-				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
-				"of solutions corresponds to the problem with the same index.  The various solutions in the "
-				"set come from different starting points defined in the problem.",
-				std::bind( &GradientDescentFunctionOptimizer::run_real_valued_local_optimizer, this, std::placeholders::_1 )
-			)
-		);
-		api_def->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< std::vector< OptimizationSolutions_APICSP >, OptimizationProblems_API const & > >(
-				"run_optimizer", "Run the optimizer on a set of loss function local minimization problems, "
-				"and produce a set of solutions.",
-				true, false, true, false,
-				"problems", "A set of local optimization problems to solve.  Each must implement a loss function and "
-				"a gradient function, and provide at least one starting point.",
-				"solutions_vector", "A vector of solutions objects.  Each solutions set in the vector "
-				"of solutions corresponds to the problem with the same index.  The various solutions in the "
-				"set come from different starting points defined in the problem.",
-				std::bind( &GradientDescentFunctionOptimizer::run_optimizer, this, std::placeholders::_1 )
+				std::bind( &QuasiNewtonianFunctionOptimizerBase::min_inv_hessian_determinant, this )
 			)
 		);
 
@@ -502,84 +507,83 @@ GradientDescentFunctionOptimizer::get_api_definition() {
 /// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
 /// the problem with the same index.
 std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
-GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
+QuasiNewtonianFunctionOptimizerBase::run_real_valued_local_optimizer(
 	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
 ) const {
-	using masala::base::Size;
-	using masala::base::Real;
 	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
-	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
 	using namespace masala::base::managers::threads;
+	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+	using masala::base::Size;
 
 	std::lock_guard< std::mutex > lock( mutex() );
 
-
 	PluginLineOptimizerCSP line_optimizer(
 		line_optimizer_ == nullptr ?
-		generate_brent_optimizer() :
+		masala::make_shared< BrentAlgorithmLineOptimizer >() :
 		line_optimizer_
 	);
 
-	MasalaThreadedWorkRequest work_vector( protected_threads_to_request() );
-	Size const nproblems( problems.n_problems() );
-	work_vector.reserve( nproblems );
+	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > outvec_nonconst( problems.n_problems() );
 
-	// Temporary storage of solutions, indexed by (problem, starting point):
-	std::vector< std::vector< RealValuedFunctionLocalOptimizationSolution_APISP > > solution_storage_temp( nproblems );
-
-	for( Size iproblem(0); iproblem < nproblems; ++iproblem ) {
+	MasalaThreadedWorkRequest work_vector;
+	Size jobcounter(0);
+	for( Size i(0); i<problems.n_problems(); ++i ) {
 		RealValuedFunctionLocalOptimizationProblem_APICSP curproblem(
-			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(iproblem) )
+			std::dynamic_pointer_cast< RealValuedFunctionLocalOptimizationProblem_API const >( problems.problem(i) )
 		);
 		CHECK_OR_THROW_FOR_CLASS( curproblem != nullptr, "run_real_valued_local_optimizer",
-			"Could not interpret problem " + std::to_string( iproblem + 1 )
-			+ " as a RealValuedFunctionLocalOptimizationProblem.  Problem type was "
-			+ problems.problem(iproblem)->inner_class_name() + "."
+			"Could not interpret problem " + std::to_string(i) + " (of type " + problems.problem(i)->inner_class_name() +
+			") as a RealValuedFunctionLocalOptimizationProblem."
 		);
 		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function(), "run_real_valued_local_optimizer",
-			"The " + class_name() + " requires that every problem have an objective function defined.  No "
-			"real-valued objective function was found for problem " + std::to_string(iproblem + 1) + "."
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not implement an objective function."
 		);
 		CHECK_OR_THROW_FOR_CLASS( curproblem->has_objective_function_gradient(), "run_real_valued_local_optimizer",
-			"The " + class_name() + " requires that every problem have an objective function gradient defined.  No "
-			"gradient function was found for problem " + std::to_string(iproblem + 1) + "."
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not implement an objective function gradient."
+		);
+		CHECK_OR_THROW_FOR_CLASS( curproblem->has_at_least_one_starting_point(), "run_real_valued_local_optimizer",
+			"Problem " + std::to_string(i) + " (of type " + curproblem->inner_class_name() +
+			") does not have at least one starting point."
 		);
 
-		Size const n_starting_points( curproblem->starting_points().size() );
-		solution_storage_temp[iproblem].resize( n_starting_points );
+		Size const nstarts( curproblem->starting_points().size() );
+		outvec_nonconst[i].resize(nstarts);
 
-		for( Size j_starting_point(0); j_starting_point < n_starting_points; ++j_starting_point ) {
+		for( Size j(0); j<nstarts; ++j ) {
+			PluginLineOptimizerSP line_optimizer_clone( line_optimizer->clone() );
+			line_optimizer_clone->make_independent();
 
-			solution_storage_temp[iproblem][j_starting_point] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >(); // Do all the heap-locking and allocation up front, before multi-threading.
-			solution_storage_temp[iproblem][j_starting_point]->set_problem( curproblem );
+			outvec_nonconst[i][j] = masala::make_shared< RealValuedFunctionLocalOptimizationSolution_API >();
 
-			PluginLineOptimizerSP line_optimizer_copy( line_optimizer->clone() );
-			line_optimizer_copy->make_independent();
 			work_vector.add_job(
 				std::bind(
-					&GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem,
+					&QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads,
 					this,
+					jobcounter,
+					i, j,
 					curproblem,
-					iproblem,
-					j_starting_point,
-					line_optimizer_copy,
-					std::ref( *solution_storage_temp[iproblem][j_starting_point] )
+					line_optimizer_clone,
+					std::ref(outvec_nonconst[i][j])
 				)
 			);
+			++jobcounter;
 		}
 	}
 
-	MasalaThreadedWorkExecutionSummary const work_summary(
+	// Actually run the work in threads:
+	work_vector.set_n_threads_to_request( protected_threads_to_request() );
+	MasalaThreadedWorkExecutionSummary const execution_summary(
 		MasalaThreadManager::get_instance()->do_work_in_threads( work_vector )
 	);
-	work_summary.write_summary_to_tracer();
 
 	// Bundle all the solutions up into containers:
-	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( nproblems );
-	for( Size i(0); i<nproblems; ++i ) {
+	std::vector< RealValuedFunctionLocalOptimizationSolutions_APICSP > outvec( problems.n_problems() );
+	for( Size i(0); i<problems.n_problems(); ++i ) {
 		RealValuedFunctionLocalOptimizationSolutions_APISP cur_solutions( masala::make_shared< RealValuedFunctionLocalOptimizationSolutions_API >() );
-		for( Size j(0); j<solution_storage_temp[i].size(); ++j ) {
-			cur_solutions->add_optimization_solution( solution_storage_temp[i][j] );
+		for( Size j(0); j<outvec_nonconst[i].size(); ++j ) {
+			cur_solutions->add_optimization_solution( outvec_nonconst[i][j] );
 		}
 		outvec[i] = cur_solutions; // Nonconst to const.
 	}
@@ -592,114 +596,211 @@ GradientDescentFunctionOptimizer::run_real_valued_local_optimizer(
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
-/// in threads.  This function is called from a mutex-locked context.
-/// @param[in] problem The problem to solve.
-/// @param[in] problem_index The index of the problem.
-/// @param[in] starting_point_index The index of the starting point for the problem.
-/// @param[in] line_optimizer The line optimizer to use when solving this problem.
-/// @param[out] solutions The solution container into which we will put the solution.
+/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
+/// @details This function executes in threads.  Expected to be called from a mutex-locked context.
 void
-GradientDescentFunctionOptimizer::run_real_valued_local_optimizer_on_one_problem(
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+QuasiNewtonianFunctionOptimizerBase::run_one_job_in_threads(
+	masala::base::Size const job_index,
 	masala::base::Size const problem_index,
-	masala::base::Size const starting_point_index,
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
+	masala::base::Size const start_index,
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
+	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
 ) const {
 	using masala::base::Size;
 	using masala::base::Real;
+	using namespace masala::numeric_api::auto_generated_api::optimization::real_valued_local;
 
-	Real const small_epsilon( std::numeric_limits< Real >::epsilon() * 1.0e-3 );
+	// Redundant checks:
+	CHECK_OR_THROW_FOR_CLASS( problem->has_objective_function(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not implement an objective function."
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem->has_objective_function_gradient(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not implement an objective function gradient."
+	);
+	CHECK_OR_THROW_FOR_CLASS( problem->has_at_least_one_starting_point(), "run_one_job_in_threads",
+		"Problem " + std::to_string(problem_index) + " (of type " + problem->inner_class_name() +
+		") does not have at least one starting point."
+	);
+	CHECK_OR_THROW_FOR_CLASS( line_optimizer != nullptr, "run_one_job_in_threads",
+		"Got a null pointer for the line optimizer.  This is a program error that ought not to happen.  "
+		"Please consult a developer."
+	);
 
-	masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_API const & prob( *problem );
-
-	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > const & fxn( prob.objective_function() );
-	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > const & fxn_grad( prob.objective_function_gradient() );
-
-	Eigen::Vector< Real, Eigen::Dynamic > x( prob.starting_points()[starting_point_index] );
-	// std::cout << "Iteration 0: x=[" << masala::base::utility::container::container_to_string( x, "," ) << "], f(x)=" << fxn(x) << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
-
-	Eigen::Vector< Real, Eigen::Dynamic > grad_at_x, grad_test_vec, new_x;
-	Size const ndims( static_cast< Size >( x.size() ) ); // Number of dimensions
-	new_x.resize( static_cast< Eigen::Index >( ndims ) );
-	grad_at_x.resize( static_cast< Eigen::Index >( ndims ) );
-	grad_test_vec.resize( static_cast< Eigen::Index >( ndims ) );
-	Real fxn_at_x(0.0), new_fxn_at_x(0.0);
-
-	Size iter_counter(0);
 	bool converged(false);
-	while( max_iterations_ == 0 ? true : iter_counter < max_iterations_ ) {
-		++iter_counter;
-		fxn_at_x = fxn_grad( x, grad_at_x ); // Evaluate the function and its gradient.
 
-		// Test for zero gradient:
-		for( Size i(0); i<ndims; ++i ) {
-			grad_test_vec[i] = std::abs( grad_at_x[i] ) * std::max( std::abs(x[i]), 1.0 );
-		}
-		if( grad_test_vec.maxCoeff() / std::max( fxn_at_x, 1.0 ) < gradient_tolerance_ ) {
+	Size iter(0);
+	Eigen::Vector< Real, Eigen::Dynamic > p( problem->starting_points()[start_index] ), pnew, delta_p;
+	pnew.resize( p.size() );
+	pnew = p;
+	delta_p.resize( p.size() );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const & ) > compute_fxn( problem->objective_function() );
+	std::function< Real( Eigen::Vector< Real, Eigen::Dynamic > const &, Eigen::Vector< Real, Eigen::Dynamic > & ) > compute_fxn_grad( problem->objective_function_gradient() );
+
+	Real curscore( compute_fxn(p) );
+	Real newscore( curscore );
+	Eigen::Vector< Real, Eigen::Dynamic > curgrad, newgrad, delta_grad, scratchvec1, scratchvec2, curdirection;
+	curgrad.resize( p.size() );
+	newgrad.resize( p.size() );
+	delta_grad.resize( p.size() );
+	scratchvec1.resize( p.size() );
+	scratchvec2.resize( p.size() );
+	curdirection.resize( p.size() );
+	compute_fxn_grad( p, curgrad );
+	curdirection = curgrad;
+
+	Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > inv_hessian;
+	inv_hessian.setIdentity( p.size(), p.size() );
+
+	while( max_iterations_ == 0 || iter < max_iterations_ ) {
+
+		// Run the line optimizer along the current direction (the gradient modified by the approximation of the inverse Hessian):
+		line_optimizer->run_line_optimizer( compute_fxn, p, curscore, curgrad, -curdirection, pnew, newscore );
+
+		// Test for convergence:
+		delta_p = pnew - p;
+		if( search_converged( delta_p, pnew, tolerance_ ) ) {
 			converged = true;
 			break;
 		}
 
-		// Run the line optimizer along the (inverse) gradient direction:
-		line_optimizer->run_line_optimizer(
-			fxn, x, fxn_at_x, grad_at_x, -grad_at_x, new_x, new_fxn_at_x
-		);
+		// Compute the new gradient:
+		compute_fxn_grad( pnew, newgrad );
+		delta_grad = newgrad - curgrad;
 
-		// std::cout << "Iteration " << iter_counter << ": x=[" << masala::base::utility::container::container_to_string( new_x, "," ) << "], f(x)=" << new_fxn_at_x << std::endl; // COMMENT ME OUT.  FOR DEBUGGING ONLY.
-
-		// Test whether the function has not been reduced:
-		if ( 2.0 * std::abs( new_fxn_at_x - fxn_at_x ) <= tolerance_ * ( std::abs( new_fxn_at_x ) + std::abs( fxn_at_x ) + small_epsilon ) ) {
-			std::swap( x, new_x );
-			fxn_at_x = new_fxn_at_x;
+		// Test for convergence:
+		if( gradient_converged( pnew, newgrad, gradient_tolerance_, curscore ) ) {
 			converged = true;
 			break;
 		}
 
-		// Update the current point.
-		std::swap( x, new_x );
+		// Update the inverse Hessian approximation:
+		update_inverse_hessian( iter, delta_p, delta_grad, scratchvec1, scratchvec2, inv_hessian );
+
+		// Update the search direction:
+		curdirection = inv_hessian * newgrad;
+
+		// Update the current position and gradient:
+		p = pnew;
+		curgrad = newgrad;
+		curscore = newscore;
+
+		// Increment the iteration:
+		++iter;
 	}
 
-	// Message or error on non-convergence:
 	if( !converged ) {
 		if( throw_if_iterations_exceeded_ ) {
-			MASALA_THROW( class_namespace_static() + "::" + class_name_static(),
-				"run_real_valued_local_optimizer_on_one_problem", "After " + std::to_string( iter_counter )
-				+ " iterations, the minimization problem has not converged."
+			MASALA_THROW( class_namespace() + "::" + class_name(), "run_one_job_in_threads",
+				"The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
+				+ std::to_string(job_index) + " (problem " + std::to_string(problem_index)
+				+ ", starting point " + std::to_string(start_index)
+				+ ")" + " were exhausted, but the function did not converge!"
 			);
 		} else {
-			write_to_tracer( "Warning: after " + std::to_string( iter_counter ) + " iterations, minimization "
-				"problem " + std::to_string( problem_index ) + ", starting point " + std::to_string( starting_point_index)
-				+ ", has not converged."
+			write_to_tracer( "Warning!  The maximum iterations (" +  std::to_string(max_iterations_) + ") for job "
+				+ std::to_string(job_index) + " (problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index)
+				+ ")" + " were exhausted, but the function did not converge!"
 			);
 		}
 	} else {
-		write_to_tracer( "For problem " + std::to_string(problem_index) + ", starting point " + std::to_string( starting_point_index ) + ", the "
-			+ class_name() + "'s search for a local minimum converged in " + std::to_string( iter_counter ) + " iterations.  New function value: " +
-			std::to_string( fxn_at_x ) + "."
+		write_to_tracer( "For problem " + std::to_string(problem_index) + ", starting point " + std::to_string(start_index) + ", the "
+			+ class_name() + "'s search for a local minimum converged in " + std::to_string( iter+1 ) + " iterations.  New function value: " +
+			std::to_string( newscore ) + "."
 		);
 	}
 
-	// Common to all OptimizationSolution objects:
-	solution.set_solution_score( fxn_at_x );
-	solution.set_solution_score_data_representation_approximation( fxn_at_x );
-	solution.set_solution_score_solver_approximation( fxn_at_x );
-	solution.set_n_times_solution_was_produced( 1 );
-
-	// Specific to RealValuedFunctionLocalOptimizationSolution:
-	solution.set_starting_point_and_index( prob.starting_points()[starting_point_index], starting_point_index );
-	solution.set_solution_point( x );
-	solution.set_converged( converged );
-	solution.set_iterations( iter_counter );
+	solution->set_converged(converged);
+	solution->set_iterations( iter + 1 );
+	solution->set_problem( problem );
+	solution->set_starting_point_and_index( problem->starting_points()[start_index], start_index );
+	solution->set_n_times_solution_was_produced(1);
+	solution->set_solution_point( pnew );
+	solution->set_solution_score( newscore );
+	solution->set_solution_score_data_representation_approximation( newscore );
+	solution->set_solution_score_solver_approximation( newscore );
 }
 
-/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
-	return masala::make_shared< BrentAlgorithmLineOptimizer >();
+/// @brief Update the approximation of the inverse of the Hessian matrix.
+/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
+/// @note Expected to be called from a mutex-locked context.  Must be implemented by derived classes.
+void
+QuasiNewtonianFunctionOptimizerBase::update_inverse_hessian(
+	masala::base::Size const ,//iter,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//p_diff,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & ,//grad_diff,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & ,//scratchvec1,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > & ,//scratchvec2,
+	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & //inv_hessian
+) const {
+	MASALA_THROW( class_namespace() + "::" + class_name(), "update_inverse_hessian",
+		"This function must be implemented by derived classes."
+	);
 }
 
+
+/// @brief Determine whether the search has converged, based on the change in coordinates.
+/// @return True for convergence, false otherwise.
+/// @note Static function.
+/*static*/
+bool
+QuasiNewtonianFunctionOptimizerBase::search_converged(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & delta_p,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+	masala::base::Real const tolerance
+) {
+	using masala::base::Real;
+	using masala::base::Size;
+
+	Real biggestval(0.0), curval;
+	Size const ndim( static_cast< Size >( delta_p.size() ) );
+	DEBUG_MODE_CHECK_OR_THROW( ndim == static_cast< Size >( p_new.size() ),
+		class_namespace_static() + "::" + class_name_static(), "search_converged",
+		"Expected delta_p and p_new vectors to be of the same size.  This is a program "
+		"error that ought not to occur.  Please consult a developer."
+	);
+	for( Size i(0); i<ndim; ++i ) {
+		curval = std::abs( delta_p[i] ) / std::max( std::abs( p_new[i] ), 1.0 );
+		if( curval > biggestval ) {
+			biggestval = curval;
+		}
+	}
+	return biggestval < tolerance;
+}
+
+/// @brief Determine whether the search has converged, based on the change in gradient.
+/// @return True for convergence, false otherwise.
+/// @note Static function.
+/*static*/
+bool
+QuasiNewtonianFunctionOptimizerBase::gradient_converged(
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+	Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+	masala::base::Real const grad_tolerance,
+	masala::base::Real const curscore
+) {
+	using masala::base::Real;
+	using masala::base::Size;
+
+	Real biggestval(0.0), curval;
+	Real const abscurscore( std::max( std::abs( curscore ), 1.0 ) );
+	Size const ndim( static_cast< Size >( p_new.size() ) );
+	DEBUG_MODE_CHECK_OR_THROW( ndim == static_cast< Size >( grad_new.size() ),
+		class_namespace_static() + "::" + class_name_static(), "gradient_converged",
+		"Expected delta_grad and grad_new vectors to be of the same size.  This is a program "
+		"error that ought not to occur.  Please consult a developer."
+	);
+	for( Size i(0); i<ndim; ++i ) {
+		curval = std::abs( grad_new[i] ) * std::max( std::abs( p_new[i] ), 1.0 ) / abscurscore;
+		if( curval > biggestval ) {
+			biggestval = curval;
+		}
+	}
+
+	return biggestval < grad_tolerance;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
@@ -709,14 +810,18 @@ GradientDescentFunctionOptimizer::generate_brent_optimizer() const {
 /// class protected_assign().
 /// @details Performs no mutex locking.
 void
-GradientDescentFunctionOptimizer::protected_assign(
+QuasiNewtonianFunctionOptimizerBase::protected_assign(
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer const & src
 ) {
-	GradientDescentFunctionOptimizer const * src_ptr_cast( dynamic_cast< GradientDescentFunctionOptimizer const * >( &src ) );
+	QuasiNewtonianFunctionOptimizerBase const * src_ptr_cast( dynamic_cast< QuasiNewtonianFunctionOptimizerBase const * >( &src ) );
 	CHECK_OR_THROW_FOR_CLASS( src_ptr_cast != nullptr, "protected_assign", "Cannot assign an object of type " + src.class_name() + " to an object of type " + class_name() + "." );
 
 	max_iterations_ = src_ptr_cast->max_iterations_;
 	line_optimizer_ = src_ptr_cast->line_optimizer_;
+	tolerance_ = src_ptr_cast->tolerance_;
+	gradient_tolerance_ = src_ptr_cast->gradient_tolerance_;
+	throw_if_iterations_exceeded_ = src_ptr_cast->throw_if_iterations_exceeded_;
+	min_inv_hessian_determinant_ = src_ptr_cast->min_inv_hessian_determinant_;
 
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_assign( src );
 }
@@ -725,12 +830,14 @@ GradientDescentFunctionOptimizer::protected_assign(
 /// class protected_make_independent().
 /// @details Performs no mutex locking.
 void
-GradientDescentFunctionOptimizer::protected_make_independent() {
+QuasiNewtonianFunctionOptimizerBase::protected_make_independent() {
 	using namespace masala::numeric_api::base_classes::optimization::real_valued_local;
+
+	// TODO
 	if( line_optimizer_ != nullptr ) {
-		PluginLineOptimizerSP line_optimizer_copy( line_optimizer_->clone() );
-		line_optimizer_copy->make_independent();
-		line_optimizer_ = line_optimizer_copy;
+		PluginLineOptimizerSP line_opt_copy( line_optimizer_->clone() );
+		line_opt_copy->make_independent();
+		line_optimizer_ = line_opt_copy;
 	}
 	masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer::protected_make_independent();
 }

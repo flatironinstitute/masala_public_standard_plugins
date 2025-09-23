@@ -31,6 +31,7 @@
 #include <optimizers/annealing/LogarithmicAnnealingSchedule.hh>
 #include <optimizers/annealing/LogarithmicRepeatAnnealingSchedule.hh>
 #include <optimizers/cost_function_network/MonteCarloCostFunctionNetworkOptimizer.hh>
+#include <optimizers/cost_function_network/RandomCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/GreedyCostFunctionNetworkOptimizer.hh>
 #include <optimizers/cost_function_network/PairwisePrecomputedCostFunctionNetworkOptimizationProblem.hh>
 #include <optimizers/cost_function_network/cost_function/FunctionOfIntegerPenaltySumCostFunction.hh>
@@ -41,7 +42,9 @@
 #include <optimizers/cost_function_network/cost_function/graph_island_based/LogOfGraphIslandCountCostFunction.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/ChoiceFeature.hh>
 #include <optimizers/cost_function_network/cost_function/feature_based/SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction.hh>
-// #include <optimizers/gradient_based/BFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh>
+#include <optimizers/gradient_based/quasi_newtonian/BFGSFunctionOptimizer.hh>
+#include <optimizers/gradient_based/quasi_newtonian/DFPFunctionOptimizer.hh>
 #include <optimizers/gradient_based/GradientDescentFunctionOptimizer.hh>
 #include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
@@ -67,6 +70,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< annealing::LogarithmicAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< annealing::LogarithmicRepeatAnnealingSchedule >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::MonteCarloCostFunctionNetworkOptimizer >() );
+        outvec.emplace_back( masala::make_shared< cost_function_network::RandomCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::GreedyCostFunctionNetworkOptimizer >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::PairwisePrecomputedCostFunctionNetworkOptimizationProblem >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::FunctionOfIntegerPenaltySumCostFunction >() );
@@ -77,7 +81,9 @@ namespace api {
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::graph_island_based::LogOfGraphIslandCountCostFunction >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::ChoiceFeature >() );
         outvec.emplace_back( masala::make_shared< cost_function_network::cost_function::feature_based::SquareOfSumOfUnsatisfiedChoiceFeaturesCostFunction >() );
-        // outvec.emplace_back( masala::make_shared< gradient_based::BFGSFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::QuasiNewtonianFunctionOptimizerBase >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::quasi_newtonian::BFGSFunctionOptimizer >() );
+        outvec.emplace_back( masala::make_shared< gradient_based::quasi_newtonian::DFPFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::GradientDescentFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_free::SimplexFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );

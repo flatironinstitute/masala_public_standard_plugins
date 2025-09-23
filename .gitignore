@@ -1,3 +1,5 @@
+.DS_Store
+logos/.DS_Store
 lib/
 build/
 bin/

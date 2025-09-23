@@ -108,10 +108,6 @@ public:
 	MonteCarloCostFunctionNetworkOptimizerSP
 	deep_clone() const;
 
-	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
-	void
-	make_independent();
-
 	/// @brief Destructor.
 	~MonteCarloCostFunctionNetworkOptimizer() override = default;
 
@@ -341,24 +337,6 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Perform greedy refinement on all solutions found.
-	void
-	carry_out_greedy_refinement(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
-		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
-		MCOptimizerGreedyRefinementMode const greedy_mode
-	) const;
-
-	/// @brief Carry out a single greedy optimization/
-	/// @details This function runs in threads.
-	void
-	do_one_greedy_refinement_in_threads(
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
-		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
-    	std::vector< masala::base::Size > const & starting_point,
-		masala::base::Size const n_times_seen
-	) const;
-
 	/// @brief Run a single Monte Carlo trajectory.
 	/// @details This function runs in threads.
 	/// @param[in] replicate_index The index of this replicate for this problem.
@@ -392,6 +370,30 @@ private:
 		bool const do_greedy,
 		MCOptimizerGreedyRefinementMode const greedy_mode,
 		std::mutex & solutions_mutex
+	) const;
+
+protected:
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Perform greedy refinement on all solutions found.
+	void
+	carry_out_greedy_refinement(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_API const & problems,
+		std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > & solutions_by_problem,
+		MCOptimizerGreedyRefinementMode const greedy_mode
+	) const;
+
+	/// @brief Carry out a single greedy optimization/
+	/// @details This function runs in threads.
+	void
+	do_one_greedy_refinement_in_threads(
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APICSP greedy_problem,
+		masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APICSP & greedy_solutions,
+    	std::vector< masala::base::Size > const & starting_point,
+		masala::base::Size const n_times_seen
 	) const;
 
 	/// @brief Make a Monte Carlo move.
@@ -446,14 +448,11 @@ private:
 		bool const force_store
 	);
 
-protected:
-
-////////////////////////////////////////////////////////////////////////////////
-// PROTECTED FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
-
 	/// @brief Assign src to this object.  Must be implemented by derived classes.  Performs no mutex-locking.  Derived classes should call their parent's protected_assign().
 	void protected_assign( PluginCostFunctionNetworkOptimizer const & src ) override;
+
+	/// @brief Make this object independent of any of its copies (i.e. deep-clone all of its internal data).
+	void protected_make_independent() override;
 
 	/// @brief Set a template cost function network optimization problem data representation, configured by the user but with no data entered.
 	/// @details This can optionally be passed in, in which case the get_template_preferred_cfn_data_representation() function can be
@@ -469,6 +468,56 @@ protected:
 	/// @details This version returns a PairwisePrecomputedCostFunctionNetworkOptimizationProblem, with default configuration.  Performs no mutex-locking.
 	masala::base::managers::engine::MasalaDataRepresentationAPISP
 	protected_get_default_template_preferred_cfn_data_representation() const override;
+
+	/// @brief Allow derived classes to access the API description.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::api::MasalaObjectAPIDefinitionCSP & protected_api_description() { return api_description_; }
+
+	/// @brief Allow derived classes to access the annealing schedule.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::numeric_api::auto_generated_api::optimization::annealing::AnnealingScheduleBase_APISP const & protected_annealing_schedule() const { return annealing_schedule_; }
+
+	/// @brief Allow derived classes to access the annealing steps per attempt.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_annealing_steps_per_attempt() const { return annealing_steps_per_attempt_; }
+
+	/// @brief Allow derived classes to access the maximum number of CPU threads to request for parallel execution.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_cpu_threads_to_request() const { return cpu_threads_to_request_; }
+
+	/// @brief Allow derived classes to access the number of times to attempt each problem.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_attempts_per_problem() const { return attempts_per_problem_; }
+
+	/// @brief Allow derived classes to access the number of solutions to store for each problem.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_n_solutions_to_store_per_problem() const { return n_solutions_to_store_per_problem_; }
+
+	/// @brief Allow derived classes to access whether we're using multimutation.
+	/// @details Intended for use only in a mutex-locked context.
+	inline bool protected_use_multimutation() const { return use_multimutation_; }
+
+	/// @brief Allow derived classes to access the probability of one mutation when using multimutation mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Real protected_multimutation_probability_of_one_mutation() const { return multimutation_probability_of_one_mutation_; }
+
+	/// @brief Allow derived classes to access the solution storage mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline MonteCarloCostFunctionNetworkOptimizerSolutionStorageMode protected_solution_storage_mode() const { return solution_storage_mode_; }
+
+	/// @brief If true, we do greedy optimization at the end on each solution found by the Monte Carlo search.
+	/// False by default.
+	/// @details Intended for use only in a mutex-locked context.
+	inline bool protected_do_greedy_refinement() const { return do_greedy_refinement_; }
+
+	/// @brief Allow derived classes to access the greedy refinement mode.
+	/// @details Intended for use only in a mutex-locked context.
+	inline MCOptimizerGreedyRefinementMode protected_greedy_refinement_mode() const { return greedy_refinement_mode_; }
+
+	/// @brief Allow derived classes to access the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
+	/// to correct the accumulation of small numerical errors.
+	/// @details Intended for use only in a mutex-locked context.
+	inline masala::base::Size protected_recompute_from_scratch_every_n_steps() const{ return recompute_from_scratch_every_n_steps_; }
 
 private:
 

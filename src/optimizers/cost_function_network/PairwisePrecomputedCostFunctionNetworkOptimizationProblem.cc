@@ -277,6 +277,32 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_onebody_penalty(
 	}
 }
 
+/// @brief Add to the onebody penalty for a choice at a node.  If no onebody penalty has been
+/// added, this sets it.
+/// @details Must be implemented by derived classes.
+void
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_onebody_penalty(
+	masala::base::Size const node_index,
+	masala::base::Size const choice_index,
+	masala::base::Real const penalty
+) {
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+	std::map< masala::base::Size, masala::base::Size >::iterator it( n_choices_by_node_index().find(node_index) );
+	if( it == n_choices_by_node_index().end() ) {
+		// Update the number of choices per node:
+		n_choices_by_node_index()[node_index] = choice_index + 1;
+		// Set the one-body penalty:
+		single_node_penalties_[node_index] = create_choice_vector( choice_index, penalty );
+	} else {
+		// Update the number of choices per node:
+		if( it->second <= choice_index ) {
+			it->second = choice_index + 1;
+		}
+		// Set the one-body penalty:
+		add_to_entry_in_vector( single_node_penalties_[node_index], choice_index, penalty );
+	}
+}
+
 /// @brief Set the two-node penalty for a particular pair of choice indices corresponding to a particular
 /// pair of node indices.
 /// @param[in] node_indices A pair of node indices.  The lower index should be first.  (This function will
@@ -319,6 +345,48 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty(
 		pairwise_node_penalties_[node_indices] = create_choicepair_matrix( choice_indices, penalty );
 	} else {
 		set_entry_in_matrix( pairwise_node_penalties_[node_indices], choice_indices, penalty );
+	}
+}
+
+/// @brief Add to the two-node penalty for a particular pair of choice indices corresponding to a particular
+/// pair of node indices.  If the two-node penalty hasn't been set, this sets it.
+/// @param[in] node_indices A pair of node indices.  The lower index should be first.  (This function should
+/// throw if it is not, since it makes the choice indices ambiguous).
+/// @param[in] choice_indices The corresponding pair of choice indices.  The first entry should be the choice
+/// index for the lower-numbered node, and the second should be the choice index for the higher-numbered node.
+/// @param[in] penalty The value to be added to the two-node penalty (or, if negative, bonus).
+/// @details Must be implemented by derived classes.
+void
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_twobody_penalty(
+	std::pair< masala::base::Size, masala::base::Size > const & node_indices,
+	std::pair< masala::base::Size, masala::base::Size > const & choice_indices,
+	masala::base::Real penalty
+) {
+	using masala::base::Size;
+	using masala::base::Real;
+
+	std::lock_guard< std::mutex > lock( data_representation_mutex() );
+
+	// Sanity check:
+	CHECK_OR_THROW_FOR_CLASS(
+		node_indices.second > node_indices.first,
+		"add_to_twobody_penalty",
+		"This function requires that the second node index be higher than the first.  Got node_index1="
+		+ std::to_string( node_indices.first ) + ", node_index2=" + std::to_string( node_indices.second ) + "."
+	);
+
+	// Update the number of choices per node:
+	set_minimum_number_of_choices_at_node_mutex_locked( node_indices.first, choice_indices.first + 1 );
+	set_minimum_number_of_choices_at_node_mutex_locked( node_indices.second, choice_indices.second + 1 );
+
+	// Update the penalties:
+	std::unordered_map< std::pair< Size, Size >, Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic >, masala::base::size_pair_hash >::iterator it(
+		pairwise_node_penalties_.find( node_indices )
+	);
+	if( it == pairwise_node_penalties_.end() ) {
+		pairwise_node_penalties_[node_indices] = create_choicepair_matrix( choice_indices, penalty );
+	} else {
+		add_to_entry_in_matrix( pairwise_node_penalties_[node_indices], choice_indices, penalty );
 	}
 }
 
@@ -610,21 +678,40 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::get_api_definition() 
 			)
 		);
 		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< Size, Size, Real > >(
+				"add_to_onebody_penalty", "Add to the onebody penalty for a choice at a node.  If no onebody penalty has been "
+				"added, this sets it.",
+				"node_index", "The index of the node for which we're setting a penalty.",
+				"choice_index", "The index of the choice at this node for which we're setting a penalty.",
+				"penalty", "The value to add to the penalty (or, if negative, bonus).", true, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_onebody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
+			)
+		);
+		api_def->add_setter(
 			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size > const &, std::pair< Size, Size > const &, Real > >(
 				"set_twobody_penalty", "Set the two-node penalty for a pair of choices at a pair of nodes.",
-
 				"node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
 				"throw if it is not, since it makes the choice indices ambiguous).",
-
 				"choice_indices", "The corresponding pair of choice indices.  The first entry should be the choice "
 				"index for the lower-numbered node, and the second should be the choice index for the higher-numbered "
 				"node.",
-
 				"penalty", "The value of the penalty (or, if negative, bonus).",
-
 				true, false,
-
 				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_twobody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
+			)
+		);
+		api_def->add_setter(
+			masala::make_shared< setter::MasalaObjectAPISetterDefinition_ThreeInput< std::pair< Size, Size > const &, std::pair< Size, Size > const &, Real > >(
+				"add_to_twobody_penalty", "dd to the two-node penalty for a particular pair of choice indices corresponding to a "
+				"particular pair of node indices.  If the two-node penalty hasn't been set, this sets it.",
+				"node_indices", "A pair of node indices.  The lower index should be first.  (This function will "
+				"throw if it is not, since it makes the choice indices ambiguous).",
+				"choice_indices", "The corresponding pair of choice indices.  The first entry should be the choice "
+				"index for the lower-numbered node, and the second should be the choice index for the higher-numbered "
+				"node.",
+				"penalty", "The value to add to the penalty (or, if negative, bonus).",
+				true, false,
+				std::bind( &PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_twobody_penalty, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 )
 			)
 		);
 
@@ -1020,6 +1107,23 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_entry_in_vector(
 	}
 }
 
+/// @brief Given a vector with a certain number of entries, add an input value to the value of entry N.  If the
+/// vector length is less than N+1, extend the vector, padding it with zeros.
+/*static*/
+void
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_entry_in_vector(
+	std::vector< masala::base::Real > & vec,
+	masala::base::Size const index,
+	masala::base::Real const value
+) {
+	if( vec.size() > index ) {
+		vec[index] += value;
+	} else {
+		vec.resize( index+1, 0.0 );
+		vec[index] += value;
+	}
+}
+
 /// @brief Given a matrix with certain dimensions, set the value of an entry.  If the matrix
 /// is too small, resize it appropriately, padding with zeros.
 /*static*/
@@ -1058,6 +1162,46 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::set_entry_in_matrix(
 	}
 
 	mat( indices.first, indices.second ) = value;
+}
+
+/// @brief Given a matrix with certain dimensions, add an input value to the value of an entry.  If the matrix
+/// is too small, resize it appropriately, padding with zeros.
+/*static*/
+void
+PairwisePrecomputedCostFunctionNetworkOptimizationProblem::add_to_entry_in_matrix(
+	Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & mat,
+	std::pair< masala::base::Size, masala::base::Size > const & indices,
+	masala::base::Real const value
+) {
+	using masala::base::Size;
+
+	Size const oldrows( mat.rows() ), oldcols( mat.cols() );
+	if( indices.first >= oldrows ) {
+		if( indices.second >= oldcols ) {
+			mat.conservativeResize( indices.first + 1, indices.second + 1 );
+			for( Size y(0); y <= indices.first; ++y ) {
+				for( Size x( y < oldrows ? oldcols : 0 ); x <= indices.second; ++x ) {
+					mat(y,x) = 0.0;
+				}
+			}
+		} else {
+			mat.conservativeResize( indices.first + 1, Eigen::NoChange );
+			for( Size y(oldrows); y <= indices.first; ++y ) {
+				for( Size x(0); x < oldcols; ++x ) {
+					mat(y,x) = 0.0;
+				}
+			}
+		}
+	} else if( indices.second >= oldcols ) {
+		mat.conservativeResize( Eigen::NoChange, indices.second + 1 );
+		for( Size y(0); y < oldrows; ++y ) {
+			for( Size x( oldcols ); x <= indices.second; ++x ) {
+				mat(y,x) = 0.0;
+			}
+		}
+	}
+
+	mat( indices.first, indices.second ) += value;
 }
 
 /// @brief Given a vector, add a value to the Nth entry, or, if the vector has fewer than N entries,
