@@ -36,8 +36,23 @@ void
 register_library() {
     using namespace masala::base::managers::version;
     using masala::base::Size;
-    masala::base::managers::tracer::MasalaTracerManager::get_instance()->write_to_tracer(
+    masala::base::managers::tracer::MasalaTracerManagerHandle tm( masala::base::managers::tracer::MasalaTracerManager::get_instance() );
+    tm->write_to_tracer(
         "standard_masala_plugins::registration_api::register_library", "Registering standard Masala plugins."
+    );
+    tm->add_destruction_message(
+        "STANDARD_MASALA_PLUGINS",
+        {  //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            "This run of Masala used the Standard Masala Plugins    ",
+            "library.  This library's citation is: T. Zaborniak, N. ",
+            "Azadvari, Q. Zhu, S.M.B.A. Turzo, P. Hosseinzadeh, P.D.",
+            "Renfrew, and V.K. Mulligan.  (2025).  The open-source  ",
+            "Masala software suite: Facilitating rapid methods      ",
+            "development for synthetic heteropolymer design. \033[4mbioRxiv\033[24m",
+            "https://doi.org/10.1101/2025.07.02.662756.             ",
+            "                                                       "
+        },
+        "standard_masala_plugins_citation_message"
     );
 
     MasalaModuleVersionInfoSP module_version_info(
@@ -49,8 +64,9 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 0, 15 ), // Min version
+        std::pair< Size, Size >( 1, 0 ), // Min version
         "",
+        "Version 1.0 (public release) updated output messages on shutdown to report the citations for Masala.  "
         "Version 0.15 added the add_to_onebody_penalty() and add_to_twobody_penalty() functions for pairwise precomputed CFN problems.  "
         "Version 0.14 added the protected_make_independent() function for CFN optimizers.  "
         "Version 0.13 updated some of the CMake files, made the release build the default build, and added support for AVX512 instructions.  "
