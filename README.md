@@ -1,5 +1,7 @@
 # Standard Masala Plugins
 
+![Masala logo](logos/Masala_logo_v3_sm.png)
+
 ## Version
 
 The Standard Masala Plugins library is currently version 1.0. 
