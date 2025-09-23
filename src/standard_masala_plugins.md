@@ -11,6 +11,8 @@ The Standard Masala Plugins library version 1.0 contains discrete cost function 
 - Vikram K. Mulligan, Ph.D., Research Scientist, Center for Computational Biology, Flatiron Institute (vmulligan@flatironinstitute.org).
 - Tristan Zaborniak, Ph.D. Candidate, Department of Computer Science, University of Victoria (tzaborniak@flatironinstitute.org).
 - Noora Azadvari, Ph.D. Candidate, Department of Bioengineering, University of Oregon (eazadvar@uoregon.edu).
+- Qiyao Zhu, Ph.D., Flatiron Research Fellow, Center for Computational Biology, Flatiron Institute (qzhu@flatironinstitute.org).
+- S.M. Bargeen A. Turzo, Ph.D., Flatiron Research Fellow, Center for Computational Biology, Flatiron Institute (bturzo@flatironinstitute.org).
 - P. Douglas Renfrew, Ph.D., Research Scientist, Center for Computatinoal Biology, Flatiron Institute (pdrenfrew@flatironinstitute.org).
 
 ## Library organization
