@@ -16,48 +16,44 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// @file src/numeric_api/base_classes/optimization/gradient_based/GradientDescentFunctionOptimizer.hh
-/// @brief Headers for the GradientDescentFunctionOptimizer.
-/// @details The GradientDescentFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using an iterative approach of computing gradients and carrying out
-/// line searches with a line search algorithm.  This is relatively inefficient compared to quasi-Newtonian
-/// methods like DFP, BFGS, or L-BFGS.
+/// @file src/numeric_api/base_classes/optimization/gradient_based/QuasiNewtonianFunctionOptimizerBase.hh
+/// @brief Headers for the QuasiNewtonianFunctionOptimizerBase base class.
+/// @details The QuasiNewtonianFunctionOptimizerBase class serves as a base class for optimizers that carry out gradient-
+/// descent minimization of functions using quasi-Newtonian approaches, such as the DFP, BFGS, and L-BFGS algorithms.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
 
-#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_GradientDescentFunctionOptimizer_hh
-#define Standard_Masala_Plugins_src_optimizers_gradient_based_GradientDescentFunctionOptimizer_hh
+#ifndef Standard_Masala_Plugins_src_optimizers_gradient_based_QuasiNewtonianFunctionOptimizerBase_hh
+#define Standard_Masala_Plugins_src_optimizers_gradient_based_QuasiNewtonianFunctionOptimizerBase_hh
 
 // Forward declarations:
-#include <optimizers/gradient_based/GradientDescentFunctionOptimizer.fwd.hh>
+#include <optimizers/gradient_based/QuasiNewtonianFunctionOptimizerBase.fwd.hh>
 
 // Base headers:
-#include <base/types.hh>
 #include <base/managers/engine/MasalaEngineAPI.fwd.hh>
+#include <base/types.hh>
 
 // Numeric API headers:
-#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblem_API.fwd.hh>
-#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationProblems_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolution_API.fwd.hh>
+#include <numeric_api/auto_generated_api/optimization/real_valued_local/RealValuedFunctionLocalOptimizationSolutions_API.fwd.hh>
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginLineOptimizer.fwd.hh>
 
 // Parent header:
 #include <numeric_api/base_classes/optimization/real_valued_local/PluginRealValuedFunctionLocalOptimizer.hh>
 
-// STL headers:
-#include <limits>
-#include <cmath>
+// External headers:
+#include <external/eigen/Eigen/Core>
 
 namespace standard_masala_plugins {
 namespace optimizers {
 namespace gradient_based {
 
-/// @brief The GradientDescentFunctionOptimizer carries out gradient-descent minimization of an arbitrary function
-/// for which gradients are available using an iterative approach of computing gradients and carrying out
-/// line searches with a line search algorithm.  This is relatively inefficient compared to quasi-Newtonian
-/// methods like DFP, BFGS, or L-BFGS.
+/// @brief The QuasiNewtonianFunctionOptimizerBase base class.
+/// @details The QuasiNewtonianFunctionOptimizerBase class serves as a base class for optimizers that carry out gradient-
+/// descent minimization of functions using quasi-Newtonian approaches, such as the DFP, BFGS, and L-BFGS algorithms.
 /// @author Vikram K. Mulligan (vmulligan@flatironinstitute.org).
-class GradientDescentFunctionOptimizer : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
+class QuasiNewtonianFunctionOptimizerBase : public masala::numeric_api::base_classes::optimization::real_valued_local::PluginRealValuedFunctionLocalOptimizer {
 
 public:
 
@@ -66,13 +62,13 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Default constructor.
-	GradientDescentFunctionOptimizer() = default;
+	QuasiNewtonianFunctionOptimizerBase() = default;
 
 	/// @brief Copy constructor.
-	GradientDescentFunctionOptimizer( GradientDescentFunctionOptimizer const & ) = default;
+	QuasiNewtonianFunctionOptimizerBase( QuasiNewtonianFunctionOptimizerBase const & ) = default;
 
 	/// @brief Destructor.
-	~GradientDescentFunctionOptimizer() override = default;
+	~QuasiNewtonianFunctionOptimizerBase() override = default;
 
 	/// @brief Clone operation: copy this object and return a shared pointer to the
 	/// copy.  Contained objects may still be shared.
@@ -81,7 +77,7 @@ public:
 
 	/// @brief Deep clone operation: copy this object and return a shared pointer to the
 	/// copy, making sure that all contained objects are also copied.
-	GradientDescentFunctionOptimizerSP
+	QuasiNewtonianFunctionOptimizerBaseSP
 	deep_clone() const;
 
 public:
@@ -92,7 +88,7 @@ public:
 
 	/// @brief Get the category or categories for this plugin class.  Default for all optimizers;
 	/// may be overridden by derived classes.
-	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer" } }
+	/// @returns { { "Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer" } }
 	/// @note Categories are hierarchical (e.g. Selector->AtomSelector->AnnotatedRegionSelector,
 	/// stored as { {"Selector", "AtomSelector", "AnnotatedRegionSelector"} }). A plugin can be
 	/// in more than one hierarchical category (in which case there would be more than one
@@ -103,7 +99,7 @@ public:
 
 	/// @brief Get the keywords for this plugin class.  Default for all optimizers; may be overridden
 	/// by derived classes.
-	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
+	/// @returns { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric", "quasi_newtonian" }
 	std::vector< std::string >
 	get_keywords() const override;
 
@@ -116,17 +112,12 @@ public:
     /// a list of hierarchical categories, and the inner vector is the particular hierarchical
     /// category, from most general to most specific.  Also note that this function is pure
     /// virtual, and must be defined for instantiable MasalaEngine subclasses.
-	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "GradientDescentFunctionOptimizer"} }
+	/// @returns { {"Optimizer", "RealValuedFunctionLocalOptimizer", "QuasiNewtonianFunctionOptimizer"} }
     std::vector< std::vector < std::string > >
     get_engine_categories() const override;
 
-	/// @brief Get the keywords that this MasalaEngine has.
-	/// @returns  { "optimizer", "real_valued", "local_optimizer", "gradient_based", "numeric" }
-	std::vector< std::string >
-	get_engine_keywords() const override;
-
 	/// @brief Every class can name itself.
-	/// @returns "GradientDescentFunctionOptimizer".
+	/// @returns "QuasiNewtonianFunctionOptimizerBase".
 	std::string class_name() const override;
 
 	/// @brief Every class can provide its own namespace.
@@ -134,7 +125,7 @@ public:
 	std::string class_namespace() const override;
 
 	/// @brief Every class can name itself.
-	/// @returns "GradientDescentFunctionOptimizer".
+	/// @returns "QuasiNewtonianFunctionOptimizerBase".
 	static std::string class_name_static();
 
 	/// @brief Every class can provide its own namespace.
@@ -149,10 +140,7 @@ public:
 
 	/// @brief Set the maximum number of steps that we can take.
 	/// @details A setting of 0 means loop until convergence.
-	void
-	set_max_iterations(
-		masala::base::Size const setting
-	);
+	void set_max_iterations( masala::base::Size const setting );
 
 	/// @brief Set a line optimizer to use for the line searches.
 	/// @details Used directly, not cloned.  If none is provided (or if this is set to
@@ -175,6 +163,12 @@ public:
 	/// @brief Set whether we should throw if iterations are exceeded (true), or just warn
 	/// (false, the default).
 	void set_throw_if_iterations_exceeded( bool const setting );
+
+	/// @brief Set the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	void set_min_inv_hessian_determinant( masala::base::Real const setting );
 
 public:
 
@@ -205,6 +199,12 @@ public:
 	/// @brief Should we throw if iterations are exceeded (true), or just warn
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded() const;
+
+	/// @brief Get the minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	masala::base::Real min_inv_hessian_determinant() const;
 
 public:
 
@@ -242,6 +242,13 @@ protected:
 	void
 	protected_make_independent() override;
 
+	/// @brief Allow derived classes to access the minimum determinant of the inverse Hessian.
+	inline
+	masala::base::Real
+	protected_min_inv_hessian_determinant() const {
+		return min_inv_hessian_determinant_;
+	}
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +257,8 @@ public:
 
 	/// @brief Run the optimizer on a set of gradient-based loss function minimization problems, and produce a set of solutions.
 	/// @details Must be implemented by derived classes.  Each solutions set in the vector of solutions corresponds to
-	/// the problem with the same index.
+	/// the problem with the same index.  This version uses the low-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (BFGS)
+	/// to carry out gradient-descent minimization.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolutions_APICSP >
 	run_real_valued_local_optimizer(
 		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblems_API const & problems
@@ -262,25 +270,54 @@ private:
 // PRIVATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Run a single local optimization problem in a thread.  This function runs in parallel
-	/// in threads.  This function is called from a mutex-locked context.
-	/// @param[in] problem The problem to solve.
-	/// @param[in] problem_index The index of the problem.
-	/// @param[in] starting_point_index The index of the starting point for the problem.
-	/// @param[in] line_optimizer The line optimizer to use when solving this problem.
-	/// @param[out] solutions The solution container into which we will put the solution.
+	/// @brief Run the optimizer on a single gradient-based loss function minimization problem, and produce a single solution.
+	/// @details This function executes in threads.  Expected to be called from a mutex-locked context.
 	void
-	run_real_valued_local_optimizer_on_one_problem(
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+	run_one_job_in_threads(
+		masala::base::Size const job_index,
 		masala::base::Size const problem_index,
-		masala::base::Size const starting_point_index,
-		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer,
-		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_API & solution
+		masala::base::Size const start_index,
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationProblem_APICSP problem,
+		masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP line_optimizer, // Deliberately passed by shared pointer copy.
+		masala::numeric_api::auto_generated_api::optimization::real_valued_local::RealValuedFunctionLocalOptimizationSolution_APISP & solution
 	) const;
 
-	/// @brief Generate the Brent optimizer used by default if another line optimizer is not provided.
-	masala::numeric_api::base_classes::optimization::real_valued_local::PluginLineOptimizerCSP
-	generate_brent_optimizer() const;
+	/// @brief Update the approximation of the inverse of the Hessian matrix.
+	/// @details The update rule differs between the DFP, BFGS, and L-BFGS algorithms.
+	/// @note Expected to be called from a mutex-locked context.  Must be implemented by derived classes.
+	virtual
+	void
+	update_inverse_hessian(
+		masala::base::Size const iter,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_diff,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_diff,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec1,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > & scratchvec2,
+		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > & inv_hessian
+	) const;
+
+	/// @brief Determine whether the search has converged, based on the change in coordinates.
+	/// @return True for convergence, false otherwise.
+	/// @note Static function.
+	static
+	bool
+	search_converged(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & delta_p,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		masala::base::Real const tolerance
+	);
+
+	/// @brief Determine whether the search has converged, based on the change in gradient.
+	/// @return True for convergence, false otherwise.
+	/// @note Static function.
+	static
+	bool
+	gradient_converged(
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & p_new,
+		Eigen::Vector< masala::base::Real, Eigen::Dynamic > const & grad_new,
+		masala::base::Real const grad_tolerance,
+		masala::base::Real const curscore
+	);
 
 private:
 
@@ -310,10 +347,16 @@ private:
 	/// (false, the default)?
 	bool throw_if_iterations_exceeded_ = false;
 
-}; // class GradientDescentFunctionOptimizer
+	/// @brief The minimum absolute value of the determinant of the approximate inverse Hessian matrix, below which we reset the Hessian
+	/// to the identity matrix.
+	/// @details Quasi-Newtonian methods fail if the Hessian becomes singular.  The default value is 4 times machine precision, and rarely
+	/// needs to be adjusted.
+	masala::base::Real min_inv_hessian_determinant_ = 4.0 * std::numeric_limits< masala::base::Real >::epsilon();
+
+}; // class QuasiNewtonianFunctionOptimizerBase
 
 } // namespace gradient_based
 } // namespace optimizers
 } // namespace standard_masala_plugins
 
-#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_GradientDescentFunctionOptimizer_hh
+#endif // Standard_Masala_Plugins_src_optimizers_gradient_based_QuasiNewtonianFunctionOptimizerBase_hh
