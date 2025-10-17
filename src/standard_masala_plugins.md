@@ -4,7 +4,7 @@
 
 ## Description
 
-The Standard Masala Plugins library version 1.0 contains discrete cost function network (CFN) and continuous real-valued local (RVL) optimizers.  It also contains a framework for defining scoring functions, file interpreters, and selectors.
+The Standard Masala Plugins library version 1.1 contains discrete cost function network (CFN) and continuous real-valued local (RVL) optimizers.  It also contains a framework for defining scoring functions, file interpreters, and selectors.
 
 ## Authors
 

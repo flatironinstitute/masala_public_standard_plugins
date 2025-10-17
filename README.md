@@ -4,7 +4,7 @@
 
 ## Version
 
-The Standard Masala Plugins library is currently version 1.0. 
+The Standard Masala Plugins library is currently version 1.1.
 
 ## Description
 
@@ -87,6 +87,11 @@ doxygen Doxyfile.src
 ```
 
 (Note that Doxygen must be installed.) Documentation will be addded to the `html_docs/` directory.  Delete this directory to recompile documentation from scratch.  Prebuild Doxygen documentation for the current version of the Standard Masala Plugins library may be found at [https://users.flatironinstitute.org/~vmulligan/doxygen/masala_standard_plugins_doxygen/index.html](https://users.flatironinstitute.org/~vmulligan/doxygen/masala_standard_plugins_doxygen/index.html).
+
+## Version History
+
+- Version 1.1 made minor efficiency tweaks to the behaviour of the PairwisePrecomputedCostFunctionNetworkOptimizer.
+- Version 1.0 was the first public release.
 
 ## Licence
 
