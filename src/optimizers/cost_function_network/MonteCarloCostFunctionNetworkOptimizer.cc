@@ -505,7 +505,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				"set_recompute_from_scratch_every_n_steps",
 				"Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
 				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
-				"every 100 Monte Carlo trajectory steps.",
+				"every 100000 Monte Carlo trajectory steps.",
 				"steps_in", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
 				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
 				"numerical precision errors.  Defaults to every 100 steps.",
@@ -617,7 +617,7 @@ MonteCarloCostFunctionNetworkOptimizer::get_api_definition() {
 				"recompute_from_scratch_every_n_steps",
 				"Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences, "
 				"to correct the accumulation of small numerical errors.  A setting of 0 means that we never do this.  Defaults to "
-				"every 100 Monte Carlo trajectory steps.",
+				"every 100000 Monte Carlo trajectory steps.",
 				"steps", "If set to a nonzero value, then every time this number of steps has been performed in the MC trajectory, "
 				"we recompute the scoring function from scratch rather than just computing differences.  This corrects accumulated "
 				"numerical precision errors.  Defaults to every 100 steps.",
@@ -832,7 +832,7 @@ MonteCarloCostFunctionNetworkOptimizer::set_greedy_refinement_mode(
 
 /// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
 /// to correct the accumulation of small numerical errors.
-/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+/// @details A setting of 0 means that we never do this.  Defaults to every 100000 Monte Carlo trajectory steps.
 void
 MonteCarloCostFunctionNetworkOptimizer::set_recompute_from_scratch_every_n_steps(
     masala::base::Size const steps_in
