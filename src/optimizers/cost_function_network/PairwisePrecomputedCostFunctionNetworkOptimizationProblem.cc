@@ -447,10 +447,10 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 		Size const node_i_index( variable_positions[i].first );
 		Size const choice_i_index( candidate_solution[i] );
 		{
-			//Retrieve onebody energy
-			std::unordered_map< Size, std::vector< Real > >::const_iterator it( single_node_penalties_.find(node_i_index) );
-			if( it != single_node_penalties_.end() && choice_i_index < it->second.size() ) {
-				accumulator += it->second[choice_i_index];
+			// Retrieve onebody energy
+			std::vector< masala::base::Real > const * onebody_vec( single_node_penalties_for_variable_nodes_[i] );
+			if( onebody_vec != nullptr && choice_i_index < onebody_vec->size() ) {
+				accumulator += (*onebody_vec)[choice_i_index];
 			}
 		}
 
