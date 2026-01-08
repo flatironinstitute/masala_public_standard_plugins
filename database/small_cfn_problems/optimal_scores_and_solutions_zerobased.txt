@@ -1,0 +1,400 @@
+problem_description_000003_short 650.445172 0 0 0
+problem_description_000004_short 1322.758835 0 0 0 0
+problem_description_000005_short 3181.223418 0 0 0 0 0
+problem_description_000006_short 3583.409977 0 0 0 0 0 0
+problem_description_000007_short 3585.042640 0 0 0 0 0 0 0
+problem_description_000008_short 3585.571530 0 0 0 0 0 0 0 0
+problem_description_000009_short 3988.206150 0 0 0 0 0 0 0 0 0
+problem_description_000010_short 4728.335096 0 0 0 0 0 0 0 0 0 0
+problem_description_000011_short 6200.843884 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000012_short 6309.286633 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000013_short 7769.909859 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000014_short 7781.651910 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000015_short 7778.265281 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000016_short 9626.717567 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000017_short 10677.072352 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000018_short 10674.944221 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000019_short 10677.439865 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000020_short 10680.747666 0 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000022_short 10689.076272 0 2 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000043_short 717.653281 0 0 0
+problem_description_000044_short 1441.572150 0 0 0 0
+problem_description_000045_short 3800.510822 0 0 0 0 0
+problem_description_000046_short 4197.472157 0 0 0 0 0 0
+problem_description_000047_short 4197.546933 0 0 0 0 0 0 2
+problem_description_000048_short 4202.743474 0 1 0 0 1 0 0 2
+problem_description_000049_short 4600.121740 0 1 0 0 0 1 0 0 2
+problem_description_000050_short 5804.325162 0 1 0 0 0 0 1 0 0 2
+problem_description_000051_short 7297.147265 0 1 0 0 0 0 0 1 0 0 2
+problem_description_000052_short 7493.120910 0 1 0 0 0 0 0 0 1 0 0 2
+problem_description_000053_short 8973.973735 0 1 0 0 0 0 0 0 0 1 0 0 2
+problem_description_000054_short 8981.670978 2 0 1 0 0 0 0 0 0 0 1 0 0 2
+problem_description_000055_short 8978.001733 2 0 1 0 0 0 0 0 0 0 0 1 0 0 2
+problem_description_000056_short 11345.003552 2 0 1 0 0 0 0 0 0 0 0 0 1 0 0 2
+problem_description_000057_short 12753.929518 2 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 2
+problem_description_000058_short 12751.458532 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2
+problem_description_000059_short 12754.335799 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0
+problem_description_000060_short 12754.741231 2 0 0 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0
+problem_description_000061_short 12758.378584 2 0 0 1 2 0 0 2 0 0 0 0 0 0 0 0 0 0 0 2 0
+problem_description_000083_short 1268.505645 0 0 0
+problem_description_000084_short 3115.976106 0 0 0 0
+problem_description_000085_short 5539.660233 0 0 0 0 0
+problem_description_000086_short 5892.389677 0 0 0 0 0 0
+problem_description_000087_short 5891.473588 0 0 0 0 0 0 0
+problem_description_000088_short 5889.531141 0 0 0 0 0 0 0 0
+problem_description_000089_short 6243.177589 0 0 0 0 0 0 0 0 0
+problem_description_000090_short 10438.965278 0 0 0 0 0 0 0 0 0 0
+problem_description_000091_short 11261.300083 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000092_short 10761.804288 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000093_short 11572.752569 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000094_short 11584.019071 5 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000123_short 2293.343504 0 1 0
+problem_description_000124_short 4095.453984 0 1 0 0
+problem_description_000125_short 11967.694469 0 1 0 0 0
+problem_description_000126_short 12471.706302 0 1 0 0 0 0
+problem_description_000127_short 12471.651935 0 1 0 0 0 0 0
+problem_description_000128_short 12967.022914 0 0 0 0 0 0 0 0
+problem_description_000129_short 13470.792029 0 0 0 0 0 0 0 0 0
+problem_description_000130_short 20037.260842 0 0 0 0 0 0 0 0 0 0
+problem_description_000131_short 22270.092295 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000132_short 23415.685514 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000133_short 25633.937657 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000134_short 26337.217477 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000135_short 26333.783168 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000136_short 35864.165383 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000137_short 44096.536494 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000138_short 44094.371502 0 0 0 4 0 0 0 0 0 0 0 0 0 0 4 0 0 0
+problem_description_000161_short 700.387024 1
+problem_description_000162_short 1346.972993 0 1
+problem_description_000163_short 1341.569419 0 8 1
+problem_description_000164_short 2424.588103 0 8 0 0
+problem_description_000165_short 9355.310244 1 8 0 0 0
+problem_description_000166_short 9685.812767 1 8 0 0 1 0
+problem_description_000167_short 9685.169516 1 9 0 0 1 0 12
+problem_description_000207_short 6302.807736 0 0 0 0 0 0 0
+problem_description_000208_short 6600.504040 0 0 0 0 0 0 0 0
+problem_description_000209_short 7592.038073 0 0 0 0 0 0 0 0 0
+problem_description_000210_short 10137.314785 0 0 0 0 0 0 0 0 0 0
+problem_description_000211_short 11656.252567 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000212_short 12377.918256 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000213_short 13884.635114 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000214_short 13895.371465 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000215_short 13890.177378 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000216_short 15056.495298 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000217_short 17723.168212 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000218_short 17719.221882 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000219_short 17748.026853 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000220_short 17790.584608 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000221_short 17792.685013 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000222_short 17793.851191 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000223_short 18192.709505 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+problem_description_000224_short 18311.623273 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000225_short 18322.283281 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000226_short 18364.966057 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000227_short 18749.453946 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000228_short 18778.105319 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000229_short 18897.241653 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000230_short 18893.120255 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000231_short 19292.036927 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000232_short 19292.657733 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000233_short 19303.588963 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000234_short 19302.064012 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000235_short 19303.230684 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000236_short 19304.397299 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000237_short 19690.249753 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000238_short 19692.401433 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000239_short 19703.271205 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000240_short 19704.437816 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000243_short 1154.038763 0 0 0
+problem_description_000244_short 3955.862860 0 0 0 0
+problem_description_000245_short 5634.219645 0 0 0 0 0
+problem_description_000246_short 5986.461682 0 0 0 0 0 0
+problem_description_000247_short 5985.280763 0 3 0 0 0 0 0
+problem_description_000248_short 5982.964027 0 4 0 0 0 0 0 0
+problem_description_000249_short 6335.597917 0 4 0 0 0 0 0 0 0
+problem_description_000250_short 11426.138596 0 4 0 0 0 0 0 0 0 0
+problem_description_000251_short 13689.837315 0 4 0 0 0 0 0 0 0 0 0
+problem_description_000252_short 13976.307150 0 4 0 0 0 0 0 0 0 0 0 0
+problem_description_000254_short 16236.441269 0 0 4 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000287_short 8671.526583 0 0 0 0 0 0 0
+problem_description_000288_short 8706.181642 0 0 0 0 0 0 0 0
+problem_description_000289_short 9716.272542 0 0 0 0 0 0 0 0 0
+problem_description_000290_short 12282.620739 0 0 0 0 0 0 0 0 0 0
+problem_description_000291_short 13872.812706 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000292_short 14938.815451 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000293_short 16516.864780 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000294_short 16526.582675 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000295_short 16521.713835 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000296_short 20084.998388 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000297_short 22886.802372 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000298_short 22883.088459 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+problem_description_000299_short 22883.305376 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000300_short 22883.933633 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000301_short 22885.501514 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000302_short 22886.520655 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000303_short 22886.068552 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+problem_description_000304_short 22884.002681 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000305_short 22893.295571 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000306_short 22894.268392 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000307_short 22892.650235 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000308_short 22893.181173 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000309_short 22925.892977 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000310_short 22922.138976 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0
+problem_description_000311_short 22921.745364 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0
+problem_description_000312_short 22921.939412 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0
+problem_description_000313_short 22931.853075 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000314_short 22930.974604 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000315_short 22932.244297 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000316_short 22933.263444 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000317_short 22933.632649 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 0 0
+problem_description_000318_short 22935.273983 0 0 1 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0
+problem_description_000319_short 22944.773759 0 0 1 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0
+problem_description_000320_short 22946.043356 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0
+problem_description_000323_short 1377.637184 0 0 0
+problem_description_000324_short 2648.399151 0 0 0 0
+problem_description_000325_short 4492.657372 0 0 0 0 0
+problem_description_000326_short 4835.656060 0 0 0 0 0 0
+problem_description_000327_short 4835.651399 0 1 0 0 0 0 4
+problem_description_000328_short 4835.462861 0 1 0 0 2 0 0 0
+problem_description_000329_short 5178.549958 0 1 0 0 0 2 0 0 0
+problem_description_000330_short 9124.796754 0 1 0 0 0 0 2 0 0 0
+problem_description_000331_short 10024.808145 0 1 0 0 0 0 0 2 0 0 0
+problem_description_000332_short 10302.218846 0 1 0 0 0 0 0 0 2 0 0 0
+problem_description_000333_short 11190.220673 0 1 0 0 0 0 0 0 0 2 0 0 0
+problem_description_000334_short 11201.526740 1 0 1 0 0 0 0 0 0 0 2 0 0 0
+problem_description_000335_short 11197.388781 1 0 1 5 0 0 0 0 0 0 0 2 0 0 0
+problem_description_000336_short 12947.195568 1 0 1 5 0 0 0 0 0 0 0 0 2 0 0 0
+problem_description_000337_short 16944.961517 1 0 1 5 0 0 0 0 0 0 0 0 0 2 0 0 0
+problem_description_000338_short 16942.083344 1 0 1 5 0 0 0 0 0 0 0 0 0 2 8 0 0 0
+problem_description_000363_short 976.463809 0 0 0
+problem_description_000364_short 2007.173594 0 0 0 0
+problem_description_000365_short 5054.369915 0 0 0 0 0
+problem_description_000366_short 5374.868379 0 0 0 0 0 0
+problem_description_000367_short 5374.723354 0 0 0 0 0 0 1
+problem_description_000368_short 5375.186332 0 0 0 0 0 0 0 1
+problem_description_000369_short 5695.975526 0 0 0 0 0 0 0 0 1
+problem_description_000370_short 7266.156662 0 0 0 0 0 0 0 0 0 1
+problem_description_000371_short 9059.945099 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000372_short 9444.241891 0 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000373_short 11226.314269 0 0 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000374_short 11235.712115 2 0 0 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000375_short 11230.305364 2 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000378_short 16265.940667 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+problem_description_000443_short 1363.589731 0 0 0
+problem_description_000445_short 4599.568001 0 0 0 0 0
+problem_description_000446_short 4943.607091 0 0 0 0 0 0
+problem_description_000447_short 4942.774976 0 2 0 0 0 0 10
+problem_description_000448_short 4941.171778 0 2 0 0 1 0 0 10
+problem_description_000450_short 6793.369571 0 2 0 0 0 0 1 0 0 10
+problem_description_000451_short 7609.807130 0 2 0 0 0 0 0 1 0 0 10
+problem_description_000452_short 6731.550246 0 2 0 0 0 0 0 0 1 0 0 10
+problem_description_000453_short 7536.185134 0 2 0 0 0 0 0 0 0 1 0 0 10
+problem_description_000483_short 3946.087448 0 2 0
+problem_description_000484_short 5721.494072 0 2 0 0
+problem_description_000485_short 10778.310074 0 2 0 0 0
+problem_description_000486_short 11151.094846 0 2 0 0 0 0
+problem_description_000487_short 11150.477060 0 2 0 0 0 0 4
+problem_description_000488_short 11149.401565 0 2 0 0 1 0 0 4
+problem_description_000490_short 17639.212437 0 2 0 0 0 0 1 0 0 4
+problem_description_000491_short 19058.218800 0 2 0 0 0 0 0 1 0 0 4
+problem_description_000492_short 19379.866003 0 2 0 0 0 0 0 0 1 0 0 4
+problem_description_000522_short 199.336500 15 0
+problem_description_000563_short 557.894009 0 4 0
+problem_description_000564_short 1155.542999 0 4 0 0
+problem_description_000565_short 2167.367926 0 4 0 0 0
+problem_description_000566_short 2595.225633 0 4 0 0 0 0
+problem_description_000567_short 2593.739795 0 4 0 0 0 0 3
+problem_description_000614_short 10210.696970 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000615_short 10206.895543 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000616_short 11004.706382 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000617_short 12395.281566 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000618_short 12392.733508 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000619_short 12423.530759 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000620_short 12441.972468 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000621_short 12443.812113 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000622_short 12445.211239 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000623_short 12487.781955 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000624_short 12570.533327 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000625_short 12583.362503 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000626_short 12601.930713 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000627_short 12656.506013 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000628_short 12687.149765 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000629_short 12770.120563 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000630_short 12767.752854 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000631_short 12810.382673 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000633_short 12823.843483 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000634_short 12824.156799 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000635_short 12825.556151 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000636_short 12826.955482 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000637_short 12882.973890 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000638_short 12884.878345 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000639_short 12897.916518 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000640_short 12899.315840 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000643_short 2825.746718 0 1 0
+problem_description_000644_short 8044.629084 0 1 0 0
+problem_description_000645_short 9753.370585 0 1 0 0 0
+problem_description_000646_short 10208.755080 0 1 0 0 0 0
+problem_description_000647_short 10208.522780 0 2 0 0 0 0 2
+problem_description_000648_short 10392.153698 0 4 0 0 4 0 0 8
+problem_description_000649_short 10847.638607 0 4 0 0 0 4 0 0 8
+problem_description_000650_short 17165.028576 0 4 0 0 0 0 4 0 0 8
+problem_description_000651_short 20168.911750 0 4 0 0 0 0 0 4 0 0 8
+problem_description_000652_short 21288.364318 0 4 0 0 0 0 0 0 4 0 0 8
+problem_description_000653_short 24284.215396 0 4 0 0 0 0 0 0 0 4 0 0 8
+problem_description_000654_short 24700.240263 1 0 4 0 0 0 0 0 0 0 4 0 0 8
+problem_description_000655_short 24696.309473 1 0 4 4 0 0 0 0 0 0 0 4 0 0 8
+problem_description_000656_short 26395.812568 1 0 4 4 0 0 0 0 0 0 0 0 4 0 0 8
+problem_description_000659_short 31895.740182 1 0 4 4 0 0 0 0 0 0 0 0 0 4 4 0 0 8 2
+problem_description_000683_short 2671.820868 0 2 0
+problem_description_000684_short 4967.223150 0 2 0 0
+problem_description_000685_short 13722.290532 0 2 0 0 0
+problem_description_000686_short 14202.782314 0 2 0 0 0 0
+problem_description_000687_short 14202.238916 0 2 0 0 0 0 1
+problem_description_000688_short 15332.858735 0 5 0 0 1 0 0 0
+problem_description_000689_short 15813.235637 0 5 0 0 0 1 0 0 0
+problem_description_000690_short 23504.541728 0 5 0 0 0 0 1 0 0 0
+problem_description_000691_short 26166.291737 0 5 0 0 0 0 0 1 0 0 0
+problem_description_000692_short 27332.682783 0 5 0 0 0 0 0 0 1 0 0 0
+problem_description_000693_short 29980.820162 0 5 0 0 0 0 0 0 0 1 0 0 0
+problem_description_000694_short 29990.464397 0 0 5 0 0 0 0 0 0 0 1 0 0 0
+problem_description_000721_short -1.939510 0
+problem_description_000722_short -4.789053 1 0
+problem_description_000723_short 280.599368 1 0 0
+problem_description_000724_short 276.480921 1 0 0 0
+problem_description_000726_short 314.430418 1 0 0 0 0 0
+problem_description_000727_short 310.686370 1 0 0 0 0 0 3
+problem_description_000728_short 308.878996 1 0 0 0 0 0 0 3
+problem_description_000729_short 309.672300 1 0 0 1 0 0 0 0 3
+problem_description_000730_short 321.660539 0 1 0 0 1 0 0 0 0 3
+problem_description_000762_short 30.315350 5 0
+problem_description_000763_short 206.353678 5 2 2
+problem_description_000764_short 204.376790 5 2 2 2
+problem_description_000765_short 228.920350 5 2 2 0 2
+problem_description_000766_short 228.375734 5 2 2 0 2 2
+problem_description_000767_short 234.622579 5 2 2 0 2 2 5
+problem_description_000802_short 129.000548 10 1
+problem_description_000803_short 860.414779 10 0 2
+problem_description_000804_short 856.483743 10 0 0 2
+problem_description_000805_short 922.602240 10 0 0 0 2
+problem_description_000843_short 4485.586753 0 0 1
+problem_description_000844_short 4482.334705 0 0 0 1
+problem_description_000845_short 4558.589330 0 0 0 0 1
+problem_description_000846_short 4558.569090 0 0 0 0 1 0
+problem_description_000847_short 9054.874253 0 0 0 0 1 0 0
+problem_description_000848_short 9087.316603 0 2 0 2 0 1 0 0
+problem_description_000849_short 11544.341209 0 2 1 0 2 0 1 0 0
+problem_description_000850_short 11580.046226 0 0 2 1 0 2 0 1 0 0
+problem_description_000851_short 11657.980490 0 0 2 0 1 0 2 0 1 0 0
+problem_description_000852_short 11655.529909 0 0 2 0 1 0 2 4 0 1 0 0
+problem_description_000853_short 11658.609450 0 0 2 0 1 0 2 4 0 1 0 1 0
+problem_description_000854_short 14467.724230 0 0 2 0 1 0 2 4 2 1 0 1 0 0
+problem_description_000855_short 19544.214058 0 0 0 2 0 1 0 2 4 2 0 0 1 0 0
+problem_description_000856_short 22352.169816 2 0 0 0 2 0 1 0 2 4 2 0 0 1 0 0
+problem_description_000857_short 22354.217776 2 0 0 0 2 0 1 0 0 2 4 2 0 0 1 0 0
+problem_description_000858_short 28799.412887 0 2 0 0 0 2 0 1 0 0 2 4 2 0 0 1 0 0
+problem_description_000881_short 68.165604 1
+problem_description_000882_short 802.699208 0 1
+problem_description_000883_short 3599.919957 0 4 6
+problem_description_000884_short 3597.058352 0 8 4 6
+problem_description_000885_short 3616.239574 0 8 4 1 6
+problem_description_000886_short 3615.291586 0 8 4 1 6 0
+problem_description_000926_short 1121.916993 0 0 0 0 0 0
+problem_description_000927_short 1157.789427 0 0 0 0 0 0 0
+problem_description_000928_short 1219.931483 0 0 0 0 0 0 0 0
+problem_description_000929_short 1652.337188 0 0 0 0 0 0 0 0 0
+problem_description_000930_short 1663.610491 0 0 0 0 0 0 0 0 0 0
+problem_description_000931_short 1786.654171 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000932_short 1782.584879 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000933_short 1804.908726 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000934_short 2203.961182 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000935_short 2890.344460 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000936_short 3287.570306 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000937_short 3286.733497 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000938_short 3325.670635 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000939_short 3321.771396 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000940_short 4155.659252 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000941_short 4202.538644 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000942_short 4203.702964 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+problem_description_000943_short 4259.953139 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+problem_description_000944_short 4306.959988 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0
+problem_description_000945_short 4367.512499 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000946_short 4378.655782 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000947_short 4389.971824 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000948_short 4412.287869 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000949_short 4413.452177 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0
+problem_description_000950_short 4409.211405 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000951_short 4469.747598 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000952_short 4501.058824 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000953_short 4557.369781 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000954_short 4556.587607 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000955_short 4554.934610 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000956_short 4556.098918 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+problem_description_000957_short 4588.745996 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+problem_description_000958_short 4589.382873 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000959_short 4600.699978 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+problem_description_000962_short 108.033642 1 1
+problem_description_000963_short 1483.744061 2 0 0
+problem_description_000964_short 1478.813658 2 6 0 0
+problem_description_000965_short 1531.185837 2 6 0 0 0
+problem_description_000966_short 1528.331019 2 5 0 0 0 1
+problem_description_000967_short 1599.722312 0 5 0 0 0 1 0
+problem_description_001006_short 2548.226473 0 0 0 0 0 1
+problem_description_001007_short 3616.008998 0 0 0 0 0 1 0
+problem_description_001008_short 3613.619090 0 0 0 0 0 0 1 0
+problem_description_001009_short 4197.763847 0 0 0 0 0 0 0 1 0
+problem_description_001010_short 4207.926980 1 0 0 0 0 0 0 0 1 0
+problem_description_001011_short 4723.831767 1 0 0 0 0 0 0 0 0 1 0
+problem_description_001012_short 4719.488631 1 0 0 0 0 0 0 1 0 0 1 0
+problem_description_001013_short 4720.938377 1 0 0 0 0 0 0 1 0 0 1 0 0
+problem_description_001014_short 6342.385349 1 0 0 0 0 0 0 1 0 0 1 0 0 0
+problem_description_001015_short 7471.810865 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0
+problem_description_001016_short 9091.710978 0 0 1 0 0 0 0 0 0 1 0 0 1 0 0 0
+problem_description_001017_short 9090.160016 0 0 1 0 0 0 0 1 0 0 1 0 0 1 0 0 0
+problem_description_001018_short 10159.083419 0 0 0 1 0 0 0 0 1 0 0 1 0 0 1 0 0 0
+problem_description_001019_short 10154.966841 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0
+problem_description_001020_short 11991.478593 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0
+problem_description_001021_short 11993.139862 0 0 0 1 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0
+problem_description_001022_short 11994.180661 0 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0
+problem_description_001023_short 11994.684672 0 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0
+problem_description_001024_short 11996.473420 0 0 0 1 0 1 0 0 1 0 0 1 1 0 0 1 0 0 1 0 1 0 0 0
+problem_description_001025_short 11991.777705 0 0 0 1 0 1 0 0 1 0 0 1 1 0 0 1 0 0 1 0 1 0 0 0 0
+problem_description_001026_short 12001.763082 0 0 0 1 0 1 0 0 1 0 0 1 1 0 0 1 0 0 1 0 1 1 0 0 0 0
+problem_description_001027_short 12011.969020 0 0 0 1 0 1 0 0 1 0 0 1 1 1 0 0 1 0 0 1 0 1 1 0 0 0 0
+problem_description_001028_short 12013.394927 0 0 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0 1 0 1 1 0 0 0 0
+problem_description_001029_short 12014.435719 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 0 0
+problem_description_001030_short 12010.334383 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001031_short 12006.954538 0 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001032_short 12006.206453 0 0 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001033_short 12006.771608 1 0 0 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001034_short 12005.337367 1 0 0 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001035_short 12004.127157 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 1 0 0 1 0 0
+problem_description_001036_short 12005.167995 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0
+problem_description_001037_short 12006.373969 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 0
+problem_description_001038_short 12006.046316 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0
+problem_description_001039_short 12016.205428 1 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0
+problem_description_001040_short 12017.246240 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0 1 0 1 0 0 1 0 0 1 0
+problem_description_001042_short 112.501558 1 0
+problem_description_001043_short 608.314781 1 0 0
+problem_description_001044_short 604.227228 1 0 0 0
+problem_description_001045_short 667.047274 1 0 0 0 0
+problem_description_001046_short 665.962643 1 2 0 0 0 5
+problem_description_001047_short 620.565059 1 2 0 0 0 5 1
+problem_description_001048_short 618.827612 1 2 0 6 0 0 5 1
+problem_description_001049_short 621.460101 1 2 0 1 6 0 0 5 1
+problem_description_001050_short 632.964261 2 1 2 0 1 6 0 0 5 1
+problem_description_001051_short 697.239496 2 1 2 0 0 1 6 0 0 5 1
+problem_description_001053_short 696.570030 2 1 2 0 0 1 6 3 0 0 5 1 1
+problem_description_001082_short 85.966614 2 0
+problem_description_001083_short 631.702440 2 2 5
+problem_description_001084_short 629.499181 2 1 2 5
+problem_description_001085_short 641.306279 2 1 2 0 5
+problem_description_001087_short 644.353698 1 5 2 0 5 0 0
+problem_description_001088_short 645.089529 1 6 2 1 0 5 0 0
+problem_description_001162_short 97.256909 1 2
+problem_description_001163_short 976.763318 1 0 2
+problem_description_001164_short 971.209993 1 5 0 2
+problem_description_001165_short 1036.276251 1 5 0 0 2
+problem_description_001202_short 116.815842 2 0
+problem_description_001203_short 2716.056910 2 0 0
+problem_description_001204_short 2709.235228 2 1 0 0
+problem_description_001205_short 2768.304079 2 1 0 0 0
