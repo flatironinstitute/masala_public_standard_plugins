@@ -37,6 +37,12 @@
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
 
+// Numeric API headers:
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.hh>
+#include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolution_API.hh>
+
 // STL headers
 #include <string>
 
@@ -139,15 +145,116 @@ ExampleCFNProblemLoader::get_keywords() const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// PUBLIC WORK FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Reads problem descriptions from disk (if not already loaded), and returns
+/// a container of 400 problems.
+/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
+/// directory of the Masala Standard Plugins repository.  Requires the Masala
+/// Standard Plugins to have been registered with the plugin manager.  Problems are cached
+/// in this object to prevent repeated loading, and are cloned for packaging in the problems
+/// container.
+/// @note These problems are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+ExampleCFNProblemLoader::load_problems() {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_load();
+	return protected_get_problems();
+}
+
+/// @brief Reads problem descriptions from disk (if not already loaded), and returns
+/// a container of n problems (where 0 < n <= 400).
+/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
+/// directory of the Masala Standard Plugins repository.  Requires the Masala
+/// Standard Plugins to have been registered with the plugin manager.  Problems are cached
+/// in this object to prevent repeated loading, and are cloned for packaging in the problems
+/// container.
+/// @param[in] n_problems The number of problems to load.  Must be in the range [1, 400].  If smaller than
+/// 400, then the first 400 problems are loaded.
+/// @note These problems are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+ExampleCFNProblemLoader::load_problems( masala::base::Size n_problems ) {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( n_problems > 0 && n_problems <= 400, "load_problems", "Expected n_problems to be in the range [1,400], but got " + std::to_string(n_problems) + "." );
+	protected_load();
+	return protected_get_problems( n_problems );
+}
+
+/// @brief Reads problem descriptions from disk (if not already loaded), and returns
+/// a container of 400 solutions.
+/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
+/// directory of the Masala Standard Plugins repository.  Requires the Masala
+/// Standard Plugins to have been registered with the plugin manager.  Solutions are cached
+/// in this object to prevent repeated loading, and are cloned for packaging in the solutions
+/// container.
+/// @note These solutions are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+ExampleCFNProblemLoader::load_solutions() {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_load();
+	return protected_get_solutions();
+}
+
+/// @brief Reads problem descriptions from disk (if not already loaded), and returns
+/// a container of n solutions (where 0 < n <= 400).
+/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
+/// directory of the Masala Standard Plugins repository.  Requires the Masala
+/// Standard Plugins to have been registered with the plugin manager.  Solutions are cached
+/// in this object to prevent repeated loading, and are cloned for packaging in the solutions
+/// container.
+/// @param[in] n_solutions The number of solutions to load.  Must be in the range [1, 400].  If smaller than
+/// 400, then the first 400 solutions are loaded.
+/// @note These solutions are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+ExampleCFNProblemLoader::load_solutions( masala::base::Size n_solutions ) {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( n_solutions > 0 && n_problems <= 400, "load_solutions", "Expected n_solutions to be in the range [1,400], but got " + std::to_string(n_solutions) + "." );
+	protected_load();
+	return protected_get_solutions( n_solutions );
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Assign src to this.
+/// @brief Assign src to this.  Performs no mutex locking.  Derived classes should
+/// override this, and the overrides should call the parent class protected_assign().
 void
 ExampleCFNProblemLoader::protected_assign(
 	ExampleCFNProblemLoader const & src
 ) {
-	TODO TODO TODO;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	problems_.clear();
+	solutions_.clear();
+
+	if( src.problems_.size() > 0 ) {
+		problems_.reserve(src.problems_.size());
+		for( auto const & problem : src.problems_ ) {
+#ifdef NDEBUG
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->clone() ) );
+#else
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->clone() ) );
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "protected_assign", "Could not clone a problem of type " + problem->class_name() + "." );
+#endif
+			problem_copy->make_independent();
+			problems_.push_back( problem_copy );
+		}
+	}
+	if( src.solutions_.size() > 0 ) {
+		solutions_.reserve(src.problems_.size());
+		for( auto const & solution : src.solutions_ ) {
+#ifdef NDEBUG
+			CostFunctionNetworkOptimizationSolution_APISP solution_copy( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solution->clone() ) );
+#else
+			CostFunctionNetworkOptimizationSolution_APISP solution_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solution->clone() ) );
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_copy != nullptr, "protected_assign", "Could not clone a problem of type " + solution->class_name() + "." );
+#endif
+			solution_copy->make_independent();
+			solutions_.push_back( solution_copy );
+		}
+	}
 }
 
 } // namespace utility
