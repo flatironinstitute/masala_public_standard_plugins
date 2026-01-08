@@ -145,6 +145,52 @@ ExampleCFNProblemLoader::get_keywords() const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// PUBLIC GETTERS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Returns a container of 400 problems.  Throws if problems and solutions  have not already been
+/// loaded and cached.
+/// @note These problems are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+ExampleCFNProblemLoader::get_problems() const {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	return protected_get_problems();
+}
+
+/// @brief Returns a container of n problems (where 0 < n <= 400).  Throws if problems and solutions 
+/// have not already been loaded and cached.
+/// @param[in] n_problems The number of problems to return.  Must be in the range [1, 400].  If smaller than
+/// 400, then the first 400 problems are returned.
+/// @note These problems are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+ExampleCFNProblemLoader::get_problems( masala::base::Size n_problems ) const {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( n_problems > 0 && n_problems <= 400, "get_problems", "Expected n_problems to be in the range [1,400], but got " + std::to_string(n_problems) + "." );
+	return protected_get_problems( n_problems );
+}
+
+/// @brief Returns a container of 400 solutions.  Throws if problems and solutions have not already been
+/// loaded and cached.
+/// @note These solutions are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+ExampleCFNProblemLoader::get_solutions() const {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	return protected_get_solutions();
+}
+
+/// @brief Returns a container of n solutions (where 0 < n <= 400).  Throws if problems and solutions 
+/// have not already been loaded and cached.
+/// @param[in] n_solutions The number of solutions to return.  Must be in the range [1, 400].  If smaller than
+/// 400, then the first 400 solutions are returned.
+/// @note These solutions are not finalized.
+masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+ExampleCFNProblemLoader::get_solutions( masala::base::Size n_solutions ) const {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( n_solutions > 0 && n_problems <= 400, "get_solutions", "Expected n_solutions to be in the range [1,400], but got " + std::to_string(n_solutions) + "." );
+	return protected_get_solutions( n_solutions );
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
