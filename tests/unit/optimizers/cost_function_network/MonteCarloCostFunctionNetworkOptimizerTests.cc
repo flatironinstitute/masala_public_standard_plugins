@@ -509,7 +509,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
     masala::numeric_api::auto_generated_api::registration::unregister_numeric();
 }
 
-TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+TEST_CASE( "Solve 393 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
 	using namespace masala::base::managers::plugin_module;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	using namespace masala::base::api;
@@ -563,10 +563,10 @@ TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunc
 			solutions = get_solutions_fxn->function();
 			problem_names = get_probnames_fxn->function();
 
-			CHECK( problems->n_problems() == 394 );
-			CHECK( solutions.size() == 394 );
-			CHECK( problem_names.size() == 394 );
-			for( Size i(0); i<394; ++i ) {
+			CHECK( problems->n_problems() == 393 );
+			CHECK( solutions.size() == 393 );
+			CHECK( problem_names.size() == 393 );
+			for( Size i(0); i<393; ++i ) {
 				problems->problem_nonconst(i)->finalize();
 			}
 		}
@@ -581,8 +581,8 @@ TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunc
 		log_rep_as->set_temperature_final(0.1);
 		log_rep_as->set_n_repeats(3);
 		mc_opt->set_annealing_schedule( *log_rep_as );
-		mc_opt->set_annealing_steps_per_attempt(500000);
-		mc_opt->set_attempts_per_problem(1);
+		mc_opt->set_annealing_steps_per_attempt(100000);
+		mc_opt->set_attempts_per_problem(2);
 		mc_opt->set_cpu_threads_to_request(0);
 		mc_opt->set_solution_storage_mode("check_on_acceptance");
 		mc_opt->set_n_solutions_to_store_per_problem(1);
@@ -593,9 +593,9 @@ TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunc
 		);
 
 		// Compare:
-		CHECK( mc_opt_solutions.size() == 394 );
-		std::vector< bool > passed( 394, true );
-		for( Size i(0); i<394; ++i ) {
+		CHECK( mc_opt_solutions.size() == 393 );
+		std::vector< bool > passed( 393, true );
+		for( Size i(0); i<393; ++i ) {
 			CHECK( solutions[i]->n_solutions() == 1 );
 			CHECK( mc_opt_solutions[i]->n_solutions() == 1 );
 			CHECK( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) < 1.0e-5 );
@@ -609,7 +609,130 @@ TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunc
 		}
 		std::stringstream ss;
 		ss << "NAME" << "\t" << "FAILED?" << "\t" << "EXP_SCORE" << "\t" << "ACT_SCORE" << "\t" << "EXP_SOLUTION" << "\t" << "ACT_SOLUTION" << "\n";
-		for( Size i(0); i<394; ++i ) {
+		for( Size i(0); i<393; ++i ) {
+			ss << problem_names[i]
+				<< (passed[i] ? "  " : " X")
+				<< "\t" << solutions[i]->solution_score(0)
+				<< "\t" << mc_opt_solutions[i]->solution_score(0)
+				<< "\t[" << masala::base::utility::container::container_to_string( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_variable_positions(), "," ) << "]"
+				<< "\t[" << masala::base::utility::container::container_to_string( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_variable_positions(), "," ) << "]"
+				<< "\n";
+		}
+		mc_opt->write_to_tracer( ss.str() );
+
+		// Spin down threads:
+		MasalaThreadManager::get_instance()->set_total_threads(1);
+
+	}() );
+
+	file_interpreters_api::auto_generated_api::registration::unregister_file_interpreters();
+	optimizers_api::auto_generated_api::registration::unregister_optimizers();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+}
+
+TEST_CASE( "Solve 393 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule with greedy refinement.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+	using namespace masala::base::managers::plugin_module;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using namespace masala::base::api;
+	using namespace masala::base::api::work_function;
+	using namespace masala::base::api::getter;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
+	using namespace masala::base::managers::threads;
+	using masala::base::Size;
+
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+	optimizers_api::auto_generated_api::registration::register_optimizers();
+	file_interpreters_api::auto_generated_api::registration::register_file_interpreters();
+
+	REQUIRE_NOTHROW([&](){
+
+		// Get the plugin module manager:
+		MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+
+		// Create the problems and their solutions:
+		std::vector< std::string > problem_names;
+		std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions;
+		CostFunctionNetworkOptimizationProblems_APISP problems;
+		{
+			// Create the problem loader:
+			MasalaPluginAPISP example_loader( plugman->create_plugin_object_instance_by_short_name( { "Utility", "CFN_Utility" }, "ExampleCFNProblemLoader", true ) );
+			CHECK( example_loader != nullptr );
+
+			// Get its API functions:
+			MasalaObjectAPIDefinitionCSP el_apidef( example_loader->get_api_definition_for_inner_class() );
+			CHECK( el_apidef != nullptr );
+			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > init_fxn(
+				el_apidef->get_oneinput_work_function< void, std::string const & >( "initialize_from_problem_type_name" ).lock()
+			);
+			CHECK( init_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< CostFunctionNetworkOptimizationProblems_APISP > get_problems_fxn(
+				el_apidef->get_zeroinput_getter_function< CostFunctionNetworkOptimizationProblems_APISP >( "get_problems" ).lock()
+			);
+			CHECK( get_problems_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > get_solutions_fxn(
+				el_apidef->get_zeroinput_getter_function< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > >( "get_solutions" ).lock()
+			);
+			CHECK( get_solutions_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< std::vector< std::string > const & > get_probnames_fxn(
+				el_apidef->get_zeroinput_getter_function< std::vector< std::string > const &  >( "get_problem_names" ).lock()
+			);
+			CHECK( get_probnames_fxn != nullptr );
+
+			init_fxn->function( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" );
+			problems = get_problems_fxn->function();
+			solutions = get_solutions_fxn->function();
+			problem_names = get_probnames_fxn->function();
+
+			CHECK( problems->n_problems() == 393 );
+			CHECK( solutions.size() == 393 );
+			CHECK( problem_names.size() == 393 );
+			for( Size i(0); i<393; ++i ) {
+				problems->problem_nonconst(i)->finalize();
+			}
+		}
+
+		// Spin up threads:
+		MasalaThreadManager::get_instance()->set_total_threads(16);
+
+		// Create and configure the optimizer:
+		MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt( masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >() );
+		LogarithmicRepeatAnnealingSchedule_APISP log_rep_as( masala::make_shared< LogarithmicRepeatAnnealingSchedule_API >() );
+		log_rep_as->set_temperature_initial(100.0);
+		log_rep_as->set_temperature_final(0.1);
+		log_rep_as->set_n_repeats(3);
+		mc_opt->set_annealing_schedule( *log_rep_as );
+		mc_opt->set_annealing_steps_per_attempt(100000);
+		mc_opt->set_attempts_per_problem(1);
+		mc_opt->set_cpu_threads_to_request(0);
+		mc_opt->set_solution_storage_mode("check_on_acceptance");
+		mc_opt->set_n_solutions_to_store_per_problem(1);
+		mc_opt->set_do_greedy_refinement(true);
+		mc_opt->set_greedy_refinement_mode("refine_top");
+		
+		// Run the cost function network optimizer:
+		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > mc_opt_solutions(
+			mc_opt->run_cost_function_network_optimizer( *problems )
+		);
+
+		// Compare:
+		CHECK( mc_opt_solutions.size() == 393 );
+		std::vector< bool > passed( 393, true );
+		for( Size i(0); i<393; ++i ) {
+			CHECK( solutions[i]->n_solutions() == 1 );
+			CHECK( mc_opt_solutions[i]->n_solutions() == 1 );
+			CHECK( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) < 1.0e-5 );
+			if( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) >= 1.0e-5 ) {
+				passed[i] = false;
+			}
+			CHECK( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_all_positions() == std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_all_positions() );
+			if( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_all_positions() != std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_all_positions() ) {
+				passed[i] = false;
+			}
+		}
+		std::stringstream ss;
+		ss << "NAME" << "\t" << "FAILED?" << "\t" << "EXP_SCORE" << "\t" << "ACT_SCORE" << "\t" << "EXP_SOLUTION" << "\t" << "ACT_SOLUTION" << "\n";
+		for( Size i(0); i<393; ++i ) {
 			ss << problem_names[i]
 				<< (passed[i] ? "  " : " X")
 				<< "\t" << solutions[i]->solution_score(0)
