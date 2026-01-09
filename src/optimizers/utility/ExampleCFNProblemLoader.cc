@@ -83,6 +83,7 @@ ExampleCFNProblemLoader::operator=(
 	std::lock_guard< std::mutex > lockthis( mutex_, std::adopt_lock );
 	std::lock_guard< std::mutex > lockthat( src.mutex_, std::adopt_lock );
 	protected_assign(src);
+	return *this;
 }
 
 /// @brief Every class can name itself.
@@ -129,18 +130,7 @@ ExampleCFNProblemLoader::get_api_definition() {
 		);
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( ExampleCFNProblemLoader, apidef );
 
-		// Work function:
-		apidef->add_work_function(
-			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, PluginCostFunctionNetworkOptimizer const & > >(
-				"initialize_from_optimizer_instance",
-				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.  "
-				"This version picks the preferred data representation given an instance of an optimizer.",
-				false, false, false, false,
-				"optimizer", "An instance of the optimizer type that will be accepting the problems, used to determine the problem data representation to generate.",
-				"void", "This function returns nothing.",
-				std::bind( &ExampleCFNProblemLoader::initialize_from_optimizer_instance, this, std::placeholders::_1 )
-			)
-		);
+		// Work functions:
 		apidef->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, std::string const & > >(
 				"initialize_from_optimizer_type_name",
@@ -284,15 +274,6 @@ ExampleCFNProblemLoader::get_solutions( masala::base::Size const n_solutions ) c
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.
-void
-ExampleCFNProblemLoader::initialize_from_optimizer_instance(
-	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer
-) {
-	std::lock_guard< std::mutex > lock( mutex_ );
-	protected_initialize( optimizer.class_namespace() + "::" + optimizer.class_name(), "" );
-}
 
 /// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given type of optimizer.
 /// @details Throws if already initialized.

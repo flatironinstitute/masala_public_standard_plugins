@@ -49,6 +49,7 @@
 #include <optimizers/gradient_free/SimplexFunctionOptimizer.hh>
 #include <optimizers/gradient_based/ArmijoInexactLineOptimizer.hh>
 #include <optimizers/gradient_based/BrentAlgorithmLineOptimizer.hh>
+#include <optimizers/utility/ExampleCFNProblemLoader.hh>
 
 namespace standard_masala_plugins {
 namespace optimizers {
@@ -88,6 +89,7 @@ namespace api {
         outvec.emplace_back( masala::make_shared< gradient_free::SimplexFunctionOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::ArmijoInexactLineOptimizer >() );
         outvec.emplace_back( masala::make_shared< gradient_based::BrentAlgorithmLineOptimizer >() );
+        outvec.emplace_back( masala::make_shared< utility::ExampleCFNProblemLoader >() );
         // ADD MORE ENTRIES HERE
 
         return outvec;

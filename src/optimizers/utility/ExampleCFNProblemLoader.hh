@@ -32,6 +32,9 @@
 // Parent headers:
 #include <base/managers/plugin_module/MasalaPlugin.hh>
 
+// Base headers:
+#include <base/types.hh>
+
 // Numeric API headers:
 #include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.fwd.hh>
@@ -157,10 +160,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.
-	/// @details Throws if already initialized.  This version picks the preferred data representation given an instance of an optimizer.
-	void initialize_from_optimizer_instance( masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer );
 
 	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given type of optimizer.
 	/// @details Throws if already initialized.  This version picks the preferred data representation given the name of a type of optimizer.
