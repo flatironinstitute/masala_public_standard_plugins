@@ -160,7 +160,7 @@ public:
 
 	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.
 	/// @details Throws if already initialized.
-	void initialize( masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer );
+	void initialize_from_optimizer_instance( masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer );
 
 protected:
 
