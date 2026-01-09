@@ -236,7 +236,6 @@ ExampleCFNProblemLoader::get_problems() const {
 masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
 ExampleCFNProblemLoader::get_problems( masala::base::Size const n_problems ) const {
 	std::lock_guard< std::mutex > lock( mutex_ );
-	CHECK_OR_THROW_FOR_CLASS( n_problems > 0 && n_problems <= 400, "get_problems", "Expected n_problems to be in the range [1,400], but got " + std::to_string(n_problems) + "." );
 	return protected_get_problems( n_problems );
 }
 
@@ -407,7 +406,7 @@ ExampleCFNProblemLoader::protected_initialize(
 			CostFunctionNetworkOptimizationSolutions_APISP cursoln( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( curprob->create_solutions_container() ) );
 			CHECK_OR_THROW_FOR_CLASS( cursoln != nullptr, "protected_initialize", "Unable to create solutions container for problem " + std::to_string(counter) + "." );
 			cursoln->merge_in_lowest_scoring_solutions(
-				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple{ vec, solutionscore, 1 } },
+				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple( solnvec, solutionscore, 1 ) },
 				1,
 				curprob,
 				curscratch.get()
@@ -463,9 +462,29 @@ ExampleCFNProblemLoader::protected_assign(
 /// @details Throws if problems and solutions have not yet been loaded.
 masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
 ExampleCFNProblemLoader::protected_get_problems( masala::base::Size const n_problems /*= 400*/ ) const {
+	using masala::base::Size;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
-	TODO TODO TODO;
+	CHECK_OR_THROW_FOR_CLASS( n_problems > 0 && n_problems <= 400, "protected_get_problems", "Expected n_problems to be in the range [1,400], but got " + std::to_string(n_problems) + "." );
+	CHECK_OR_THROW_FOR_CLASS( problems_ != nullptr, "protected_get_problems", "This object must be initialized before this function is called." );
+
+	CostFunctionNetworkOptimizationProblems_APISP problems_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( problems_->clone() ) );
+	CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_get_problems", "Unable to clone problems." );
+
+	if( n_problems < 400 ) {
+		problems_copy->reset();
+		problems_copy->make_independent();
+		for( Size i(0); i<n_problems; ++i ) {
+			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_->problem(i)->clone() ) );
+			CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_get_problems", "Unable to clone problem " + std::to_string(i) + "." );
+			problem_copy->make_independent();
+			problems_copy->add_optimization_problem( problem_copy );
+		}
+	} else {
+		problems_copy->make_independent();
+	}
+
+	return problems_copy;
 }
 
 /// @brief Clone the first N of the cached solutions and package the clones into a problems container.
