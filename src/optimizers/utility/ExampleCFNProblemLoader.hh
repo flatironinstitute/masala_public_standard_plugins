@@ -133,7 +133,7 @@ public:
 	/// @brief Returns a container of n problems (where 0 < n <= 400).  Throws if problems and solutions 
 	/// have not already been loaded and cached.
 	/// @param[in] n_problems The number of problems to return.  Must be in the range [1, 400].  If smaller than
-	/// 400, then the first 400 problems are returned.
+	/// 400, then the first n problems are returned.
 	/// @note These problems are not finalized.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
 	get_problems( masala::base::Size const n_problems ) const;
@@ -147,7 +147,7 @@ public:
 	/// @brief Returns a container of n solutions (where 0 < n <= 400).  Throws if problems and solutions 
 	/// have not already been loaded and cached.
 	/// @param[in] n_solutions The number of solutions to return.  Must be in the range [1, 400].  If smaller than
-	/// 400, then the first 400 solutions are returned.
+	/// 400, then the first n solutions are returned.
 	/// @note These solutions are not finalized.
 	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 	get_solutions( masala::base::Size const n_solutions ) const;

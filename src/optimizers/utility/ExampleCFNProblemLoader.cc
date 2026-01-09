@@ -181,10 +181,32 @@ ExampleCFNProblemLoader::get_api_definition() {
 				"Returns a container of n problems (where 0 < n <= 400).  Throws if problems and solutions "
 				"have not already been loaded and cached.  These problems are not finalized.",
 				"n_problems", "The number of problems to return.  Must be in the range [1, 400].  If smaller "
-				"than 400, then the first 400 problems are returned.",
+				"than 400, then the first n problems are returned.",
 				"problems", "A set of n CFN problems, in an appropriate format.  Not finalized.",
 				false, false,
 				std::bind( static_cast<CostFunctionNetworkOptimizationProblems_APISP(ExampleCFNProblemLoader::*)( masala::base::Size const ) const>( &ExampleCFNProblemLoader::get_problems ), this, std::placeholders::_1 )
+			)
+		);
+		apidef->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > >(
+				"get_solutions",
+				"Returns a container of 400 solutions.  Throws if problems and solutions have not already been "
+				"loaded and cached.  These solutions are not finalized.",
+				"solutions", "A set of 400 CFN solutions.  Not finalized.",
+				false, false,
+				std::bind( static_cast<std::vector< CostFunctionNetworkOptimizationSolutions_APISP>(ExampleCFNProblemLoader::*)() const>( &ExampleCFNProblemLoader::get_solutions ), this )
+			)
+		);
+		apidef->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_OneInput< std::vector< CostFunctionNetworkOptimizationSolutions_APISP >, Size const > >(
+				"get_solutions",
+				"Returns a container of n solutions (where 0 < n <= 400).  Throws if problems and solutions "
+				"have not already been loaded and cached.  These solutions are not finalized.",
+				"n_solutions", "The number of solutions to return.  Must be in the range [1, 400].  If smaller "
+				"than 400, then the first n solutions are returned.",
+				"solutions", "A set of n CFN solutions.  Not finalized.",
+				false, false,
+				std::bind( static_cast<std::vector< CostFunctionNetworkOptimizationSolutions_APISP >(ExampleCFNProblemLoader::*)( masala::base::Size const ) const>( &ExampleCFNProblemLoader::get_solutions ), this, std::placeholders::_1 )
 			)
 		);
 
@@ -231,7 +253,7 @@ ExampleCFNProblemLoader::get_problems() const {
 /// @brief Returns a container of n problems (where 0 < n <= 400).  Throws if problems and solutions 
 /// have not already been loaded and cached.
 /// @param[in] n_problems The number of problems to return.  Must be in the range [1, 400].  If smaller than
-/// 400, then the first 400 problems are returned.
+/// 400, then the first n problems are returned.
 /// @note These problems are not finalized.
 masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
 ExampleCFNProblemLoader::get_problems( masala::base::Size const n_problems ) const {
@@ -251,7 +273,7 @@ ExampleCFNProblemLoader::get_solutions() const {
 /// @brief Returns a container of n solutions (where 0 < n <= 400).  Throws if problems and solutions 
 /// have not already been loaded and cached.
 /// @param[in] n_solutions The number of solutions to return.  Must be in the range [1, 400].  If smaller than
-/// 400, then the first 400 solutions are returned.
+/// 400, then the first n solutions are returned.
 /// @note These solutions are not finalized.
 std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 ExampleCFNProblemLoader::get_solutions( masala::base::Size const n_solutions ) const {
