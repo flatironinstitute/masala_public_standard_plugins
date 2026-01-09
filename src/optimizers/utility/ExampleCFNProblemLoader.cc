@@ -100,6 +100,28 @@ ExampleCFNProblemLoader::class_namespace() const {
 	return "standard_masala_plugins::optimizers::utility";
 }
 
+/// @brief Make a copy of this object.
+ExampleCFNProblemLoaderSP
+ExampleCFNProblemLoader::clone() const {
+	return masala::make_shared< ExampleCFNProblemLoader >( *this );
+}
+
+/// @brief Make a fully independent copy of this object.
+ExampleCFNProblemLoaderSP
+ExampleCFNProblemLoader::deep_clone() const {
+	ExampleCFNProblemLoaderSP object_copy( masala::make_shared< ExampleCFNProblemLoader >( *this ) );
+	object_copy->make_independent();
+	return object_copy;
+}
+
+/// @brief Ensure that this object doesn't share any data with anything else, by
+/// deep-cloning all of its internal data.
+void
+ExampleCFNProblemLoader::make_independent() {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_make_independent();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC MEMBER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -424,7 +446,30 @@ ExampleCFNProblemLoader::protected_initialize(
 		);
 		write_to_tracer( "Loaded " + std::to_string( solutions_.size() ) + " solutions." );
 	}
+}
 
+/// @brief Deep-clone all the internal data in this object.  Should be implemented by
+/// derived classes, and the derived classes' implementations should call their parent classes'
+/// implementations.
+void
+ExampleCFNProblemLoader::protected_make_independent() {
+	using masala::base::Size;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+
+	if( problems_ != nullptr ) {
+		CostFunctionNetworkOptimizationProblems_APISP problems_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( problems_->clone() ) );
+		CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_make_independent", "Could not properly clone a " + problems_->inner_class_name() + " object." );
+		problems_copy->make_independent();
+		problems_ = problems_copy;
+	}
+	if( !solutions_.empty() ) {
+		for( Size i(0); i<solutions_.size(); ++i ) {
+			CostFunctionNetworkOptimizationSolutions_APISP solution_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions_[i]->clone() ) );
+			CHECK_OR_THROW_FOR_CLASS( solution_copy != nullptr, "protected_make_independent", "Could not properly clone solutions object " + std::to_string(i) + "." );
+			solution_copy->make_independent();
+			solutions_[i] = solution_copy;
+		}
+	}
 }
 
 /// @brief Assign src to this.  Performs no mutex locking.  Derived classes should

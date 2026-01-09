@@ -88,6 +88,16 @@ public:
 	/// @returns "standard_masala_plugins::optimizers::utility".
 	std::string class_namespace() const override;
 
+	/// @brief Make a copy of this object.
+	virtual ExampleCFNProblemLoaderSP clone() const;
+
+	/// @brief Make a fully independent copy of this object.
+	ExampleCFNProblemLoaderSP deep_clone() const;
+
+	/// @brief Ensure that this object doesn't share any data with anything else, by
+	/// deep-cloning all of its internal data.
+	void make_independent();
+
 public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +192,11 @@ protected:
 		std::string const & optimizer_name,
 		std::string const & problem_type_name
 	);
+
+	/// @brief Deep-clone all the internal data in this object.  Should be implemented by
+	/// derived classes, and the derived classes' implementations should call their parent classes'
+	/// implementations.
+	virtual void protected_make_independent();
 
 	/// @brief Assign src to this.  Performs no mutex locking.  Derived classes should
 	/// override this, and the overrides should call the parent class protected_assign().
