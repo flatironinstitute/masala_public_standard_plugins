@@ -33,6 +33,7 @@
 #include <base/managers/plugin_module/MasalaPlugin.hh>
 
 // Numeric API headers:
+#include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblems_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.fwd.hh>
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationSolutions_API.fwd.hh>
@@ -135,7 +136,7 @@ public:
 	/// 400, then the first 400 problems are returned.
 	/// @note These problems are not finalized.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
-	get_problems( masala::base::Size n_problems ) const;
+	get_problems( masala::base::Size const n_problems ) const;
 
 	/// @brief Returns a container of 400 solutions.  Throws if problems and solutions have not already been
 	/// loaded and cached.
@@ -149,7 +150,7 @@ public:
 	/// 400, then the first 400 solutions are returned.
 	/// @note These solutions are not finalized.
 	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
-	get_solutions( masala::base::Size n_solutions ) const;
+	get_solutions( masala::base::Size const n_solutions ) const;
 
 public:
 
@@ -157,53 +158,9 @@ public:
 // PUBLIC WORK FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-	/// @brief Reads problem descriptions from disk (if not already loaded), and returns
-	/// a container of 400 problems.
-	/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
-	/// directory of the Masala Standard Plugins repository.  Requires the Masala
-	/// Standard Plugins to have been registered with the plugin manager.  Problems are cached
-	/// in this object to prevent repeated loading, and are cloned for packaging in the problems
-	/// container.
-	/// @note These problems are not finalized.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
-	load_problems();
-
-	/// @brief Reads problem descriptions from disk (if not already loaded), and returns
-	/// a container of n problems (where 0 < n <= 400).
-	/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
-	/// directory of the Masala Standard Plugins repository.  Requires the Masala
-	/// Standard Plugins to have been registered with the plugin manager.  Problems are cached
-	/// in this object to prevent repeated loading, and are cloned for packaging in the problems
-	/// container.
-	/// @param[in] n_problems The number of problems to load.  Must be in the range [1, 400].  If smaller than
-	/// 400, then the first 400 problems are loaded.
-	/// @note These problems are not finalized.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
-	load_problems( masala::base::Size n_problems );
-
-	/// @brief Reads problem descriptions from disk (if not already loaded), and returns
-	/// a container of 400 solutions.
-	/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
-	/// directory of the Masala Standard Plugins repository.  Requires the Masala
-	/// Standard Plugins to have been registered with the plugin manager.  Solutions are cached
-	/// in this object to prevent repeated loading, and are cloned for packaging in the solutions
-	/// container.
-	/// @note These solutions are not finalized.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
-	load_solutions();
-
-	/// @brief Reads problem descriptions from disk (if not already loaded), and returns
-	/// a container of n solutions (where 0 < n <= 400).
-	/// @details Requires MASALA_STANDARD_PLUGINS environment variable to point to the
-	/// directory of the Masala Standard Plugins repository.  Requires the Masala
-	/// Standard Plugins to have been registered with the plugin manager.  Solutions are cached
-	/// in this object to prevent repeated loading, and are cloned for packaging in the solutions
-	/// container.
-	/// @param[in] n_solutions The number of solutions to load.  Must be in the range [1, 400].  If smaller than
-	/// 400, then the first 400 solutions are loaded.
-	/// @note These solutions are not finalized.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
-	load_solutions( masala::base::Size n_solutions );
+	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.
+	/// @details Throws if already initialized.
+	void initialize( masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer );
 
 protected:
 
@@ -214,6 +171,16 @@ protected:
 	/// @brief Assign src to this.  Performs no mutex locking.  Derived classes should
 	/// override this, and the overrides should call the parent class protected_assign().
 	virtual void protected_assign( ExampleCFNProblemLoader const & src );
+
+	/// @brief Clone the first N of the cached problems and package the clones into a problems container.
+	/// @details Throws if problems and solutions have not yet been loaded.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP
+	protected_get_problems( masala::base::Size const n_problems = 400 ) const;
+
+	/// @brief Clone the first N of the cached solutions and package the clones into a problems container.
+	/// @details Throws if problems and solutions have not yet been loaded.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+	protected_get_solutions( masala::base::Size const n_solutions = 400 ) const;
 
 private:
 
@@ -229,11 +196,14 @@ private:
 	/// @brief The API definition for this instance of this class.  Nullptr until get_api_definition() is called.
 	masala::base::api::MasalaObjectAPIDefinitionCSP api_definition_;
 
-	/// @brief The problems, loaded from disk.  Initialized on first call to load_problems() or load_solutions().
-	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblem_APISP > problems_;
+	/// @brief The problems, loaded from disk.
+	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationProblems_APISP problems_;
 
-	/// @brief The solutions, loaded from disk.  Initialized on first call to load_problems() or load_solutions().
-	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolution_APISP > solutions_;
+	/// @brief The solutions, loaded from disk.
+	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP > solutions_;
+
+	/// @brief The problem names, loaded from disk.
+	std::vector< std::string > problem_names_;
 
 }; // class MasalaObject
 
