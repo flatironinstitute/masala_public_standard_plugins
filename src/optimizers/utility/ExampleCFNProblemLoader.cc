@@ -326,35 +326,30 @@ ExampleCFNProblemLoader::protected_assign(
 ) {
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
-	problems_.clear();
+	if( src.problems_ != nullptr ) {
+		problems_ = std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( src.problems_->clone() );
+		CHECK_OR_THROW_FOR_CLASS( problems_ != nullptr, "protected_assign", "Unable to clone problems from source." );
+		problems_->make_independent();
+	} else {
+		problems_ = nullptr;
+	}
 	solutions_.clear();
 
-	if( src.problems_.size() > 0 ) {
-		problems_.reserve(src.problems_.size());
-		for( auto const & problem : src.problems_ ) {
-#ifdef NDEBUG
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::static_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->clone() ) );
-#else
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problem->clone() ) );
-			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( problem_copy != nullptr, "protected_assign", "Could not clone a problem of type " + problem->class_name() + "." );
-#endif
-			problem_copy->make_independent();
-			problems_.push_back( problem_copy );
-		}
-	}
 	if( src.solutions_.size() > 0 ) {
-		solutions_.reserve(src.problems_.size());
+		solutions_.reserve(src.solutions_.size());
 		for( auto const & solution : src.solutions_ ) {
 #ifdef NDEBUG
-			CostFunctionNetworkOptimizationSolution_APISP solution_copy( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solution->clone() ) );
+			CostFunctionNetworkOptimizationSolutions_APISP solution_copy( std::static_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solution->clone() ) );
 #else
-			CostFunctionNetworkOptimizationSolution_APISP solution_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolution_API >( solution->clone() ) );
-			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_copy != nullptr, "protected_assign", "Could not clone a problem of type " + solution->class_name() + "." );
+			CostFunctionNetworkOptimizationSolutions_APISP solution_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solution->clone() ) );
+			DEBUG_MODE_CHECK_OR_THROW_FOR_CLASS( solution_copy != nullptr, "protected_assign", "Could not clone a solutions object of type " + solution->class_name() + "." );
 #endif
 			solution_copy->make_independent();
 			solutions_.push_back( solution_copy );
 		}
 	}
+
+	problem_names_ = src.problem_names_;
 }
 
 /// @brief Clone the first N of the cached problems and package the clones into a problems container.
