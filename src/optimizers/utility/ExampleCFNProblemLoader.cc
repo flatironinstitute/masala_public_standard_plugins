@@ -131,11 +131,34 @@ ExampleCFNProblemLoader::get_api_definition() {
 		apidef->add_work_function(
 			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, PluginCostFunctionNetworkOptimizer const & > >(
 				"initialize_from_optimizer_instance",
-				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.",
+				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.  "
+				"This version picks the preferred data representation given an instance of an optimizer.",
 				false, false, false, false,
 				"optimizer", "An instance of the optimizer type that will be accepting the problems, used to determine the problem data representation to generate.",
 				"void", "This function returns nothing.",
 				std::bind( &ExampleCFNProblemLoader::initialize_from_optimizer_instance, this, std::placeholders::_1 )
+			)
+		);
+		apidef->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, std::string const & > >(
+				"initialize_from_optimizer_type_name",
+				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.  "
+				"This version picks the preferred data representation given the name of a type of optimizer.",
+				false, false, false, false,
+				"optimizer_name", "The name of a type of optimizer type that will be accepting the problems, used to determine the problem data representation to generate.",
+				"void", "This function returns nothing.",
+				std::bind( &ExampleCFNProblemLoader::initialize_from_optimizer_type_name, this, std::placeholders::_1 )
+			)
+		);
+		apidef->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, std::string const & > >(
+				"initialize_from_problem_type_name",
+				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.  "
+				"This version accepts the name of a CFN problem data representation to generate.",
+				false, false, false, false,
+				"problem_type_name", "The name of a type of CFN problem data representation to generate.",
+				"void", "This function returns nothing.",
+				std::bind( &ExampleCFNProblemLoader::initialize_from_problem_type_name, this, std::placeholders::_1 )
 			)
 		);
 
@@ -223,6 +246,41 @@ void
 ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 	masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer
 ) {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_initialize( optimizer.class_namespace() + "::" + optimizer.class_name(), "" );
+}
+
+/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given type of optimizer.
+/// @details Throws if already initialized.
+void
+ExampleCFNProblemLoader::initialize_from_optimizer_type_name(
+	std::string const & optimizer_name
+) {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_initialize( optimizer_name, "" );
+}
+
+/// @brief Load problems and solutions from disk, and cache them in this object in a given CFN problem format.
+/// @details Throws if already initialized.
+void
+ExampleCFNProblemLoader::initialize_from_problem_type_name(
+	std::string const & problem_type_name
+) {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	protected_initialize( "", problem_type_name );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Initialize this object from either an optimizer type name or a problem type name.
+/// @details Performs no mutex-locking.  Throws if already initialized.
+void
+ExampleCFNProblemLoader::protected_initialize(
+	std::string const & optimizer_name,
+	std::string const & problem_type_name
+) {
 	using masala::base::Size;
 	using masala::base::Real;
 	using namespace masala::base::managers::plugin_module;
@@ -232,8 +290,12 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 	using namespace masala::base::api::work_function;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
-	std::lock_guard< std::mutex > lock( mutex_ );
-	CHECK_OR_THROW_FOR_CLASS( problems_ == nullptr && solutions_.empty() && problem_names_.empty(), "initialize_from_optimizer_instance", "This object has already been initialized." );
+	CHECK_OR_THROW_FOR_CLASS( problems_ == nullptr && solutions_.empty() && problem_names_.empty(), "protected_initialize", "This object has already been initialized." );
+	CHECK_OR_THROW_FOR_CLASS(
+		(optimizer_name.empty() && (!problem_type_name.empty())) ||
+		((!optimizer_name.empty()) && problem_type_name.empty()),
+		"protected_initialize", "Only one of optimizer_name or problem_type_name should be provided to this function.  The other should be an empty string."
+	)
 
 	MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
 	MasalaPluginAPISP fileloader(
@@ -243,7 +305,7 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 			true
 		)
 	);
-	CHECK_OR_THROW_FOR_CLASS( fileloader != nullptr, "initialize_from_optimizer_instance", "Could not create an instance "
+	CHECK_OR_THROW_FOR_CLASS( fileloader != nullptr, "protected_initialize", "Could not create an instance "
 		"of an ASCIICostFunctionNetworkProblemRosettaFileInterpreter class.  Has the Standard Masala Plugins "
 		"library been loaded?"
 	);
@@ -252,7 +314,7 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 	std::string std_plugin_path;
 	CHECK_OR_THROW_FOR_CLASS(
 		MasalaEnvironmentManager::get_instance()->get_environment_variable("MASALA_STANDARD_PLUGINS", std_plugin_path ),
-		"initialize_from_optimizer_instance",
+		"protected_initialize",
 		"The MASALA_STANDARD_PLUGINS environment variable must be set to point at the Masala Standard Plugins directory."
 	);
 
@@ -260,28 +322,38 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 	{
 		// Get work functions:
 		MasalaObjectAPIDefinitionCSP fileloader_apidef( fileloader->get_api_definition_for_inner_class().lock() );
-		CHECK_OR_THROW_FOR_CLASS( fileloader_apidef != nullptr, "initialize_from_optimizer_instance", "Could not get an API definition for the " + fileloader->inner_class_name() + " class." );
-		MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > fileloader_setoptimizer_fxn(
-			fileloader_apidef->get_oneinput_work_function< void, std::string const & >( "set_cfn_optimizer_type" ).lock()
-		);
-		CHECK_OR_THROW_FOR_CLASS( fileloader_setoptimizer_fxn != nullptr, "initialize_from_optimizer_instance", "The " + fileloader->inner_class_name()
-			+ " class does not appear to have a set_cfn_optimizer_type() function."
-		);
+		CHECK_OR_THROW_FOR_CLASS( fileloader_apidef != nullptr, "protected_initialize", "Could not get an API definition for the " + fileloader->inner_class_name() + " class." );
 		MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< CostFunctionNetworkOptimizationProblems_APISP, std::string const & > fileloader_load_fxn(
 			fileloader_apidef->get_oneinput_work_function< CostFunctionNetworkOptimizationProblems_APISP, std::string const & >( "cfn_problems_from_ascii_file" ).lock()
 		);
-		CHECK_OR_THROW_FOR_CLASS( fileloader_load_fxn != nullptr, "initialize_from_optimizer_instance", "The " + fileloader->inner_class_name() + " class does not appear to have "
+		CHECK_OR_THROW_FOR_CLASS( fileloader_load_fxn != nullptr, "protected_initialize", "The " + fileloader->inner_class_name() + " class does not appear to have "
 			"a cfn_problems_from_ascii_file() function."
 		);
 
 		// Set the optimizer type:
-		fileloader_setoptimizer_fxn->function( optimizer.class_name() );
+		if( !optimizer_name.empty() ) {
+			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > fileloader_setoptimizer_fxn(
+				fileloader_apidef->get_oneinput_work_function< void, std::string const & >( "set_cfn_optimizer_type" ).lock()
+			);
+			CHECK_OR_THROW_FOR_CLASS( fileloader_setoptimizer_fxn != nullptr, "protected_initialize", "The " + fileloader->inner_class_name()
+				+ " class does not appear to have a set_cfn_optimizer_type() function."
+			);
+			fileloader_setoptimizer_fxn->function( optimizer_name );
+		} else {
+			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > fileloader_setprobtype_fxn(
+				fileloader_apidef->get_oneinput_work_function< void, std::string const & >( "set_cfn_problem_type_to_generate" ).lock()
+			);
+			CHECK_OR_THROW_FOR_CLASS( fileloader_setprobtype_fxn != nullptr, "protected_initialize", "The " + fileloader->inner_class_name()
+				+ " class does not appear to have a set_cfn_problem_type_to_generate() function."
+			);
+			fileloader_setprobtype_fxn->function( problem_type_name );
+		}
 
 		// Load the problems:
 		std::string const problem_path( std_plugin_path + "/database/small_cfn_problems/problems_concatenated.txt" );
 		problems_ = fileloader_load_fxn->function( problem_path );
-		CHECK_OR_THROW_FOR_CLASS( problems_ != nullptr, "initialize_from_optimizer_instance", "Unable to load CFN problems from file " + problem_path + "." );
-		CHECK_OR_THROW_FOR_CLASS( problems_->n_problems() == 400, "initialize_from_optimizer_instance", "Expected 400 problems in container, but got " + std::to_string( problems_->n_problems() ) + "." );
+		CHECK_OR_THROW_FOR_CLASS( problems_ != nullptr, "protected_initialize", "Unable to load CFN problems from file " + problem_path + "." );
+		CHECK_OR_THROW_FOR_CLASS( problems_->n_problems() == 400, "protected_initialize", "Expected 400 problems in container, but got " + std::to_string( problems_->n_problems() ) + "." );
 		write_to_tracer( "Loaded " + std::to_string( problems_->n_problems() ) + " problems from file " + problem_path + "." );
 	}
 
@@ -289,19 +361,19 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 	{
 		std::string const solution_path( std_plugin_path + "/database/small_cfn_problems/optimal_scores_and_solutions_zerobased.txt" );
 		std::vector< std::string > const solutionlines( MasalaDiskManager::get_instance()->read_ascii_file_to_string_vector( solution_path ) );
-		CHECK_OR_THROW_FOR_CLASS( solutionlines.size() == 400, "initialize_from_optimizer_instance", "Expected 400 lines in file " + solution_path + ", but got " + std::to_string( solutionlines.size() ) + "." );
+		CHECK_OR_THROW_FOR_CLASS( solutionlines.size() == 400, "protected_initialize", "Expected 400 lines in file " + solution_path + ", but got " + std::to_string( solutionlines.size() ) + "." );
 		Size counter(0);
 		for( std::string const & line : solutionlines ) {
 			std::istringstream ss(line);
 			std::string probname;
 			Real solutionscore;
 			ss >> probname >> solutionscore;
-			CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() || ss.eof() ), "initialize_from_optimizer_instance", "Failed to parse line \"" + line + "\" from file " + solution_path + "." );
+			CHECK_OR_THROW_FOR_CLASS( !( ss.bad() || ss.fail() || ss.eof() ), "protected_initialize", "Failed to parse line \"" + line + "\" from file " + solution_path + "." );
 			std::vector< Size > solnvec;
 			while( !ss.eof() ) {
 				Size val;
 				ss >> val;
-				CHECK_OR_THROW_FOR_CLASS( !(ss.bad() || ss.fail()), "initialize_from_optimizer_instance", "Failure to parse solution from line \"" + line + "\" from file " + solution_path + "." );
+				CHECK_OR_THROW_FOR_CLASS( !(ss.bad() || ss.fail()), "protected_initialize", "Failure to parse solution from line \"" + line + "\" from file " + solution_path + "." );
 				solnvec.push_back(val);
 			}
 
@@ -310,7 +382,7 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 			curprob->finalize();
 			masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP curscratch( curprob->generate_cfn_problem_scratch_space() );
 			CostFunctionNetworkOptimizationSolutions_APISP cursoln( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( curprob->create_solutions_container() ) );
-			CHECK_OR_THROW_FOR_CLASS( cursoln != nullptr, "initialize_from_optimizer_instance", "Unable to create solutions container for problem " + std::to_string(counter) + "." );
+			CHECK_OR_THROW_FOR_CLASS( cursoln != nullptr, "protected_initialize", "Unable to create solutions container for problem " + std::to_string(counter) + "." );
 			cursoln->merge_in_lowest_scoring_solutions(
 				std::vector< std::tuple< std::vector< Size >, Real, Size > >{ std::make_tuple{ vec, solutionscore, 1 } },
 				1,
@@ -322,17 +394,13 @@ ExampleCFNProblemLoader::initialize_from_optimizer_instance(
 
 			++counter;
 		}
-		CHECK_OR_THROW_FOR_CLASS( problem_names_.size() == 400 && solutions_.size() == 400, "initialize_from_optimizer_instance", "Expected 400 solutions, but got "
+		CHECK_OR_THROW_FOR_CLASS( problem_names_.size() == 400 && solutions_.size() == 400, "protected_initialize", "Expected 400 solutions, but got "
 			+ std::to_string( problem_names_.size() ) + " problem names and " + std::to_string( solutions_.size() ) + " solutions."
 		);
 		write_to_tracer( "Loaded " + std::to_string( solutions_.size() ) + " solutions." );
 	}
 
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// PROTECTED FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Assign src to this.  Performs no mutex locking.  Derived classes should
 /// override this, and the overrides should call the parent class protected_assign().

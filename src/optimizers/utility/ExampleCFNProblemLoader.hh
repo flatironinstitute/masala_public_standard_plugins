@@ -159,14 +159,30 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.
-	/// @details Throws if already initialized.
+	/// @details Throws if already initialized.  This version picks the preferred data representation given an instance of an optimizer.
 	void initialize_from_optimizer_instance( masala::numeric_api::base_classes::optimization::cost_function_network::PluginCostFunctionNetworkOptimizer const & optimizer );
+
+	/// @brief Load problems and solutions from disk, and cache them in this object in a format compatible with a given type of optimizer.
+	/// @details Throws if already initialized.  This version picks the preferred data representation given the name of a type of optimizer.
+	void initialize_from_optimizer_type_name( std::string const & optimizer_name );
+
+	/// @brief Load problems and solutions from disk, and cache them in this object in a given CFN problem format.
+	/// @details Throws if already initialized.  This version accepts the name of a CFN problem data representation to generate.
+	void initialize_from_problem_type_name( std::string const & problem_type_name );
 
 protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+
+	/// @brief Initialize this object from either an optimizer type name or a problem type name.
+	/// @details Performs no mutex-locking.  Throws if already initialized.
+	void
+	protected_initialize(
+		std::string const & optimizer_name,
+		std::string const & problem_type_name
+	);
 
 	/// @brief Assign src to this.  Performs no mutex locking.  Derived classes should
 	/// override this, and the overrides should call the parent class protected_assign().
