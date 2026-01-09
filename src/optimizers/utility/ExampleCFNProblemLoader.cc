@@ -243,7 +243,7 @@ ExampleCFNProblemLoader::get_problems( masala::base::Size const n_problems ) con
 /// @brief Returns a container of 400 solutions.  Throws if problems and solutions have not already been
 /// loaded and cached.
 /// @note These solutions are not finalized.
-masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 ExampleCFNProblemLoader::get_solutions() const {
 	std::lock_guard< std::mutex > lock( mutex_ );
 	return protected_get_solutions();
@@ -254,10 +254,9 @@ ExampleCFNProblemLoader::get_solutions() const {
 /// @param[in] n_solutions The number of solutions to return.  Must be in the range [1, 400].  If smaller than
 /// 400, then the first 400 solutions are returned.
 /// @note These solutions are not finalized.
-masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 ExampleCFNProblemLoader::get_solutions( masala::base::Size const n_solutions ) const {
 	std::lock_guard< std::mutex > lock( mutex_ );
-	CHECK_OR_THROW_FOR_CLASS( n_solutions > 0 && n_problems <= 400, "get_solutions", "Expected n_solutions to be in the range [1,400], but got " + std::to_string(n_solutions) + "." );
 	return protected_get_solutions( n_solutions );
 }
 
@@ -471,11 +470,23 @@ ExampleCFNProblemLoader::protected_get_problems( masala::base::Size const n_prob
 
 /// @brief Clone the first N of the cached solutions and package the clones into a problems container.
 /// @details Throws if problems and solutions have not yet been loaded.
-masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 ExampleCFNProblemLoader::protected_get_solutions( masala::base::Size const n_solutions /*= 400*/ ) const {
+	using masala::base::Size;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
-	TODO TODO TODO;
+	CHECK_OR_THROW_FOR_CLASS( n_solutions > 0 && n_solutions <= 400, "protected_get_solutions", "Expected n_solutions to be in the range [1,400], but got " + std::to_string(n_solutions) + "." );
+	CHECK_OR_THROW_FOR_CLASS( solutions_.size() == 400, "protected_get_solutions", "This object must be initialized before this function is called." );
+	std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions_copy;
+	solutions_copy.reserve( n_solutions );
+	for( Size i(0); i<n_solutions; ++i ) {
+		CostFunctionNetworkOptimizationSolutions_APISP solution_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( solutions_[i]->clone() ) );
+		CHECK_OR_THROW_FOR_CLASS( solution_copy != nullptr, "protected_get_solutions", "Unable to clone solution for problem " + std::to_string(i) + "." );
+		solution_copy->make_independent();
+		solutions_copy.push_back(solution_copy);
+	}
+
+	return solutions_copy;
 }
 
 } // namespace utility

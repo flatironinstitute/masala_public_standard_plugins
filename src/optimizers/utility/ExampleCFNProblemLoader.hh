@@ -195,7 +195,7 @@ protected:
 
 	/// @brief Clone the first N of the cached solutions and package the clones into a problems container.
 	/// @details Throws if problems and solutions have not yet been loaded.
-	masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP
+	std::vector< masala::numeric_api::auto_generated_api::optimization::cost_function_network::CostFunctionNetworkOptimizationSolutions_APISP >
 	protected_get_solutions( masala::base::Size const n_solutions = 400 ) const;
 
 private:
