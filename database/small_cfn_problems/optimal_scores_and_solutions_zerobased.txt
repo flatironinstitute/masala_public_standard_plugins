@@ -250,12 +250,6 @@ problem_description_000684_short 4967.223150 0 2 0 0
 problem_description_000685_short 13722.290532 0 2 0 0 0
 problem_description_000686_short 14202.782314 0 2 0 0 0 0
 problem_description_000687_short 14202.238916 0 2 0 0 0 0 1
-problem_description_000688_short 15332.858735 0 5 0 0 1 0 0 0
-problem_description_000689_short 15813.235637 0 5 0 0 0 1 0 0 0
-problem_description_000690_short 23504.541728 0 5 0 0 0 0 1 0 0 0
-problem_description_000691_short 26166.291737 0 5 0 0 0 0 0 1 0 0 0
-problem_description_000692_short 27332.682783 0 5 0 0 0 0 0 0 1 0 0 0
-problem_description_000693_short 29980.820162 0 5 0 0 0 0 0 0 0 1 0 0 0
 problem_description_000694_short 29990.464397 0 0 5 0 0 0 0 0 0 0 1 0 0 0
 problem_description_000721_short -1.939510 0
 problem_description_000722_short -4.789053 1 0

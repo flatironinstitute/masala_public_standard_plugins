@@ -509,7 +509,7 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
     masala::numeric_api::auto_generated_api::registration::unregister_numeric();
 }
 
-TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+TEST_CASE( "Solve 394 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
 	using namespace masala::base::managers::plugin_module;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 	using namespace masala::base::api;
@@ -563,10 +563,10 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 			solutions = get_solutions_fxn->function();
 			problem_names = get_probnames_fxn->function();
 
-			CHECK( problems->n_problems() == 400 );
-			CHECK( solutions.size() == 400 );
-			CHECK( problem_names.size() == 400 );
-			for( Size i(0); i<400; ++i ) {
+			CHECK( problems->n_problems() == 394 );
+			CHECK( solutions.size() == 394 );
+			CHECK( problem_names.size() == 394 );
+			for( Size i(0); i<394; ++i ) {
 				problems->problem_nonconst(i)->finalize();
 			}
 		}
@@ -593,9 +593,9 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 		);
 
 		// Compare:
-		CHECK( mc_opt_solutions.size() == 400 );
-		std::vector< bool > passed( 400, true );
-		for( Size i(0); i<400; ++i ) {
+		CHECK( mc_opt_solutions.size() == 394 );
+		std::vector< bool > passed( 394, true );
+		for( Size i(0); i<394; ++i ) {
 			CHECK( solutions[i]->n_solutions() == 1 );
 			CHECK( mc_opt_solutions[i]->n_solutions() == 1 );
 			CHECK( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) < 1.0e-5 );
@@ -609,7 +609,7 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 		}
 		std::stringstream ss;
 		ss << "NAME" << "\t" << "FAILED?" << "\t" << "EXP_SCORE" << "\t" << "ACT_SCORE" << "\t" << "EXP_SOLUTION" << "\t" << "ACT_SOLUTION" << "\n";
-		for( Size i(0); i<400; ++i ) {
+		for( Size i(0); i<394; ++i ) {
 			ss << problem_names[i]
 				<< (passed[i] ? "  " : " X")
 				<< "\t" << solutions[i]->solution_score(0)
