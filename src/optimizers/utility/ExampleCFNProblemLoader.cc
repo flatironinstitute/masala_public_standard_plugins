@@ -179,7 +179,7 @@ ExampleCFNProblemLoader::get_api_definition() {
 		// Getters:
 		apidef->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::string > const & > >(
-				"get_problems",
+				"get_problem_names",
 				"Get a vector of problem names.  Throws if not initialized.",
 				"problem_names", "A set of 400 problem names.",
 				false, false,
