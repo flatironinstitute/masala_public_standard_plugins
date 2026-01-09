@@ -428,9 +428,11 @@ ExampleCFNProblemLoader::protected_initialize(
 	{
 		std::string const solution_path( std_plugin_path + "/database/small_cfn_problems/optimal_scores_and_solutions_zerobased.txt" );
 		std::vector< std::string > const solutionlines( MasalaDiskManager::get_instance()->read_ascii_file_to_string_vector( solution_path ) );
-		CHECK_OR_THROW_FOR_CLASS( solutionlines.size() == 400, "protected_initialize", "Expected 400 lines in file " + solution_path + ", but got " + std::to_string( solutionlines.size() ) + "." );
+		CHECK_OR_THROW_FOR_CLASS( solutionlines.size() == 401, "protected_initialize", "Expected 401 lines in file " + solution_path + " (including empty line at end), but got " + std::to_string( solutionlines.size() ) + "." );
+		CHECK_OR_THROW_FOR_CLASS( solutionlines[400].empty(), "protected_initialize", "Expected final line of file " + solution_path + " to be empty." );
 		Size counter(0);
 		for( std::string const & line : solutionlines ) {
+			if(line.empty()) { continue; }
 			std::istringstream ss(line);
 			std::string probname;
 			Real solutionscore;
