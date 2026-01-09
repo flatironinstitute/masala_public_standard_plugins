@@ -137,6 +137,10 @@ public:
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
 
+	/// @brief Get a vector of problem names.
+	/// @details Throws if not initialized.
+	std::vector< std::string > const & get_problem_names();
+
 	/// @brief Returns a container of 400 problems.  Throws if problems and solutions have not already been
 	/// loaded and cached.
 	/// @note These problems are not finalized.

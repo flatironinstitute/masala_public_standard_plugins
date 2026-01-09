@@ -178,6 +178,15 @@ ExampleCFNProblemLoader::get_api_definition() {
 
 		// Getters:
 		apidef->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< std::vector< std::string > const & > >(
+				"get_problems",
+				"Get a vector of problem names.  Throws if not initialized.",
+				"problem_names", "A set of 400 problem names.",
+				false, false,
+				std::bind( &ExampleCFNProblemLoader::get_problem_names, this )
+			)
+		);	
+		apidef->add_getter(
 			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< CostFunctionNetworkOptimizationProblems_APISP > >(
 				"get_problems",
 				"Returns a container of 400 problems.  Throws if problems and solutions have not already been "
@@ -252,6 +261,15 @@ ExampleCFNProblemLoader::get_keywords() const {
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC GETTERS
 ////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Get a vector of problem names.
+/// @details Throws if not initialized.
+std::vector< std::string > const &
+ExampleCFNProblemLoader::get_problem_names() {
+	std::lock_guard< std::mutex > lock( mutex_ );
+	CHECK_OR_THROW_FOR_CLASS( !problem_names_.empty(), "get_problem_names", "This object must be initialized before this function is called." );
+	return problem_names_;
+}
 
 /// @brief Returns a container of 400 problems.  Throws if problems and solutions  have not already been
 /// loaded and cached.
