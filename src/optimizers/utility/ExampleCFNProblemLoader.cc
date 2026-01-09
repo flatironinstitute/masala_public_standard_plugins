@@ -108,10 +108,12 @@ ExampleCFNProblemLoader::class_namespace() const {
 /// derived objects.
 masala::base::api::MasalaObjectAPIDefinitionCWP
 ExampleCFNProblemLoader::get_api_definition() {
+	using masala::base::Size;
 	using namespace masala::base::api;
 	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
 	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
 	std::lock_guard< std::mutex > lock( mutex_ );
 	if( api_definition_ == nullptr ) {
@@ -162,10 +164,32 @@ ExampleCFNProblemLoader::get_api_definition() {
 			)
 		);
 
-		TODO TODO TODO;
+		// Getters:
+		apidef->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_ZeroInput< CostFunctionNetworkOptimizationProblems_APISP > >(
+				"get_problems",
+				"Returns a container of 400 problems.  Throws if problems and solutions have not already been "
+				"loaded and cached.  These problems are not finalized.",
+				"problems", "A set of 400 CFN problems, in an appropriate format.  Not finalized.",
+				false, false,
+				std::bind( static_cast<CostFunctionNetworkOptimizationProblems_APISP(ExampleCFNProblemLoader::*)() const>( &ExampleCFNProblemLoader::get_problems ), this )
+			)
+		);
+		apidef->add_getter(
+			masala::make_shared< MasalaObjectAPIGetterDefinition_OneInput< CostFunctionNetworkOptimizationProblems_APISP, Size const > >(
+				"get_problems",
+				"Returns a container of n problems (where 0 < n <= 400).  Throws if problems and solutions "
+				"have not already been loaded and cached.  These problems are not finalized.",
+				"n_problems", "The number of problems to return.  Must be in the range [1, 400].  If smaller "
+				"than 400, then the first 400 problems are returned.",
+				"problems", "A set of n CFN problems, in an appropriate format.  Not finalized.",
+				false, false,
+				std::bind( static_cast<CostFunctionNetworkOptimizationProblems_APISP(ExampleCFNProblemLoader::*)( masala::base::Size const ) const>( &ExampleCFNProblemLoader::get_problems ), this, std::placeholders::_1 )
+			)
+		);
 
 		// Nonconst to const:
-		api_definition_ = api_def;
+		api_definition_ = apidef;
 	}
 	return api_definition_;
 }
