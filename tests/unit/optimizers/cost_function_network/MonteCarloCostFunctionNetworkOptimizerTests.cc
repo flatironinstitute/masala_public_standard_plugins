@@ -29,6 +29,7 @@
 #include <optimizers_api/auto_generated_api/annealing/LinearAnnealingSchedule_API.hh>
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 #include <optimizers_api/utility/cost_function_network/util.hh>
+#include <file_interpreters_api/auto_generated_api/registration/register_file_interpreters.hh>
 
 // Masala numeric headers:
 #include <numeric_api/auto_generated_api/optimization/cost_function_network/CostFunctionNetworkOptimizationProblem_API.hh>
@@ -39,9 +40,14 @@
 #include <numeric_api/utility/optimization/cost_function_network/util.hh>
 
 // Masala base headers:
+#include <base/managers/plugin_module/MasalaPluginModuleManager.hh>
+#include <base/managers/plugin_module/MasalaPlugin.hh>
 #include <base/managers/threads/MasalaThreadManager.hh>
 #include <base/managers/tracer/MasalaTracerManager.hh>
 #include <base/utility/container/container_util.tmpl.hh>
+#include <base/api/MasalaObjectAPIDefinition.hh>
+#include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
+#include <base/api/getter/MasalaObjectAPIGetterDefinition_ZeroInput.tmpl.hh>
 
 // STL headers:
 #include <sstream>
@@ -500,6 +506,70 @@ TEST_CASE( "Solve a problem with satisfiable features using the MonteCarloCostFu
 
     optimizers_api::auto_generated_api::registration::unregister_optimizers();
     masala::numeric_api::auto_generated_api::registration::unregister_numeric();
+}
+
+TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunctionNetworkOptimizer with a logarithmic repeat annealing schedule.", "[standard_masala_plugins::optimizers_api::auto_generated_api::annealing::LogarithmicRepeatAnnealingSchedule_API][standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network::MonteCarloCostFunctionNetworkOptimizer_API][optimization]" ) {
+	using namespace masala::base::managers::plugin_module;
+	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
+	using namespace masala::base::api;
+	using namespace masala::base::api::work_function;
+	using namespace masala::base::api::getter;
+
+
+	masala::numeric_api::auto_generated_api::registration::register_numeric();
+	optimizers_api::auto_generated_api::registration::register_optimizers();
+	file_interpreters_api::auto_generated_api::registration::register_file_interpreters();
+
+	REQUIRE_NOTHROW([&](){
+
+		// Get the plugin module manager:
+		MasalaPluginModuleManagerHandle plugman( MasalaPluginModuleManager::get_instance() );
+
+		// Create the problems and their solutions:
+		std::vector< std::string > problem_names;
+		std::vector< CostFunctionNetworkOptimizationSolutions_APISP > solutions;
+		CostFunctionNetworkOptimizationProblems_APISP problems;
+		{
+			// Create the problem loader:
+			MasalaPluginAPISP example_loader( plugman->create_plugin_object_instance_by_short_name( { "Utility", "CFN_Utility" }, "ExampleCFNProblemLoader", true ) );
+			CHECK( example_loader != nullptr );
+
+			// Get its API functions:
+			MasalaObjectAPIDefinitionCSP el_apidef( example_loader->get_api_definition_for_inner_class() );
+			CHECK( el_apidef != nullptr );
+			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > init_fxn(
+				el_apidef->get_oneinput_work_function< void, std::string const & >( "initialize_from_problem_type_name" ).lock()
+			);
+			CHECK( init_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< CostFunctionNetworkOptimizationProblems_APISP > get_problems_fxn(
+				el_apidef->get_zeroinput_getter_function< CostFunctionNetworkOptimizationProblems_APISP >( "get_problems" ).lock()
+			);
+			CHECK( get_problems_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > > get_solutions_fxn(
+				el_apidef->get_zeroinput_getter_function< std::vector< CostFunctionNetworkOptimizationSolutions_APISP > >( "get_solutions" ).lock()
+			);
+			CHECK( get_solutions_fxn != nullptr );
+			MasalaObjectAPIGetterDefinition_ZeroInputCSP< std::vector< std::string > const & > get_probnames_fxn(
+				el_apidef->get_zeroinput_getter_function< std::vector< std::string > const &  >( "get_problem_names" ).lock()
+			);
+			CHECK( get_probnames_fxn != nullptr );
+
+			init_fxn->function( "PairwisePrecomputedCostFunctionNetworkOptimizationProblem" );
+			problems = get_problems_fxn->function();
+			solutions = get_solutions_fxn->function();
+			problem_names = get_probnames_fxn->function();
+
+			CHECK( problems->n_problems() == 400 );
+			CHECK( solutions.size() == 400 );
+			CHECK( problem_names.size() == 400 );
+		}
+
+
+	}() );
+
+	file_interpreters_api::auto_generated_api::registration::unregister_file_interpreters();
+	optimizers_api::auto_generated_api::registration::unregister_optimizers();
+	masala::numeric_api::auto_generated_api::registration::unregister_numeric();
 }
 
 } // namespace cost_function_network
