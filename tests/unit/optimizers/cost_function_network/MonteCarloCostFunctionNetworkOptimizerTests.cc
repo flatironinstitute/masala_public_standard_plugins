@@ -27,6 +27,7 @@
 #include <optimizers_api/auto_generated_api/cost_function_network/MonteCarloCostFunctionNetworkOptimizer_API.hh>
 #include <optimizers_api/auto_generated_api/annealing/ConstantAnnealingSchedule_API.hh>
 #include <optimizers_api/auto_generated_api/annealing/LinearAnnealingSchedule_API.hh>
+#include <optimizers_api/auto_generated_api/annealing/LogarithmicRepeatAnnealingSchedule_API.hh>
 #include <optimizers_api/auto_generated_api/registration/register_optimizers.hh>
 #include <optimizers_api/utility/cost_function_network/util.hh>
 #include <file_interpreters_api/auto_generated_api/registration/register_file_interpreters.hh>
@@ -514,7 +515,10 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 	using namespace masala::base::api;
 	using namespace masala::base::api::work_function;
 	using namespace masala::base::api::getter;
-
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::cost_function_network;
+	using namespace standard_masala_plugins::optimizers_api::auto_generated_api::annealing;
+	using namespace masala::base::managers::threads;
+	using masala::base::Size;
 
 	masala::numeric_api::auto_generated_api::registration::register_numeric();
 	optimizers_api::auto_generated_api::registration::register_optimizers();
@@ -562,8 +566,62 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 			CHECK( problems->n_problems() == 400 );
 			CHECK( solutions.size() == 400 );
 			CHECK( problem_names.size() == 400 );
+			for( Size i(0); i<400; ++i ) {
+				problems->problem_nonconst(i)->finalize();
+			}
 		}
 
+		// Spin up threads:
+		MasalaThreadManager::get_instance()->set_total_threads(16);
+
+		// Create and configure the optimizer:
+		MonteCarloCostFunctionNetworkOptimizer_APISP mc_opt( masala::make_shared< MonteCarloCostFunctionNetworkOptimizer_API >() );
+		LogarithmicRepeatAnnealingSchedule_APISP log_rep_as( masala::make_shared< LogarithmicRepeatAnnealingSchedule_API >() );
+		log_rep_as->set_temperature_initial(100.0);
+		log_rep_as->set_temperature_final(0.1);
+		log_rep_as->set_n_repeats(3);
+		mc_opt->set_annealing_schedule( *log_rep_as );
+		mc_opt->set_annealing_steps_per_attempt(1000000);
+		mc_opt->set_attempts_per_problem(1);
+		mc_opt->set_cpu_threads_to_request(0);
+		mc_opt->set_solution_storage_mode("check_on_acceptance");
+		mc_opt->set_n_solutions_to_store_per_problem(1);
+		
+		// Run the cost function network optimizer:
+		std::vector< CostFunctionNetworkOptimizationSolutions_APICSP > mc_opt_solutions(
+			mc_opt->run_cost_function_network_optimizer( *problems )
+		);
+
+		// Compare:
+		CHECK( mc_opt_solutions.size() == 400 );
+		std::vector< bool > passed( 400, true );
+		for( Size i(0); i<400; ++i ) {
+			CHECK( solutions[i]->n_solutions() == 1 );
+			CHECK( mc_opt_solutions[i]->n_solutions() == 1 );
+			CHECK( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) < 1.0e-5 );
+			if( solutions[i]->solution_score(0) - mc_opt_solutions[i]->solution_score(0) >= 1.0e-5 ) {
+				passed[i] = false;
+			}
+			CHECK( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_all_positions() == std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_all_positions() );
+			if( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_all_positions() != std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_all_positions() ) {
+				passed[i] = false;
+			}
+		}
+		std::stringstream ss;
+		ss << "NAME" << "\t" << "FAILED?" << "\t" << "EXP_SCORE" << "\t" << "ACT_SCORE" << "\t" << "EXP_SOLUTION" << "\t" << "ACT_SOLUTION" << "\n";
+		for( Size i(0); i<400; ++i ) {
+			ss << problem_names[i]
+				<< (passed[i] ? "  " : " X")
+				<< "\t" << solutions[i]->solution_score(0)
+				<< "\t" << mc_opt_solutions[i]->solution_score(0)
+				<< "\t[" << masala::base::utility::container::container_to_string( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( solutions[i]->solution(0) )->solution_at_variable_positions(), "," ) << "]"
+				<< "\t[" << masala::base::utility::container::container_to_string( std::static_pointer_cast< CostFunctionNetworkOptimizationSolution_API const >( mc_opt_solutions[i]->solution(0) )->solution_at_variable_positions(), "," ) << "]"
+				<< "\n";
+		}
+		mc_opt->write_to_tracer( ss.str() );
+
+		// Spin down threads:
+		MasalaThreadManager::get_instance()->set_total_threads(1);
 
 	}() );
 
