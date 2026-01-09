@@ -433,6 +433,14 @@ ExampleCFNProblemLoader::protected_initialize(
 		Size counter(0);
 		for( std::string const & line : solutionlines ) {
 			if(line.empty()) { continue; }
+			// Copy the current problem.
+			CostFunctionNetworkOptimizationProblem_APISP curprob( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_->problem(counter)->clone() ) );
+			curprob->finalize();
+			masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP curscratch( curprob->generate_cfn_problem_scratch_space() );
+			std::map< Size, Size > const & choices_at_all_nodes( curprob->n_choices_at_all_nodes() );
+			std::map< Size, Size >::const_iterator choices_at_all_nodes_it( choices_at_all_nodes.begin() );
+
+			// Read the file.
 			std::istringstream ss(line);
 			std::string probname;
 			Real solutionscore;
@@ -443,13 +451,14 @@ ExampleCFNProblemLoader::protected_initialize(
 				Size val;
 				ss >> val;
 				CHECK_OR_THROW_FOR_CLASS( !(ss.bad() || ss.fail()), "protected_initialize", "Failure to parse solution from line \"" + line + "\" from file " + solution_path + "." );
-				solnvec.push_back(val);
+				
+				if( choices_at_all_nodes_it->second > 1 ) { // Only want variable nodes.
+					solnvec.push_back(val);
+				}
+				++choices_at_all_nodes_it;
 			}
 
-			// Copy the current problem.
-			CostFunctionNetworkOptimizationProblem_APISP curprob( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_->problem(counter)->clone() ) );
-			curprob->finalize();
-			masala::numeric::optimization::cost_function_network::CFNProblemScratchSpaceSP curscratch( curprob->generate_cfn_problem_scratch_space() );
+			// Create solution.
 			CostFunctionNetworkOptimizationSolutions_APISP cursoln( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationSolutions_API >( curprob->create_solutions_container() ) );
 			CHECK_OR_THROW_FOR_CLASS( cursoln != nullptr, "protected_initialize", "Unable to create solutions container for problem " + std::to_string(counter) + "." );
 			cursoln->merge_in_lowest_scoring_solutions(
@@ -541,17 +550,12 @@ ExampleCFNProblemLoader::protected_get_problems( masala::base::Size const n_prob
 	CostFunctionNetworkOptimizationProblems_APISP problems_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblems_API >( problems_->clone() ) );
 	CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_get_problems", "Unable to clone problems." );
 
-	if( n_problems < 400 ) {
-		problems_copy->reset();
-		problems_copy->make_independent();
-		for( Size i(0); i<n_problems; ++i ) {
-			CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_->problem(i)->clone() ) );
-			CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_get_problems", "Unable to clone problem " + std::to_string(i) + "." );
-			problem_copy->make_independent();
-			problems_copy->add_optimization_problem( problem_copy );
-		}
-	} else {
-		problems_copy->make_independent();
+	problems_copy->reset();
+	for( Size i(0); i<n_problems; ++i ) {
+		CostFunctionNetworkOptimizationProblem_APISP problem_copy( std::dynamic_pointer_cast< CostFunctionNetworkOptimizationProblem_API >( problems_->problem(i)->clone() ) );
+		CHECK_OR_THROW_FOR_CLASS( problems_copy != nullptr, "protected_get_problems", "Unable to clone problem " + std::to_string(i) + "." );
+		problem_copy->make_independent();
+		problems_copy->add_optimization_problem( problem_copy );
 	}
 
 	return problems_copy;
