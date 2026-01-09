@@ -38,6 +38,7 @@
 #include <base/api/getter/MasalaObjectAPIGetterDefinition_OneInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_ZeroInput.tmpl.hh>
 #include <base/api/work_function/MasalaObjectAPIWorkFunctionDefinition_OneInput.tmpl.hh>
+#include <base/api/setter/MasalaObjectAPISetterDefinition_OneInput.tmpl.hh>
 
 // Numeric API headers:
 #include <numeric_api/base_classes/optimization/cost_function_network/PluginCostFunctionNetworkOptimizer.hh>
@@ -353,6 +354,7 @@ ExampleCFNProblemLoader::protected_initialize(
 	using namespace masala::base::managers::disk;
 	using namespace masala::base::api;
 	using namespace masala::base::api::work_function;
+	using namespace masala::base::api::setter;
 	using namespace masala::numeric_api::auto_generated_api::optimization::cost_function_network;
 
 	CHECK_OR_THROW_FOR_CLASS( problems_ == nullptr && solutions_.empty() && problem_names_.empty(), "protected_initialize", "This object has already been initialized." );
@@ -397,16 +399,16 @@ ExampleCFNProblemLoader::protected_initialize(
 
 		// Set the optimizer type:
 		if( !optimizer_name.empty() ) {
-			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > fileloader_setoptimizer_fxn(
-				fileloader_apidef->get_oneinput_work_function< void, std::string const & >( "set_cfn_optimizer_type" ).lock()
+			MasalaObjectAPISetterDefinition_OneInputCSP< std::string const & > fileloader_setoptimizer_fxn(
+				fileloader_apidef->get_oneinput_setter_function< std::string const & >( "set_cfn_optimizer_type" ).lock()
 			);
 			CHECK_OR_THROW_FOR_CLASS( fileloader_setoptimizer_fxn != nullptr, "protected_initialize", "The " + fileloader->inner_class_name()
 				+ " class does not appear to have a set_cfn_optimizer_type() function."
 			);
 			fileloader_setoptimizer_fxn->function( optimizer_name );
 		} else {
-			MasalaObjectAPIWorkFunctionDefinition_OneInputCSP< void, std::string const & > fileloader_setprobtype_fxn(
-				fileloader_apidef->get_oneinput_work_function< void, std::string const & >( "set_cfn_problem_type_to_generate" ).lock()
+			MasalaObjectAPISetterDefinition_OneInputCSP< std::string const & > fileloader_setprobtype_fxn(
+				fileloader_apidef->get_oneinput_setter_function< std::string const & >( "set_cfn_problem_type_to_generate" ).lock()
 			);
 			CHECK_OR_THROW_FOR_CLASS( fileloader_setprobtype_fxn != nullptr, "protected_initialize", "The " + fileloader->inner_class_name()
 				+ " class does not appear to have a set_cfn_problem_type_to_generate() function."
