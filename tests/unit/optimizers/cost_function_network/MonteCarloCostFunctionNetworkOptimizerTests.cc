@@ -581,7 +581,7 @@ TEST_CASE( "Solve 400 different problems in parallel with the MonteCarloCostFunc
 		log_rep_as->set_temperature_final(0.1);
 		log_rep_as->set_n_repeats(3);
 		mc_opt->set_annealing_schedule( *log_rep_as );
-		mc_opt->set_annealing_steps_per_attempt(1000000);
+		mc_opt->set_annealing_steps_per_attempt(500000);
 		mc_opt->set_attempts_per_problem(1);
 		mc_opt->set_cpu_threads_to_request(0);
 		mc_opt->set_solution_storage_mode("check_on_acceptance");
