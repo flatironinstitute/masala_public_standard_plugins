@@ -111,6 +111,7 @@ ExampleCFNProblemLoader::get_api_definition() {
 	using namespace masala::base::api;
 	using namespace masala::base::api::getter;
 	using namespace masala::base::api::work_function;
+	using namespace masala::numeric_api::base_classes::optimization::cost_function_network;
 
 	std::lock_guard< std::mutex > lock( mutex_ );
 	if( api_definition_ == nullptr ) {
@@ -126,7 +127,22 @@ ExampleCFNProblemLoader::get_api_definition() {
 		);
 		ADD_PUBLIC_CONSTRUCTOR_DEFINITIONS( ExampleCFNProblemLoader, apidef );
 
+		// Work function:
+		apidef->add_work_function(
+			masala::make_shared< MasalaObjectAPIWorkFunctionDefinition_OneInput< void, PluginCostFunctionNetworkOptimizer const & > >(
+				"initialize",
+				"Load problems and solutions from disk, and cache them in this object in a format compatible with a given optimizer.  Throws if already initialized.",
+				false, false, false, false,
+				"optimizer", "An instance of the optimizer type that will be accepting the problems, used to determine the problem data representation to generate.",
+				"void", "This function returns nothing.",
+				std::bind( &ExampleCFNProblemLoader::initialize, this, std::placeholders::_1 )
+			)
+		);
+
 		TODO TODO TODO;
+
+		// Nonconst to const:
+		api_definition_ = api_def;
 	}
 	return api_definition_;
 }
