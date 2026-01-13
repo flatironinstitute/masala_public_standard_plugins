@@ -90,6 +90,7 @@ doxygen Doxyfile.src
 
 ## Version History
 
+- Version 1.2 added a set of 393 small cost function network (CFN) test cases to use to assess the validity of alternative approaches to solving CFN problems.  (Since these problems are small, they have known lowest-energy solutions, as determined with the Toulbar2 deterministic CFN solver.)
 - Version 1.1 made minor efficiency tweaks to the behaviour of the PairwisePrecomputedCostFunctionNetworkOptimizer.
 - Version 1.0 was the first public release.
 
