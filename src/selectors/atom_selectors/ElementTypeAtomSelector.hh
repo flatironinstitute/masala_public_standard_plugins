@@ -149,7 +149,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief The type of atom that we will be selecting.
-	masala::base::managers::database::elements::ElementTypeEnum element_ = masala::base::managers::database::elements::ElementTypeEnum::C;
+	masala::base::managers::database::elements::ElementTypeEnum element_ = masala::base::managers::database::elements::ElementTypeEnum::ELEMENT_C;
 
 	/// @brief The API descriptor.
 	/// @details Lazily generated.

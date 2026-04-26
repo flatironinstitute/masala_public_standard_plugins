@@ -256,7 +256,7 @@ public:
 
 	/// @brief Set the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
 	/// to correct the accumulation of small numerical errors.
-	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100000 Monte Carlo trajectory steps.
 	void set_recompute_from_scratch_every_n_steps( masala::base::Size const steps_in );
 
 public:
@@ -310,7 +310,7 @@ public:
 
 	/// @brief Get the frequency with which we recompute the scoring function from scratch, rather than just computing differences,
 	/// to correct the accumulation of small numerical errors.
-	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100000 Monte Carlo trajectory steps.
 	masala::base::Size recompute_from_scratch_every_n_steps() const;
 
 public:
@@ -572,8 +572,8 @@ private:
 
 	/// @brief The frequency with which we recompute the scoring function from scratch, rather than just computing differences,
 	/// to correct the accumulation of small numerical errors.
-	/// @details A setting of 0 means that we never do this.  Defaults to every 100 Monte Carlo trajectory steps.
-	masala::base::Size recompute_from_scratch_every_n_steps_ = 100;
+	/// @details A setting of 0 means that we never do this.  Defaults to every 100000 Monte Carlo trajectory steps.
+	masala::base::Size recompute_from_scratch_every_n_steps_ = 100000;
 
 }; // class MonteCarloCostFunctionNetworkOptimizer
 

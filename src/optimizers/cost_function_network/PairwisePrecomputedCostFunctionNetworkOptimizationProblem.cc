@@ -444,28 +444,40 @@ PairwisePrecomputedCostFunctionNetworkOptimizationProblem::compute_absolute_scor
 		"The number of entries in the candidate solution vector (" + std::to_string( candidate_solution.size() ) +
 		") does not match the number of variable nodes with two or more choices (" + std::to_string( variable_positions.size() ) + ")." );
 	for( Size i(0); i<n_pos; ++i ) {
-		Size const node_i_index( variable_positions[i].first );
 		Size const choice_i_index( candidate_solution[i] );
 		{
-			//Retrieve onebody energy
-			std::unordered_map< Size, std::vector< Real > >::const_iterator it( single_node_penalties_.find(node_i_index) );
-			if( it != single_node_penalties_.end() && choice_i_index < it->second.size() ) {
-				accumulator += it->second[choice_i_index];
+			// Retrieve onebody energy
+			std::vector< masala::base::Real > const * onebody_vec( single_node_penalties_for_variable_nodes_[i] );
+			if( onebody_vec != nullptr && choice_i_index < onebody_vec->size() ) {
+				accumulator += (*onebody_vec)[choice_i_index];
 			}
 		}
 
-		for( Size j(0); j<i; ++j ) {
-			Size const node_j_index( variable_positions[j].first );
+		for( auto const & othernode_and_choicepair_matrix : interacting_variable_nodes_[i] ) {
+			Size const j( othernode_and_choicepair_matrix.first );
 			Size const choice_j_index( candidate_solution[j] );
-			// Retrieve twobody energy:
-			std::unordered_map< std::pair< Size, Size >, Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic >, masala::base::size_pair_hash >::const_iterator it( pairwise_node_penalties_.find( std::make_pair( node_j_index, node_i_index ) ) );
-			if( it != pairwise_node_penalties_.end() ) {
-				Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > const & choicepairs( it->second );
-				if( static_cast< Size >( choicepairs.rows() ) > choice_j_index && static_cast< Size >( choicepairs.cols() ) > choice_i_index ) {
-					accumulator += choicepairs( choice_j_index, choice_i_index );
-				}
+			Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > const * const choicepair_matrix( othernode_and_choicepair_matrix.second );
+			if( j < i &&
+				choicepair_matrix != nullptr &&
+				choice_j_index < static_cast<Size>( choicepair_matrix->rows() ) &&
+				choice_i_index < static_cast<Size>( choicepair_matrix->cols() )
+			) {
+				accumulator += (*choicepair_matrix)(choice_j_index, choice_i_index);
 			}
 		}
+
+		// for( Size j(0); j<i; ++j ) {
+		// 	Size const node_j_index( variable_positions[j].first );
+		// 	Size const choice_j_index( candidate_solution[j] );
+		// 	// Retrieve twobody energy:
+		// 	std::unordered_map< std::pair< Size, Size >, Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic >, masala::base::size_pair_hash >::const_iterator it( pairwise_node_penalties_.find( std::make_pair( node_j_index, node_i_index ) ) );
+		// 	if( it != pairwise_node_penalties_.end() ) {
+		// 		Eigen::Matrix< masala::base::Real, Eigen::Dynamic, Eigen::Dynamic > const & choicepairs( it->second );
+		// 		if( static_cast< Size >( choicepairs.rows() ) > choice_j_index && static_cast< Size >( choicepairs.cols() ) > choice_i_index ) {
+		// 			accumulator += choicepairs( choice_j_index, choice_i_index );
+		// 		}
+		// 	}
+		// }
 	}
 
 	return accumulator;

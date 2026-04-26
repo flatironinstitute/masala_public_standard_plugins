@@ -4,7 +4,7 @@
 
 ## Description
 
-The Standard Masala Plugins library version 1.0 contains discrete cost function network (CFN) and continuous real-valued local (RVL) optimizers.  It also contains a framework for defining scoring functions, file interpreters, and selectors.
+The Standard Masala Plugins library version 1.2 contains discrete cost function network (CFN) and continuous real-valued local (RVL) optimizers.  It also contains a framework for defining scoring functions, file interpreters, and selectors.
 
 ## Authors
 
@@ -40,3 +40,9 @@ If you choose the link this library at compilation time, it is _only_ safe to di
 ## Using this library as a dynamically-linked library only provided at runtime
 
 As an alternative, you may choose only to link the Masala Core library.  In that case, you can use the \link masala::base::managers::plugin_module::MasalaPluginLibraryManager \endlink to load the Standard Masala Plugins at runtime, which will trigger registration of all plugin modules in this library that have API definitions with the \link masala::base::managers::plugin_module::MasalaPluginModuleManager \endlink, which your code may interrogate to obtain Masala plugins.  The interface for plugin modules may be accessed through the \link masala::base::api::MasalaObjectAPIDefinition \endlink for each plugin module.
+
+## Version history
+
+- Version 1.2 added a set of 393 small cost function network (CFN) test cases to use to assess the validity of alternative approaches to solving CFN problems.  (Since these problems are small, they have known lowest-energy solutions, as determined with the Toulbar2 deterministic CFN solver.)
+- Version 1.1 made minor efficiency tweaks to the behaviour of the PairwisePrecomputedCostFunctionNetworkOptimizer.
+- Version 1.0 was the first public release.
