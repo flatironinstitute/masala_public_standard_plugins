@@ -64,8 +64,10 @@ register_library() {
     module_version_info->add_requirement_with_minimum_version(
         "Masala",
         true,
-        std::pair< Size, Size >( 1, 0 ), // Min version
+        std::pair< Size, Size >( 1, 2 ), // Min version
         "",
+	"Version 1.2 altered the ElementType enum to avoid name conflicts.  "
+        "Version 1.1 provided a small bugfix for the RVL optimizer base class, removing a float-float comparison that could sometimes fail due to machine precision limits.  "
         "Version 1.0 (public release) updated output messages on shutdown to report the citations for Masala.  "
         "Version 0.15 added the add_to_onebody_penalty() and add_to_twobody_penalty() functions for pairwise precomputed CFN problems.  "
         "Version 0.14 added the protected_make_independent() function for CFN optimizers.  "
